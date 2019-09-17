@@ -14,45 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
-
-import java.io.File;
-import java.util.Arrays;
+package com.lessspring.org;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class PathUtils {
+public final class KeyUtils {
 
-    private static volatile boolean initialized = false;
+    private static final char KEY_LINK = '#';
 
-    private static String FATHER_ROAD_KING = System.getProperty("user.home");
-
-    public static void init(String path) {
-        if (!initialized) {
-            initialized = true;
-            FATHER_ROAD_KING = path;
-        } else {
-            throw new IllegalStateException("Initialization method can execute only once");
-        }
-    }
-
-    public static String finalPath(String subPath) {
-        if (subPath.startsWith(File.separator)) {
-            subPath = subPath.substring(1);
-        }
-        return FATHER_ROAD_KING + "/" + subPath;
-    }
-
-    public static String join(Object... objects) {
+    public static String createKey(Object... objects) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < objects.length; i ++) {
             builder.append(objects[i]);
             if (i != objects.length - 1) {
-                builder.append(File.separator);
+                builder.append(KEY_LINK);
             }
         }
         return builder.toString();
     }
+
 }

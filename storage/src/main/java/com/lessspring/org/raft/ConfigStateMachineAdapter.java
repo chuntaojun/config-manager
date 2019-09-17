@@ -16,34 +16,19 @@
  */
 package com.lessspring.org.raft;
 
-import com.google.common.eventbus.Subscribe;
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.event.ServerNodeChangeEvent;
-import com.lessspring.org.raft.vo.ServerNode;
-
-import java.util.List;
+import com.alipay.sofa.jraft.Iterator;
+import com.alipay.sofa.jraft.core.StateMachineAdapter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ServerChangeListener implements LifeCycle {
+@Slf4j
+public class ConfigStateMachineAdapter extends StateMachineAdapter {
 
     @Override
-    public void init() {
-        Thread.currentThread().getContextClassLoader().getResource("cluster.properties");
-    }
-
-    @Override
-    public void destroy() {
+    public void onApply(Iterator iter) {
 
     }
-
-
-
-    @Subscribe
-    public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
-
-    }
-
 }

@@ -14,25 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.raft.dto;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class KeyUtils {
+public class Datum {
 
-    private static final char KEY_LINK = '#';
+    private String key;
+    private byte[] value;
+    private String className;
 
-    public static String createKey(Object... objects) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < objects.length; i ++) {
-            builder.append(objects[i]);
-            if (i != objects.length - 1) {
-                builder.append(KEY_LINK);
-            }
-        }
-        return builder.toString();
+    public Datum(String key, byte[] value, String className) {
+        this.key = key;
+        this.value = value;
+        this.className = className;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public byte[] getValue() {
+        return value;
+    }
+
+    public String getClassName() {
+        return className;
+    }
 }

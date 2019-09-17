@@ -23,7 +23,7 @@ import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.vo.NodeChangeRequest;
 import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.raft.ServerChangeListener;
+import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +45,7 @@ public class ClusterManager {
     @PostConstruct
     public void init() {
         eventBus.register(this);
-        eventBus.register(new ServerChangeListener());
+        eventBus.register(new ClusterServer());
     }
 
     public ResponseData nodeAdd(NodeChangeRequest request) {

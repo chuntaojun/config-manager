@@ -28,12 +28,22 @@ import java.util.stream.Stream;
  */
 public class NodeManager {
 
+    private ServerNode self = null;
+
     private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
 
     private static final NodeManager INSTANCE = new NodeManager();
 
     public static NodeManager getInstance() {
         return INSTANCE;
+    }
+
+    public ServerNode getSelf() {
+        return self;
+    }
+
+    public void setSelf(ServerNode self) {
+        this.self = self;
     }
 
     public void nodeJoin(ServerNode node) {
