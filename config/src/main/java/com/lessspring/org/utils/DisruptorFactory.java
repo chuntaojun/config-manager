@@ -51,7 +51,7 @@ public final class DisruptorFactory {
                 String name = namePrefix + nextId.getAndDecrement();
                 return new Thread(r, name);
             }
-        }, ProducerType.SINGLE, new BlockingWaitStrategy());
+        }, ProducerType.MULTI, new BlockingWaitStrategy());
     }
 
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.vo;
+package com.lessspring.org.db.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,24 +29,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NodeChangeRequest {
+public class ConfigBetaInfoDTO {
 
-    private String nodeIp;
-    private int nodePort;
+    private Long id;
+    private String groupId;
+    private String dataId;
+    private String content;
+    private String clientIps;
+    private Long createTime;
+    private Long lastModifyTime;
 
-    public String getNodeIp() {
-        return nodeIp;
-    }
-
-    public void setNodeIp(String nodeIp) {
-        this.nodeIp = nodeIp;
-    }
-
-    public int getNodePort() {
-        return nodePort;
-    }
-
-    public void setNodePort(int nodePort) {
-        this.nodePort = nodePort;
-    }
 }
