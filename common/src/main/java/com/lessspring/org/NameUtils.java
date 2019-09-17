@@ -22,7 +22,7 @@ package com.lessspring.org;
  */
 public final class NameUtils {
 
-    private static final String LINK_STRING = "@#@";
+    public static final String LINK_STRING = "@#@";
 
     public static String buildName(Object... params) {
         StringBuilder builder = new StringBuilder();

@@ -32,9 +32,11 @@ import lombok.NoArgsConstructor;
 public class ConfigBetaInfoDTO {
 
     private Long id;
+    private String namespaceId;
     private String groupId;
     private String dataId;
     private String content;
+    private String type;
     private String clientIps;
     private Long createTime;
     private Long lastModifyTime;

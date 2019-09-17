@@ -14,36 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.config;
 
-import com.google.common.eventbus.Subscribe;
+import com.lessspring.org.AbstractListener;
 import com.lessspring.org.LifeCycle;
-import com.lessspring.org.event.ServerNodeChangeEvent;
-import com.lessspring.org.raft.vo.ServerNode;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ServerChangeListener implements LifeCycle {
+public interface ClientConfigService extends LifeCycle {
 
-    @Override
-    public void init() {
-        Thread.currentThread().getContextClassLoader().getResource("cluster.properties");
-    }
+    /**
+     * get config by groupId and dataId
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @return config content
+     */
+    String getConfig(String groupId, String dataId);
 
-    @Override
-    public void destroy() {
+    /**
+     * publish config
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param content config content
+     * @param type config type, such as {properties, yml, yaml, json, xml}
+     * @return Release successful logo
+     */
+    boolean publishConfig(String groupId, String dataId, String content, String type);
 
-    }
-
-
-
-    @Subscribe
-    public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
-
-    }
+    /**
+     * Add configuration changes the listener
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param listeners listener list
+     */
+    void addListener(String groupId, String dataId, AbstractListener... listeners);
 
 }

@@ -22,12 +22,8 @@ package com.lessspring.org.model.dto;
  */
 public class ConfigInfo {
 
-    private long id;
-    private String namespaceId;
-    private String dataId;
     private String groupId;
     private String content;
-    private long createTime;
-    private long lastModifiedTime;
+    private String type;
 
 }

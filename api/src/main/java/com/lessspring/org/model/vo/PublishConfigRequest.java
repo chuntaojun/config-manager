@@ -22,7 +22,10 @@ package com.lessspring.org.model.vo;
  */
 public class PublishConfigRequest extends BaseConfigRequest {
 
+    private boolean beta = false;
+    private String clientIps;
     private String content;
+    private String type;
 
     public String getContent() {
         return content;
@@ -30,6 +33,30 @@ public class PublishConfigRequest extends BaseConfigRequest {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isBeta() {
+        return beta;
+    }
+
+    public void setBeta(boolean beta) {
+        this.beta = beta;
+    }
+
+    public String getClientIps() {
+        return clientIps;
+    }
+
+    public void setClientIps(String clientIps) {
+        this.clientIps = clientIps;
     }
 
     public static Builder builder() {
@@ -41,6 +68,9 @@ public class PublishConfigRequest extends BaseConfigRequest {
         private String dataId;
         private String groupId;
         private String content;
+        private String type;
+        private boolean beta = false;
+        private String clientIps;
 
         private Builder() {
         }
@@ -65,12 +95,30 @@ public class PublishConfigRequest extends BaseConfigRequest {
             return this;
         }
 
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder beta(boolean beta) {
+            this.beta = beta;
+            return this;
+        }
+
+        public Builder clientIps(String clientIps) {
+            this.clientIps = clientIps;
+            return this;
+        }
+
         public PublishConfigRequest build() {
             PublishConfigRequest publishConfigRequest = new PublishConfigRequest();
             publishConfigRequest.setGroupId(this.groupId);
             publishConfigRequest.setContent(this.content);
             publishConfigRequest.setDataId(this.dataId);
             publishConfigRequest.setNamespaceId(this.namespaceId);
+            publishConfigRequest.setType(this.type);
+            publishConfigRequest.setBeta(this.beta);
+            publishConfigRequest.setClientIps(this.clientIps);
             return publishConfigRequest;
         }
     }

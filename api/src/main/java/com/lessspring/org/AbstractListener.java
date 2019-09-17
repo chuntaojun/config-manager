@@ -14,30 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.db.dto;
+package com.lessspring.org;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.google.common.eventbus.Subscribe;
+import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ConfigInfoDTO {
+public abstract class AbstractListener {
 
-    private Long id;
-    private String namespaceId;
-    private String groupId;
-    private String dataId;
-    private String content;
-    private String type;
-    private Long createTime;
-    private Long lastModifyTime;
+    @Subscribe
+    public void receive(ConfigInfo configInfo) {
+        onReceive(configInfo);
+    }
+
+    /**
+     *
+     * @param configInfo
+     */
+    public abstract void onReceive(ConfigInfo configInfo);
 
 }

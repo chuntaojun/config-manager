@@ -14,30 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.db.dto;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+package com.lessspring.org;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ConfigInfoDTO {
+public interface LifeCycle {
 
-    private Long id;
-    private String namespaceId;
-    private String groupId;
-    private String dataId;
-    private String content;
-    private String type;
-    private Long createTime;
-    private Long lastModifyTime;
+    /**
+     * init
+     */
+    void init();
 
+    /**
+     * destroy
+     */
+    void destroy();
 }

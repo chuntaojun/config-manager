@@ -54,6 +54,7 @@ public class WatchClientManager implements EventHandler<NotifyEvent> {
                 .checkKey(request.getWatchKey())
                 .namespaceId(request.getNamespaceId())
                 .response(serverRequest.exchange().getResponse())
+                .sink(sink)
                 .build();
         Map<String, String> listenKeys = client.getCheckKey();
         listenKeys.forEach((key, value) -> {
@@ -72,7 +73,7 @@ public class WatchClientManager implements EventHandler<NotifyEvent> {
                 .stream()
                 .peek(client -> {
                     try {
-//                        writeResponse(client, data);
+                        writeResponse(client, ResponseData.builder().withData(event.getCreateTime()).build());
                         finishWorks[0] ++;
                     } catch (Exception e) {
                         log.error("[Notify WatchClient has Error] : {}", e.getMessage());

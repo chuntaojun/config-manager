@@ -38,7 +38,7 @@ public final class DiskUtils {
         File file = openFile(finalPath, fileName);
         if (file.exists()) {
             try {
-                BufferedSource bufferedSource=Okio.buffer(Okio.source(file));
+                BufferedSource bufferedSource = Okio.buffer(Okio.source(file));
                 return bufferedSource.readByteString().string(StandardCharsets.UTF_8);
             } catch (IOException e) {
                 log.error("[DiskUtils readFile has Error] : {}", e.getMessage());
@@ -49,35 +49,54 @@ public final class DiskUtils {
 
     public static boolean writeFile(String path, String fileName, byte[] content) {
         String finalPath = PathUtils.finalPath(path);
-        File file = openFile(finalPath, fileName);
-        if (file.exists()) {
-            try {
-                BufferedSink bufferedSink =Okio.buffer(Okio.sink(file));
-                bufferedSink.write(content);
-                return true;
-            } catch (IOException e) {
-                log.error("[DiskUtils writeFile has Error] : {}", e.getMessage());
-            }
+        File file = openFile(finalPath, fileName, true);
+        try {
+            BufferedSink bufferedSink = Okio.buffer(Okio.sink(file));
+            bufferedSink.write(content);
+            return true;
+        } catch (IOException e) {
+            log.error("[DiskUtils writeFile has Error] : {}", e.getMessage());
         }
         log.error("[DiskUtils writeFile has Error] : File does not exist");
         return false;
     }
 
+    public static boolean deleteFile(String path, String fileName) {
+        String finalPath = PathUtils.finalPath(path);
+        File file = openFile(finalPath, fileName);
+        if (file.exists()) {
+            return file.delete();
+        }
+        return false;
+    }
+
     private static File openFile(String path, String fileName) {
+        return openFile(path, fileName, false);
+    }
+
+    private static File openFile(String path, String fileName, boolean rewrite) {
         File directory = new File(path);
         if (directory.isDirectory()) {
             boolean mkdirs = directory.mkdirs();
             log.debug("[DiskUtils openFile mkdirs] : result is : {}", mkdirs);
         }
         File file = new File(path, fileName);
-        if (!file.exists()) {
-            try {
-                boolean create = file.createNewFile();
-                log.debug("[DiskUtils openFile createNewFile] : result is : {}", create);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try {
+            boolean create = true;
+            if (file.exists()) {
+                if (rewrite) {
+                    file.delete();
+                } else {
+                    create = false;
+                }
             }
+            if (create) {
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
         return file;
     }
 

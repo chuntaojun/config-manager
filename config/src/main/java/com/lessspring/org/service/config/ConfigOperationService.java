@@ -16,84 +16,79 @@
  */
 package com.lessspring.org.service.config;
 
-import com.lessspring.org.NameUtils;
+import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.pojo.event.BaseEvent;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.event.EventType;
-import com.lessspring.org.service.publish.ConfigPersistenceHandler;
-import com.lessspring.org.utils.DiskUtils;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lmax.disruptor.dsl.Disruptor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Component
 public class ConfigOperationService {
 
-    private final Disruptor<? extends BaseEvent> disruptorHolder;
+    private final Disruptor<ConfigChangeEvent> disruptorHolder;
+    private final PresistenceHandler presistenceHandler;
 
-    public ConfigOperationService(ConfigPersistenceHandler persistenceHandler) {
-        Disruptor<ConfigChangeEvent> disruptor = DisruptorFactory.build(ConfigChangeEvent.class);
-        disruptor.handleEventsWith(persistenceHandler);
+    public ConfigOperationService(PresistenceHandler presistenceHandler, ConfigPersistenceHandler configPersistenceHandler) {
+        this.presistenceHandler = presistenceHandler;
+        Disruptor<ConfigChangeEvent> disruptor = DisruptorFactory.build(ConfigChangeEvent::new, "Config-Change-Event-Disruptor");
+        disruptor.handleEventsWith(configPersistenceHandler);
         disruptorHolder = disruptor;
     }
 
     public ResponseData queryConfig(QueryConfigRequest request) {
-        final String path = request.getNamespaceId();
-        final String fileName = NameUtils.buildName(request.getGroupId(), request.getDataId());
-        String content = DiskUtils.readFile(path, fileName);
-        return ResponseData.builder()
-                .withCode(200)
-                .withData(content)
-                .build();
+        return ResponseData.success(presistenceHandler.readConfigContent(request));
     }
 
     public ResponseData publishConfig(PublishConfigRequest request) {
-        ConfigChangeEvent event = ConfigChangeEvent.builder()
-                .namespaceId(request.getNamespaceId())
-                .dataId(request.getDataId())
-                .groupId(request.getGroupId())
-                .content(request.getContent())
-                .source(this)
-                .eventType(EventType.PUBLISH)
-                .build();
-        publishEvent(event);
-        return ResponseData.success();
+        if (presistenceHandler.saveConfigInfo(request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(request, request.getContent(), EventType.PUBLISH);
+            publishEvent(event);
+            return ResponseData.success();
+        }
+        return ResponseData.fail();
     }
 
     public ResponseData modifyConfig(PublishConfigRequest request) {
-        ConfigChangeEvent event = ConfigChangeEvent.builder()
-                .namespaceId(request.getNamespaceId())
-                .dataId(request.getDataId())
-                .groupId(request.getGroupId())
-                .content(request.getContent())
-                .source(this)
-                .eventType(EventType.MODIFIED)
-                .build();
-        publishEvent(event);
-        return ResponseData.success();
+        if (presistenceHandler.modifyConfigInfo(request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(request, request.getContent(), EventType.MODIFIED);
+            publishEvent(event);
+            return ResponseData.success();
+        }
+        return ResponseData.fail();
     }
 
     public ResponseData removeConfig(DeleteConfigRequest request) {
-        ConfigChangeEvent event = ConfigChangeEvent.builder()
+        if (presistenceHandler.removeConfigInfo(request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(request, "", EventType.DELETE);
+            publishEvent(event);
+            return ResponseData.success();
+        }
+        return ResponseData.fail();
+    }
+
+    private void publishEvent(ConfigChangeEvent source) {
+        disruptorHolder.publishEvent((target, sequence) -> ConfigChangeEvent.copy(sequence, source, target));
+    }
+
+    private ConfigChangeEvent buildConfigChangeEvent(BaseConfigRequest request, String content, EventType type) {
+        return ConfigChangeEvent.builder()
                 .namespaceId(request.getNamespaceId())
                 .dataId(request.getDataId())
                 .groupId(request.getGroupId())
+                .content(content)
                 .source(this)
-                .eventType(EventType.DELETE)
+                .eventType(type)
                 .build();
-        publishEvent(event);
-        return ResponseData.success();
-    }
-
-    private void publishEvent(ConfigChangeEvent event) {
-        disruptorHolder.publishEvent((event1, sequence) -> {});
     }
 }

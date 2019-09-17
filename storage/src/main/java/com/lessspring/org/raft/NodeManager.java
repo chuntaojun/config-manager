@@ -14,30 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.db.dto;
+package com.lessspring.org.raft;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.lessspring.org.raft.vo.ServerNode;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Builder
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ConfigInfoDTO {
+public class NodeManager {
 
-    private Long id;
-    private String namespaceId;
-    private String groupId;
-    private String dataId;
-    private String content;
-    private String type;
-    private Long createTime;
-    private Long lastModifyTime;
+    private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
 
+    private static final NodeManager INSTANCE = new NodeManager();
+
+    public static NodeManager getInstance() {
+        return INSTANCE;
+    }
+
+    public void nodeJoin(ServerNode node) {
+        nodeMap.putIfAbsent(node.getKey(), node);
+    }
+
+    public void nodeLeave(ServerNode node) {
+        nodeMap.remove(node.getKey());
+    }
+
+    public Stream<Map.Entry<String, ServerNode>> stream() {
+        return nodeMap.entrySet().stream();
+    }
 }

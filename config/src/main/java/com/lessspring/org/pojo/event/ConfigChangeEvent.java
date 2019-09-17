@@ -41,6 +41,16 @@ public class ConfigChangeEvent extends BaseEvent {
         return TYPE;
     }
 
+    public static void copy(long sequence, ConfigChangeEvent source, ConfigChangeEvent target) {
+        target.setSequence(sequence);
+        target.setNamespaceId(source.getNamespaceId());
+        target.setGroupId(source.getGroupId());
+        target.setDataId(source.getDataId());
+        target.setSource(source.getSource());
+        target.setContent(source.getContent());
+        target.setEventType(source.getEventType());
+    }
+
     public static Builder builder() {
         return new Builder();
     }

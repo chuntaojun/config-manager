@@ -16,9 +16,17 @@
  */
 package com.lessspring.org.utils;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since
+ * @since 0.0.1
  */
 public final class MD5Utils {
+
+    public static String md5Hex(Object obj) {
+        String s = String.valueOf(obj);
+        return DigestUtils.md5Hex(s);
+    }
+
 }

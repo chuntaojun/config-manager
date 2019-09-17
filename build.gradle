@@ -17,6 +17,7 @@ subprojects {
 
     dependencies {
         implementation("com.squareup.okhttp3:okhttp:4.2.0")
+        compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
         compile group: 'com.squareup.okio', name: 'okio', version: '2.4.0'
         compile group: 'io.projectreactor', name: 'reactor-core', version: '3.2.9.RELEASE'

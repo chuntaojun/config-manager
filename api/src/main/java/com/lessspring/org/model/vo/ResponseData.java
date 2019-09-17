@@ -45,11 +45,26 @@ public class ResponseData<T> {
                 .build();
     }
 
+    public static <T> ResponseData<T> success(T data) {
+        return ResponseData.builder()
+                .withCode(200)
+                .withData(data)
+                .build();
+    }
+
     public static ResponseData<Boolean> fail(Throwable throwable) {
         return ResponseData.builder()
                 .withCode(500)
                 .withData(false)
                 .withErrMsg(throwable.getMessage())
+                .build();
+    }
+
+    public static ResponseData<Boolean> fail() {
+        return ResponseData.builder()
+                .withCode(500)
+                .withData(false)
+                .withErrMsg("failed")
                 .build();
     }
 

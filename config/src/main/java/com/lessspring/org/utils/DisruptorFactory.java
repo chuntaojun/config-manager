@@ -16,14 +16,12 @@
  */
 package com.lessspring.org.utils;
 
-import com.lessspring.org.configuration.schedule.Schedule;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,21 +31,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class DisruptorFactory {
 
-    public static <T> Disruptor<T> build(Class<T> type) {
-        EventFactory<T> factory = () -> {
-            try {
-                return type.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        };
+    public static <T> Disruptor<T> build(EventFactory<T> factory, String name) {
         int ringBufferSize = 1024 * 1024;
         return new Disruptor<>(factory, ringBufferSize, new ThreadFactory() {
             private final AtomicInteger nextId = new AtomicInteger(1);
 
             @Override
             public Thread newThread(@NotNull Runnable r) {
-                String namePrefix = "Config_Operation_Mq_THREAD-";
+                String namePrefix = name + "-";
                 String name = namePrefix + nextId.getAndDecrement();
                 return new Thread(r, name);
             }

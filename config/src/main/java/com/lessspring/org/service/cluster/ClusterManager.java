@@ -22,17 +22,14 @@ import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.vo.NodeChangeRequest;
+import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ServerChangeListener;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -40,12 +37,10 @@ import java.util.stream.Collectors;
  * @since 0.0.1
  */
 @Slf4j
-@Component
 public class ClusterManager {
 
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
-
-    private Map<String, ServerNode> nodeManager = new ConcurrentHashMap<>(3);
+    private final NodeManager nodeManager = NodeManager.getInstance();
 
     @PostConstruct
     public void init() {
@@ -73,7 +68,7 @@ public class ClusterManager {
     }
 
     public ResponseData listNodes() {
-        List<ServerNode> nodes = nodeManager.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+        List<ServerNode> nodes = nodeManager.stream().map(Map.Entry::getValue).collect(Collectors.toList());
         return ResponseData.builder()
                 .withCode(200)
                 .withData(nodes)
@@ -92,10 +87,10 @@ public class ClusterManager {
                 .build();
         switch (event.getType()) {
             case PUBLISH:
-                nodeManager.putIfAbsent(node.getKey(), node);
+                nodeManager.nodeJoin(node);
                 break;
             case DELETE:
-                nodeManager.remove(node.getKey());
+                nodeManager.nodeLeave(node);
                 break;
             default:
                 throw new IllegalArgumentException("Illegal cluster nodes change event type");
