@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.web;
 
+import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.ClusterHandler;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -44,8 +47,9 @@ public class ClusterRouter {
     @Bean(value = "clusterRouter")
     public RouterFunction<ServerResponse> clusterRouter() {
         return route(
-                PUT(StringConst.API_V1 + "cluster/join").and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::joinNode
-        );
+                PUT(ApiConstant.CLUSTER_NODE_JOIN).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::joinNode
+        ).andRoute(GET(ApiConstant.REFRESH_CLUSTER_NODE_INFO).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::serverNodes
+        ).andRoute(DELETE(ApiConstant.CLUSTER_NODE_LEAVE).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::leaveNode);
     }
 
 }

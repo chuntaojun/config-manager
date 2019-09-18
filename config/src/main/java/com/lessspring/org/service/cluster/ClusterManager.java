@@ -26,6 +26,7 @@ import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
  * @since 0.0.1
  */
 @Slf4j
+@Component(value = "clusterManager")
 public class ClusterManager {
 
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");

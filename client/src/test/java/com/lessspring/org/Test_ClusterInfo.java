@@ -14,34 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org;
 
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Iterator;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class ConfigStateMachineAdapter extends StateMachineAdapter {
+public class Test_ClusterInfo {
 
-    @Override
-    public void onApply(Iterator iter) {
-
+    @Test
+    public void testSplitClusterInfo() {
+        String clusterInfo = "127.0.0.1:8080";
+        String clusterInfos = "127.0.0.1:8080,127.0.0.1:8089";
+        System.out.println(clusterInfo.split(",").length);
     }
 
-    @Override
-    public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        super.onSnapshotSave(writer, done);
-    }
-
-    @Override
-    public boolean onSnapshotLoad(SnapshotReader reader) {
-        return super.onSnapshotLoad(reader);
-    }
 }

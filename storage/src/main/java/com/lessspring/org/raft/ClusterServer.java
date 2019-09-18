@@ -16,39 +16,25 @@
  */
 package com.lessspring.org.raft;
 
-import com.alipay.remoting.rpc.RpcServer;
-import com.alipay.sofa.jraft.CliService;
-import com.alipay.sofa.jraft.JRaftUtils;
-import com.alipay.sofa.jraft.Node;
-import com.alipay.sofa.jraft.RaftGroupService;
-import com.alipay.sofa.jraft.RouteTable;
-import com.alipay.sofa.jraft.conf.Configuration;
-import com.alipay.sofa.jraft.entity.PeerId;
+
+import com.alipay.remoting.InvokeCallback;
+import com.alipay.remoting.exception.RemotingException;
 import com.alipay.sofa.jraft.entity.Task;
-import com.alipay.sofa.jraft.option.CliOptions;
-import com.alipay.sofa.jraft.option.NodeOptions;
-import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
-import com.alipay.sofa.jraft.rpc.impl.cli.BoltCliClientService;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.LifeCycle;
-import com.lessspring.org.PathUtils;
 import com.lessspring.org.SerializerUtils;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.checkerframework.checker.units.qual.C;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.concurrent.Executor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -71,6 +57,7 @@ public class ClusterServer implements LifeCycle {
             Properties properties = new Properties();
             properties.load(is);
             initClusterNode(properties);
+            raftServer.init();
             raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
         } catch (IOException e) {
             log.error("Server");
@@ -94,20 +81,46 @@ public class ClusterServer implements LifeCycle {
         }
     }
 
-    public CompletableFuture<ResponseData> apply(Datum datum) {
+    public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException, InterruptedException {
+        CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
         Task task = new Task();
         task.setData(ByteBuffer.wrap(SerializerUtils.getInstance().serialize(datum)));
-        task.setDone(new DatumStoreClosure(datum, status -> {
-            Result result = new Result();
-            result.setOk(status.isOk());
-            result.setErrorMsg(status.getErrorMsg());
-            future.complete(result);
+        task.setDone(new ConfigStoreClosure(datum, status -> {
+            ResponseData<Boolean> data = ResponseData.builder()
+                    .withCode(status.getCode())
+                    .withData(status.isOk())
+                    .withErrMsg(status.getErrorMsg())
+                    .build();
+            future.complete(data);
         }));
+        if (raftServer.isLeader()) {
+            raftServer.getNode().apply(task);
+        } else {
+            raftServer.getCliClientService().getRpcClient().invokeWithCallback(raftServer.leaderIp(), datum, new InvokeCallback() {
+                @Override
+                public void onResponse(Object o) {
+                    ResponseData<Boolean> data = ResponseData.success();
+                    future.complete(data);
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    ResponseData<Boolean> data = ResponseData.fail(throwable);
+                    future.complete(data);
+                }
+
+                @Override
+                public Executor getExecutor() {
+                    return null;
+                }
+            }, 5000);
+        }
+        return future;
     }
 
     @Override
     public void destroy() {
-
+        raftServer.destroy();
     }
 
     @Subscribe

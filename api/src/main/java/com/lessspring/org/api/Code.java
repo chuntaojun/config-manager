@@ -14,34 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
-
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Iterator;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import lombok.extern.slf4j.Slf4j;
+package com.lessspring.org.api;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class ConfigStateMachineAdapter extends StateMachineAdapter {
+public enum Code {
+    /**
+     * success
+     */
+    SUCCESS(200, "SUCCESS"),
 
-    @Override
-    public void onApply(Iterator iter) {
+    /**
+     * failure
+     */
+    FAILURE(500, "FAILURE")
+    ;
 
+    private final int code;
+    private final String msg;
+
+    Code(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
     }
 
-    @Override
-    public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        super.onSnapshotSave(writer, done);
+    public int getCode() {
+        return code;
     }
 
-    @Override
-    public boolean onSnapshotLoad(SnapshotReader reader) {
-        return super.onSnapshotLoad(reader);
+    public String getMsg() {
+        return msg;
     }
 }

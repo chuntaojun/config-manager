@@ -14,34 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
-
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Iterator;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import lombok.extern.slf4j.Slf4j;
+package com.lessspring.org.http.param;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class ConfigStateMachineAdapter extends StateMachineAdapter {
+public class MediaType {
 
-    @Override
-    public void onApply(Iterator iter) {
+    public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
-    }
+    public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
 
-    @Override
-    public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        super.onSnapshotSave(writer, done);
-    }
-
-    @Override
-    public boolean onSnapshotLoad(SnapshotReader reader) {
-        return super.onSnapshotLoad(reader);
-    }
 }

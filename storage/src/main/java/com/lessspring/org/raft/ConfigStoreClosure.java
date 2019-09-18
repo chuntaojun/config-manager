@@ -14,14 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.raft;
+
+import com.alipay.sofa.jraft.Closure;
+import com.alipay.sofa.jraft.Status;
+import com.lessspring.org.raft.dto.Datum;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClientConfigServiceFactory {
+public class ConfigStoreClosure implements Closure {
 
+    private final Datum datum;
+    private final Closure closure;
 
+    public ConfigStoreClosure(Datum datum, Closure closure) {
+        this.datum = datum;
+        this.closure = closure;
+    }
 
+    @Override
+    public void run(Status status) {
+        if (closure != null) {
+            closure.run(status);
+        }
+    }
+
+    public Datum getDatum() {
+        return datum;
+    }
 }

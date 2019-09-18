@@ -14,34 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.watch;
 
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Iterator;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import lombok.extern.slf4j.Slf4j;
+import com.lessspring.org.AbstractListener;
+import com.lessspring.org.LifeCycle;
+import com.lessspring.org.pojo.CacheItem;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class ConfigStateMachineAdapter extends StateMachineAdapter {
+public class WatchConfigWorker implements LifeCycle {
+
+    private Map<CacheItem, List<AbstractListener>> watchListenerMap;
 
     @Override
-    public void onApply(Iterator iter) {
-
+    public void init() {
+        watchListenerMap = new ConcurrentHashMap<>(16);
     }
 
     @Override
-    public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        super.onSnapshotSave(writer, done);
-    }
+    public void destroy() {
 
-    @Override
-    public boolean onSnapshotLoad(SnapshotReader reader) {
-        return super.onSnapshotLoad(reader);
     }
 }

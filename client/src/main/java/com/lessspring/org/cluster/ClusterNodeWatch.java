@@ -1,0 +1,118 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.lessspring.org.cluster;
+
+import com.google.common.eventbus.EventBus;
+import com.lessspring.org.Configuration;
+import com.lessspring.org.LifeCycle;
+import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.http.HttpClient;
+import com.lessspring.org.http.Retry;
+import com.lessspring.org.http.param.Header;
+import com.lessspring.org.http.param.Query;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.utils.HttpUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static com.lessspring.org.api.Code.SUCCESS;
+
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+public class ClusterNodeWatch implements LifeCycle {
+
+    private ScheduledThreadPoolExecutor executor;
+
+    private EventBus eventBus;
+
+    private final HttpClient httpClient;
+
+    private Set<String> nodeList = new HashSet<>();
+
+    private ClusterChoose choose;
+
+    public ClusterNodeWatch(HttpClient httpClient, Configuration configuration) {
+        this.httpClient = httpClient;
+        String[] clusterIps = configuration.getServers().split(",");
+        for (String ip : clusterIps) {
+            nodeList.add(ip);
+        }
+    }
+
+    @Override
+    public void init() {
+
+        choose = new ClusterChoose(this);
+
+        eventBus = new EventBus("cluster-watch-event");
+
+        executor = new ScheduledThreadPoolExecutor(1, r -> {
+            Thread thread = new Thread(r);
+            thread.setDaemon(true);
+            thread.setName("config-client-refresh-clusterInfo");
+            return thread;
+        });
+
+        register(choose);
+
+        executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(5), TimeUnit.MILLISECONDS);
+
+    }
+
+    @Override
+    public void destroy() {
+        executor.shutdown();
+    }
+
+    private void refreshCluster() {
+        long delay = TimeUnit.SECONDS.toMillis(30);
+        Retry retry = () -> {
+            String serverIp = choose.getLastClusterIp();
+            String url = HttpUtils.buildBasePath(serverIp, ApiConstant.REFRESH_CLUSTER_NODE_INFO);
+            ResponseData<Set> response = httpClient.get(url, Header.EMPTY, Query.EMPTY, Set.class);
+            if (response.getCode() == SUCCESS.getCode()) {
+                Set<String> result = (Set<String>) response.getData();
+                ClusterNodeWatch.this.nodeList = result;
+                return true;
+            }
+            return false;
+        };
+
+        boolean success = retry.run();
+        if (!success) {
+            delay = 0;
+            choose.refreshClusterIp();
+        }
+
+        executor.schedule(this::refreshCluster, delay, TimeUnit.MILLISECONDS);
+    }
+
+    public void register(Object watcher) {
+        eventBus.register(watcher);
+    }
+
+    public Set<String> copyNodeList() {
+        return new HashSet<>(nodeList);
+    }
+}

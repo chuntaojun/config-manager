@@ -14,34 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org;
 
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Iterator;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import lombok.extern.slf4j.Slf4j;
+import com.lessspring.org.cluster.ClusterNodeWatch;
+import com.lessspring.org.config.ConfigService;
+import com.lessspring.org.watch.WatchConfigWorker;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class ConfigStateMachineAdapter extends StateMachineAdapter {
+public class ClientConfigService implements ConfigService {
+
+    private WatchConfigWorker watchConfigWorker;
+    private ClusterNodeWatch clusterNodeWatch;
 
     @Override
-    public void onApply(Iterator iter) {
+    public void init() {
 
     }
 
     @Override
-    public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        super.onSnapshotSave(writer, done);
+    public void destroy() {
+
     }
 
     @Override
-    public boolean onSnapshotLoad(SnapshotReader reader) {
-        return super.onSnapshotLoad(reader);
+    public void create(Configuration configuration) {
+
     }
+
+    @Override
+    public String getConfig(String groupId, String dataId) {
+        return null;
+    }
+
+    @Override
+    public boolean publishConfig(String groupId, String dataId, String content, String type) {
+        return false;
+    }
+
+    @Override
+    public void addListener(String groupId, String dataId, AbstractListener... listeners) {
+
+    }
+
 }

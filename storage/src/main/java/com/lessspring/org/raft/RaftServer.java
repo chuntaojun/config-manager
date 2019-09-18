@@ -26,22 +26,31 @@ import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.option.NodeOptions;
+import com.alipay.sofa.jraft.rpc.CliRequests;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.impl.cli.BoltCliClientService;
+import com.google.protobuf.Message;
+import com.lessspring.org.LifeCycle;
 import com.lessspring.org.PathUtils;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-public class RaftServer {
+public class RaftServer implements LifeCycle {
 
     private String raftGroupId = "CONFIG_MANAGER";
 
@@ -52,7 +61,7 @@ public class RaftServer {
     private ConfigStateMachineAdapter csm;
     private RpcServer rpcServer;
     private BoltCliClientService cliClientService;
-    private volatile boolean isAvailable = false;
+    private ScheduledExecutorService scheduledExecutorService;
 
     public void initRaftCluster(NodeManager nodeManager, String cacheDirPath) {
         final String path = PathUtils.finalPath(cacheDirPath);
@@ -103,12 +112,12 @@ public class RaftServer {
 
         this.node = this.raftGroupService.start();
 
-        this.isAvailable = true;
-
         RouteTable.getInstance().updateConfiguration(raftGroupId, conf);
 
         this.cliClientService = new BoltCliClientService();
         cliClientService.init(new CliOptions());
+
+        scheduledExecutorService.scheduleAtFixedRate(this::refresh, 3, 3, TimeUnit.MINUTES);
     }
 
     public RaftGroupService getRaftGroupService() {
@@ -129,5 +138,59 @@ public class RaftServer {
 
     public BoltCliClientService getCliClientService() {
         return cliClientService;
+    }
+
+    PeerId leaderNode() {
+        if (node.getLeaderId() != null) {
+            return node.getLeaderId();
+        }
+        final CliRequests.GetLeaderRequest.Builder rb = CliRequests.GetLeaderRequest.newBuilder();
+        rb.setGroupId(raftGroupId);
+        rb.setPeerId(node.getNodeId().getPeerId().toString());
+        try {
+            Message result = cliClientService.getLeader(node.getNodeId().getPeerId().getEndpoint(), rb.build(), null).get(1000, TimeUnit.MILLISECONDS);
+            if (result instanceof CliRequests.GetLeaderResponse) {
+                CliRequests.GetLeaderResponse resp = (CliRequests.GetLeaderResponse) result;
+                return JRaftUtils.getPeerId(resp.getLeaderId());
+            }
+        } catch (Exception e) {
+            log.error("Get leader node has error : {}", e.getMessage());
+        }
+        return null;
+    }
+
+    String leaderIp() {
+        PeerId leader = leaderNode();
+        return leader.getIp() + ":" + leader.getPort();
+    }
+
+    public boolean isLeader() {
+        return getNode().isLeader();
+    }
+
+    private void refresh() {
+        int timeoutMs = 5000;
+        try {
+            if (!RouteTable.getInstance().refreshLeader(cliClientService, raftGroupId, timeoutMs).isOk()) {
+                log.error("refresh raft node info failed");
+            }
+        } catch (InterruptedException | TimeoutException e) {
+            log.error("refresh raft node info failed, error is : {}", e.getMessage());
+        }
+    }
+
+    @Override
+    public void init() {
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread thread = new Thread(r);
+            thread.setDaemon(true);
+            thread.setName("config-manager-raft-node-refresh");
+            return thread;
+        });
+    }
+
+    @Override
+    public void destroy() {
+        scheduledExecutorService.shutdown();
     }
 }

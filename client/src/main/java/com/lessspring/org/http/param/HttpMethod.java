@@ -14,44 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.config;
-
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.LifeCycle;
+package com.lessspring.org.http.param;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface ClientConfigService extends LifeCycle {
+public enum HttpMethod {
 
     /**
-     * get config by groupId and dataId
      *
-     * @param groupId groupId
-     * @param dataId dataId
-     * @return config content
      */
-    String getConfig(String groupId, String dataId);
+    GET,
 
     /**
-     * publish config
      *
-     * @param groupId groupId
-     * @param dataId dataId
-     * @param content config content
-     * @param type config type, such as {properties, yml, yaml, json, xml}
-     * @return Release successful logo
      */
-    boolean publishConfig(String groupId, String dataId, String content, String type);
+    DELETE,
 
     /**
-     * Add configuration changes the listener
      *
-     * @param groupId groupId
-     * @param dataId dataId
-     * @param listeners listener list
      */
-    void addListener(String groupId, String dataId, AbstractListener... listeners);
+    PUT,
+
+    /**
+     *
+     */
+    POST
 
 }
