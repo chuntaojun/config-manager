@@ -14,19 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo;
-
-import java.util.Objects;
+package com.lessspring.org.model.vo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class CacheItem {
+public class WatchResponse {
 
     private String groupId;
     private String dataId;
-    private String lastMd5 = "";
+    private String content;
+    private String type;
 
     public String getGroupId() {
         return groupId;
@@ -44,69 +43,72 @@ public class CacheItem {
         this.dataId = dataId;
     }
 
-    public String getLastMd5() {
-        return lastMd5;
+    public String getContent() {
+        return content;
     }
 
-    public void setLastMd5(String lastMd5) {
-        this.lastMd5 = lastMd5;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public boolean isChange(String remoteMd5) {
-        return Objects.equals(lastMd5, remoteMd5);
+    public String getType() {
+        return type;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CacheItem cacheItem = (CacheItem) o;
-        return groupId.equals(cacheItem.groupId) &&
-                dataId.equals(cacheItem.dataId);
+    public void setType(String type) {
+        this.type = type;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(groupId, dataId);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static CacheItemBuilder builder() {
-        return new CacheItemBuilder();
-    }
-
-    public static final class CacheItemBuilder {
+    public static final class Builder {
         private String groupId;
         private String dataId;
-        private String lastMd5 = "";
+        private String content;
+        private String type;
 
-        private CacheItemBuilder() {
+        private Builder() {
         }
 
-        public CacheItemBuilder withGroupId(String groupId) {
+        public Builder groupId(String groupId) {
             this.groupId = groupId;
             return this;
         }
 
-        public CacheItemBuilder withDataId(String dataId) {
+        public Builder dataId(String dataId) {
             this.dataId = dataId;
             return this;
         }
 
-        public CacheItemBuilder withLastMd5(String lastMd5) {
-            this.lastMd5 = lastMd5;
+        public Builder content(String content) {
+            this.content = content;
             return this;
         }
 
-        public CacheItem build() {
-            CacheItem cacheItem = new CacheItem();
-            cacheItem.setGroupId(groupId);
-            cacheItem.setDataId(dataId);
-            cacheItem.setLastMd5(lastMd5);
-            return cacheItem;
+        public Builder type(String type) {
+            this.type = type;
+            return this;
         }
+
+        public WatchResponse build() {
+            WatchResponse watchResponse = new WatchResponse();
+            watchResponse.setGroupId(groupId);
+            watchResponse.setDataId(dataId);
+            watchResponse.setContent(content);
+            watchResponse.setType(type);
+            return watchResponse;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "WatchResponse{" +
+                "groupId='" + groupId + '\'' +
+                ", dataId='" + dataId + '\'' +
+                ", content='" + content + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

@@ -83,12 +83,14 @@ public class ConfigHttpClient implements HttpClient {
     }
 
     @Override
-    public <T> void serverSendEvent(String url, Header header, Query query, Class<T> cls, EventReceiver receiver) {
+    public <T> void serverSendEvent(String url, Header header, Body body, Class<T> cls, EventReceiver receiver) {
+        RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
         Request request = new Request.Builder()
-                .url(buildUrl(url, query))
-                .get()
+                .url(url)
+                .post(postBody)
                 .build();
         Call call = client.newCall(request);
+        receiver.setCall(call);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {

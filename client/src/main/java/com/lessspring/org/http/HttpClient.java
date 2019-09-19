@@ -80,10 +80,10 @@ public interface HttpClient extends LifeCycle {
      *
      * @param url url
      * @param header http header param
-     * @param query http query param
+     * @param body http body param
      * @param cls return type
      * @param receiver {@link EventReceiver}
      */
-    <T> void serverSendEvent(String url, Header header, Query query, Class<T> cls, EventReceiver receiver);
+    <T> void serverSendEvent(String url, Header header, , Body body, Class<T> cls, EventReceiver receiver);
 
 }

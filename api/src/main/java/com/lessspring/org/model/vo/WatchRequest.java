@@ -16,16 +16,26 @@
  */
 package com.lessspring.org.model.vo;
 
+import com.lessspring.org.utils.GsonUtils;
+
+import java.util.Collections;
 import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since
+ * @since 0.0.1
  */
 public class WatchRequest {
 
-    private String namespaceId;
-    private Map<String, String> watchKey;
+    public static final String QUERY_KEY = "watchParams";
+
+    private String namespaceId = "default";
+    private Map<String, String> watchKey = Collections.emptyMap();
+
+    public WatchRequest(String namespaceId, Map<String, String> watchKey) {
+        this.namespaceId = namespaceId;
+        this.watchKey = watchKey;
+    }
 
     public String getNamespaceId() {
         return namespaceId;
@@ -41,5 +51,10 @@ public class WatchRequest {
 
     public void setWatchKey(Map<String, String> watchKey) {
         this.watchKey = watchKey;
+    }
+
+    @Override
+    public String toString() {
+        return GsonUtils.toJson(this);
     }
 }

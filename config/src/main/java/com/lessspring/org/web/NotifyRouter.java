@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -45,7 +46,7 @@ public class NotifyRouter {
     @Bean(value = "notifyRouter")
     public RouterFunction notifyRouter() {
         return route(
-                GET(StringConst.API_V1 + "watch").and(accept(MediaType.APPLICATION_JSON_UTF8)),
+                POST(StringConst.API_V1 + "watch").and(accept(MediaType.APPLICATION_JSON_UTF8)),
                 notifyHandler::watch
         );
     }

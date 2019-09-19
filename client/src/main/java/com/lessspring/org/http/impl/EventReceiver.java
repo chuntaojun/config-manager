@@ -16,12 +16,12 @@
  */
 package com.lessspring.org.http.impl;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.vo.ResponseData;
+import okhttp3.Call;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -29,29 +29,16 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public abstract class EventReceiver<T> {
 
-    private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("");
-        return thread;
-    });
+    private static final EventBus DEFER_PUBLISHER = new EventBus("config-watch-event-publisher");
 
-    private BlockingQueue<ResponseData<T>> deferQueue = new LinkedBlockingQueue<>();
+    private Call call;
 
     public EventReceiver() {
-        executor.submit((Runnable) () -> {
-            while (true) {
-                ResponseData<T> data = deferQueue.poll();
-                onReceive(data);
-            }
-        });
+        DEFER_PUBLISHER.register(this);
     }
 
     void deferEvent(ResponseData<T> data) {
-        try {
-            deferQueue.put(data);
-        } catch (InterruptedException ignore) {
-        }
+        DEFER_PUBLISHER.post(data);
     }
 
     /**
@@ -59,18 +46,24 @@ public abstract class EventReceiver<T> {
      *
      * @param data {@link ResponseData}
      */
-    abstract void onReceive(ResponseData<T> data);
+    @Subscribe
+    public abstract void onReceive(ResponseData<T> data);
 
     /**
      * When the error occurs when the callback function
      *
      * @param throwable {@link Throwable}
      */
-    abstract void onError(Throwable throwable);
+    public abstract void onError(Throwable throwable);
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        executor.shutdown();
+    void setCall(Call call) {
+        this.call = call;
+    }
+
+    public void cancle() {
+        DEFER_PUBLISHER.unregister(this);
+        if (Objects.nonNull(call)) {
+            call.cancel();
+        }
     }
 }

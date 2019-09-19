@@ -22,7 +22,17 @@ package com.lessspring.org;
  */
 public class Configuration {
 
+    private String namespaceId;
+
     private String servers;
+
+    public String getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public String getServers() {
         return servers;

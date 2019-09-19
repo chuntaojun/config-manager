@@ -21,6 +21,7 @@ import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -69,17 +70,19 @@ public class Query {
 
     public String toQueryUrl() {
         StringBuilder urlBuilder = new StringBuilder();
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
+        Set<Map.Entry<String, Object>> entrySet = params.entrySet();
+        int i = entrySet.size();
+        for (Map.Entry<String, Object> entry : entrySet) {
             try {
                 urlBuilder.append(entry.getKey())
-                        .append("=").append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8")).append("&");
+                        .append("=").append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8"));
+                if (i > 1) {
+                    urlBuilder.append("&");
+                }
+                i --;
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-        }
-
-        if (urlBuilder.length() > 0) {
-            urlBuilder = urlBuilder.deleteCharAt(urlBuilder.length() - 1);
         }
 
         return urlBuilder.toString();

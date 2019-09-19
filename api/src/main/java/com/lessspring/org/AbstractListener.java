@@ -26,13 +26,13 @@ import com.lessspring.org.model.dto.ConfigInfo;
 public abstract class AbstractListener {
 
     @Subscribe
-    public void receive(ConfigInfo configInfo) {
+    protected void receive(ConfigInfo configInfo) {
         onReceive(configInfo);
     }
 
     /**
      *
-     * @param configInfo
+     * @param configInfo {@link ConfigInfo}
      */
     public abstract void onReceive(ConfigInfo configInfo);
 
