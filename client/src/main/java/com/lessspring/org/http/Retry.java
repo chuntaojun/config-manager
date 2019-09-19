@@ -20,14 +20,47 @@ package com.lessspring.org.http;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@FunctionalInterface
-public interface Retry {
+public abstract class Retry<T> {
 
     /**
      * run work
      *
+     * @throws Exception
      * @return Tasks are completed correctly
      */
-    boolean run();
+    protected abstract T run() throws Exception;
+
+    public T work() {
+        int maxRetryNum = maxRetry();
+        T data = null;
+        while (maxRetryNum > 0) {
+            try {
+                data = run();
+                if (shouldRetry(data, null)) {
+                    maxRetryNum --;
+                    continue;
+                }
+                return data;
+            } catch (Throwable throwable) {
+                if (!shouldRetry(null, throwable)) {
+                    throw new UnSupportRetryException(throwable);
+                }
+                maxRetryNum --;
+            }
+        }
+        throw new MaxRetryException("Has reached its maximum retries");
+    }
+
+    /**
+     * Retry strategy
+     */
+    protected abstract boolean shouldRetry(T data, Throwable throwable);
+
+    /**
+     * The maximum number of retries
+     *
+     * @return number
+     */
+    protected abstract int maxRetry();
 
 }

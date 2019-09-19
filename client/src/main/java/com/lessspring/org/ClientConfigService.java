@@ -16,8 +16,12 @@
  */
 package com.lessspring.org;
 
+import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.cluster.ClusterNodeWatch;
 import com.lessspring.org.config.ConfigService;
+import com.lessspring.org.http.HttpClient;
+import com.lessspring.org.http.impl.ConfigHttpClient;
+import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.watch.WatchConfigWorker;
 
 /**
@@ -26,26 +30,47 @@ import com.lessspring.org.watch.WatchConfigWorker;
  */
 public class ClientConfigService implements ConfigService {
 
+    private HttpClient httpClient;
     private WatchConfigWorker watchConfigWorker;
     private ClusterNodeWatch clusterNodeWatch;
+    private CacheConfigManager configManager;
+    private Configuration configuration;
 
     @Override
     public void init() {
+        // Build a cluster node selector
+        ClusterChoose choose = new ClusterChoose();
 
+        httpClient = new ConfigHttpClient(choose);
+        ClusterNodeWatch clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
+
+        choose.setWatch(clusterNodeWatch);
+
+        WatchConfigWorker watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
+        configManager = new CacheConfigManager(httpClient, configuration, watchConfigWorker);
+
+        httpClient.init();
+        clusterNodeWatch.init();
+        watchConfigWorker.init();
+        configManager.init();
+        watchConfigWorker.setConfigManager(configManager);
     }
 
     @Override
     public void destroy() {
-
+        httpClient.destroy();
+        clusterNodeWatch.destroy();
+        watchConfigWorker.destroy();
+        configManager.destroy();
     }
 
     @Override
     public void create(Configuration configuration) {
-
+        this.configuration = configuration;
     }
 
     @Override
-    public String getConfig(String groupId, String dataId) {
+    public ConfigInfo getConfig(String groupId, String dataId) {
         return null;
     }
 
@@ -56,6 +81,11 @@ public class ClientConfigService implements ConfigService {
 
     @Override
     public void addListener(String groupId, String dataId, AbstractListener... listeners) {
+
+    }
+
+    @Override
+    public void removeListener(String groupId, String dataId, AbstractListener... listeners) {
 
     }
 

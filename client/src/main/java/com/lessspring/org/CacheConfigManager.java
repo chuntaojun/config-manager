@@ -16,7 +16,14 @@
  */
 package com.lessspring.org;
 
-import com.google.common.eventbus.EventBus;
+import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.cluster.ClusterChoose;
+import com.lessspring.org.http.HttpClient;
+import com.lessspring.org.http.param.Header;
+import com.lessspring.org.http.param.Query;
+import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.model.vo.QueryConfigRequest;
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.MD5Utils;
 import com.lessspring.org.watch.WatchConfigWorker;
@@ -35,14 +42,35 @@ public class CacheConfigManager implements LifeCycle {
 
     private WatchConfigWorker worker;
 
-    public CacheConfigManager(WatchConfigWorker worker) {
+    private HttpClient httpClient;
+
+    private final String namespaceId;
+
+    CacheConfigManager(HttpClient client, Configuration configuration, WatchConfigWorker worker) {
+        this.httpClient = client;
         this.worker = worker;
+        this.namespaceId = configuration.getNamespaceId();
     }
 
     @Override
     public void init() {
         this.cacheItemMap = new ConcurrentHashMap<>(16);
         this.worker.setConfigManager(this);
+    }
+
+    public ConfigInfo query(String groupId, String dataId) {
+        final QueryConfigRequest request = QueryConfigRequest.builder()
+                .namespaceId(namespaceId)
+                .groupId(groupId)
+                .dataId(dataId)
+                .build();
+        final Query query = Query.newInstance()
+                .addParam("query", request);
+        ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG, Header.EMPTY, query, ConfigInfo.class);
+        if (response.isOk()) {
+            return response.getData();
+        }
+        throw new RuntimeException(response.getErrMsg());
     }
 
     public void addCacheItem(String groupId, String dataId, String content, String type) {
@@ -79,7 +107,10 @@ public class CacheConfigManager implements LifeCycle {
 
     @Override
     public void destroy() {
+        httpClient.destroy();
+        worker.destroy();
         worker = null;
+        httpClient = null;
         cacheItemMap.clear();
     }
 }

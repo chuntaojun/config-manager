@@ -14,40 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.model.vo;
+package com.lessspring.org.http;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class BaseConfigRequest {
+public class MaxRetryException extends RuntimeException {
 
-    private String namespaceId;
-    private String dataId;
-    private String groupId;
-
-    public String getNamespaceId() {
-        return namespaceId;
+    public MaxRetryException() {
+        super();
     }
 
-    public void setNamespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
+    public MaxRetryException(String message) {
+        super(message);
     }
 
-    public String getDataId() {
-        return dataId;
+    public MaxRetryException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public void setDataId(String dataId) {
-        this.dataId = dataId;
+    public MaxRetryException(Throwable cause) {
+        super(cause);
     }
 
-    public String getGroupId() {
-        return groupId;
+    protected MaxRetryException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
 }

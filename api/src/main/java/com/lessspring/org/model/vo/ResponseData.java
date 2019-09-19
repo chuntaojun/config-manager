@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.model.vo;
 
+import com.lessspring.org.api.Code;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since
@@ -36,6 +38,10 @@ public class ResponseData<T> {
 
     public String getErrMsg() {
         return errMsg;
+    }
+
+    public boolean isOk() {
+        return code == Code.SUCCESS.getCode();
     }
 
     public static ResponseData<Boolean> success() {

@@ -19,6 +19,7 @@ package com.lessspring.org.config;
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
+import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -38,9 +39,9 @@ public interface ConfigService extends LifeCycle {
      *
      * @param groupId groupId
      * @param dataId dataId
-     * @return config content
+     * @return config {@link ConfigInfo}
      */
-    String getConfig(String groupId, String dataId);
+    ConfigInfo getConfig(String groupId, String dataId);
 
     /**
      * publish config
@@ -61,5 +62,14 @@ public interface ConfigService extends LifeCycle {
      * @param listeners listener list
      */
     void addListener(String groupId, String dataId, AbstractListener... listeners);
+
+    /**
+     * Remove configuration changes the listener
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param listeners listener list
+     */
+    void removeListener(String groupId, String dataId, AbstractListener... listeners);
 
 }

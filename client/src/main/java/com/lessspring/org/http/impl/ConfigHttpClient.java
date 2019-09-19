@@ -16,7 +16,9 @@
  */
 package com.lessspring.org.http.impl;
 
+import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.http.HttpClient;
+import com.lessspring.org.http.Retry;
 import com.lessspring.org.http.handler.RequestHandler;
 import com.lessspring.org.http.handler.ResponseHandler;
 import com.lessspring.org.http.param.Body;
@@ -32,11 +34,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.lessspring.org.http.param.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
@@ -53,6 +57,14 @@ public class ConfigHttpClient implements HttpClient {
 
     private final ResponseHandler responseHandler = ResponseHandler.getHandler();
 
+    private final ClusterChoose choose;
+
+    private AtomicReference<String> clusterIp = new AtomicReference<>();
+
+    public ConfigHttpClient(ClusterChoose choose) {
+        this.choose = choose;
+    }
+
     @Override
     public void init() {
         client = new OkHttpClient();
@@ -60,75 +72,180 @@ public class ConfigHttpClient implements HttpClient {
 
     @Override
     public <T> ResponseData<T> get(String url, Header header, Query query, Class<T> cls) {
-        Request request = buildRequest(buildUrl(url, query), header, Body.EMPTY, HttpMethod.GET);
-        return execute(client.newCall(request), cls);
+        Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
+            @Override
+            protected ResponseData<T> run() throws Exception {
+                Request request = buildRequest(buildUrl(url, query), header, Body.EMPTY, HttpMethod.GET);
+                return execute(client.newCall(request), cls);
+            }
+
+            @Override
+            protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
+                if (!data.isOk()) {
+                    return false;
+                }
+                refresh();
+                return false;
+            }
+
+            @Override
+            protected int maxRetry() {
+                return 3;
+            }
+        };
+        return retry.work();
     }
 
     @Override
     public <T> ResponseData<T> delete(String url, Header header, Query query, Class<T> cls) {
-        Request request = buildRequest(buildUrl(url, query), header, Body.EMPTY, HttpMethod.DELETE);
-        return execute(client.newCall(request), cls);
+        Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
+            @Override
+            protected ResponseData<T> run() throws Exception {
+                Request request = buildRequest(buildUrl(url, query), header, Body.EMPTY, HttpMethod.DELETE);
+                return execute(client.newCall(request), cls);
+            }
+
+            @Override
+            protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
+                if (!data.isOk()) {
+                    return false;
+                }
+                refresh();
+                return true;
+            }
+
+            @Override
+            protected int maxRetry() {
+                return 3;
+            }
+        };
+        return retry.work();
     }
 
     @Override
     public <T> ResponseData<T> put(String url, Header header, Query query, Body body, Class<T> cls) {
-        Request request = buildRequest(buildUrl(url, query), header, body, HttpMethod.PUT);
-        return execute(client.newCall(request), cls);
+        Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
+            @Override
+            protected ResponseData<T> run() throws Exception {
+                Request request = buildRequest(buildUrl(url, query), header, body, HttpMethod.PUT);
+                return execute(client.newCall(request), cls);
+            }
+
+            @Override
+            protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
+                if (!data.isOk()) {
+                    return false;
+                }
+                refresh();
+                return true;
+            }
+
+            @Override
+            protected int maxRetry() {
+                return 3;
+            }
+        };
+        return retry.work();
+
     }
 
     @Override
     public <T> ResponseData<T> post(String url, Header header, Query query, Body body, Class<T> cls) {
-        Request request = buildRequest(buildUrl(url, query), header, body, HttpMethod.POST);
-        return execute(client.newCall(request), cls);
+        Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
+            @Override
+            protected ResponseData<T> run() throws Exception {
+                Request request = buildRequest(buildUrl(url, query), header, body, HttpMethod.POST);
+                return execute(client.newCall(request), cls);
+            }
+
+            @Override
+            protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
+                if (!data.isOk()) {
+                    return false;
+                }
+                refresh();
+                return true;
+            }
+
+            @Override
+            protected int maxRetry() {
+                return 3;
+            }
+        };
+        return retry.work();
     }
 
     @Override
     public <T> void serverSendEvent(String url, Header header, Body body, Class<T> cls, EventReceiver receiver) {
-        RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
-        Request request = new Request.Builder()
-                .url(url)
-                .post(postBody)
-                .build();
-        Call call = client.newCall(request);
-        receiver.setCall(call);
-        call.enqueue(new Callback() {
+        Retry<Void> retry = new Retry<Void>() {
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                receiver.onError(e);
+            protected Void run() throws Exception {
+                RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(postBody)
+                        .build();
+                Call call = client.newCall(request);
+                receiver.setCall(call);
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        receiver.onError(e);
+                        call.cancel();
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        ResponseData<T> data = ResponseData.builder()
+                                .withCode(response.code())
+                                .withData(responseHandler.convert(response.body().string(), cls))
+                                .withErrMsg(response.message())
+                                .build();
+                        receiver.deferEvent(data);
+                    }
+                });
+                return null;
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                ResponseData<T> data = ResponseData.builder()
-                        .withCode(response.code())
-                        .withData(responseHandler.convert(response.body().string(), cls))
-                        .withErrMsg(response.message())
-                        .build();
-                receiver.deferEvent(data);
+            protected boolean shouldRetry(Void data, Throwable throwable) {
+                if (data == null) {
+                    return false;
+                }
+                refresh();
+                return true;
             }
-        });
+
+            @Override
+            protected int maxRetry() {
+                return 3;
+            }
+        };
+
+        retry.work();
     }
 
     @Override
     public void destroy() {
     }
 
-    private <T> ResponseData<T> execute(Call call, Class<T> cls) {
+    private <T> ResponseData<T> execute(Call call, Class<T> cls) throws IOException {
         ResponseData<T> data;
-        try (Response response = call.execute()) {
-            data = ResponseData.builder()
-                    .withCode(response.code())
-                    .withData(responseHandler.convert(response.body().string(), cls))
-                    .withErrMsg(response.message())
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Response response = call.execute();
+        data = ResponseData.builder()
+                .withCode(response.code())
+                .withData(responseHandler.convert(response.body().string(), cls))
+                .withErrMsg(response.message())
+                .build();
         return data;
     }
 
+    private String buildUrl(String url) {
+        return buildUrl(url, Query.EMPTY);
+    }
+
     private String buildUrl(String url, Query query) {
-        return url + "?" + query.toQueryUrl();
+        return getServerIp() + "/" + url + "?" + query.toQueryUrl();
     }
 
     private Request buildRequest(String url, Header header, Body body, HttpMethod method) {
@@ -153,5 +270,17 @@ public class ConfigHttpClient implements HttpClient {
             builder.addHeader(entry.getKey(), entry.getValue());
         }
         return builder.build();
+    }
+
+    private String getServerIp() {
+        String ip = clusterIp.get();
+        if (StringUtils.isEmpty(ip)) {
+            clusterIp.set(choose.getLastClusterIp());
+        }
+        return clusterIp.get();
+    }
+
+    private void refresh() {
+        clusterIp.set("");
     }
 }

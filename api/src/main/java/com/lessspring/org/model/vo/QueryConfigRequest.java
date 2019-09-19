@@ -16,9 +16,52 @@
  */
 package com.lessspring.org.model.vo;
 
+import com.lessspring.org.utils.GsonUtils;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class QueryConfigRequest extends BaseConfigRequest {
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private String namespaceId;
+        private String dataId;
+        private String groupId;
+
+        private Builder() {
+        }
+
+        public Builder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
+        }
+
+        public Builder dataId(String dataId) {
+            this.dataId = dataId;
+            return this;
+        }
+
+        public Builder groupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public QueryConfigRequest build() {
+            QueryConfigRequest queryConfigRequest = new QueryConfigRequest();
+            queryConfigRequest.setNamespaceId(namespaceId);
+            queryConfigRequest.setDataId(dataId);
+            queryConfigRequest.setGroupId(groupId);
+            return queryConfigRequest;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return GsonUtils.toJson(this);
+    }
 }

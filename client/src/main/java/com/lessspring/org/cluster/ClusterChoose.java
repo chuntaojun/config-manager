@@ -42,7 +42,10 @@ public class ClusterChoose implements LifeCycle {
     private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
     private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
-    public ClusterChoose(ClusterNodeWatch watch) {
+    public ClusterChoose() {
+    }
+
+    public void setWatch(ClusterNodeWatch watch) {
         this.watch = watch;
     }
 

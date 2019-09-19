@@ -24,6 +24,7 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.api.Code;
+import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
 import com.lessspring.org.http.param.Body;
@@ -73,9 +74,9 @@ public class WatchConfigWorker implements LifeCycle {
     private final Configuration configuration;
     private EventReceiver<WatchResponse> receiver;
 
-    public WatchConfigWorker(Configuration configuration, HttpClient httpClient) {
-        this.configuration = configuration;
+    public WatchConfigWorker(HttpClient httpClient, Configuration configuration) {
         this.httpClient = httpClient;
+        this.configuration = configuration;
     }
 
     @Override

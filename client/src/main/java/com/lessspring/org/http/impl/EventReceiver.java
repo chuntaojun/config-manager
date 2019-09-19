@@ -62,7 +62,7 @@ public abstract class EventReceiver<T> {
 
     public void cancle() {
         DEFER_PUBLISHER.unregister(this);
-        if (Objects.nonNull(call)) {
+        if (Objects.nonNull(call) && !call.isCanceled()) {
             call.cancel();
         }
     }

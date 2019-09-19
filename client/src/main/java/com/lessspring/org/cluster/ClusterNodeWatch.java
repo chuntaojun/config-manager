@@ -28,6 +28,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.utils.HttpUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class ClusterNodeWatch implements LifeCycle {
 
     private ScheduledThreadPoolExecutor executor;
 
-    private EventBus eventBus;
+    private EventBus eventBus = new EventBus("cluster-watch-event");
 
     private final HttpClient httpClient;
 
@@ -55,17 +56,15 @@ public class ClusterNodeWatch implements LifeCycle {
     public ClusterNodeWatch(HttpClient httpClient, Configuration configuration) {
         this.httpClient = httpClient;
         String[] clusterIps = configuration.getServers().split(",");
-        for (String ip : clusterIps) {
-            nodeList.add(ip);
-        }
+        nodeList.addAll(Arrays.asList(clusterIps));
     }
 
     @Override
     public void init() {
 
-        choose = new ClusterChoose(this);
+        choose = new ClusterChoose();
 
-        eventBus = new EventBus("cluster-watch-event");
+        choose.setWatch(this);
 
         executor = new ScheduledThreadPoolExecutor(1, r -> {
             Thread thread = new Thread(r);
@@ -115,4 +114,5 @@ public class ClusterNodeWatch implements LifeCycle {
     public Set<String> copyNodeList() {
         return new HashSet<>(nodeList);
     }
+
 }
