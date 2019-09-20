@@ -16,6 +16,8 @@
  */
 package com.lessspring.org;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.util.Arrays;
 
@@ -32,7 +34,9 @@ public final class PathUtils {
     public static void init(String path) {
         if (!initialized) {
             initialized = true;
-            FATHER_ROAD_KING = path;
+            if (StringUtils.isNoneEmpty(path)) {
+                FATHER_ROAD_KING = path;
+            }
         } else {
             throw new IllegalStateException("Initialization method can execute only once");
         }

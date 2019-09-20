@@ -27,6 +27,7 @@ public class ConfigChangeEvent extends BaseEvent {
     public static final String TYPE = "ConfigChangeEvent";
 
     private String content;
+    private String configType;
 
     public String getContent() {
         return content;
@@ -34,6 +35,14 @@ public class ConfigChangeEvent extends BaseEvent {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getConfigType() {
+        return configType;
+    }
+
+    public void setConfigType(String configType) {
+        this.configType = configType;
     }
 
     @Override
@@ -49,6 +58,7 @@ public class ConfigChangeEvent extends BaseEvent {
         target.setSource(source.getSource());
         target.setContent(source.getContent());
         target.setEventType(source.getEventType());
+        target.setConfigType(source.getConfigType());
     }
 
     public static Builder builder() {
@@ -62,6 +72,7 @@ public class ConfigChangeEvent extends BaseEvent {
         private String groupId;
         private String content;
         private EventType eventType;
+        private String configType;
 
         private Builder() {
         }
@@ -96,6 +107,11 @@ public class ConfigChangeEvent extends BaseEvent {
             return this;
         }
 
+        public Builder configType(String configType) {
+            this.configType = configType;
+            return this;
+        }
+
         public ConfigChangeEvent build() {
             ConfigChangeEvent configChangeEvent = new ConfigChangeEvent();
             configChangeEvent.setSource(source);
@@ -104,6 +120,7 @@ public class ConfigChangeEvent extends BaseEvent {
             configChangeEvent.setGroupId(groupId);
             configChangeEvent.setContent(content);
             configChangeEvent.setEventType(eventType);
+            configChangeEvent.setConfigType(configType);
             return configChangeEvent;
         }
     }

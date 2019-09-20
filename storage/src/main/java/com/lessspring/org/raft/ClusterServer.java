@@ -47,6 +47,7 @@ public class ClusterServer implements LifeCycle {
     private static final String SERVER_NOED_IP = "cluster.server.node.ip.";
     private static final String SERVER_NOED_PORT = "cluster.server.node.port.";
     private static final String CACHE_DIR_PATH = "config_manager_raft";
+    private boolean initialize = false;
 
     private NodeManager nodeManager = NodeManager.getInstance();
     private RaftServer raftServer = new RaftServer();
@@ -59,6 +60,7 @@ public class ClusterServer implements LifeCycle {
             initClusterNode(properties);
             raftServer.init();
             raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
+            initialize = true;
         } catch (IOException e) {
             log.error("Server");
         }
@@ -81,7 +83,12 @@ public class ClusterServer implements LifeCycle {
         }
     }
 
+    public void registerTransactionCommitCallback(TransactionCommitCallback commitCallback) {
+        raftServer.registerTransactionCommitCallback(commitCallback);
+    }
+
     public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException, InterruptedException {
+        needInitialized();
         CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
         Task task = new Task();
         task.setData(ByteBuffer.wrap(SerializerUtils.getInstance().serialize(datum)));
@@ -125,7 +132,13 @@ public class ClusterServer implements LifeCycle {
 
     @Subscribe
     public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
+        needInitialized();
+    }
 
+    private void needInitialized() {
+        if (!initialize) {
+            throw new IllegalStateException("Uninitialized cluster");
+        }
     }
 
 }

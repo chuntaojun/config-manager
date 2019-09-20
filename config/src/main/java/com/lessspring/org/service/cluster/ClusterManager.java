@@ -24,8 +24,10 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.vo.NodeChangeRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ClusterServer;
+import com.lessspring.org.raft.TransactionCommitCallback;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,10 +46,19 @@ public class ClusterManager {
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
     private final NodeManager nodeManager = NodeManager.getInstance();
 
+    private final TransactionCommitCallback commitCallback;
+
+    public ClusterManager(@Qualifier("configTransactionCommitCallback") TransactionCommitCallback commitCallback) {
+        this.commitCallback = commitCallback;
+    }
+
     @PostConstruct
     public void init() {
+        ClusterServer clusterServer = new ClusterServer();
+        clusterServer.init();
+        clusterServer.registerTransactionCommitCallback(commitCallback);
         eventBus.register(this);
-        eventBus.register(new ClusterServer());
+        eventBus.register(clusterServer);
     }
 
     public ResponseData nodeAdd(NodeChangeRequest request) {

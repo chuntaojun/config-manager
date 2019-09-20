@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.configuration;
 
+import com.lessspring.org.model.vo.ResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
@@ -62,8 +63,8 @@ public class GlobalErrorWebExceptionConfiguration {
             final Map<String, Object> errorMap = getErrorAttributes(request, true);
             log.error("[请求url信息]：{}", request.uri());
             log.error("[内部错误信息]：{}", errorMap.get("trace"));
-            Mono<ResultData> errMono = Mono.just(ResponseData.builder().code(Integer.valueOf(String.valueOf(errorMap.get("status"))))
-                    .errMsg("内部错误").data(errorMap.get("trace")).build());
+            Mono<ResponseData> errMono = Mono.just(ResponseData.builder().withCode(Integer.parseInt(String.valueOf(errorMap.get("status"))))
+                    .withErrMsg("内部错误").withData(errorMap.get("trace")).build());
             return ServerResponse.ok().body(BodyInserters
                     .fromPublisher(errMono.publishOn(Schedulers.elastic()), ResponseData.class))
                     .subscribeOn(Schedulers.elastic());

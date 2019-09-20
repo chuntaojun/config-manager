@@ -29,33 +29,37 @@ public interface PresistenceHandler {
     /**
      * read config-info
      *
+     * @param namespaceId
      * @param request {@link BaseConfigRequest}
      * @return config content
      */
-    String readConfigContent(BaseConfigRequest request);
+    String readConfigContent(String namespaceId, BaseConfigRequest request);
 
     /**
      * save config-info
      *
+     * @param namespaceId
      * @param request {@link PublishConfigRequest}
      * @return save result
      */
-    boolean saveConfigInfo(PublishConfigRequest request);
+    boolean saveConfigInfo(String namespaceId, PublishConfigRequest request);
 
     /**
      * modify config-info
      *
+     * @param namespaceId
      * @param request {@link PublishConfigRequest}
      * @return modify result
      */
-    boolean modifyConfigInfo(PublishConfigRequest request);
+    boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request);
 
     /**
      * remove config-info
      *
+     * @param namespaceId
      * @param request {@link DeleteConfigRequest}
      * @return delete result
      */
-    boolean removeConfigInfo(DeleteConfigRequest request);
+    boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request);
 
 }

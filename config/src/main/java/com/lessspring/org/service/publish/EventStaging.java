@@ -22,7 +22,7 @@ import com.google.common.cache.CacheLoader;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.utils.DiskUtils;
+import com.lessspring.org.DiskUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

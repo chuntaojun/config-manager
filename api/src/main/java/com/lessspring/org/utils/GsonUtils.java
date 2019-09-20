@@ -18,6 +18,9 @@ package com.lessspring.org.utils;
 
 import com.google.gson.Gson;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -28,6 +31,18 @@ public final class GsonUtils {
 
     public static String toJson(Object obj) {
         return GSON.toJson(obj);
+    }
+
+    public static byte[] toJsonBytes(Object obj) {
+        return GSON.toJson(obj).getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static <T> T toObj(byte[] json, Class<T> cls) {
+        return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())), cls);
+    }
+
+    public static <T> T toObj(String json, Class<T> cls) {
+        return GSON.fromJson(json, cls);
     }
 
 }

@@ -46,31 +46,33 @@ public class ConfigOperationService {
         disruptorHolder = disruptor;
     }
 
-    public ResponseData queryConfig(QueryConfigRequest request) {
-        return ResponseData.success(presistenceHandler.readConfigContent(request));
+    public ResponseData queryConfig(String namespaceId, QueryConfigRequest request) {
+        return ResponseData.success(presistenceHandler.readConfigContent(namespaceId, request));
     }
 
-    public ResponseData publishConfig(PublishConfigRequest request) {
-        if (presistenceHandler.saveConfigInfo(request)) {
-            ConfigChangeEvent event = buildConfigChangeEvent(request, request.getContent(), EventType.PUBLISH);
+    public ResponseData publishConfig(String namespaceId, PublishConfigRequest request) {
+        if (presistenceHandler.saveConfigInfo(namespaceId, request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), EventType.PUBLISH);
+            event.setConfigType(request.getType());
             publishEvent(event);
             return ResponseData.success();
         }
         return ResponseData.fail();
     }
 
-    public ResponseData modifyConfig(PublishConfigRequest request) {
-        if (presistenceHandler.modifyConfigInfo(request)) {
-            ConfigChangeEvent event = buildConfigChangeEvent(request, request.getContent(), EventType.MODIFIED);
+    public ResponseData modifyConfig(String namespaceId, PublishConfigRequest request) {
+        if (presistenceHandler.modifyConfigInfo(namespaceId, request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), EventType.MODIFIED);
+            event.setConfigType(request.getType());
             publishEvent(event);
             return ResponseData.success();
         }
         return ResponseData.fail();
     }
 
-    public ResponseData removeConfig(DeleteConfigRequest request) {
-        if (presistenceHandler.removeConfigInfo(request)) {
-            ConfigChangeEvent event = buildConfigChangeEvent(request, "", EventType.DELETE);
+    public ResponseData removeConfig(String namespaceId, DeleteConfigRequest request) {
+        if (presistenceHandler.removeConfigInfo(namespaceId, request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, "", EventType.DELETE);
             publishEvent(event);
             return ResponseData.success();
         }
@@ -81,9 +83,9 @@ public class ConfigOperationService {
         disruptorHolder.publishEvent((target, sequence) -> ConfigChangeEvent.copy(sequence, source, target));
     }
 
-    private ConfigChangeEvent buildConfigChangeEvent(BaseConfigRequest request, String content, EventType type) {
+    private ConfigChangeEvent buildConfigChangeEvent(String namespaceId, BaseConfigRequest request, String content, EventType type) {
         return ConfigChangeEvent.builder()
-                .namespaceId(request.getNamespaceId())
+                .namespaceId(namespaceId)
                 .dataId(request.getDataId())
                 .groupId(request.getGroupId())
                 .content(content)

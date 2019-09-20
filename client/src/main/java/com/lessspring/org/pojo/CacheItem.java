@@ -16,7 +16,11 @@
  */
 package com.lessspring.org.pojo;
 
+import com.lessspring.org.AbstractListener;
+
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -27,6 +31,7 @@ public class CacheItem {
     private String groupId;
     private String dataId;
     private String lastMd5 = "";
+    private CopyOnWriteArrayList<AbstractListener> listeners;
 
     public String getGroupId() {
         return groupId;
@@ -52,8 +57,34 @@ public class CacheItem {
         this.lastMd5 = lastMd5;
     }
 
+    public void addListener(AbstractListener listener) {
+        if (listeners == null) {
+            synchronized (this) {
+                if (listeners == null) {
+                    listeners = new CopyOnWriteArrayList<>();
+                }
+            }
+        }
+        listeners.add(listener);
+    }
+
+    public void removeListener(AbstractListener listener) {
+        if (Objects.isNull(listeners)) {
+            throw new IllegalStateException("listener list is null");
+        }
+        listeners.remove(listener);
+    }
+
+    public List<AbstractListener> listListener() {
+        return listeners;
+    }
+
     public boolean isChange(String remoteMd5) {
         return Objects.equals(lastMd5, remoteMd5);
+    }
+
+    private void loadFromDisk() {
+
     }
 
     @Override

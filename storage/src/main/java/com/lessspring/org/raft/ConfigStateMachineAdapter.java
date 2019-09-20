@@ -23,12 +23,19 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-public class ConfigStateMachineAdapter extends StateMachineAdapter {
+public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
+
+    private final List<TransactionCommitCallback> callbacks = new LinkedList<>();
+
+    private final Object monitor = new Object();
 
     @Override
     public void onApply(Iterator iter) {
@@ -43,5 +50,12 @@ public class ConfigStateMachineAdapter extends StateMachineAdapter {
     @Override
     public boolean onSnapshotLoad(SnapshotReader reader) {
         return super.onSnapshotLoad(reader);
+    }
+
+    @Override
+    public void registerTransactionCommitCallback(TransactionCommitCallback commitCallback) {
+        synchronized (monitor) {
+            callbacks.add(commitCallback);
+        }
     }
 }

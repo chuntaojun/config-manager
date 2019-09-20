@@ -14,14 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org;
 
-import com.lessspring.org.PathUtils;
-import lombok.extern.slf4j.Slf4j;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +28,6 @@ import java.nio.charset.StandardCharsets;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 public final class DiskUtils {
 
     public static String readFile(String path, String fileName) {
@@ -42,10 +38,10 @@ public final class DiskUtils {
                 BufferedSource bufferedSource = Okio.buffer(Okio.source(file));
                 return bufferedSource.readByteString().string(StandardCharsets.UTF_8);
             } catch (IOException e) {
-                log.error("[DiskUtils readFile has Error] : {}", e.getMessage());
+                return null;
             }
         }
-        return StringUtils.EMPTY;
+        return null;
     }
 
     public static boolean writeFile(String path, String fileName, byte[] content) {
@@ -56,9 +52,7 @@ public final class DiskUtils {
             bufferedSink.write(content);
             return true;
         } catch (IOException e) {
-            log.error("[DiskUtils writeFile has Error] : {}", e.getMessage());
         }
-        log.error("[DiskUtils writeFile has Error] : File does not exist");
         return false;
     }
 
@@ -79,7 +73,6 @@ public final class DiskUtils {
         File directory = new File(path);
         if (directory.isDirectory()) {
             boolean mkdirs = directory.mkdirs();
-            log.debug("[DiskUtils openFile mkdirs] : result is : {}", mkdirs);
         }
         File file = new File(path, fileName);
         try {
@@ -97,7 +90,6 @@ public final class DiskUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         return file;
     }
 

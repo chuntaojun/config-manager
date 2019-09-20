@@ -17,6 +17,7 @@
 package com.lessspring.org.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -60,7 +61,7 @@ public class RouterFunctionMapConfiguration extends AbstractHandlerMapping imple
         List<RouterFunction<?>> routerFunctions = routerFunctions();
         this.routerFunction = routerFunctions
                 .stream()
-                .reduce((routerFunction1, other) -> routerFunction1.andOther(other))
+                .reduce(RouterFunction::andOther)
                 .orElse(null);
     }
 

@@ -16,7 +16,11 @@
  */
 package com.lessspring.org;
 
+import com.lessspring.org.config.ConfigService;
+import com.lessspring.org.model.dto.ConfigInfo;
 import org.junit.Test;
+
+import java.util.Scanner;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -26,9 +30,18 @@ public class Test_ClusterInfo {
 
     @Test
     public void testSplitClusterInfo() {
-        String clusterInfo = "127.0.0.1:8080";
-        String clusterInfos = "127.0.0.1:8080,127.0.0.1:8089";
-        System.out.println(clusterInfo.split(",").length);
+        String clusterInfo = "127.0.0.1:2959";
+        Configuration configuration = new Configuration();
+        configuration.setServers(clusterInfo);
+        ConfigService configService = new ClientConfigService(configuration);
+        configService.addListener("DEFAULT_GROUP", "TEST", new AbstractListener() {
+            @Override
+            public void onReceive(ConfigInfo configInfo) {
+                System.out.println(configInfo.toString());
+            }
+        });
+        Scanner scanner = new Scanner(System.in);
+        scanner.next();
     }
 
 }

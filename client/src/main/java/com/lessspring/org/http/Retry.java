@@ -53,6 +53,10 @@ public abstract class Retry<T> {
 
     /**
      * Retry strategy
+     *
+     * @param data receive data
+     * @param throwable if has throwable
+     * @return Void
      */
     protected abstract boolean shouldRetry(T data, Throwable throwable);
 

@@ -21,7 +21,7 @@ import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.service.publish.EventStaging;
-import com.lessspring.org.utils.DiskUtils;
+import com.lessspring.org.DiskUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,38 +48,37 @@ public class CacheableConfigPresistenceHandler implements PresistenceHandler {
     }
 
     @Override
-    public String readConfigContent(BaseConfigRequest request) {
-        final String namespaceId = request.getNamespaceId();
+    public String readConfigContent(String namespaceId, BaseConfigRequest request) {
         final String dataId = request.getDataId();
         final String groupId = request.getGroupId();
         String content = DiskUtils.readFile(namespaceId, NameUtils.buildName(groupId, dataId));
         if (StringUtils.isEmpty(content)) {
-            return presistenceHandler.readConfigContent(request);
+            return presistenceHandler.readConfigContent(namespaceId, request);
         }
         return content;
     }
 
     @Override
-    public boolean saveConfigInfo(PublishConfigRequest request) {
-        String key = NameUtils.buildName(request.getNamespaceId(), request.getGroupId(), request.getDataId());
+    public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
+        String key = NameUtils.buildName(namespaceId, request.getGroupId(), request.getDataId());
         eventStaging.invalidate(key);
-        presistenceHandler.saveConfigInfo(request);
+        presistenceHandler.saveConfigInfo(namespaceId, request);
         return true;
     }
 
     @Override
-    public boolean modifyConfigInfo(PublishConfigRequest request) {
-        String key = NameUtils.buildName(request.getNamespaceId(), request.getGroupId(), request.getDataId());
+    public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
+        String key = NameUtils.buildName(namespaceId, request.getGroupId(), request.getDataId());
         eventStaging.invalidate(key);
-        presistenceHandler.saveConfigInfo(request);
+        presistenceHandler.saveConfigInfo(namespaceId, request);
         return true;
     }
 
     @Override
-    public boolean removeConfigInfo(DeleteConfigRequest request) {
-        String key = NameUtils.buildName(request.getNamespaceId(), request.getGroupId(), request.getDataId());
+    public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
+        String key = NameUtils.buildName(namespaceId, request.getGroupId(), request.getDataId());
         eventStaging.invalidate(key);
-        presistenceHandler.removeConfigInfo(request);
+        presistenceHandler.removeConfigInfo(namespaceId, request);
         return true;
     }
 

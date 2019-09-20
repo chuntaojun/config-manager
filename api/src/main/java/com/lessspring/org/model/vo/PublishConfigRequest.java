@@ -64,7 +64,6 @@ public class PublishConfigRequest extends BaseConfigRequest {
     }
 
     public static final class Builder {
-        private String namespaceId;
         private String dataId;
         private String groupId;
         private String content;
@@ -73,11 +72,6 @@ public class PublishConfigRequest extends BaseConfigRequest {
         private String clientIps;
 
         private Builder() {
-        }
-
-        public Builder namespaceId(String namespaceId) {
-            this.namespaceId = namespaceId;
-            return this;
         }
 
         public Builder dataId(String dataId) {
@@ -115,7 +109,6 @@ public class PublishConfigRequest extends BaseConfigRequest {
             publishConfigRequest.setGroupId(this.groupId);
             publishConfigRequest.setContent(this.content);
             publishConfigRequest.setDataId(this.dataId);
-            publishConfigRequest.setNamespaceId(this.namespaceId);
             publishConfigRequest.setType(this.type);
             publishConfigRequest.setBeta(this.beta);
             publishConfigRequest.setClientIps(this.clientIps);

@@ -44,8 +44,9 @@ public class ConfigHandlerImpl implements ConfigHandler {
     @NotNull
     @Override
     public Mono<ServerResponse> publishConfig(ServerRequest request) {
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
         return request.bodyToMono(PublishConfigRequest.class)
-                .map(operationService::publishConfig)
+                .map(publishRequest -> operationService.publishConfig(namespaceId, publishRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
@@ -53,8 +54,9 @@ public class ConfigHandlerImpl implements ConfigHandler {
     @NotNull
     @Override
     public Mono<ServerResponse> modifyConfig(ServerRequest request) {
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
         return request.bodyToMono(PublishConfigRequest.class)
-                .map(operationService::modifyConfig)
+                .map(publishRequest -> operationService.modifyConfig(namespaceId, publishRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
@@ -62,8 +64,9 @@ public class ConfigHandlerImpl implements ConfigHandler {
     @NotNull
     @Override
     public Mono<ServerResponse> queryConfig(ServerRequest request) {
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
         return request.bodyToMono(QueryConfigRequest.class)
-                .map(operationService::queryConfig)
+                .map(queryRequest -> operationService.queryConfig(namespaceId, queryRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
@@ -71,8 +74,9 @@ public class ConfigHandlerImpl implements ConfigHandler {
     @NotNull
     @Override
     public Mono<ServerResponse> removeConfig(ServerRequest request) {
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
         return request.bodyToMono(DeleteConfigRequest.class)
-                .map(operationService::removeConfig)
+                .map(deleteRequest -> operationService.removeConfig(namespaceId, deleteRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }

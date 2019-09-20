@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.configuration.cluster;
 
+import com.lessspring.org.raft.ClusterServer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**

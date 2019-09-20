@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.handler.LoginHandler;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1

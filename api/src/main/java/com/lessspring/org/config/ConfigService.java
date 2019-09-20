@@ -28,13 +28,6 @@ import com.lessspring.org.model.dto.ConfigInfo;
 public interface ConfigService extends LifeCycle {
 
     /**
-     * Create a ClientConfigService with Configuration
-     *
-     * @param configuration {@link Configuration}
-     */
-    void create(Configuration configuration);
-
-    /**
      * get config by groupId and dataId
      *
      * @param groupId groupId

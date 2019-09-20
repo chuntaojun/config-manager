@@ -44,12 +44,12 @@ public class ClusterRouter {
         this.clusterHandler = clusterHandler;
     }
 
-    @Bean(value = "clusterRouter")
+    @Bean(value = "clusterRouterImpl")
     public RouterFunction<ServerResponse> clusterRouter() {
         return route(
-                PUT(ApiConstant.CLUSTER_NODE_JOIN).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::joinNode
-        ).andRoute(GET(ApiConstant.REFRESH_CLUSTER_NODE_INFO).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::serverNodes
-        ).andRoute(DELETE(ApiConstant.CLUSTER_NODE_LEAVE).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::leaveNode);
+                PUT(ApiConstant.CLUSTER_NODE_JOIN).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::joinNode)
+                .andRoute(GET(ApiConstant.REFRESH_CLUSTER_NODE_INFO).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::serverNodes)
+                .andRoute(DELETE(ApiConstant.CLUSTER_NODE_LEAVE).and(accept(MediaType.APPLICATION_JSON_UTF8)), clusterHandler::leaveNode);
     }
 
 }

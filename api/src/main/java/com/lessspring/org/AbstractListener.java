@@ -19,6 +19,8 @@ package com.lessspring.org;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.dto.ConfigInfo;
 
+import java.util.concurrent.Executor;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -35,5 +37,9 @@ public abstract class AbstractListener {
      * @param configInfo {@link ConfigInfo}
      */
     public abstract void onReceive(ConfigInfo configInfo);
+
+    public Executor executor() {
+        return null;
+    }
 
 }

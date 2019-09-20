@@ -27,10 +27,8 @@ import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.utils.HttpUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -86,19 +84,33 @@ public class ClusterNodeWatch implements LifeCycle {
 
     private void refreshCluster() {
         long delay = TimeUnit.SECONDS.toMillis(30);
-        Retry retry = () -> {
-            String serverIp = choose.getLastClusterIp();
-            String url = HttpUtils.buildBasePath(serverIp, ApiConstant.REFRESH_CLUSTER_NODE_INFO);
-            ResponseData<Set> response = httpClient.get(url, Header.EMPTY, Query.EMPTY, Set.class);
-            if (response.getCode() == SUCCESS.getCode()) {
-                Set<String> result = (Set<String>) response.getData();
-                ClusterNodeWatch.this.nodeList = result;
+        Retry<Boolean> retry = new Retry<Boolean>() {
+            @Override
+            protected Boolean run() throws Exception {
+                String serverIp = choose.getLastClusterIp();
+                String url = HttpUtils.buildBasePath(serverIp, ApiConstant.REFRESH_CLUSTER_NODE_INFO);
+                ResponseData<Set> response = httpClient.get(url, Header.EMPTY, Query.EMPTY, Set.class);
+                if (response.getCode() == SUCCESS.getCode()) {
+                    Set<String> result = (Set<String>) response.getData();
+                    ClusterNodeWatch.this.nodeList = result;
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            protected boolean shouldRetry(Boolean data, Throwable throwable) {
+                choose.refreshClusterIp();
                 return true;
             }
-            return false;
+
+            @Override
+            protected int maxRetry() {
+                return 3;
+            }
         };
 
-        boolean success = retry.run();
+        boolean success = retry.work();
         if (!success) {
             delay = 0;
             choose.refreshClusterIp();

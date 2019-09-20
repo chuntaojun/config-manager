@@ -50,7 +50,7 @@ import java.util.concurrent.TimeoutException;
  * @since 0.0.1
  */
 @Slf4j
-public class RaftServer implements LifeCycle {
+class RaftServer implements LifeCycle {
 
     private String raftGroupId = "CONFIG_MANAGER";
 
@@ -63,7 +63,7 @@ public class RaftServer implements LifeCycle {
     private BoltCliClientService cliClientService;
     private ScheduledExecutorService scheduledExecutorService;
 
-    public void initRaftCluster(NodeManager nodeManager, String cacheDirPath) {
+    void initRaftCluster(NodeManager nodeManager, String cacheDirPath) {
         final String path = PathUtils.finalPath(cacheDirPath);
         try {
             FileUtils.forceMkdir(new File(path));
@@ -136,11 +136,15 @@ public class RaftServer implements LifeCycle {
         return rpcServer;
     }
 
-    public BoltCliClientService getCliClientService() {
+    BoltCliClientService getCliClientService() {
         return cliClientService;
     }
 
-    PeerId leaderNode() {
+    public void registerTransactionCommitCallback(TransactionCommitCallback commitCallback) {
+        csm.registerTransactionCommitCallback(commitCallback);
+    }
+
+    private PeerId leaderNode() {
         if (node.getLeaderId() != null) {
             return node.getLeaderId();
         }
@@ -164,7 +168,7 @@ public class RaftServer implements LifeCycle {
         return leader.getIp() + ":" + leader.getPort();
     }
 
-    public boolean isLeader() {
+    boolean isLeader() {
         return getNode().isLeader();
     }
 

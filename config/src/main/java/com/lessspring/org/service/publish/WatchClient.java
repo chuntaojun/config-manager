@@ -31,7 +31,7 @@ public class WatchClient {
     private String clientIp;
     private String namespaceId;
     private Map<String, String> checkKey;
-    private FluxSink sink;
+    private FluxSink<?> sink;
     private ServerHttpResponse response;
 
     public String getClientIp() {
@@ -72,6 +72,10 @@ public class WatchClient {
 
     private void setSink(FluxSink sink) {
         this.sink = sink;
+    }
+
+    public boolean isChange(String key, String lastMd5) {
+        return Objects.equals(lastMd5, checkKey.get(lastMd5));
     }
 
     public static Builder builder() {
@@ -126,8 +130,12 @@ public class WatchClient {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         WatchClient client = (WatchClient) o;
         return Objects.equals(clientIp, client.clientIp);
     }

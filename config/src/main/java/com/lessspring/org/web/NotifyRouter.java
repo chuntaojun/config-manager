@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
@@ -43,12 +44,10 @@ public class NotifyRouter {
         this.notifyHandler = notifyHandler;
     }
 
-    @Bean(value = "notifyRouter")
-    public RouterFunction notifyRouter() {
+    @Bean(value = "notifyRouterImpl")
+    public RouterFunction<ServerResponse> notifyRouter() {
         return route(
-                POST(StringConst.API_V1 + "watch").and(accept(MediaType.APPLICATION_JSON_UTF8)),
-                notifyHandler::watch
-        );
+                POST(StringConst.API_V1 + "watch").and(accept(MediaType.APPLICATION_JSON_UTF8)), notifyHandler::watch);
     }
 
 }

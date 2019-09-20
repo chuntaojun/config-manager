@@ -26,6 +26,8 @@ public class Configuration {
 
     private String servers;
 
+    private String cachePath;
+
     public String getNamespaceId() {
         return namespaceId;
     }
@@ -40,5 +42,13 @@ public class Configuration {
 
     public void setServers(String servers) {
         this.servers = servers;
+    }
+
+    public String getCachePath() {
+        return cachePath;
+    }
+
+    public void setCachePath(String cachePath) {
+        this.cachePath = cachePath;
     }
 }

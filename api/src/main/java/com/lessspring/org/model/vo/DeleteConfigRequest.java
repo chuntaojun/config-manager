@@ -37,17 +37,11 @@ public class DeleteConfigRequest extends BaseConfigRequest {
     }
 
     public static final class Builder {
-        private String namespaceId;
         private String dataId;
         private boolean beta;
         private String groupId;
 
         private Builder() {
-        }
-
-        public Builder namespaceId(String namespaceId) {
-            this.namespaceId = namespaceId;
-            return this;
         }
 
         public Builder dataId(String dataId) {
@@ -67,7 +61,6 @@ public class DeleteConfigRequest extends BaseConfigRequest {
 
         public DeleteConfigRequest build() {
             DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
-            deleteConfigRequest.setNamespaceId(namespaceId);
             deleteConfigRequest.setDataId(dataId);
             deleteConfigRequest.setBeta(beta);
             deleteConfigRequest.setGroupId(groupId);

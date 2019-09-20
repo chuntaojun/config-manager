@@ -16,10 +16,15 @@ apply plugin: 'io.spring.dependency-management'
 
 version '0.0.1'
 
+configurations {
+    compile.exclude	module:	"spring-boot-starter-logging"
+}
+
 dependencies {
     compile(project(":api"))
     compile(project(":common"))
     compile(project(":storage"))
+    compile group: 'com.h2database', name: 'h2', version: '1.4.199'
     compile 'org.springframework.boot:spring-boot-starter-webflux'
     compileOnly "org.springframework.boot:spring-boot-configuration-processor"
     compile group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.0'

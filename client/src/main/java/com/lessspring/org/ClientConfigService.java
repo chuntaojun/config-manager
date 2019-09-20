@@ -22,6 +22,8 @@ import com.lessspring.org.config.ConfigService;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.ConfigHttpClient;
 import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.watch.WatchConfigWorker;
 
 /**
@@ -34,10 +36,15 @@ public class ClientConfigService implements ConfigService {
     private WatchConfigWorker watchConfigWorker;
     private ClusterNodeWatch clusterNodeWatch;
     private CacheConfigManager configManager;
-    private Configuration configuration;
+    private final Configuration configuration;
+
+    public ClientConfigService(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public void init() {
+        PathUtils.init(configuration.getCachePath());
         // Build a cluster node selector
         ClusterChoose choose = new ClusterChoose();
 
@@ -65,28 +72,34 @@ public class ClientConfigService implements ConfigService {
     }
 
     @Override
-    public void create(Configuration configuration) {
-        this.configuration = configuration;
-    }
-
-    @Override
     public ConfigInfo getConfig(String groupId, String dataId) {
-        return null;
+        return configManager.query(groupId, dataId);
     }
 
     @Override
     public boolean publishConfig(String groupId, String dataId, String content, String type) {
-        return false;
+        final PublishConfigRequest request = PublishConfigRequest.builder()
+                .groupId(groupId)
+                .dataId(dataId)
+                .content(content)
+                .type(type)
+                .build();
+        ResponseData<Boolean> response = configManager.publishConfig(request);
+        return response.isOk();
     }
 
     @Override
     public void addListener(String groupId, String dataId, AbstractListener... listeners) {
-
+        for (AbstractListener listener : listeners) {
+            watchConfigWorker.registerListener(groupId, dataId, listener);
+        }
     }
 
     @Override
     public void removeListener(String groupId, String dataId, AbstractListener... listeners) {
-
+        for (AbstractListener listener : listeners) {
+            watchConfigWorker.registerListener(groupId, dataId, listener);
+        }
     }
 
 }

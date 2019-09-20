@@ -17,28 +17,24 @@
 package com.lessspring.org;
 
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.http.HttpClient;
+import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.pojo.CacheItem;
-import com.lessspring.org.utils.MD5Utils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.watch.WatchConfigWorker;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class CacheConfigManager implements LifeCycle {
-
-    private Map<String, CacheItem> cacheItemMap;
 
     private WatchConfigWorker worker;
 
@@ -54,55 +50,49 @@ public class CacheConfigManager implements LifeCycle {
 
     @Override
     public void init() {
-        this.cacheItemMap = new ConcurrentHashMap<>(16);
         this.worker.setConfigManager(this);
     }
 
     public ConfigInfo query(String groupId, String dataId) {
         final QueryConfigRequest request = QueryConfigRequest.builder()
-                .namespaceId(namespaceId)
                 .groupId(groupId)
                 .dataId(dataId)
                 .build();
         final Query query = Query.newInstance()
+                .addParam("namespaceId", namespaceId)
                 .addParam("query", request);
         ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG, Header.EMPTY, query, ConfigInfo.class);
         if (response.isOk()) {
-            return response.getData();
+            ConfigInfo configInfo = response.getData();
+            doSnapshot(groupId, dataId, configInfo);
+            return configInfo;
         }
-        throw new RuntimeException(response.getErrMsg());
-    }
-
-    public void addCacheItem(String groupId, String dataId, String content, String type) {
-        String key = NameUtils.buildName(groupId, dataId);
-        String md5 = MD5Utils.md5Hex(content);
-        CacheItem oldItem = cacheItemMap.get(key);
-        if (oldItem != null) {
-            if (oldItem.isChange(md5)) {
-                oldItem.setLastMd5(md5);
-                worker.notifyWatcher(groupId, dataId, content, type);
-                worker.onChange();
-            }
-        } else {
-            CacheItem newItem = CacheItem.builder()
-                    .withGroupId(groupId)
-                    .withDataId(dataId)
-                    .withLastMd5(md5)
-                    .build();
-            cacheItemMap.put(key, newItem);
-            worker.notifyWatcher(groupId, dataId,  content, type);
-            worker.onChange();
+        ConfigInfo local = loadFromDisk(groupId, dataId);
+        if (Objects.nonNull(local)) {
+            return local;
         }
+        return null;
     }
 
-    public void removeCacheItem(String groupId, String dataId) {
-        String key = NameUtils.buildName(groupId, dataId);
-        cacheItemMap.remove(key);
-        worker.onChange();
+    public boolean removeConfig(String groupId, String dataId) {
+        return false;
     }
 
-    public Map<String, CacheItem> copy() {
-        return new HashMap<>(cacheItemMap);
+    public ResponseData<Boolean> publishConfig(final PublishConfigRequest request) {
+        final Query query = Query.newInstance()
+                .addParam("namespaceId", namespaceId);
+        return httpClient.put(ApiConstant.PUBLISH_CONFIG, Header.EMPTY, query, Body.objToBody(request), Boolean.class);
+    }
+
+    private ConfigInfo loadFromDisk(String groupId, String dataId) {
+        final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
+        final String content = DiskUtils.readFile(namespaceId, fileName);
+        return GsonUtils.toObj(content, ConfigInfo.class);
+    }
+
+    private void doSnapshot(String groupId, String dataId, ConfigInfo configInfo) {
+        final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
+        DiskUtils.writeFile(namespaceId, fileName, GsonUtils.toJsonBytes(configInfo));
     }
 
     @Override
@@ -111,6 +101,5 @@ public class CacheConfigManager implements LifeCycle {
         worker.destroy();
         worker = null;
         httpClient = null;
-        cacheItemMap.clear();
     }
 }

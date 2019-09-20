@@ -29,16 +29,10 @@ public class QueryConfigRequest extends BaseConfigRequest {
     }
 
     public static final class Builder {
-        private String namespaceId;
         private String dataId;
         private String groupId;
 
         private Builder() {
-        }
-
-        public Builder namespaceId(String namespaceId) {
-            this.namespaceId = namespaceId;
-            return this;
         }
 
         public Builder dataId(String dataId) {
@@ -53,7 +47,6 @@ public class QueryConfigRequest extends BaseConfigRequest {
 
         public QueryConfigRequest build() {
             QueryConfigRequest queryConfigRequest = new QueryConfigRequest();
-            queryConfigRequest.setNamespaceId(namespaceId);
             queryConfigRequest.setDataId(dataId);
             queryConfigRequest.setGroupId(groupId);
             return queryConfigRequest;

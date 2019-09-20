@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.watch;
 
-import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.Configuration;
@@ -24,29 +23,32 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.api.Code;
-import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
 import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
-import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.model.vo.WatchResponse;
 import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.utils.MD5Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -68,7 +70,7 @@ public class WatchConfigWorker implements LifeCycle {
                 }
             });
 
-    private Map<String, CopyOnWriteArrayList<AbstractListener>> watchListenerMap;
+    private Map<String, CacheItem> cacheItemMap;
     private CacheConfigManager configManager;
     private final HttpClient httpClient;
     private final Configuration configuration;
@@ -81,7 +83,7 @@ public class WatchConfigWorker implements LifeCycle {
 
     @Override
     public void init() {
-        watchListenerMap = new ConcurrentHashMap<>(16);
+        this.cacheItemMap = new ConcurrentHashMap<>(16);
     }
 
     public void setConfigManager(CacheConfigManager configManager) {
@@ -90,24 +92,27 @@ public class WatchConfigWorker implements LifeCycle {
     }
 
     public void registerListener(String groupId, String dataId, AbstractListener listener) {
-        String key = NameUtils.buildName(groupId, dataId);
-        watchListenerMap.computeIfAbsent(key, s -> new CopyOnWriteArrayList<>());
-        watchListenerMap.get(key).add(listener);
+        CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+        cacheItem.addListener(listener);
     }
 
     public void deregisterListener(String groupId, String dataId, AbstractListener listener) {
-        String key = NameUtils.buildName(groupId, dataId);
-        if (watchListenerMap.containsKey(key)) {
-            watchListenerMap.get(key).remove(listener);
-        }
+        CacheItem cacheItem = getCacheItem(groupId, dataId);
+        cacheItem.removeListener(listener);
     }
 
     public void notifyWatcher(final String groupId, final String dataId, final String content, final String type) {
         String key = NameUtils.buildName(groupId, dataId);
-        Optional<List<AbstractListener>> listeners = Optional.ofNullable(watchListenerMap.get(key));
+        Optional<List<AbstractListener>> listeners = Optional.ofNullable(cacheItemMap.get(key).listListener());
         listeners.ifPresent(abstractListeners -> {
             for (AbstractListener listener : abstractListeners) {
-                listener.onReceive(new ConfigInfo(content, type));
+                Runnable job = () -> listener.onReceive(new ConfigInfo(content, type));
+                Executor userExecutor = listener.executor();
+                if (Objects.isNull(userExecutor)) {
+                    job.run();
+                } else {
+                    userExecutor.execute(job);
+                }
             }
         });
     }
@@ -117,26 +122,63 @@ public class WatchConfigWorker implements LifeCycle {
         receiver.cancle();
         receiver = null;
         configManager = null;
-        watchListenerMap.clear();
         httpClient.destroy();
         executor.shutdown();
     }
 
-    public void onChange() {
+    private void onChange() {
         receiver.cancle();
         executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
     }
 
-    protected void onError(Throwable throwable) {
+    private void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
 
+    private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {
+        final String key = NameUtils.buildName(groupId, dataId);
+        Supplier<CacheItem> supplier = () -> CacheItem.builder()
+                .withGroupId(groupId)
+                .withDataId(dataId)
+                .withLastMd5("")
+                .build();
+        cacheItemMap.computeIfAbsent(key, s -> supplier.get());
+        return cacheItemMap.get(key);
+    }
+
+    private CacheItem getCacheItem(String groupId, String dataId) {
+        final String key = NameUtils.buildName(groupId, dataId);
+        return cacheItemMap.get(key);
+    }
+
+    private void updateAndNotify(String groupId, String dataId, String content, String type) {
+        final String key = NameUtils.buildName(groupId, dataId);
+        final String lastMd5 = MD5Utils.md5Hex(content);
+        final CacheItem oldItem = cacheItemMap.get(key);
+        if (oldItem.isChange(lastMd5)) {
+            oldItem.setLastMd5(lastMd5);
+            notifyWatcher(groupId, dataId, content, type);
+        }
+    }
+
+    private void removeCacheItem(String groupId, String dataId) {
+        String key = NameUtils.buildName(groupId, dataId);
+        if (cacheItemMap.containsKey(key)) {
+            cacheItemMap.remove(key);
+            onChange();
+        }
+    }
+
+    public Map<String, CacheItem> copy() {
+        return new HashMap<>(cacheItemMap);
+    }
+
     private void createWatcher() {
-        Map<String, CacheItem> tmp = configManager.copy();
+        Map<String, CacheItem> tmp = copy();
         Map<String, String> watchInfo = tmp.entrySet()
                 .stream()
                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().getLastMd5()), HashMap::putAll);
-        WatchRequest request = new WatchRequest(configuration.getNamespaceId(), watchInfo);
+        final WatchRequest request = new WatchRequest(configuration.getNamespaceId(), watchInfo);
         final Body body = Body.objToBody(request);
 
         receiver = new EventReceiver<WatchResponse>() {
@@ -145,11 +187,12 @@ public class WatchConfigWorker implements LifeCycle {
             public void onReceive(ResponseData<WatchResponse> data) {
                 WatchResponse response = data.getData();
                 if (data.getCode() == Code.SUCCESS.getCode()) {
-                    WatchConfigWorker.this.notifyWatcher(
+                    WatchConfigWorker.this.updateAndNotify(
                             response.getGroupId(),
                             response.getDataId(),
                             response.getContent(),
-                            response.getType());
+                            response.getType()
+                    );
                 }
             }
 

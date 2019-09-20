@@ -20,6 +20,7 @@ import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
+import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -27,8 +28,9 @@ import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.utils.DiskUtils;
+import com.lessspring.org.DiskUtils;
 import com.lessspring.org.utils.DisruptorFactory;
+import com.lessspring.org.utils.GsonUtils;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,8 +57,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
     }
 
     @Override
-    public String readConfigContent(BaseConfigRequest request) {
-        final String namespaceId = request.getNamespaceId();
+    public String readConfigContent(String namespaceId, BaseConfigRequest request) {
         final String dataId = request.getDataId();
         final String groupId = request.getGroupId();
         QueryConfigInfo queryConfigInfo = QueryConfigInfo.builder()
@@ -68,12 +69,12 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
     }
 
     @Override
-    public boolean saveConfigInfo(PublishConfigRequest request) {
+    public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
         boolean success = true;
         try {
             if (request.isBeta()) {
                 ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
-                        .namespaceId(request.getNamespaceId())
+                        .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
                         .content(request.getContent())
@@ -84,7 +85,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
                 int affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
             } else {
                 ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
-                        .namespaceId(request.getNamespaceId())
+                        .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
                         .content(request.getContent())
@@ -102,12 +103,12 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
     }
 
     @Override
-    public boolean modifyConfigInfo(PublishConfigRequest request) {
+    public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
         boolean success = true;
         try {
             if (request.isBeta()) {
                 ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
-                        .namespaceId(request.getNamespaceId())
+                        .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
                         .content(request.getContent())
@@ -118,7 +119,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
                 int affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
             } else {
                 ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
-                        .namespaceId(request.getNamespaceId())
+                        .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
                         .content(request.getContent())
@@ -136,7 +137,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
     }
 
     @Override
-    public boolean removeConfigInfo(DeleteConfigRequest request) {
+    public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
         boolean success = true;
         try {
             if (request.isBeta()) {
@@ -160,7 +161,8 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
             DiskUtils.deleteFile(namespaceId, NameUtils.buildName(groupId, dataId));
             return;
         }
-        DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), event.getContent().getBytes(StandardCharsets.UTF_8));
+        final ConfigInfo configInfo = new ConfigInfo(event.getContent(), event.getConfigType());
+        DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), GsonUtils.toJsonBytes(configInfo));
         NotifyEvent source = NotifyEvent.builder()
                 .namespaceId(event.getNamespaceId())
                 .groupId(event.getGroupId())
