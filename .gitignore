@@ -1,16 +1,16 @@
-.gradle
-/build/
+*.gradle
+**/build/
 !gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-.DS_Store
+*.apt_generated
+*.classpath
+*.factorypath
+*.project
+*.settings
+*.springBeans
+*.sts4-cache
+*.DS_Store
 
 ### IntelliJ IDEA ###
 .idea
@@ -19,12 +19,10 @@
 *.ipr
 
 ### NetBeans ###
-/nbproject/private/
-/build/
-/out/
+**/nbproject/private/
+**/build/
+**/out/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-/src/test
