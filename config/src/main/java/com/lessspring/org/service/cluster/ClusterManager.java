@@ -56,7 +56,7 @@ public class ClusterManager {
     public void init() {
         ClusterServer clusterServer = new ClusterServer();
         clusterServer.init();
-        clusterServer.registerTransactionCommitCallback(commitCallback);
+//        clusterServer.registerTransactionCommitCallback(commitCallback);
         eventBus.register(this);
         eventBus.register(clusterServer);
     }

@@ -40,11 +40,14 @@ import java.util.Objects;
 @Configuration
 public class HttpServerConfiguration {
 
-    @Autowired
-    private Environment environment;
+    private final Environment environment;
+
+    public HttpServerConfiguration(Environment environment) {
+        this.environment = environment;
+    }
 
     @Bean
-    public HttpServer httpServerForService(@Qualifier(value = "StoreRouter") RouterFunction<?> routerFunction) {
+    public HttpServer httpServerForService(@Qualifier(value = "configRouterImpl") RouterFunction<?> routerFunction) {
         return getHttpServer(routerFunction);
     }
 
@@ -60,14 +63,14 @@ public class HttpServerConfiguration {
      * 抽取的函数, 实现具体的 HttpServer 部署实现工作
      * </pre>
      * @param routerFunction 路由实例
-     * @return
+     * @return {@link HttpServer}
      */
     private HttpServer getHttpServer(RouterFunction<?> routerFunction) {
         HttpHandler handler = RouterFunctions.toHttpHandler(routerFunction);
         ReactorHttpHandlerAdapter httpHandlerAdapter = new ReactorHttpHandlerAdapter(handler);
         HttpServer httpServer = HttpServer.create()
                 .host("localhost")
-                .port(Integer.valueOf(Objects.requireNonNull(environment.getProperty("server.port"))));
+                .port(Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))));
         httpServer.handle(httpHandlerAdapter);
         return httpServer;
     }

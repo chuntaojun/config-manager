@@ -54,16 +54,16 @@ public class ClusterServer implements LifeCycle {
 
     @Override
     public void init() {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
-            Properties properties = new Properties();
-            properties.load(is);
-            initClusterNode(properties);
-            raftServer.init();
-            raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
-            initialize = true;
-        } catch (IOException e) {
-            log.error("Server");
-        }
+//        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
+//            Properties properties = new Properties();
+//            properties.load(is);
+//            initClusterNode(properties);
+//            raftServer.init();
+//            raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
+//            initialize = true;
+//        } catch (IOException e) {
+//            log.error("Server");
+//        }
     }
 
     private void initClusterNode(Properties properties) {

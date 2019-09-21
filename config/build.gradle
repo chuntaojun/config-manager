@@ -24,6 +24,7 @@ dependencies {
     compile(project(":api"))
     compile(project(":common"))
     compile(project(":storage"))
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.0'
     compile group: 'com.h2database', name: 'h2', version: '1.4.199'
     compile 'org.springframework.boot:spring-boot-starter-webflux'
     compileOnly "org.springframework.boot:spring-boot-configuration-processor"
