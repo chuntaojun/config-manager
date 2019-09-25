@@ -19,6 +19,8 @@ package com.lessspring.org.http.handler;
 import com.google.gson.Gson;
 
 /**
+ * The response body processor
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */

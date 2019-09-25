@@ -17,13 +17,13 @@
 package com.lessspring.org.http.impl;
 
 import com.google.common.eventbus.Subscribe;
-import com.lessspring.org.model.vo.ResponseData;
 import okhttp3.sse.EventSource;
 
-import java.lang.reflect.Type;
 import java.util.Objects;
 
 /**
+ * For the use of user-defined SSE the receiving processor
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
@@ -49,11 +49,20 @@ public abstract class EventReceiver<T> {
      */
     public abstract void onError(Throwable throwable);
 
-    public void setEventSource(EventSource eventSource) {
+    /**
+     * Well what the receiver
+     *
+     * @return attention event name
+     */
+    public abstract String attention();
+
+    final void setEventSource(EventSource eventSource) {
         this.eventSource = eventSource;
     }
 
-    public void cancle() {
+    // Cancel the sse request
+
+    public final void cancle() {
         if (Objects.nonNull(eventSource)) {
             eventSource.cancel();
         }

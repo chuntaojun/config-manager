@@ -33,9 +33,11 @@ import java.util.Map;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ServerSentEventListener<T> extends EventSourceListener {
+class ServerSentEventListener<T> extends EventSourceListener {
 
-    private static final Map<Class, EventBus> eventBusMap = new HashMap<>();
+    // Event the dispenser, according to the Receiver concern events, event distribution
+
+    private static final Map<String, EventBus> eventBusMap = new HashMap<>();
 
     private static final Object monitor = new Object();
 
@@ -49,7 +51,7 @@ public class ServerSentEventListener<T> extends EventSourceListener {
         synchronized (monitor) {
             typeCls = cls;
             EventBus eventBus = new EventBus("config-watch-event-publisher");
-            eventBusMap.computeIfAbsent(cls, aClass -> eventBus);
+            eventBusMap.computeIfAbsent(receiver.attention(), s -> eventBus);
             eventBus.register(receiver);
         }
     }
@@ -57,18 +59,21 @@ public class ServerSentEventListener<T> extends EventSourceListener {
     @Override
     public void onClosed(@NotNull EventSource eventSource) {
         super.onClosed(eventSource);
-        eventBusMap.get(typeCls).unregister(receiver);
+        // When close the incident, automatic cancellation of the Receiver
+        eventBusMap.get(receiver.attention()).unregister(receiver);
     }
 
     @Override
     public void onEvent(@NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
         ResponseData<String> result = GsonUtils.toObj(data, new TypeToken<ResponseData<String>>(){}.getType());
-        eventBusMap.get(typeCls).post(GsonUtils.toObj(result.getData(), typeCls));
+        // For event distribution
+        eventBusMap.get(receiver.attention()).post(GsonUtils.toObj(result.getData(), typeCls));
     }
 
     @Override
     public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
         super.onFailure(eventSource, t, response);
+        receiver.onError(t);
     }
 
     @Override
@@ -76,7 +81,7 @@ public class ServerSentEventListener<T> extends EventSourceListener {
         super.onOpen(eventSource, response);
     }
 
-    public static void clean() {
+    static void clean() {
         eventBusMap.clear();
     }
 

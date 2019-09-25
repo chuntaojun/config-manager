@@ -52,6 +52,9 @@ public class NotifyHandlerImpl implements NotifyHandler {
         this.watchClientManager = watchClientManager;
     }
 
+    // the SSE push FluxSink, enables the Server end to independently
+    // choose the timing of the push and directional push
+
     @NotNull
     @Override
     public Mono<ServerResponse> watch(ServerRequest request) {

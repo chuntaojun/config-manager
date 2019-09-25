@@ -17,20 +17,22 @@
 package com.lessspring.org.http;
 
 /**
+ * A simple retry class, according to the custom rules set the retry mode
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class Retry<T> {
 
     /**
-     * run work
+     * run work，Actual logic in this method
      *
      * @throws Exception
      * @return Tasks are completed correctly
      */
     protected abstract T run() throws Exception;
 
-    public T work() {
+    public final T work() {
         int maxRetryNum = maxRetry();
         T data = null;
         while (maxRetryNum > 0) {

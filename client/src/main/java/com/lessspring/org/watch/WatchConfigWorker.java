@@ -16,25 +16,22 @@
  */
 package com.lessspring.org.watch;
 
-import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.api.Code;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
 import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
-import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.model.vo.WatchResponse;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.MD5Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -44,10 +41,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -96,7 +91,6 @@ public class WatchConfigWorker implements LifeCycle {
     public void registerListener(String groupId, String dataId, AbstractListener listener) {
         CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
         cacheItem.addListener(listener);
-        onChange();
     }
 
     public void deregisterListener(String groupId, String dataId, AbstractListener listener) {
@@ -104,7 +98,7 @@ public class WatchConfigWorker implements LifeCycle {
         cacheItem.removeListener(listener);
     }
 
-    public void notifyWatcher(final String groupId, final String dataId, final String content, final String type) {
+    private void notifyWatcher(final String groupId, final String dataId, final String content, final String type) {
         String key = NameUtils.buildName(groupId, dataId);
         Optional<List<AbstractListener>> listeners = Optional.ofNullable(cacheItemMap.get(key).listListener());
         listeners.ifPresent(abstractListeners -> {
@@ -129,6 +123,9 @@ public class WatchConfigWorker implements LifeCycle {
         executor.shutdown();
     }
 
+    // When your listener list changes, to build a monitoring events and
+    // initiate Watch requests to the server
+
     private void onChange() {
         if (Objects.nonNull(receiver)) {
             receiver.cancle();
@@ -143,13 +140,28 @@ public class WatchConfigWorker implements LifeCycle {
 
     private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {
         final String key = NameUtils.buildName(groupId, dataId);
-        Supplier<CacheItem> supplier = () -> CacheItem.builder()
-                .withGroupId(groupId)
-                .withDataId(dataId)
-                .withLastMd5("")
-                .build();
+        final boolean[] add = new boolean[]{false};
+        Supplier<CacheItem> supplier = () -> {
+            add[0] = true;
+            return CacheItem.builder()
+                    .withGroupId(groupId)
+                    .withDataId(dataId)
+                    .withLastMd5("")
+                    .build();
+        };
         cacheItemMap.computeIfAbsent(key, s -> supplier.get());
+        if (add[0]) {
+            onChange();
+        }
         return cacheItemMap.get(key);
+    }
+
+    private void removeCacheItem(String groupId, String dataId) {
+        String key = NameUtils.buildName(groupId, dataId);
+        if (cacheItemMap.containsKey(key)) {
+            cacheItemMap.remove(key);
+            onChange();
+        }
     }
 
     private CacheItem getCacheItem(String groupId, String dataId) {
@@ -167,17 +179,11 @@ public class WatchConfigWorker implements LifeCycle {
         }
     }
 
-    private void removeCacheItem(String groupId, String dataId) {
-        String key = NameUtils.buildName(groupId, dataId);
-        if (cacheItemMap.containsKey(key)) {
-            cacheItemMap.remove(key);
-            onChange();
-        }
-    }
-
     public Map<String, CacheItem> copy() {
         return new HashMap<>(cacheItemMap);
     }
+
+    // Create a Watcher to monitor configuration changes information
 
     private void createWatcher() {
         Map<String, CacheItem> tmp = copy();
@@ -187,7 +193,10 @@ public class WatchConfigWorker implements LifeCycle {
         final WatchRequest request = new WatchRequest(configuration.getNamespaceId(), watchInfo);
         final Body body = Body.objToBody(request);
 
+        // Create a receiving server push change event receiver
         receiver = new EventReceiver<WatchResponse>() {
+
+            private String name;
 
             @Override
             public void onReceive(WatchResponse data) {
@@ -204,6 +213,14 @@ public class WatchConfigWorker implements LifeCycle {
             @Override
             public void onError(Throwable throwable) {
                 WatchConfigWorker.this.onError(throwable);
+            }
+
+            @Override
+            public String attention() {
+                if (StringUtils.isEmpty(name)) {
+                    name = WatchResponse.class.getName();
+                }
+                return name;
             }
         };
         try {

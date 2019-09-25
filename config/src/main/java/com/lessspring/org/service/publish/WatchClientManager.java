@@ -62,6 +62,9 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
     private Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>();
 
+    // Build with the Client corresponds to a monitored object is
+    // used to monitor configuration changes
+
     public void createWatchClient(WatchRequest request, FluxSink<?> sink, ServerRequest serverRequest) {
         WatchClient client = WatchClient.builder()
                 .clientIp(Objects.requireNonNull(serverRequest.exchange().getRequest().getRemoteAddress()).getHostString())
@@ -70,6 +73,8 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
                 .response(serverRequest.exchange().getResponse())
                 .sink(sink)
                 .build();
+        // When event creation is cancelled, automatic cancellation of client
+        // on the server side corresponding to monitor object
         sink.onDispose(() -> {
             Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
             for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher.entrySet()) {
@@ -77,21 +82,30 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
             }
         });
         Map<String, String> listenKeys = client.getCheckKey();
+        // According to the monitoring configuration key, registered to a
+        // different key corresponding to the listener list
         listenKeys.forEach((key, value) -> {
-            Map<String, Set<WatchClient>> clientsMap = watchClientManager.computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>());
+            Map<String, Set<WatchClient>> clientsMap = watchClientManager.computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
             clientsMap.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
             clientsMap.get(key).add(client);
         });
+        // A quick comparison, listens for client direct access to the latest
+        // configuration when registering for the first time
         doQuickCompare(client);
     }
 
     private void doQuickCompare(WatchClient watchClient) {
     }
 
+    // Send the event to the client
+
     @SuppressWarnings("unchecked")
     private void writeResponse(WatchClient client, Object data) {
         client.getSink().next(data);
     }
+
+    // Use the event framework, receiving NotifyEvent events, the
+    // configuration changes on delivery to the client
 
     @Override
     public void onEvent(NotifyEvent event) throws Exception {
