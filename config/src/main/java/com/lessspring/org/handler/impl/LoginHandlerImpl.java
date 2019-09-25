@@ -16,11 +16,30 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.LoginHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Configuration
 public class LoginHandlerImpl implements LoginHandler {
+
+    @Bean(value = "loginRouterImpl")
+    public RouterFunction<ServerResponse> loginRouterImpl() {
+        return route(
+                GET(StringConst.API_V1 + "hello"), request -> ok().body(BodyInserters.fromObject("hello"))
+        );
+    }
+
 }

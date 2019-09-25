@@ -29,14 +29,17 @@ import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.DiskUtils;
+import com.lessspring.org.service.publish.WatchClientManager;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
-import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -45,15 +48,22 @@ import java.nio.charset.StandardCharsets;
  */
 @Slf4j
 @Component(value = "presistenceHandler")
-public class ConfigPersistenceHandler implements PresistenceHandler, EventHandler<ConfigChangeEvent> {
+public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler<ConfigChangeEvent> {
 
     private final Disruptor<NotifyEvent> disruptorHolder;
 
     @Resource
     private ConfigInfoMapper configInfoMapper;
 
-    public ConfigPersistenceHandler() {
+    public ConfigPersistenceHandler(WatchClientManager watchClientManager) {
         disruptorHolder = DisruptorFactory.build(NotifyEvent::new, "Notify-Event-Disruptor");
+        disruptorHolder.handleEventsWithWorkerPool(watchClientManager);
+        disruptorHolder.start();
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        disruptorHolder.shutdown();
     }
 
     @Override
@@ -65,39 +75,43 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
                 .groupId(groupId)
                 .dataId(dataId)
                 .build();
-        return configInfoMapper.findConfigInfo(queryConfigInfo).getContent();
+        return new String(configInfoMapper.findConfigInfo(queryConfigInfo).getContent(), Charset.forName(StandardCharsets.UTF_8.name()));
     }
 
     @Override
     public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
         boolean success = true;
+        int affect = -1;
+        long id = -1;
         try {
             if (request.isBeta()) {
                 ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent())
+                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
                         .type(request.getType())
                         .clientIps(request.getClientIps())
                         .createTime(System.currentTimeMillis())
                         .build();
-                int affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
+                affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
+                id = infoDTO.getId();
             } else {
                 ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent())
+                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
                         .type(request.getType())
                         .createTime(System.currentTimeMillis())
                         .build();
-                int affect = configInfoMapper.saveConfigInfo(infoDTO);
-                long id = infoDTO.getId();
+                affect = configInfoMapper.saveConfigInfo(infoDTO);
+                id = infoDTO.getId();
             }
+            log.debug("save config-success, affect rows is : {}, primary key is : {}", affect, id);
         } catch (Exception e) {
             success = false;
-            log.error("save config-info failed, err is : {}", e.getMessage());
+            log.error("save config-info failed, err is : {}", e.getLocalizedMessage());
         }
         return success;
     }
@@ -105,30 +119,31 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
     @Override
     public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
         boolean success = true;
+        int affect = -1;
         try {
             if (request.isBeta()) {
                 ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent())
+                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
                         .type(request.getType())
                         .clientIps(request.getClientIps())
                         .createTime(System.currentTimeMillis())
                         .build();
-                int affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
+                affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
             } else {
                 ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent())
+                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
                         .type(request.getType())
                         .createTime(System.currentTimeMillis())
                         .build();
-                int affect = configInfoMapper.updateConfigInfo(infoDTO);
-                long id = infoDTO.getId();
+                affect = configInfoMapper.updateConfigInfo(infoDTO);
             }
+            log.debug("save config-success, affect rows is : {}", affect);
         } catch (Exception e) {
             success = false;
             log.error("modify config-info failed, err is : {}", e.getMessage());
@@ -153,22 +168,26 @@ public class ConfigPersistenceHandler implements PresistenceHandler, EventHandle
     }
 
     @Override
-    public void onEvent(ConfigChangeEvent event, long sequence, boolean endOfBatch) throws Exception {
-        final String namespaceId = event.getNamespaceId();
-        final String groupId = event.getGroupId();
-        final String dataId = event.getDataId();
-        if (event.getEventType() == EventType.DELETE) {
-            DiskUtils.deleteFile(namespaceId, NameUtils.buildName(groupId, dataId));
-            return;
+    public void onEvent(ConfigChangeEvent event) throws Exception {
+        try {
+            final String namespaceId = event.getNamespaceId();
+            final String groupId = event.getGroupId();
+            final String dataId = event.getDataId();
+            if (event.getEventType() == EventType.DELETE) {
+                DiskUtils.deleteFile(namespaceId, NameUtils.buildName(groupId, dataId));
+                return;
+            }
+            final ConfigInfo configInfo = new ConfigInfo(groupId, dataId, event.getContent(), event.getConfigType());
+            DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), GsonUtils.toJsonBytes(configInfo));
+            NotifyEvent source = NotifyEvent.builder()
+                    .namespaceId(event.getNamespaceId())
+                    .groupId(event.getGroupId())
+                    .dataId(event.getDataId())
+                    .eventType(event.getEventType())
+                    .build();
+            disruptorHolder.publishEvent((target, sequence1) -> NotifyEvent.copy(sequence1, source, target));
+        } catch (Exception e) {
+            log.error("notify ConfigChangeEvent has some error : {}", e);
         }
-        final ConfigInfo configInfo = new ConfigInfo(event.getContent(), event.getConfigType());
-        DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), GsonUtils.toJsonBytes(configInfo));
-        NotifyEvent source = NotifyEvent.builder()
-                .namespaceId(event.getNamespaceId())
-                .groupId(event.getGroupId())
-                .dataId(event.getDataId())
-                .eventType(event.getEventType())
-                .build();
-        disruptorHolder.publishEvent((target, sequence1) -> NotifyEvent.copy(sequence1, target, source));
     }
 }

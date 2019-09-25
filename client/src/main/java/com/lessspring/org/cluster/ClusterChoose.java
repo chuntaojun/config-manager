@@ -21,6 +21,7 @@ import com.lessspring.org.LifeCycle;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -71,7 +72,7 @@ public class ClusterChoose implements LifeCycle {
     public void refreshClusterIp() {
         readLock.lock();
         try {
-            if (!clusterFind.hasNext()) {
+            if (Objects.isNull(clusterFind) || !clusterFind.hasNext()) {
                 clusterFind = clusterInfos.iterator();
             }
             lastClusterIp = clusterFind.next();

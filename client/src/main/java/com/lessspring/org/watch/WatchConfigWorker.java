@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.watch;
 
+import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.Configuration;
@@ -27,6 +28,7 @@ import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
 import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
+import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
@@ -88,12 +90,13 @@ public class WatchConfigWorker implements LifeCycle {
 
     public void setConfigManager(CacheConfigManager configManager) {
         this.configManager = configManager;
-        executor.schedule(this::createWatcher, 5000, TimeUnit.MILLISECONDS);
+        executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void registerListener(String groupId, String dataId, AbstractListener listener) {
         CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
         cacheItem.addListener(listener);
+        onChange();
     }
 
     public void deregisterListener(String groupId, String dataId, AbstractListener listener) {
@@ -106,7 +109,7 @@ public class WatchConfigWorker implements LifeCycle {
         Optional<List<AbstractListener>> listeners = Optional.ofNullable(cacheItemMap.get(key).listListener());
         listeners.ifPresent(abstractListeners -> {
             for (AbstractListener listener : abstractListeners) {
-                Runnable job = () -> listener.onReceive(new ConfigInfo(content, type));
+                Runnable job = () -> listener.onReceive(new ConfigInfo(groupId, dataId, content, type));
                 Executor userExecutor = listener.executor();
                 if (Objects.isNull(userExecutor)) {
                     job.run();
@@ -127,7 +130,10 @@ public class WatchConfigWorker implements LifeCycle {
     }
 
     private void onChange() {
-        receiver.cancle();
+        if (Objects.nonNull(receiver)) {
+            receiver.cancle();
+            receiver = null;
+        }
         executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
     }
 
@@ -155,7 +161,7 @@ public class WatchConfigWorker implements LifeCycle {
         final String key = NameUtils.buildName(groupId, dataId);
         final String lastMd5 = MD5Utils.md5Hex(content);
         final CacheItem oldItem = cacheItemMap.get(key);
-        if (oldItem.isChange(lastMd5)) {
+        if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {
             oldItem.setLastMd5(lastMd5);
             notifyWatcher(groupId, dataId, content, type);
         }
@@ -184,14 +190,13 @@ public class WatchConfigWorker implements LifeCycle {
         receiver = new EventReceiver<WatchResponse>() {
 
             @Override
-            public void onReceive(ResponseData<WatchResponse> data) {
-                WatchResponse response = data.getData();
-                if (data.getCode() == Code.SUCCESS.getCode()) {
+            public void onReceive(WatchResponse data) {
+                if (!data.isEmpty()) {
                     WatchConfigWorker.this.updateAndNotify(
-                            response.getGroupId(),
-                            response.getDataId(),
-                            response.getContent(),
-                            response.getType()
+                            data.getGroupId(),
+                            data.getDataId(),
+                            data.getContent(),
+                            data.getType()
                     );
                 }
             }
@@ -201,7 +206,13 @@ public class WatchConfigWorker implements LifeCycle {
                 WatchConfigWorker.this.onError(throwable);
             }
         };
-
-        httpClient.serverSendEvent(ApiConstant.WATCH_CONFIG, Header.EMPTY, body, WatchResponse.class, receiver);
+        try {
+            final Header header = Header.newInstance()
+                    .addParam("Accept", "text/event-stream")
+                    .addParam("Cache-Control", "no-cache");
+            httpClient.serverSendEvent(ApiConstant.WATCH_CONFIG, header, body, WatchResponse.class, receiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -26,7 +26,8 @@ import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.HttpMethod;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
-import lombok.extern.slf4j.Slf4j;
+import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.HttpUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -34,10 +35,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSources;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,7 +52,6 @@ import static com.lessspring.org.http.param.MediaType.APPLICATION_JSON_UTF8_VALU
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 public class ConfigHttpClient implements HttpClient {
 
     private OkHttpClient client;
@@ -67,7 +70,10 @@ public class ConfigHttpClient implements HttpClient {
 
     @Override
     public void init() {
-        client = new OkHttpClient();
+        client = new OkHttpClient.Builder()
+                .connectTimeout(Duration.ofSeconds(20_000))
+                .readTimeout(Duration.ofSeconds(30_000))
+                .build();
     }
 
     @Override
@@ -181,39 +187,19 @@ public class ConfigHttpClient implements HttpClient {
             @Override
             protected Void run() throws Exception {
                 RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
-                Request request = new Request.Builder()
-                        .url(url)
-                        .post(postBody)
-                        .build();
-                Call call = client.newCall(request);
-                receiver.setCall(call);
-                call.enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        receiver.onError(e);
-                        call.cancel();
-                    }
-
-                    @Override
-                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        ResponseData<T> data = ResponseData.builder()
-                                .withCode(response.code())
-                                .withData(responseHandler.convert(response.body().string(), cls))
-                                .withErrMsg(response.message())
-                                .build();
-                        receiver.deferEvent(data);
-                    }
-                });
+                Request.Builder builder = new Request.Builder()
+                        .url(buildUrl(url))
+                        .post(postBody);
+                initHeader(header, builder);
+                EventSource.Factory factory = EventSources.createFactory(client);
+                EventSource source = factory.newEventSource(builder.build(), new ServerSentEventListener<T>(receiver, cls));
+                receiver.setEventSource(source);
                 return null;
             }
 
             @Override
             protected boolean shouldRetry(Void data, Throwable throwable) {
-                if (data == null) {
-                    return false;
-                }
-                refresh();
-                return true;
+                return false;
             }
 
             @Override
@@ -227,6 +213,7 @@ public class ConfigHttpClient implements HttpClient {
 
     @Override
     public void destroy() {
+        ServerSentEventListener.clean();
     }
 
     private <T> ResponseData<T> execute(Call call, Class<T> cls) throws IOException {
@@ -245,7 +232,14 @@ public class ConfigHttpClient implements HttpClient {
     }
 
     private String buildUrl(String url, Query query) {
-        return getServerIp() + "/" + url + "?" + query.toQueryUrl();
+        String queryStr = "";
+        if (!query.isEmpty()) {
+            queryStr = "?" + query.toQueryUrl();
+        }
+        if (url.startsWith("/")) {
+            return HttpUtils.buildBasePath(getServerIp(), url + queryStr);
+        }
+        return HttpUtils.buildBasePath(getServerIp(), "/" + url + queryStr);
     }
 
     private Request buildRequest(String url, Header header, Body body, HttpMethod method) {
@@ -264,12 +258,16 @@ public class ConfigHttpClient implements HttpClient {
         } else {
             throw new IllegalArgumentException("Does not support HTTP request type");
         }
+        initHeader(header, builder);
+        return builder.build();
+    }
+
+    private void initHeader(final Header header, Request.Builder builder) {
         Iterator<Map.Entry<String, String>> iterator = header.iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
             builder.addHeader(entry.getKey(), entry.getValue());
         }
-        return builder.build();
     }
 
     private String getServerIp() {

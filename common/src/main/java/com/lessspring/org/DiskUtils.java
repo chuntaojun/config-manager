@@ -19,9 +19,16 @@ package com.lessspring.org;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
+import org.apache.commons.lang3.reflect.FieldUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -34,8 +41,7 @@ public final class DiskUtils {
         String finalPath = PathUtils.finalPath(path);
         File file = openFile(finalPath, fileName);
         if (file.exists()) {
-            try {
-                BufferedSource bufferedSource = Okio.buffer(Okio.source(file));
+            try (BufferedSource bufferedSource = Okio.buffer(Okio.source(file))) {
                 return bufferedSource.readByteString().string(StandardCharsets.UTF_8);
             } catch (IOException e) {
                 return null;
@@ -47,9 +53,8 @@ public final class DiskUtils {
     public static boolean writeFile(String path, String fileName, byte[] content) {
         String finalPath = PathUtils.finalPath(path);
         File file = openFile(finalPath, fileName, true);
-        try {
-            BufferedSink bufferedSink = Okio.buffer(Okio.sink(file));
-            bufferedSink.write(content);
+        try (OutputStream writer = new FileOutputStream(file)) {
+            writer.write(content);
             return true;
         } catch (IOException e) {
         }
@@ -70,8 +75,9 @@ public final class DiskUtils {
     }
 
     private static File openFile(String path, String fileName, boolean rewrite) {
+        System.out.println("File Path : " + path);
         File directory = new File(path);
-        if (directory.isDirectory()) {
+        if (!directory.exists()) {
             boolean mkdirs = directory.mkdirs();
         }
         File file = new File(path, fileName);

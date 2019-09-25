@@ -16,14 +16,17 @@
  */
 package com.lessspring.org.utils;
 
+import com.lessspring.org.model.vo.ResponseData;
+import org.springframework.http.codec.ServerSentEvent;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class HttpUtils {
+public final class SseUtils {
 
-    public static String buildBasePath(String server, String basePath) {
-        return "http://" + server + basePath;
+    public static ServerSentEvent<ResponseData> createServerSentEvent(ResponseData data) {
+        return ServerSentEvent.builder(data).build();
     }
 
 }

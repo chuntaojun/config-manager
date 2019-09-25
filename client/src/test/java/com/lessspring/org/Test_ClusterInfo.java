@@ -20,7 +20,7 @@ import com.lessspring.org.config.ConfigService;
 import com.lessspring.org.model.dto.ConfigInfo;
 import org.junit.Test;
 
-import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -34,14 +34,17 @@ public class Test_ClusterInfo {
         Configuration configuration = new Configuration();
         configuration.setServers(clusterInfo);
         ConfigService configService = new ClientConfigService(configuration);
+        configService.init();
+        AtomicBoolean shutdown = new AtomicBoolean(false);
         configService.addListener("DEFAULT_GROUP", "TEST", new AbstractListener() {
             @Override
             public void onReceive(ConfigInfo configInfo) {
                 System.out.println(configInfo.toString());
+                shutdown.set(true);
             }
         });
-        Scanner scanner = new Scanner(System.in);
-        scanner.next();
+        while (!shutdown.get()) {
+        }
     }
 
 }

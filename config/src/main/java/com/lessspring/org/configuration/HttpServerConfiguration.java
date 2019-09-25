@@ -28,6 +28,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.netty.http.server.HttpServer;
 
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class HttpServerConfiguration {
     }
 
     @Bean
-    public HttpServer httpServerForService(@Qualifier(value = "configRouterImpl") RouterFunction<?> routerFunction) {
+    public HttpServer httpServerForService(@Qualifier(value = "configRouterImpl") RouterFunction<ServerResponse> routerFunction) {
         return getHttpServer(routerFunction);
     }
 
@@ -65,14 +66,13 @@ public class HttpServerConfiguration {
      * @param routerFunction 路由实例
      * @return {@link HttpServer}
      */
-    private HttpServer getHttpServer(RouterFunction<?> routerFunction) {
+    private HttpServer getHttpServer(RouterFunction<ServerResponse> routerFunction) {
         HttpHandler handler = RouterFunctions.toHttpHandler(routerFunction);
         ReactorHttpHandlerAdapter httpHandlerAdapter = new ReactorHttpHandlerAdapter(handler);
         HttpServer httpServer = HttpServer.create()
                 .host("localhost")
                 .port(Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))));
-        httpServer.handle(httpHandlerAdapter);
-        return httpServer;
+        return httpServer.handle(httpHandlerAdapter);
     }
 
 }

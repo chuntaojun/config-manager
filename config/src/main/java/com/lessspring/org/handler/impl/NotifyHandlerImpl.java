@@ -20,9 +20,14 @@ import com.lessspring.org.handler.NotifyHandler;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.service.publish.WatchClientManager;
+import com.lessspring.org.utils.SseUtils;
 import org.jetbrains.annotations.NotNull;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
@@ -31,6 +36,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
+import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
@@ -50,8 +56,13 @@ public class NotifyHandlerImpl implements NotifyHandler {
     @Override
     public Mono<ServerResponse> watch(ServerRequest request) {
         return request.bodyToMono(WatchRequest.class)
-                .map(watchRequest -> Flux.push((Consumer<FluxSink<?>>) fluxSink -> watchClientManager.createWatchClient(watchRequest, fluxSink, request)))
-                .flatMap(objectFlux -> ok().contentType(MediaType.TEXT_EVENT_STREAM)
-                .body(objectFlux.map(o -> ResponseData.builder().withData(o).build()), ResponseData.class));
+                .map(watchRequest -> Flux.create(fluxSink -> watchClientManager.createWatchClient(watchRequest, fluxSink, request)))
+                .flatMap(objectFlux -> {
+                    return ok().contentType(MediaType.TEXT_EVENT_STREAM)
+                            .body(objectFlux.map(o -> {
+                                return SseUtils.createServerSentEvent(ResponseData.success(o));
+                            }), ServerSentEvent.class);
+                });
     }
+
 }

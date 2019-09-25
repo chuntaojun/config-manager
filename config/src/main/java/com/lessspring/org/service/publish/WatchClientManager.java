@@ -26,9 +26,15 @@ import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.ListenKeyUtils;
 import com.lessspring.org.utils.MD5Utils;
+import com.lessspring.org.utils.SseUtils;
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.C;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -44,6 +50,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Function;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -51,9 +58,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 @Slf4j
 @Component
-public class WatchClientManager implements EventHandler<NotifyEvent> {
+public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
-    private Map<String, Set<WatchClient>> watchClientManager = new ConcurrentHashMap<>();
+    private Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>();
 
     public void createWatchClient(WatchRequest request, FluxSink<?> sink, ServerRequest serverRequest) {
         WatchClient client = WatchClient.builder()
@@ -63,44 +70,51 @@ public class WatchClientManager implements EventHandler<NotifyEvent> {
                 .response(serverRequest.exchange().getResponse())
                 .sink(sink)
                 .build();
-        sink.onCancel((Disposable) () -> {
-            for (Map.Entry<String, Set<WatchClient>> entry : watchClientManager.entrySet()) {
+        sink.onDispose(() -> {
+            Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
+            for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher.entrySet()) {
                 entry.getValue().remove(client);
             }
         });
         Map<String, String> listenKeys = client.getCheckKey();
         listenKeys.forEach((key, value) -> {
-            Set<WatchClient> clients = watchClientManager.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
-            clients.add(client);
+            Map<String, Set<WatchClient>> clientsMap = watchClientManager.computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>());
+            clientsMap.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
+            clientsMap.get(key).add(client);
         });
+        doQuickCompare(client);
+    }
+
+    private void doQuickCompare(WatchClient watchClient) {
+    }
+
+    @SuppressWarnings("unchecked")
+    private void writeResponse(WatchClient client, Object data) {
+        client.getSink().next(data);
     }
 
     @Override
-    public void onEvent(NotifyEvent event, long sequence, boolean endOfBatch) throws Exception {
-        String listenKey = ListenKeyUtils.buildListenKey(event.getNamespaceId(), event.getDataId(), event.getGroupId());
-        final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
-        final ConfigInfo configInfo = GsonUtils.toObj(DiskUtils.readFile(event.getNamespaceId(), key), ConfigInfo.class);
-        final String lastMd5 = MD5Utils.md5Hex(configInfo.getContent());
-        long[] finishWorks = new long[1];
-        long works = watchClientManager.getOrDefault(listenKey, Collections.emptySet())
-                .stream()
-                .filter(watchClient -> watchClient.isChange(key, lastMd5))
-                .peek(client -> {
-                    try {
-                        writeResponse(client, ResponseData.builder().withData(GsonUtils.toJson(configInfo)).build());
-                        finishWorks[0] ++;
-                    } catch (Exception e) {
-                        log.error("[Notify WatchClient has Error] : {}", e.getMessage());
-                    }
-                })
-                .count();
-        log.info("total notify clients number is : {}, finish success is : {}", works, finishWorks[0]);
-    }
-
-    private void writeResponse(WatchClient client, ResponseData data) {
-        ServerHttpResponse response = client.getResponse();
-        client.getSink().next(response.writeWith(Mono.just(response.bufferFactory()
-                .wrap(GsonUtils.toJson(data).getBytes(StandardCharsets.UTF_8)))));
+    public void onEvent(NotifyEvent event) throws Exception {
+        try {
+            final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
+            final String configInfoJson = DiskUtils.readFile(event.getNamespaceId(), key);
+            long[] finishWorks = new long[1];
+            watchClientManager.getOrDefault(event.getNamespaceId(), Collections.emptyMap())
+                    .entrySet()
+                    .stream()
+                    .flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+                    .forEach(client -> {
+                        try {
+                            writeResponse(client, configInfoJson);
+                            finishWorks[0]++;
+                        } catch (Exception e) {
+                            log.error("[Notify WatchClient has Error] : {}", e.getMessage());
+                        }
+                    });
+            log.info("total notify clients finish success is : {}", finishWorks[0]);
+        } catch (Exception e) {
+            log.error("notify watcher has some error : {}", e);
+        }
     }
 
 }

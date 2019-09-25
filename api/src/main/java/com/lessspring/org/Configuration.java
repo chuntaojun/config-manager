@@ -28,6 +28,8 @@ public class Configuration {
 
     private String cachePath;
 
+    private String clientId;
+
     public String getNamespaceId() {
         return namespaceId;
     }
@@ -50,5 +52,23 @@ public class Configuration {
 
     public void setCachePath(String cachePath) {
         this.cachePath = cachePath;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    @Override
+    public String toString() {
+        return "Configuration{" +
+                "namespaceId='" + namespaceId + '\'' +
+                ", servers='" + servers + '\'' +
+                ", cachePath='" + cachePath + '\'' +
+                ", clientId='" + clientId + '\'' +
+                '}';
     }
 }

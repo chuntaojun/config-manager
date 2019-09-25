@@ -62,24 +62,21 @@ public class CacheableConfigPresistenceHandler implements PresistenceHandler {
     public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
         String key = NameUtils.buildName(namespaceId, request.getGroupId(), request.getDataId());
         eventStaging.invalidate(key);
-        presistenceHandler.saveConfigInfo(namespaceId, request);
-        return true;
+        return presistenceHandler.saveConfigInfo(namespaceId, request);
     }
 
     @Override
     public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
         String key = NameUtils.buildName(namespaceId, request.getGroupId(), request.getDataId());
         eventStaging.invalidate(key);
-        presistenceHandler.saveConfigInfo(namespaceId, request);
-        return true;
+        return presistenceHandler.modifyConfigInfo(namespaceId, request);
     }
 
     @Override
     public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
         String key = NameUtils.buildName(namespaceId, request.getGroupId(), request.getDataId());
         eventStaging.invalidate(key);
-        presistenceHandler.removeConfigInfo(namespaceId, request);
-        return true;
+        return presistenceHandler.removeConfigInfo(namespaceId, request);
     }
 
 }

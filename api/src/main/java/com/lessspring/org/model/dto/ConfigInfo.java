@@ -22,34 +22,40 @@ package com.lessspring.org.model.dto;
  */
 public class ConfigInfo {
 
-    private String content;
-    private String type;
+    private final String groupId;
+    private final String dataId;
+    private final String content;
+    private final String type;
 
-    public ConfigInfo(String content, String type) {
+    public ConfigInfo(String groupId, String dataId, String content, String type) {
+        this.groupId = groupId;
+        this.dataId = dataId;
         this.content = content;
         this.type = type;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public String getDataId() {
+        return dataId;
     }
 
     public String getContent() {
         return content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     @Override
     public String toString() {
         return "ConfigInfo{" +
-                "content='" + content + '\'' +
+                "groupId='" + groupId + '\'' +
+                ", dataId='" + dataId + '\'' +
+                ", content='" + content + '\'' +
                 ", type='" + type + '\'' +
                 '}';
     }

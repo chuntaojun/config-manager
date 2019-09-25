@@ -49,11 +49,12 @@ public class ClientConfigService implements ConfigService {
         ClusterChoose choose = new ClusterChoose();
 
         httpClient = new ConfigHttpClient(choose);
-        ClusterNodeWatch clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
+        clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
+        clusterNodeWatch.register(choose);
 
         choose.setWatch(clusterNodeWatch);
 
-        WatchConfigWorker watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
+        watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
         configManager = new CacheConfigManager(httpClient, configuration, watchConfigWorker);
 
         httpClient.init();

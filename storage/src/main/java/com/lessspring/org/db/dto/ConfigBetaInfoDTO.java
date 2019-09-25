@@ -35,7 +35,7 @@ public class ConfigBetaInfoDTO {
     private String namespaceId;
     private String groupId;
     private String dataId;
-    private String content;
+    private byte[] content;
     private String type;
     private String clientIps;
     private Long createTime;

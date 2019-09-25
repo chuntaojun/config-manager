@@ -80,7 +80,7 @@ public class CacheItem {
     }
 
     public boolean isChange(String remoteMd5) {
-        return Objects.equals(lastMd5, remoteMd5);
+        return !Objects.equals(lastMd5, remoteMd5);
     }
 
     private void loadFromDisk() {

@@ -18,6 +18,7 @@ package com.lessspring.org.utils;
 
 import com.google.gson.Gson;
 
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -41,7 +42,15 @@ public final class GsonUtils {
         return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())), cls);
     }
 
+    public static <T> T toObj(byte[] json, Type cls) {
+        return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())), cls);
+    }
+
     public static <T> T toObj(String json, Class<T> cls) {
+        return GSON.fromJson(json, cls);
+    }
+
+    public static <T> T toObj(String json, Type cls) {
         return GSON.fromJson(json, cls);
     }
 

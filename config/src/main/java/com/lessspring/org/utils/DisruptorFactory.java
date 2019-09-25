@@ -39,8 +39,8 @@ public final class DisruptorFactory {
             @Override
             public Thread newThread(@NotNull Runnable r) {
                 String namePrefix = name + "-";
-                String name = namePrefix + nextId.getAndDecrement();
-                return new Thread(r, name);
+                String name1 = namePrefix + nextId.getAndDecrement();
+                return new Thread(r, name1);
             }
         }, ProducerType.MULTI, new BlockingWaitStrategy());
     }

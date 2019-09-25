@@ -25,7 +25,6 @@ import com.lessspring.org.http.Retry;
 import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.utils.HttpUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,8 +48,6 @@ public class ClusterNodeWatch implements LifeCycle {
 
     private Set<String> nodeList = new HashSet<>();
 
-    private ClusterChoose choose;
-
     public ClusterNodeWatch(HttpClient httpClient, Configuration configuration) {
         this.httpClient = httpClient;
         String[] clusterIps = configuration.getServers().split(",");
@@ -60,10 +57,6 @@ public class ClusterNodeWatch implements LifeCycle {
     @Override
     public void init() {
 
-        choose = new ClusterChoose();
-
-        choose.setWatch(this);
-
         executor = new ScheduledThreadPoolExecutor(1, r -> {
             Thread thread = new Thread(r);
             thread.setDaemon(true);
@@ -71,7 +64,7 @@ public class ClusterNodeWatch implements LifeCycle {
             return thread;
         });
 
-        register(choose);
+        eventBus.post(nodeList);
 
         executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(5), TimeUnit.MILLISECONDS);
 
@@ -87,9 +80,7 @@ public class ClusterNodeWatch implements LifeCycle {
         Retry<Boolean> retry = new Retry<Boolean>() {
             @Override
             protected Boolean run() throws Exception {
-                String serverIp = choose.getLastClusterIp();
-                String url = HttpUtils.buildBasePath(serverIp, ApiConstant.REFRESH_CLUSTER_NODE_INFO);
-                ResponseData<Set> response = httpClient.get(url, Header.EMPTY, Query.EMPTY, Set.class);
+                ResponseData<Set> response = httpClient.get(ApiConstant.REFRESH_CLUSTER_NODE_INFO, Header.EMPTY, Query.EMPTY, Set.class);
                 if (response.getCode() == SUCCESS.getCode()) {
                     Set<String> result = (Set<String>) response.getData();
                     ClusterNodeWatch.this.nodeList = result;
@@ -100,7 +91,6 @@ public class ClusterNodeWatch implements LifeCycle {
 
             @Override
             protected boolean shouldRetry(Boolean data, Throwable throwable) {
-                choose.refreshClusterIp();
                 return true;
             }
 
@@ -113,7 +103,6 @@ public class ClusterNodeWatch implements LifeCycle {
         boolean success = retry.work();
         if (!success) {
             delay = 0;
-            choose.refreshClusterIp();
         }
 
         executor.schedule(this::refreshCluster, delay, TimeUnit.MILLISECONDS);

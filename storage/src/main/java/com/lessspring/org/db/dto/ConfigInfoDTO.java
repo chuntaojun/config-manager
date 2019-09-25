@@ -21,6 +21,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Clob;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -35,7 +37,7 @@ public class ConfigInfoDTO {
     private String namespaceId;
     private String groupId;
     private String dataId;
-    private String content;
+    private byte[] content;
     private String type;
     private Long createTime;
     private Long lastModifyTime;

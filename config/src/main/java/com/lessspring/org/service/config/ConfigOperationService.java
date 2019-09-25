@@ -26,7 +26,10 @@ import com.lessspring.org.event.EventType;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PreDestroy;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -39,11 +42,17 @@ public class ConfigOperationService {
     private final Disruptor<ConfigChangeEvent> disruptorHolder;
     private final PresistenceHandler presistenceHandler;
 
-    public ConfigOperationService(PresistenceHandler presistenceHandler, ConfigPersistenceHandler configPersistenceHandler) {
+    public ConfigOperationService(@Qualifier(value = "cachePresistenceHandler") PresistenceHandler presistenceHandler,
+                                  ConfigPersistenceHandler configPersistenceHandler) {
         this.presistenceHandler = presistenceHandler;
-        Disruptor<ConfigChangeEvent> disruptor = DisruptorFactory.build(ConfigChangeEvent::new, "Config-Change-Event-Disruptor");
-        disruptor.handleEventsWith(configPersistenceHandler);
-        disruptorHolder = disruptor;
+        disruptorHolder = DisruptorFactory.build(ConfigChangeEvent::new, "Config-Change-Event-Disruptor");
+        disruptorHolder.handleEventsWithWorkerPool(configPersistenceHandler);
+        disruptorHolder.start();
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        disruptorHolder.shutdown();
     }
 
     public ResponseData queryConfig(String namespaceId, QueryConfigRequest request) {

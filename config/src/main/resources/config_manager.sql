@@ -15,7 +15,7 @@ CREATE TABLE config_info
     namespace_id varchar(128) not null,
     group_id     varchar(64)  not null,
     data_id      varchar(64)  not null,
-    content      blob         not null,
+    content      binary         not null,
     config_type  varchar(32)  not null default 'text',
     primary key (id),
     unique key (namespace_id, group_id, data_id)
@@ -34,4 +34,4 @@ CREATE TABLE config_info_beta
     unique key (namespace_id, group_id, data_id)
 );
 
-INSERT INTO user(user_name, password) VALUE ('lessSpring', '29591314')
+INSERT INTO user(user_name, password) VALUES ('lessSpring', '29591314')

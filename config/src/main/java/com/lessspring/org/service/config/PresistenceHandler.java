@@ -29,7 +29,7 @@ public interface PresistenceHandler {
     /**
      * read config-info
      *
-     * @param namespaceId
+     * @param namespaceId namespaceId
      * @param request {@link BaseConfigRequest}
      * @return config content
      */
@@ -38,7 +38,7 @@ public interface PresistenceHandler {
     /**
      * save config-info
      *
-     * @param namespaceId
+     * @param namespaceId namespaceId
      * @param request {@link PublishConfigRequest}
      * @return save result
      */
@@ -47,7 +47,7 @@ public interface PresistenceHandler {
     /**
      * modify config-info
      *
-     * @param namespaceId
+     * @param namespaceId namespaceId
      * @param request {@link PublishConfigRequest}
      * @return modify result
      */
@@ -56,7 +56,7 @@ public interface PresistenceHandler {
     /**
      * remove config-info
      *
-     * @param namespaceId
+     * @param namespaceId namespaceId
      * @param request {@link DeleteConfigRequest}
      * @return delete result
      */

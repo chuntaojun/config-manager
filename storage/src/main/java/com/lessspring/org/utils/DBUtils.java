@@ -16,14 +16,12 @@
  */
 package com.lessspring.org.utils;
 
+import java.sql.PreparedStatement;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class HttpUtils {
-
-    public static String buildBasePath(String server, String basePath) {
-        return "http://" + server + basePath;
-    }
+public final class DBUtils {
 
 }

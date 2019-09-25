@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.model.vo;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -57,6 +59,10 @@ public class WatchResponse {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isEmpty() {
+        return StringUtils.isAllEmpty(groupId, dataId, content, type);
     }
 
     public static Builder builder() {

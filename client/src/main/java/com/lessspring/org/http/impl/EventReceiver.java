@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.http.impl;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.vo.ResponseData;
-import okhttp3.Call;
+import okhttp3.sse.EventSource;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 
 /**
@@ -29,25 +29,18 @@ import java.util.Objects;
  */
 public abstract class EventReceiver<T> {
 
-    private static final EventBus DEFER_PUBLISHER = new EventBus("config-watch-event-publisher");
-
-    private Call call;
+    private EventSource eventSource;
 
     public EventReceiver() {
-        DEFER_PUBLISHER.register(this);
-    }
-
-    void deferEvent(ResponseData<T> data) {
-        DEFER_PUBLISHER.post(data);
     }
 
     /**
      * Data receiving callback function
      *
-     * @param data {@link ResponseData}
+     * @param data T
      */
     @Subscribe
-    public abstract void onReceive(ResponseData<T> data);
+    public abstract void onReceive(T data);
 
     /**
      * When the error occurs when the callback function
@@ -56,14 +49,13 @@ public abstract class EventReceiver<T> {
      */
     public abstract void onError(Throwable throwable);
 
-    void setCall(Call call) {
-        this.call = call;
+    public void setEventSource(EventSource eventSource) {
+        this.eventSource = eventSource;
     }
 
     public void cancle() {
-        DEFER_PUBLISHER.unregister(this);
-        if (Objects.nonNull(call) && !call.isCanceled()) {
-            call.cancel();
+        if (Objects.nonNull(eventSource)) {
+            eventSource.cancel();
         }
     }
 }

@@ -32,6 +32,9 @@ public class WatchRequest {
     private String namespaceId = "default";
     private Map<String, String> watchKey = Collections.emptyMap();
 
+    public WatchRequest() {
+    }
+
     public WatchRequest(String namespaceId, Map<String, String> watchKey) {
         this.namespaceId = namespaceId;
         this.watchKey = watchKey;

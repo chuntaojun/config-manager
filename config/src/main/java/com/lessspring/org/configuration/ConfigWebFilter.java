@@ -17,6 +17,7 @@
 package com.lessspring.org.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -31,8 +32,9 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class ConfigWebFilter implements WebFilter {
 
+    @NotNull
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        return null;
+    public Mono<Void> filter(@NotNull ServerWebExchange exchange, WebFilterChain chain) {
+        return chain.filter(exchange);
     }
 }
