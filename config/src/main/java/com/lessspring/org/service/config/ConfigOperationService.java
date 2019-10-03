@@ -28,6 +28,8 @@ import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PreDestroy;
 
@@ -36,15 +38,15 @@ import javax.annotation.PreDestroy;
  * @since 0.0.1
  */
 @Slf4j
-@Component
+@Service
 public class ConfigOperationService {
 
     private final Disruptor<ConfigChangeEvent> disruptorHolder;
-    private final PresistenceHandler presistenceHandler;
+    private final PersistentHandler persistentHandler;
 
-    public ConfigOperationService(@Qualifier(value = "cachePresistenceHandler") PresistenceHandler presistenceHandler,
+    public ConfigOperationService(@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
                                   ConfigPersistenceHandler configPersistenceHandler) {
-        this.presistenceHandler = presistenceHandler;
+        this.persistentHandler = persistentHandler;
         disruptorHolder = DisruptorFactory.build(ConfigChangeEvent::new, "Config-Change-Event-Disruptor");
         disruptorHolder.handleEventsWithWorkerPool(configPersistenceHandler);
         disruptorHolder.start();
@@ -55,13 +57,13 @@ public class ConfigOperationService {
         disruptorHolder.shutdown();
     }
 
-    public ResponseData queryConfig(String namespaceId, QueryConfigRequest request) {
-        return ResponseData.success(presistenceHandler.readConfigContent(namespaceId, request));
+    public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request) {
+        return ResponseData.success(persistentHandler.readConfigContent(namespaceId, request));
     }
 
-    public ResponseData publishConfig(String namespaceId, PublishConfigRequest request) {
-        if (presistenceHandler.saveConfigInfo(namespaceId, request)) {
-            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), EventType.PUBLISH);
+    public ResponseData<?> publishConfig(String namespaceId, PublishConfigRequest request) {
+        if (persistentHandler.saveConfigInfo(namespaceId, request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), "", EventType.PUBLISH);
             event.setConfigType(request.getType());
             publishEvent(event);
             return ResponseData.success();
@@ -69,9 +71,9 @@ public class ConfigOperationService {
         return ResponseData.fail();
     }
 
-    public ResponseData modifyConfig(String namespaceId, PublishConfigRequest request) {
-        if (presistenceHandler.modifyConfigInfo(namespaceId, request)) {
-            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), EventType.MODIFIED);
+    public ResponseData<?> modifyConfig(String namespaceId, PublishConfigRequest request) {
+        if (persistentHandler.modifyConfigInfo(namespaceId, request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), "", EventType.MODIFIED);
             event.setConfigType(request.getType());
             publishEvent(event);
             return ResponseData.success();
@@ -79,9 +81,9 @@ public class ConfigOperationService {
         return ResponseData.fail();
     }
 
-    public ResponseData removeConfig(String namespaceId, DeleteConfigRequest request) {
-        if (presistenceHandler.removeConfigInfo(namespaceId, request)) {
-            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, "", EventType.DELETE);
+    public ResponseData<?> removeConfig(String namespaceId, DeleteConfigRequest request) {
+        if (persistentHandler.removeConfigInfo(namespaceId, request)) {
+            ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, "", "", EventType.DELETE);
             publishEvent(event);
             return ResponseData.success();
         }
@@ -92,12 +94,13 @@ public class ConfigOperationService {
         disruptorHolder.publishEvent((target, sequence) -> ConfigChangeEvent.copy(sequence, source, target));
     }
 
-    private ConfigChangeEvent buildConfigChangeEvent(String namespaceId, BaseConfigRequest request, String content, EventType type) {
+    private ConfigChangeEvent buildConfigChangeEvent(String namespaceId, BaseConfigRequest request, String content, String entryption, EventType type) {
         return ConfigChangeEvent.builder()
                 .namespaceId(namespaceId)
                 .dataId(request.getDataId())
                 .groupId(request.getGroupId())
                 .content(content)
+                .entryption(entryption)
                 .source(this)
                 .eventType(type)
                 .build();

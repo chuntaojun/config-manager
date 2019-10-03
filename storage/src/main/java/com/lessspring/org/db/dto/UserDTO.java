@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 public class UserDTO {
 
     private Long id;
-    private String userName;
+    private String username;
     private String password;
     private Short roleType;
 

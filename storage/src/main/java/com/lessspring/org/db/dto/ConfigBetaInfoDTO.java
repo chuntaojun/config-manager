@@ -37,6 +37,7 @@ public class ConfigBetaInfoDTO {
     private String dataId;
     private byte[] content;
     private String type;
+    private String encryption;
     private String clientIps;
     private Long createTime;
     private Long lastModifyTime;

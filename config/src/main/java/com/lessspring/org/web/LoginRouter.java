@@ -16,9 +16,35 @@
  */
 package com.lessspring.org.web;
 
+import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.handler.LoginHandler;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Configuration
 public class LoginRouter {
+
+    private final LoginHandler loginHandler;
+
+    public LoginRouter(LoginHandler loginHandler) {
+        this.loginHandler = loginHandler;
+    }
+
+    @Bean(value = "loginRouterImpl")
+    public RouterFunction<ServerResponse> loginRouterImpl() {
+        return route(
+                POST(StringConst.API_V1 + "login").and(accept(MediaType.APPLICATION_JSON_UTF8)), loginHandler::login);
+    }
+
 }

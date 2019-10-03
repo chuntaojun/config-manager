@@ -48,6 +48,15 @@ public interface ConfigService extends LifeCycle {
     boolean publishConfig(String groupId, String dataId, String content, String type);
 
     /**
+     * delete config
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @return delete success sign
+     */
+    boolean deleteConfig(String groupId, String dataId);
+
+    /**
      * Add configuration changes the listener
      *
      * @param groupId groupId

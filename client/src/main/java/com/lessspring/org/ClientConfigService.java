@@ -16,6 +16,8 @@
  */
 package com.lessspring.org;
 
+import com.lessspring.org.auth.AuthHolder;
+import com.lessspring.org.auth.LoginHandler;
 import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.cluster.ClusterNodeWatch;
 import com.lessspring.org.config.ConfigService;
@@ -25,6 +27,8 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.watch.WatchConfigWorker;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -36,7 +40,12 @@ public class ClientConfigService implements ConfigService {
     private WatchConfigWorker watchConfigWorker;
     private ClusterNodeWatch clusterNodeWatch;
     private CacheConfigManager configManager;
+    private LoginHandler loginHandler;
+    private final AuthHolder authHolder = new AuthHolder();
     private final Configuration configuration;
+
+    private final AtomicBoolean inited = new AtomicBoolean(false);
+    private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
     public ClientConfigService(Configuration configuration) {
         this.configuration = configuration;
@@ -44,32 +53,38 @@ public class ClientConfigService implements ConfigService {
 
     @Override
     public void init() {
-        PathUtils.init(configuration.getCachePath());
-        // Build a cluster node selector
-        ClusterChoose choose = new ClusterChoose();
+        if (inited.compareAndSet(false, true)) {
+            PathUtils.init(configuration.getCachePath());
+            // Build a cluster node selector
+            ClusterChoose choose = new ClusterChoose();
 
-        httpClient = new ConfigHttpClient(choose);
-        clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
-        clusterNodeWatch.register(choose);
+            httpClient = new ConfigHttpClient(choose, authHolder);
+            loginHandler = new LoginHandler(httpClient, authHolder, configuration);
+            clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
+            clusterNodeWatch.register(choose);
 
-        choose.setWatch(clusterNodeWatch);
+            choose.setWatch(clusterNodeWatch);
 
-        watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
-        configManager = new CacheConfigManager(httpClient, configuration, watchConfigWorker);
+            watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
+            configManager = new CacheConfigManager(httpClient, configuration, watchConfigWorker);
 
-        httpClient.init();
-        clusterNodeWatch.init();
-        watchConfigWorker.init();
-        configManager.init();
-        watchConfigWorker.setConfigManager(configManager);
+            httpClient.init();
+            loginHandler.init();
+            clusterNodeWatch.init();
+            watchConfigWorker.init();
+            configManager.init();
+            watchConfigWorker.setConfigManager(configManager);
+        }
     }
 
     @Override
     public void destroy() {
-        httpClient.destroy();
-        clusterNodeWatch.destroy();
-        watchConfigWorker.destroy();
-        configManager.destroy();
+        if (destroyed.compareAndSet(false, true)) {
+            httpClient.destroy();
+            clusterNodeWatch.destroy();
+            watchConfigWorker.destroy();
+            configManager.destroy();
+        }
     }
 
     @Override
@@ -87,6 +102,11 @@ public class ClientConfigService implements ConfigService {
                 .build();
         ResponseData<Boolean> response = configManager.publishConfig(request);
         return response.isOk();
+    }
+
+    @Override
+    public boolean deleteConfig(String groupId, String dataId) {
+        return configManager.removeConfig(groupId, dataId).isOk();
     }
 
     @Override

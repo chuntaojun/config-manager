@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.config;
 
+import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -24,16 +25,16 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface PresistenceHandler {
+public interface PersistentHandler {
 
     /**
      * read config-info
      *
      * @param namespaceId namespaceId
      * @param request {@link BaseConfigRequest}
-     * @return config content
+     * @return {@link ConfigInfo}
      */
-    String readConfigContent(String namespaceId, BaseConfigRequest request);
+    ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request);
 
     /**
      * save config-info

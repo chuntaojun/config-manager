@@ -39,7 +39,8 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     @Override
     public void onApply(Iterator iter) {
-
+        while (iter.hasNext()) {
+        }
     }
 
     @Override

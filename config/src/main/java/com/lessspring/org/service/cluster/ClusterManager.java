@@ -29,6 +29,7 @@ import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -56,19 +57,19 @@ public class ClusterManager {
     public void init() {
         ClusterServer clusterServer = new ClusterServer();
         clusterServer.init();
-//        clusterServer.registerTransactionCommitCallback(commitCallback);
+        clusterServer.registerTransactionCommitCallback(commitCallback);
         eventBus.register(this);
         eventBus.register(clusterServer);
     }
 
-    public ResponseData nodeAdd(NodeChangeRequest request) {
+    public Mono<?> nodeAdd(NodeChangeRequest request) {
         nodeChange(request, EventType.PUBLISH);
-        return ResponseData.success();
+        return Mono.just(ResponseData.success());
     }
 
-    public ResponseData nodeRemove(NodeChangeRequest request) {
+    public Mono<?> nodeRemove(NodeChangeRequest request) {
         nodeChange(request, EventType.DELETE);
-        return ResponseData.success();
+        return Mono.just(ResponseData.success());
     }
 
     private void nodeChange(NodeChangeRequest request, EventType type) {
@@ -80,7 +81,7 @@ public class ClusterManager {
         publishEvent(event);
     }
 
-    public ResponseData listNodes() {
+    public ResponseData<List<ServerNode>> listNodes() {
         List<ServerNode> nodes = nodeManager.stream().map(Map.Entry::getValue).collect(Collectors.toList());
         return ResponseData.builder()
                 .withCode(200)

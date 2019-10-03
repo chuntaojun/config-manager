@@ -14,27 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.configuration;
-
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
-import reactor.core.publisher.Mono;
+package com.lessspring.org.service.dump.task;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-@Configuration
-public class ConfigWebFilter implements WebFilter {
-
-    @NotNull
-    @Override
-    public Mono<Void> filter(@NotNull ServerWebExchange exchange, WebFilterChain chain) {
-        return chain.filter(exchange);
-    }
+public class DumpTask4All {
 }

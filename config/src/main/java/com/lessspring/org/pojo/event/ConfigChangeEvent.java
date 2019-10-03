@@ -59,6 +59,7 @@ public class ConfigChangeEvent extends BaseEvent {
         target.setContent(source.getContent());
         target.setEventType(source.getEventType());
         target.setConfigType(source.getConfigType());
+        target.setEncryption(source.getEncryption());
     }
 
     public static Builder builder() {
@@ -73,6 +74,7 @@ public class ConfigChangeEvent extends BaseEvent {
         private String content;
         private EventType eventType;
         private String configType;
+        private String entryption;
 
         private Builder() {
         }
@@ -112,6 +114,11 @@ public class ConfigChangeEvent extends BaseEvent {
             return this;
         }
 
+        public Builder entryption(String entryption) {
+            this.entryption = entryption;
+            return this;
+        }
+
         public ConfigChangeEvent build() {
             ConfigChangeEvent configChangeEvent = new ConfigChangeEvent();
             configChangeEvent.setSource(source);
@@ -121,6 +128,7 @@ public class ConfigChangeEvent extends BaseEvent {
             configChangeEvent.setContent(content);
             configChangeEvent.setEventType(eventType);
             configChangeEvent.setConfigType(configType);
+            configChangeEvent.setEncryption(entryption);
             return configChangeEvent;
         }
     }

@@ -28,6 +28,7 @@ public abstract class BaseEvent {
     private String namespaceId;
     private String dataId;
     private String groupId;
+    private String encryption;
     private Object source;
     private EventType eventType;
     private final long createTime = System.currentTimeMillis();
@@ -82,6 +83,14 @@ public abstract class BaseEvent {
 
     public void setEventType(EventType eventType) {
         this.eventType = eventType;
+    }
+
+    public String getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(String encryption) {
+        this.encryption = encryption;
     }
 
     public abstract String label();

@@ -44,7 +44,6 @@ public class ClusterHandlerImpl implements ClusterHandler {
     public Mono<ServerResponse> joinNode(ServerRequest request) {
         return request.bodyToMono(NodeChangeRequest.class)
                 .map(clusterManager::nodeAdd)
-                .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
 
@@ -53,7 +52,6 @@ public class ClusterHandlerImpl implements ClusterHandler {
     public Mono<ServerResponse> leaveNode(ServerRequest request) {
         return request.bodyToMono(NodeChangeRequest.class)
                 .map(clusterManager::nodeRemove)
-                .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
 

@@ -37,9 +37,11 @@ public class DeleteConfigRequest extends BaseConfigRequest {
     }
 
     public static final class Builder {
-        private String dataId;
+        protected String dataId;
+        protected String groupId;
+        protected String encryption;
+        protected boolean requiresEncryption = false;
         private boolean beta;
-        private String groupId;
 
         private Builder() {
         }
@@ -56,6 +58,16 @@ public class DeleteConfigRequest extends BaseConfigRequest {
 
         public Builder groupId(String groupId) {
             this.groupId = groupId;
+            return this;
+        }
+
+        public Builder encryption(String encryption) {
+            this.encryption = encryption;
+            return this;
+        }
+
+        public Builder requiresEncryption(boolean requiresEncryption) {
+            this.requiresEncryption = requiresEncryption;
             return this;
         }
 

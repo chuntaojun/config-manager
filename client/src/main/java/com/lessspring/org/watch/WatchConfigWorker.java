@@ -53,7 +53,8 @@ import java.util.function.Supplier;
  */
 public class WatchConfigWorker implements LifeCycle {
 
-    private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
+    private static final ScheduledThreadPoolExecutor executor =
+            new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
             new ThreadFactory() {
 
                 AtomicInteger id = new AtomicInteger(0);
@@ -90,20 +91,29 @@ public class WatchConfigWorker implements LifeCycle {
 
     public void registerListener(String groupId, String dataId, AbstractListener listener) {
         CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
-        cacheItem.addListener(listener);
+        cacheItem.addListener(new WrapperListener(listener));
     }
 
     public void deregisterListener(String groupId, String dataId, AbstractListener listener) {
         CacheItem cacheItem = getCacheItem(groupId, dataId);
-        cacheItem.removeListener(listener);
+        cacheItem.removeListener(new WrapperListener(listener));
     }
 
-    private void notifyWatcher(final String groupId, final String dataId, final String content, final String type) {
+    private void notifyWatcher(ConfigInfo configInfo) {
+        final String groupId = configInfo.getGroupId();
+        final String dataId = configInfo.getDataId();
         String key = NameUtils.buildName(groupId, dataId);
-        Optional<List<AbstractListener>> listeners = Optional.ofNullable(cacheItemMap.get(key).listListener());
+        Optional<List<AbstractListener>> listeners = Optional.ofNullable(cacheItemMap.get(key)
+                .listListener());
         listeners.ifPresent(abstractListeners -> {
             for (AbstractListener listener : abstractListeners) {
-                Runnable job = () -> listener.onReceive(new ConfigInfo(groupId, dataId, content, type));
+                Runnable job = () -> {
+                    // In order to make the spi mechanisms can work better
+                    ClassLoader preLoader = Thread.currentThread().getContextClassLoader();
+                    Thread.currentThread().setContextClassLoader(listener.getClass().getClassLoader());
+                    listener.onReceive(configInfo);
+                    Thread.currentThread().setContextClassLoader(preLoader);
+                };
                 Executor userExecutor = listener.executor();
                 if (Objects.isNull(userExecutor)) {
                     job.run();
@@ -169,13 +179,15 @@ public class WatchConfigWorker implements LifeCycle {
         return cacheItemMap.get(key);
     }
 
-    private void updateAndNotify(String groupId, String dataId, String content, String type) {
+    private void updateAndNotify(ConfigInfo configInfo) {
+        final String groupId = configInfo.getGroupId();
+        final String dataId = configInfo.getDataId();
         final String key = NameUtils.buildName(groupId, dataId);
-        final String lastMd5 = MD5Utils.md5Hex(content);
+        final String lastMd5 = MD5Utils.md5Hex(configInfo.getBytes());
         final CacheItem oldItem = cacheItemMap.get(key);
         if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {
             oldItem.setLastMd5(lastMd5);
-            notifyWatcher(groupId, dataId, content, type);
+            notifyWatcher(configInfo);
         }
     }
 
@@ -201,12 +213,15 @@ public class WatchConfigWorker implements LifeCycle {
             @Override
             public void onReceive(WatchResponse data) {
                 if (!data.isEmpty()) {
-                    WatchConfigWorker.this.updateAndNotify(
-                            data.getGroupId(),
-                            data.getDataId(),
-                            data.getContent(),
-                            data.getType()
-                    );
+                    final ConfigInfo configInfo = ConfigInfo.builder()
+                            .groupId(data.getGroupId())
+                            .dataId(data.getDataId())
+                            .content(data.getContent())
+                            .encryption(data.getEncryption())
+                            .file(data.getFile())
+                            .type(data.getType())
+                            .build();
+                    WatchConfigWorker.this.updateAndNotify(configInfo);
                 }
             }
 

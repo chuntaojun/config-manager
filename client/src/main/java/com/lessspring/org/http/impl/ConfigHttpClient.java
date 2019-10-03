@@ -16,8 +16,11 @@
  */
 package com.lessspring.org.http.impl;
 
+import com.lessspring.org.auth.AuthHolder;
 import com.lessspring.org.cluster.ClusterChoose;
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.http.HttpClient;
+import com.lessspring.org.http.MaxRetryException;
 import com.lessspring.org.http.Retry;
 import com.lessspring.org.http.handler.RequestHandler;
 import com.lessspring.org.http.handler.ResponseHandler;
@@ -62,10 +65,13 @@ public class ConfigHttpClient implements HttpClient {
 
     private final ClusterChoose choose;
 
+    private final AuthHolder authHolder;
+
     private AtomicReference<String> clusterIp = new AtomicReference<>();
 
-    public ConfigHttpClient(ClusterChoose choose) {
+    public ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder) {
         this.choose = choose;
+        this.authHolder = authHolder;
     }
 
     @Override
@@ -99,7 +105,11 @@ public class ConfigHttpClient implements HttpClient {
                 return 3;
             }
         };
-        return retry.work();
+        try {
+            return retry.work();
+        } catch (MaxRetryException e) {
+            return ResponseData.fail();
+        }
     }
 
     @Override
@@ -125,7 +135,11 @@ public class ConfigHttpClient implements HttpClient {
                 return 3;
             }
         };
-        return retry.work();
+        try {
+            return retry.work();
+        } catch (MaxRetryException e) {
+            return ResponseData.fail();
+        }
     }
 
     @Override
@@ -151,7 +165,11 @@ public class ConfigHttpClient implements HttpClient {
                 return 3;
             }
         };
-        return retry.work();
+        try {
+            return retry.work();
+        } catch (MaxRetryException e) {
+            return ResponseData.fail();
+        }
 
     }
 
@@ -178,7 +196,11 @@ public class ConfigHttpClient implements HttpClient {
                 return 3;
             }
         };
-        return retry.work();
+        try {
+            return retry.work();
+        } catch (MaxRetryException e) {
+            return ResponseData.fail();
+        }
     }
 
     @Override
@@ -207,8 +229,10 @@ public class ConfigHttpClient implements HttpClient {
                 return 3;
             }
         };
-
-        retry.work();
+        try {
+            retry.work();
+        } catch (MaxRetryException ignore) {
+        }
     }
 
     @Override
@@ -268,6 +292,7 @@ public class ConfigHttpClient implements HttpClient {
             Map.Entry<String, String> entry = iterator.next();
             builder.addHeader(entry.getKey(), entry.getValue());
         }
+        builder.addHeader(StringConst.TOKEN_HEADER_NAME, authHolder.getToken());
     }
 
     private String getServerIp() {

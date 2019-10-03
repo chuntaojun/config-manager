@@ -16,10 +16,15 @@
  */
 package com.lessspring.org;
 
+import lombok.Data;
+import lombok.ToString;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Data
+@ToString
 public class Configuration {
 
     private String namespaceId;
@@ -30,45 +35,73 @@ public class Configuration {
 
     private String clientId;
 
-    public String getNamespaceId() {
-        return namespaceId;
+    private String username;
+
+    private String password;
+
+    private String authToken;
+
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public void setNamespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
-    }
+    public static final class Builder {
+        private String namespaceId;
+        private String servers;
+        private String cachePath;
+        private String clientId;
+        private String username;
+        private String password;
+        private String authToken;
 
-    public String getServers() {
-        return servers;
-    }
+        private Builder() {
+        }
 
-    public void setServers(String servers) {
-        this.servers = servers;
-    }
+        public Builder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
+        }
 
-    public String getCachePath() {
-        return cachePath;
-    }
+        public Builder servers(String servers) {
+            this.servers = servers;
+            return this;
+        }
 
-    public void setCachePath(String cachePath) {
-        this.cachePath = cachePath;
-    }
+        public Builder cachePath(String cachePath) {
+            this.cachePath = cachePath;
+            return this;
+        }
 
-    public String getClientId() {
-        return clientId;
-    }
+        public Builder clientId(String clientId) {
+            this.clientId = clientId;
+            return this;
+        }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
 
-    @Override
-    public String toString() {
-        return "Configuration{" +
-                "namespaceId='" + namespaceId + '\'' +
-                ", servers='" + servers + '\'' +
-                ", cachePath='" + cachePath + '\'' +
-                ", clientId='" + clientId + '\'' +
-                '}';
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder authToken(String authToken) {
+            this.authToken = authToken;
+            return this;
+        }
+
+        public Configuration build() {
+            Configuration configuration = new Configuration();
+            configuration.setNamespaceId(namespaceId);
+            configuration.setServers(servers);
+            configuration.setCachePath(cachePath);
+            configuration.setClientId(clientId);
+            configuration.setUsername(username);
+            configuration.setPassword(password);
+            configuration.setAuthToken(authToken);
+            return configuration;
+        }
     }
 }

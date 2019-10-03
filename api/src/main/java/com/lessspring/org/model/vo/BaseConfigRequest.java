@@ -41,4 +41,5 @@ public class BaseConfigRequest {
         this.groupId = groupId;
     }
 
+    
 }

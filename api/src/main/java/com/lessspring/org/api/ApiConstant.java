@@ -24,6 +24,8 @@ import com.lessspring.org.constant.StringConst;
  */
 public class ApiConstant {
 
+    public static final String LOGIN = StringConst.API_V1 + "login";
+
     public static final String PUBLISH_CONFIG = StringConst.API_V1 + "publish/config";
 
     public static final String UPDATE_CONFIG = StringConst.API_V1 + "update/config";

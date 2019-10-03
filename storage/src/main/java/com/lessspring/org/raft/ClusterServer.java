@@ -35,43 +35,47 @@ import java.nio.ByteBuffer;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
+@SuppressWarnings("unchecked")
 public class ClusterServer implements LifeCycle {
 
     private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
-    private static final String SERVER_NOED_IP = "cluster.server.node.ip.";
-    private static final String SERVER_NOED_PORT = "cluster.server.node.port.";
+    private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
+    private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
     private static final String CACHE_DIR_PATH = "config_manager_raft";
-    private boolean initialize = false;
+    private AtomicBoolean initialize = new AtomicBoolean(false);
 
     private NodeManager nodeManager = NodeManager.getInstance();
     private RaftServer raftServer = new RaftServer();
 
     @Override
     public void init() {
-//        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
-//            Properties properties = new Properties();
-//            properties.load(is);
-//            initClusterNode(properties);
-//            raftServer.init();
-//            raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
-//            initialize = true;
-//        } catch (IOException e) {
-//            log.error("Server");
-//        }
+        if (initialize.compareAndSet(false, true)) {
+            try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
+                Properties properties = new Properties();
+                properties.load(is);
+                initClusterNode(properties);
+                raftServer.init();
+                raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
+            } catch (IOException e) {
+                log.error("Server");
+                initialize.lazySet(false);
+            }
+        }
     }
 
     private void initClusterNode(Properties properties) {
         int nodes = properties.size() / 2;
         int selfIndex = Integer.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
         for (int i = 0; i < nodes; i ++) {
-            String ip = properties.getProperty(SERVER_NOED_IP + i);
-            String port = properties.getProperty(SERVER_NOED_PORT + i);
+            String ip = properties.getProperty(SERVER_NODE_IP + i);
+            String port = properties.getProperty(SERVER_NODE_PORT + i);
             ServerNode node = ServerNode.builder()
                     .nodeIp(ip)
                     .port(Integer.parseInt(port))
@@ -136,7 +140,7 @@ public class ClusterServer implements LifeCycle {
     }
 
     private void needInitialized() {
-        if (!initialize) {
+        if (!initialize.get()) {
             throw new IllegalStateException("Uninitialized cluster");
         }
     }

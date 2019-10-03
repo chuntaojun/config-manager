@@ -33,6 +33,7 @@ public abstract class AbstractListener {
     }
 
     /**
+     * receive when config has change
      *
      * @param configInfo {@link ConfigInfo}
      */

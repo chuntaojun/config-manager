@@ -20,6 +20,7 @@ import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.service.config.ConfigOperationService;
 import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.net.URLDecoder;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -65,19 +68,31 @@ public class ConfigHandlerImpl implements ConfigHandler {
     @Override
     public Mono<ServerResponse> queryConfig(ServerRequest request) {
         final String namespaceId = request.queryParam("namespaceId").orElse("default");
-        return request.bodyToMono(QueryConfigRequest.class)
-                .map(queryRequest -> operationService.queryConfig(namespaceId, queryRequest))
-                .map(Mono::just)
-                .flatMap(RenderUtils::render);
+        final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
+        final String dataId = request.queryParam("dataId").orElse("");
+        final QueryConfigRequest queryRequest = QueryConfigRequest
+                .builder()
+                .groupId(groupId)
+                .dataId(dataId)
+                .build();
+        Mono<ResponseData<?>> mono = Mono.just(operationService.queryConfig(namespaceId, queryRequest));
+        return RenderUtils.render(mono);
     }
 
     @NotNull
     @Override
     public Mono<ServerResponse> removeConfig(ServerRequest request) {
         final String namespaceId = request.queryParam("namespaceId").orElse("default");
-        return request.bodyToMono(DeleteConfigRequest.class)
-                .map(deleteRequest -> operationService.removeConfig(namespaceId, deleteRequest))
-                .map(Mono::just)
-                .flatMap(RenderUtils::render);
+        final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
+        final String dataId = request.queryParam("dataId").orElse("");
+        final boolean isBeta = Boolean.parseBoolean(request.queryParam("beta").orElse("false"));
+        final DeleteConfigRequest deleteRequest = DeleteConfigRequest
+                .builder()
+                .beta(isBeta)
+                .groupId(groupId)
+                .dataId(dataId)
+                .build();
+        Mono<ResponseData<?>> mono = Mono.just(operationService.removeConfig(namespaceId, deleteRequest));
+        return RenderUtils.render(mono);
     }
 }

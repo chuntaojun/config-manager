@@ -18,6 +18,7 @@ package com.lessspring.org.service.distributed;
 
 import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
+import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -31,11 +32,10 @@ public class ConfigTransactionCommitCallback implements TransactionCommitCallbac
 
     @Override
     public void onApply(Transaction transaction) {
-
     }
 
     @Override
     public boolean interest(String trsKey) {
-        return false;
+        return trsKey.contains(PropertiesEnum.InterestKey.CONFIG_DARA.getType());
     }
 }

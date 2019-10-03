@@ -27,6 +27,8 @@ public class WatchResponse {
     private String groupId;
     private String dataId;
     private String content;
+    private byte[] file;
+    private String encryption;
     private String type;
 
     public String getGroupId() {
@@ -61,6 +63,22 @@ public class WatchResponse {
         this.type = type;
     }
 
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
+    public String getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(String encryption) {
+        this.encryption = encryption;
+    }
+
     public boolean isEmpty() {
         return StringUtils.isAllEmpty(groupId, dataId, content, type);
     }
@@ -74,6 +92,8 @@ public class WatchResponse {
         private String dataId;
         private String content;
         private String type;
+        private byte[] file;
+        private String encryption;
 
         private Builder() {
         }
@@ -98,12 +118,24 @@ public class WatchResponse {
             return this;
         }
 
+        public Builder encryption(String encryption) {
+            this.encryption = encryption;
+            return this;
+        }
+
+        public Builder file(byte[] file) {
+            this.file = file;
+            return this;
+        }
+
         public WatchResponse build() {
             WatchResponse watchResponse = new WatchResponse();
             watchResponse.setGroupId(groupId);
             watchResponse.setDataId(dataId);
             watchResponse.setContent(content);
             watchResponse.setType(type);
+            watchResponse.setFile(file);
+            watchResponse.setEncryption(encryption);
             return watchResponse;
         }
     }

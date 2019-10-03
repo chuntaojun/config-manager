@@ -39,6 +39,7 @@ public class ConfigInfoDTO {
     private String dataId;
     private byte[] content;
     private String type;
+    private String encryption;
     private Long createTime;
     private Long lastModifyTime;
 

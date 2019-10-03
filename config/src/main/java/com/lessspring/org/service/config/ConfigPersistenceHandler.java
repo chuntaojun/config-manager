@@ -30,8 +30,11 @@ import com.lessspring.org.pojo.query.QueryConfigInfo;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.service.publish.WatchClientManager;
+import com.lessspring.org.utils.ByteUtils;
+import com.lessspring.org.utils.ConfigRequestUtils;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,14 +44,15 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-@Component(value = "presistenceHandler")
-public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler<ConfigChangeEvent> {
+@Component(value = "persistentHandler")
+public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<ConfigChangeEvent> {
 
     private final Disruptor<NotifyEvent> disruptorHolder;
 
@@ -67,7 +71,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
     }
 
     @Override
-    public String readConfigContent(String namespaceId, BaseConfigRequest request) {
+    public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
         final String dataId = request.getDataId();
         final String groupId = request.getGroupId();
         QueryConfigInfo queryConfigInfo = QueryConfigInfo.builder()
@@ -75,7 +79,22 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
                 .groupId(groupId)
                 .dataId(dataId)
                 .build();
-        return new String(configInfoMapper.findConfigInfo(queryConfigInfo).getContent(), Charset.forName(StandardCharsets.UTF_8.name()));
+        ConfigInfoDTO dto = configInfoMapper.findConfigInfo(queryConfigInfo);
+        byte[] origin = dto.getContent();
+        ConfigInfo info = ConfigInfo.builder()
+                .groupId(dto.getGroupId())
+                .dataId(dto.getDataId())
+                .type(dto.getType())
+                .encryption(dto.getEncryption())
+                .build();
+        byte type = ByteUtils.getByteByIndex(origin, 0);
+        byte[] source = ByteUtils.cut(origin, 1, origin.length - 1);
+        if (Objects.equals(type, PropertiesEnum.ConfigType.FILE.getType())) {
+            info.setFile(source);
+        } else {
+            info.setContent(new String(source, Charset.forName(StandardCharsets.UTF_8.name())));
+        }
+        return info;
     }
 
     @Override
@@ -83,13 +102,14 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
         boolean success = true;
         int affect = -1;
         long id = -1;
+        byte[] save = ConfigRequestUtils.getByte(request);
         try {
             if (request.isBeta()) {
                 ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
+                        .content(save)
                         .type(request.getType())
                         .clientIps(request.getClientIps())
                         .createTime(System.currentTimeMillis())
@@ -101,7 +121,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
+                        .content(save)
                         .type(request.getType())
                         .createTime(System.currentTimeMillis())
                         .build();
@@ -120,13 +140,14 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
     public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
         boolean success = true;
         int affect = -1;
+        byte[] save = ConfigRequestUtils.getByte(request);
         try {
             if (request.isBeta()) {
                 ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
+                        .content(save)
                         .type(request.getType())
                         .clientIps(request.getClientIps())
                         .createTime(System.currentTimeMillis())
@@ -137,7 +158,7 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
                         .namespaceId(namespaceId)
                         .groupId(request.getGroupId())
                         .dataId(request.getDataId())
-                        .content(request.getContent().getBytes(StandardCharsets.UTF_8))
+                        .content(save)
                         .type(request.getType())
                         .createTime(System.currentTimeMillis())
                         .build();
@@ -177,13 +198,14 @@ public class ConfigPersistenceHandler implements PresistenceHandler, WorkHandler
                 DiskUtils.deleteFile(namespaceId, NameUtils.buildName(groupId, dataId));
                 return;
             }
-            final ConfigInfo configInfo = new ConfigInfo(groupId, dataId, event.getContent(), event.getConfigType());
+            final ConfigInfo configInfo = new ConfigInfo(groupId, dataId, event.getContent(), event.getConfigType(), event.getEncryption());
             DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), GsonUtils.toJsonBytes(configInfo));
             NotifyEvent source = NotifyEvent.builder()
                     .namespaceId(event.getNamespaceId())
                     .groupId(event.getGroupId())
                     .dataId(event.getDataId())
                     .eventType(event.getEventType())
+                    .entryption(event.getEncryption())
                     .build();
             disruptorHolder.publishEvent((target, sequence1) -> NotifyEvent.copy(sequence1, source, target));
         } catch (Exception e) {

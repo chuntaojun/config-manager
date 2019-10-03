@@ -24,9 +24,12 @@ import org.apache.commons.codec.digest.DigestUtils;
  */
 public final class MD5Utils {
 
-    public static String md5Hex(Object obj) {
-        String s = String.valueOf(obj);
+    public static String md5Hex(String s) {
         return DigestUtils.md5Hex(s);
+    }
+
+    public static String md5Hex(byte[] bytes) {
+        return DigestUtils.md5Hex(bytes);
     }
 
 }

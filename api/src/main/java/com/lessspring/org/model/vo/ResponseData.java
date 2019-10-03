@@ -66,10 +66,9 @@ public class ResponseData<T> {
                 .build();
     }
 
-    public static ResponseData<Boolean> fail() {
+    public static <T> ResponseData<T> fail() {
         return ResponseData.builder()
                 .withCode(500)
-                .withData(false)
                 .withErrMsg("failed")
                 .build();
     }

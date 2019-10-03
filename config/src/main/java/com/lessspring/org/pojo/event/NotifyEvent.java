@@ -40,6 +40,7 @@ public class NotifyEvent extends BaseEvent {
         target.setDataId(source.getDataId());
         target.setEventType(source.getEventType());
         target.setSource(source.getSource());
+        target.setEncryption(source.getEncryption());
         target.setSequence(sequence);
     }
 
@@ -55,6 +56,7 @@ public class NotifyEvent extends BaseEvent {
         private String groupId;
         private Object source;
         private EventType eventType;
+        private String entryption;
         private long createTime = System.currentTimeMillis();
 
         private Builder() {
@@ -85,6 +87,11 @@ public class NotifyEvent extends BaseEvent {
             return this;
         }
 
+        public Builder entryption(String entryption) {
+            this.entryption = entryption;
+            return this;
+        }
+
         public Builder TYPE(String TYPE) {
             this.TYPE = TYPE;
             return this;
@@ -108,6 +115,7 @@ public class NotifyEvent extends BaseEvent {
             notifyEvent.setGroupId(groupId);
             notifyEvent.setSource(source);
             notifyEvent.setEventType(eventType);
+            notifyEvent.setEncryption(entryption);
             return notifyEvent;
         }
     }

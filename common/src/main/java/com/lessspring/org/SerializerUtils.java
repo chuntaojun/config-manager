@@ -55,7 +55,6 @@ public final class SerializerUtils {
     }
 
     public <T> byte[] serialize(T data) {
-
         return kryoPool.run(kryo -> {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             Output output = new Output(byteArrayOutputStream);
