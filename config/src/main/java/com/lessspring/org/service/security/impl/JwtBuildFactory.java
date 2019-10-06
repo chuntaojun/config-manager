@@ -22,12 +22,15 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.db.dto.UserDTO;
+import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.repository.NamespacePermissionsMapper;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -47,6 +50,9 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_SURVIVAL_MILLISE
 @Component
 public class JwtBuildFactory {
 
+    @Resource
+    private NamespacePermissionsMapper permissionsMapper;
+
     private final Algorithm algorithm;
     private final JwtTokenCache tokenCache;
 
@@ -61,10 +67,14 @@ public class JwtBuildFactory {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(new Date());
         calendar.add(Calendar.SECOND, TOKEN_SURVIVAL_MILLISECOND.getValue());
+        Privilege privilege = new Privilege();
+        privilege.setRole(PropertiesEnum.Role.choose(userDTO.getRoleType()));
+        privilege.setUsername(userDTO.getUsername());
+        privilege.setOwnerNamespace(permissionsMapper.findNamespaceIdByUserId(userDTO.getId()));
         String jwt =  JWT
                 .create()
                 .withIssuer(ISS_USER)
-                .withSubject(GsonUtils.toJson(userDTO))
+                .withSubject(GsonUtils.toJson(privilege))
                 .withExpiresAt(calendar.getTime())
                 .sign(algorithm);
         tokenCache.addToken(jwt, userDTO.getId());

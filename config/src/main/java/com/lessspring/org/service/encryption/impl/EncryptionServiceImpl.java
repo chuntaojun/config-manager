@@ -45,9 +45,11 @@ public class EncryptionServiceImpl implements EncryptionService {
     public static class PlaceholderProcessor {
 
         private final Pattern encryptionPattern;
+        private final Pattern decryptionPattern;
 
         public PlaceholderProcessor() {
             encryptionPattern = Pattern.compile(StringConst.ENCRYPTION_PLACEHOLDER);
+            decryptionPattern = Pattern.compile(StringConst.DECRYPTION_PLACEHOLDER);
         }
 
         public String encryption(String content, String token) {
@@ -56,17 +58,17 @@ public class EncryptionServiceImpl implements EncryptionService {
                 String target = matcher.group(0);
                 String value = target.replace("ENC{", "").replace("}", "");
                 String encryptTxt = EncryptionUtils.encrypt(value, token);
-                String replace = "ENC{" + encryptTxt + "}";
+                String replace = "DECR{" + encryptTxt + "}";
                 content = content.replace(target, replace);
             }
             return content;
         }
 
         public String decryption(String content, String token) {
-            Matcher matcher = encryptionPattern.matcher(content);
+            Matcher matcher = decryptionPattern.matcher(content);
             while (matcher.find()) {
                 String target = matcher.group(0);
-                String value = target.replace("ENC{", "").replace("}", "");
+                String value = target.replace("DECR{", "").replace("}", "");
                 String replace = EncryptionUtils.decrypt(value, token);
                 content = content.replace(target, replace);
             }

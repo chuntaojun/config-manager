@@ -14,12 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump.task;
+package com.lessspring.org.raft;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DumpTask4All extends DumpTask {
+public enum OperationEnum {
+
+    /**
+     *
+     */
+    PUBLISH,
+
+    /**
+     *
+     */
+    MODIFY,
+
+    /**
+     *
+     */
+    DELETE,
+
+    /**
+     *
+     */
+    BATCH_PUBLISH,
+
+    /**
+     *
+     */
+    BATCH_MODIFY,
+
+    /**
+     *
+     */
+    BATCH_DELETE,
 
 }

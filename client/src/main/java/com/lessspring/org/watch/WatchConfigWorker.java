@@ -89,7 +89,7 @@ public class WatchConfigWorker implements LifeCycle {
         executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
     }
 
-    public void registerListener(String groupId, String dataId, AbstractListener listener) {
+    public void registerListener(String groupId, String dataId, String encryption, AbstractListener listener) {
         CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
         cacheItem.addListener(new WrapperListener(listener));
     }

@@ -14,90 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.model.vo;
+package com.lessspring.org.pojo.request;
 
-import org.apache.commons.lang3.StringUtils;
+import com.lessspring.org.model.vo.PublishConfigRequest;
+
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class PublishConfigRequest extends BaseConfigRequest {
+public class PublishConfigRequest4 extends PublishConfigRequest {
 
-    private boolean beta = false;
-    private String clientIps;
-    private String content;
-    private String type;
-    private boolean isFile = false;
-    private byte[] file;
-    private String encryption = StringUtils.EMPTY;
-    private boolean requiresEncryption = false;
+    private Map<String, Object> attribute;
 
-    public String getContent() {
-        return content;
+    public Map<String, Object> getAttribute() {
+        return attribute;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setAttribute(Map<String, Object> attribute) {
+        this.attribute = attribute;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public boolean isBeta() {
-        return beta;
-    }
-
-    public void setBeta(boolean beta) {
-        this.beta = beta;
-    }
-
-    public String getClientIps() {
-        return clientIps;
-    }
-
-    public void setClientIps(String clientIps) {
-        this.clientIps = clientIps;
-    }
-
-    public String getEncryption() {
-        return encryption;
-    }
-
-    public void setEncryption(String encryption) {
-        this.encryption = encryption;
-    }
-
-    public boolean isRequiresEncryption() {
-        return requiresEncryption;
-    }
-
-    public void setRequiresEncryption(boolean requiresEncryption) {
-        this.requiresEncryption = requiresEncryption;
-    }
-
-    public boolean isFile() {
-        return isFile;
-    }
-
-    public void setFile(boolean file) {
-        isFile = file;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
-    public static Builder builder() {
+    public static Builder sBuilder() {
         return new Builder();
     }
 
@@ -105,6 +44,7 @@ public class PublishConfigRequest extends BaseConfigRequest {
         private String dataId;
         private String groupId;
         private boolean beta = false;
+        private Map<String, Object> attribute;
         private String clientIps;
         private String content;
         private String type;
@@ -128,6 +68,11 @@ public class PublishConfigRequest extends BaseConfigRequest {
 
         public Builder beta(boolean beta) {
             this.beta = beta;
+            return this;
+        }
+
+        public Builder attribute(Map<String, Object> attribute) {
+            this.attribute = attribute;
             return this;
         }
 
@@ -166,19 +111,20 @@ public class PublishConfigRequest extends BaseConfigRequest {
             return this;
         }
 
-        public PublishConfigRequest build() {
-            PublishConfigRequest publishConfigRequest = new PublishConfigRequest();
-            publishConfigRequest.setDataId(dataId);
-            publishConfigRequest.setGroupId(groupId);
-            publishConfigRequest.setBeta(beta);
-            publishConfigRequest.setClientIps(clientIps);
-            publishConfigRequest.setContent(content);
-            publishConfigRequest.setType(type);
-            publishConfigRequest.setFile(file);
-            publishConfigRequest.setEncryption(encryption);
-            publishConfigRequest.setRequiresEncryption(requiresEncryption);
-            publishConfigRequest.isFile = this.isFile;
-            return publishConfigRequest;
+        public PublishConfigRequest4 build() {
+            PublishConfigRequest4 publishConfigRequest4 = new PublishConfigRequest4();
+            publishConfigRequest4.setDataId(dataId);
+            publishConfigRequest4.setGroupId(groupId);
+            publishConfigRequest4.setBeta(beta);
+            publishConfigRequest4.setAttribute(attribute);
+            publishConfigRequest4.setClientIps(clientIps);
+            publishConfigRequest4.setContent(content);
+            publishConfigRequest4.setType(type);
+            publishConfigRequest4.setFile(file);
+            publishConfigRequest4.setEncryption(encryption);
+            publishConfigRequest4.setRequiresEncryption(requiresEncryption);
+            publishConfigRequest4.setFile(this.isFile);
+            return publishConfigRequest4;
         }
     }
 }

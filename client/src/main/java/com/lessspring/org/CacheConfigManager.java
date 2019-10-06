@@ -62,7 +62,7 @@ public class CacheConfigManager implements LifeCycle {
         this.worker.setConfigManager(this);
     }
 
-    ConfigInfo query(String groupId, String dataId) {
+    ConfigInfo query(String groupId, String dataId, String token) {
         final Query query = Query.newInstance()
                 .addParam("namespaceId", namespaceId)
                 .addParam("groupId", groupId)
@@ -80,7 +80,7 @@ public class CacheConfigManager implements LifeCycle {
             result = local;
         }
         // Configure the decryption
-        processor.decryption(Optional.ofNullable(result));
+        processor.decryption(Optional.ofNullable(result), token);
         return result;
     }
 

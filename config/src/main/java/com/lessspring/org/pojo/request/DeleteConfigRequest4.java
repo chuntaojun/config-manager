@@ -14,25 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.model.vo;
+package com.lessspring.org.pojo.request;
+
+import com.lessspring.org.model.vo.DeleteConfigRequest;
+
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DeleteConfigRequest extends BaseConfigRequest {
+public class DeleteConfigRequest4 extends DeleteConfigRequest {
 
-    private boolean beta;
+    private Map<String, Object> attribute;
 
-    public boolean isBeta() {
-        return beta;
+    public Map<String, Object> getAttribute() {
+        return attribute;
     }
 
-    public void setBeta(boolean beta) {
-        this.beta = beta;
+    public void setAttribute(Map<String, Object> attribute) {
+        this.attribute = attribute;
     }
 
-    public static Builder builder() {
+    public static Builder sBuilder() {
         return new Builder();
     }
 
@@ -40,6 +44,7 @@ public class DeleteConfigRequest extends BaseConfigRequest {
         private String dataId;
         private String groupId;
         private boolean beta;
+        private Map<String, Object> attribute;
 
         private Builder() {
         }
@@ -59,12 +64,18 @@ public class DeleteConfigRequest extends BaseConfigRequest {
             return this;
         }
 
-        public DeleteConfigRequest build() {
-            DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
-            deleteConfigRequest.setDataId(dataId);
-            deleteConfigRequest.setGroupId(groupId);
-            deleteConfigRequest.setBeta(beta);
-            return deleteConfigRequest;
+        public Builder attribute(Map<String, Object> attribute) {
+            this.attribute = attribute;
+            return this;
+        }
+
+        public DeleteConfigRequest4 build() {
+            DeleteConfigRequest4 deleteConfigRequest4 = new DeleteConfigRequest4();
+            deleteConfigRequest4.setDataId(dataId);
+            deleteConfigRequest4.setGroupId(groupId);
+            deleteConfigRequest4.setBeta(beta);
+            deleteConfigRequest4.setAttribute(attribute);
+            return deleteConfigRequest4;
         }
     }
 }

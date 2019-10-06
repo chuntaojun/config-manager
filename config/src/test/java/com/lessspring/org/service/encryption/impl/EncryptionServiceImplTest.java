@@ -47,7 +47,7 @@ public class EncryptionServiceImplTest {
         System.out.println(encr);
         String decr = processor.decryption(encr, token);
         System.out.println(decr);
-        Assert.assertEquals(finalTxt, processor.decryption(decr, token));
+        Assert.assertEquals(finalTxt, decr);
     }
 
 }

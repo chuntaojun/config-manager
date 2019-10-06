@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.service.publish;
 
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import reactor.core.publisher.FluxSink;
 
@@ -76,8 +75,7 @@ public class WatchClient {
     }
 
     public boolean isChange(String key, String lastMd5) {
-        boolean change = Objects.equals(lastMd5, checkKey.get(lastMd5));
-        return change;
+        return Objects.equals(lastMd5, checkKey.get(lastMd5));
     }
 
     public static Builder builder() {

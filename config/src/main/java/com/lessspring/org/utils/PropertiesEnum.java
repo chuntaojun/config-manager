@@ -22,6 +22,55 @@ package com.lessspring.org.utils;
  */
 public final class PropertiesEnum {
 
+    public enum Role {
+
+        /**
+         * admin
+         */
+        ADMIN((short) 0),
+
+        /**
+         * user
+         */
+        CUSTOMER((short) 1),
+
+        /**
+         * developer
+         */
+        DEVELOPER((short) 2),
+
+        /**
+         * tester
+         */
+        TESTER((short) 3);
+
+        private short type;
+
+        Role(short type) {
+            this.type = type;
+        }
+
+        public short getType() {
+            return type;
+        }
+
+        public static Role choose(short type) {
+            if (type == (short) 0) {
+                return Role.ADMIN;
+            }
+            if (type == (short) 1) {
+                return Role.CUSTOMER;
+            }
+            if (type == (short) 2) {
+                return Role.DEVELOPER;
+            }
+            if (type == (short) 3) {
+                return Role.TESTER;
+            }
+            throw new IllegalArgumentException("");
+        }
+    }
+
     public enum ConfigType {
 
         /**

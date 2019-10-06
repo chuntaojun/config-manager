@@ -14,32 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.model.vo;
+package com.lessspring.org.pojo.request;
+
+import com.lessspring.org.model.vo.BaseConfigRequest;
+
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DeleteConfigRequest extends BaseConfigRequest {
+public class BaseRequest4 extends BaseConfigRequest {
 
-    private boolean beta;
+    private Map<String, Object> attribute;
 
-    public boolean isBeta() {
-        return beta;
+    public Map<String, Object> getAttribute() {
+        return attribute;
     }
 
-    public void setBeta(boolean beta) {
-        this.beta = beta;
+    public void setAttribute(Map<String, Object> attribute) {
+        this.attribute = attribute;
     }
 
-    public static Builder builder() {
+    public static Builder sBuilder() {
         return new Builder();
     }
 
     public static final class Builder {
         private String dataId;
         private String groupId;
-        private boolean beta;
+        private Map<String, Object> attribute;
 
         private Builder() {
         }
@@ -54,17 +58,17 @@ public class DeleteConfigRequest extends BaseConfigRequest {
             return this;
         }
 
-        public Builder beta(boolean beta) {
-            this.beta = beta;
+        public Builder attribute(Map<String, Object> attribute) {
+            this.attribute = attribute;
             return this;
         }
 
-        public DeleteConfigRequest build() {
-            DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
-            deleteConfigRequest.setDataId(dataId);
-            deleteConfigRequest.setGroupId(groupId);
-            deleteConfigRequest.setBeta(beta);
-            return deleteConfigRequest;
+        public BaseRequest4 build() {
+            BaseRequest4 baseRequest4 = new BaseRequest4();
+            baseRequest4.setDataId(dataId);
+            baseRequest4.setGroupId(groupId);
+            baseRequest4.setAttribute(attribute);
+            return baseRequest4;
         }
     }
 }

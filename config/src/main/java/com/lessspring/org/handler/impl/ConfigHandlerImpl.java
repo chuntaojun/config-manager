@@ -16,12 +16,18 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.pojo.request.DeleteConfigRequest4;
+import com.lessspring.org.pojo.request.PublishConfigRequest4;
+import com.lessspring.org.pojo.request.QueryConfigRequest4;
 import com.lessspring.org.service.config.ConfigOperationService;
+import com.lessspring.org.utils.ReactiveWebUtils;
 import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -30,6 +36,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -46,9 +56,10 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
     @NotNull
     @Override
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> publishConfig(ServerRequest request) {
         final String namespaceId = request.queryParam("namespaceId").orElse("default");
-        return request.bodyToMono(PublishConfigRequest.class)
+        return request.bodyToMono(PublishConfigRequest4.class)
                 .map(publishRequest -> operationService.publishConfig(namespaceId, publishRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
@@ -56,9 +67,10 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
     @NotNull
     @Override
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> modifyConfig(ServerRequest request) {
         final String namespaceId = request.queryParam("namespaceId").orElse("default");
-        return request.bodyToMono(PublishConfigRequest.class)
+        return request.bodyToMono(PublishConfigRequest4.class)
                 .map(publishRequest -> operationService.modifyConfig(namespaceId, publishRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
@@ -66,12 +78,13 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
     @NotNull
     @Override
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> queryConfig(ServerRequest request) {
         final String namespaceId = request.queryParam("namespaceId").orElse("default");
         final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
         final String dataId = request.queryParam("dataId").orElse("");
-        final QueryConfigRequest queryRequest = QueryConfigRequest
-                .builder()
+        final QueryConfigRequest4 queryRequest = QueryConfigRequest4
+                .sBuilder()
                 .groupId(groupId)
                 .dataId(dataId)
                 .build();
@@ -81,13 +94,14 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
     @NotNull
     @Override
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> removeConfig(ServerRequest request) {
         final String namespaceId = request.queryParam("namespaceId").orElse("default");
         final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
         final String dataId = request.queryParam("dataId").orElse("");
         final boolean isBeta = Boolean.parseBoolean(request.queryParam("beta").orElse("false"));
-        final DeleteConfigRequest deleteRequest = DeleteConfigRequest
-                .builder()
+        final DeleteConfigRequest4 deleteRequest = DeleteConfigRequest4
+                .sBuilder()
                 .beta(isBeta)
                 .groupId(groupId)
                 .dataId(dataId)

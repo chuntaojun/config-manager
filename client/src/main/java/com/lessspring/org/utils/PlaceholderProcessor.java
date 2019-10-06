@@ -31,9 +31,11 @@ import java.util.regex.Pattern;
 public final class PlaceholderProcessor {
 
     private final Pattern encryptionPattern;
+    private final Pattern decryptionPattern;
 
     public PlaceholderProcessor() {
         encryptionPattern = Pattern.compile(StringConst.ENCRYPTION_PLACEHOLDER);
+        decryptionPattern = Pattern.compile(StringConst.DECRYPTION_PLACEHOLDER);
     }
 
     public void encryption(Optional<ConfigInfo> configInfoOptional) {
@@ -48,24 +50,23 @@ public final class PlaceholderProcessor {
                 String target = matcher.group(0);
                 String value = target.replace("ENC{", "").replace("}", "");
                 String encryptTxt = EncryptionUtils.encrypt(value, token);
-                String replace = "ENC{" + encryptTxt + "}";
+                String replace = "DECR{" + encryptTxt + "}";
                 content = content.replace(target, replace);
             }
             configInfo.setContent(content);
         });
     }
 
-    public void decryption(Optional<ConfigInfo> configInfoOptional) {
+    public void decryption(Optional<ConfigInfo> configInfoOptional, String token) {
         configInfoOptional.ifPresent(configInfo -> {
-            String token = configInfo.getEncryption();
             String content = configInfo.getContent();
-            if (StringUtils.isEmpty(content)) {
+            if (StringUtils.isAnyEmpty(content, token)) {
                 return;
             }
-            Matcher matcher = encryptionPattern.matcher(content);
+            Matcher matcher = decryptionPattern.matcher(content);
             while (matcher.find()) {
                 String target = matcher.group(0);
-                String value = target.replace("ENC{", "").replace("}", "");
+                String value = target.replace("DECR{", "").replace("}", "");
                 String replace = EncryptionUtils.decrypt(value, token);
                 content = content.replace(target, replace);
             }

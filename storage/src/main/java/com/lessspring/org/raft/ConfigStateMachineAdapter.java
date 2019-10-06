@@ -18,13 +18,22 @@ package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
+import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
+import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import com.lessspring.org.SerializerUtils;
+import com.lessspring.org.raft.dto.Datum;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -35,11 +44,46 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     private final List<TransactionCommitCallback> callbacks = new LinkedList<>();
 
+    private final SerializerUtils serializer = SerializerUtils.getInstance();
+
     private final Object monitor = new Object();
 
     @Override
     public void onApply(Iterator iter) {
-        while (iter.hasNext()) {
+        int index = 0;
+        int applied = 0;
+        try {
+            while (iter.hasNext()) {
+                Datum datum = null;
+                ConfigStoreClosure closure = null;
+                try {
+                    if (iter.done() != null) {
+                        closure = (ConfigStoreClosure) iter.done();
+                        datum = closure.getDatum();
+                    } else {
+                        final ByteBuffer data = iter.getData();
+                        datum = serializer.deserialize(data.array(), Datum.class);
+                    }
+                    final Transaction transaction = new Transaction(datum.getKey(), datum.getValue(), datum.getOperationEnum());
+                    callbacks.forEach(commitCallback -> {
+                        if (commitCallback.interest(transaction.getKey())) {
+                            commitCallback.onApply(transaction);
+                        }
+                    });
+                } catch (Throwable e) {
+                    index++;
+                    throw new RuntimeException("Decode operation error", e);
+                }
+                if (Objects.nonNull(closure)) {
+                    closure.run(Status.OK());
+                }
+                applied ++;
+                index ++;
+                iter.next();
+            }
+        } catch (Throwable t) {
+            iter.setErrorAndRollback(index - applied, new Status(RaftError.ESTATEMACHINE,
+                    "StateMachine meet critical error: %s.", t.getMessage()));
         }
     }
 

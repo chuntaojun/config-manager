@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.raft.dto;
 
+import com.lessspring.org.raft.OperationEnum;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -25,6 +27,7 @@ public class Datum {
     private String key;
     private byte[] value;
     private String className;
+    private OperationEnum operationEnum;
 
     public Datum(String key, byte[] value, String className) {
         this.key = key;
@@ -42,5 +45,25 @@ public class Datum {
 
     public String getClassName() {
         return className;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setValue(byte[] value) {
+        this.value = value;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public OperationEnum getOperationEnum() {
+        return operationEnum;
+    }
+
+    public void setOperationEnum(OperationEnum operationEnum) {
+        this.operationEnum = operationEnum;
     }
 }

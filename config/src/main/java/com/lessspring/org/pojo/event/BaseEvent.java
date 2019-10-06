@@ -28,6 +28,7 @@ public abstract class BaseEvent {
     private String namespaceId;
     private String dataId;
     private String groupId;
+    private boolean isFile = false;
     private String encryption;
     private Object source;
     private EventType eventType;
@@ -91,6 +92,14 @@ public abstract class BaseEvent {
 
     public void setEncryption(String encryption) {
         this.encryption = encryption;
+    }
+
+    public boolean isFile() {
+        return isFile;
+    }
+
+    public void setFile(boolean file) {
+        isFile = file;
     }
 
     public abstract String label();

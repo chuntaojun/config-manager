@@ -19,6 +19,7 @@ package com.lessspring.org.watch;
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.utils.PlaceholderProcessor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -33,10 +34,13 @@ class WrapperListener extends AbstractListener {
 
     private String lastMd5;
 
+    private final String encryption;
+
     private final AbstractListener listener;
 
-    WrapperListener(AbstractListener listener) {
+    WrapperListener(AbstractListener listener, String encryption) {
         this.listener = listener;
+        this.encryption = encryption;
     }
 
     public String getLastMd5() {
@@ -53,7 +57,7 @@ class WrapperListener extends AbstractListener {
 
     @Override
     public void onReceive(ConfigInfo configInfo) {
-        processor.decryption(Optional.ofNullable(configInfo));
+        processor.decryption(Optional.ofNullable(configInfo), encryption);
         listener.onReceive(configInfo);
     }
 

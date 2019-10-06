@@ -43,6 +43,14 @@ public class ConfigInfo {
         this.encryption = encryption;
     }
 
+    public ConfigInfo(String groupId, String dataId, byte[] file, String type, String encryption) {
+        this.groupId = groupId;
+        this.dataId = dataId;
+        this.file = file;
+        this.type = type;
+        this.encryption = encryption;
+    }
+
     public void setGroupId(String groupId) {
         this.groupId = groupId;
     }

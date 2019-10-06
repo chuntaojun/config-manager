@@ -28,11 +28,21 @@ public class QueryConfigRequest extends BaseConfigRequest {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return GsonUtils.toJson(this);
+    }
+
+
     public static final class Builder {
         private String dataId;
         private String groupId;
 
         private Builder() {
+        }
+
+        public static Builder aQueryConfigRequest() {
+            return new Builder();
         }
 
         public Builder dataId(String dataId) {
@@ -51,10 +61,5 @@ public class QueryConfigRequest extends BaseConfigRequest {
             queryConfigRequest.setGroupId(groupId);
             return queryConfigRequest;
         }
-    }
-
-    @Override
-    public String toString() {
-        return GsonUtils.toJson(this);
     }
 }

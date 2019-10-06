@@ -14,12 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump.task;
+package com.lessspring.org.exception;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DumpTask4All extends DumpTask {
+public class TpsLimitException extends RuntimeException {
 
+    public TpsLimitException() {
+        super();
+    }
+
+    public TpsLimitException(String message) {
+        super(message);
+    }
+
+    public TpsLimitException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public TpsLimitException(Throwable cause) {
+        super(cause);
+    }
+
+    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

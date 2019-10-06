@@ -16,7 +16,10 @@
  */
 package com.lessspring.org.service.security;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.model.vo.LoginRequest;
+
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -47,7 +50,7 @@ public interface SecurityService {
      * @param token jwt token
      * @return Whether for this token issued by the component
      */
-    boolean verify(String token);
+    Optional<DecodedJWT> verify(String token);
 
     /**
      * this token has been expire

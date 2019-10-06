@@ -89,16 +89,38 @@ public class ClientConfigService implements ConfigService {
 
     @Override
     public ConfigInfo getConfig(String groupId, String dataId) {
-        return configManager.query(groupId, dataId);
+        return getConfig(groupId, dataId, "");
+    }
+
+    @Override
+    public ConfigInfo getConfig(String groupId, String dataId, String encryption) {
+        return configManager.query(groupId, dataId, encryption);
     }
 
     @Override
     public boolean publishConfig(String groupId, String dataId, String content, String type) {
+        return publishConfig(groupId, dataId, content, type, "");
+    }
+
+    @Override
+    public boolean publishConfig(String groupId, String dataId, String content, String type, String encryption) {
         final PublishConfigRequest request = PublishConfigRequest.builder()
                 .groupId(groupId)
                 .dataId(dataId)
                 .content(content)
+                .encryption(encryption)
                 .type(type)
+                .build();
+        ResponseData<Boolean> response = configManager.publishConfig(request);
+        return response.isOk();
+    }
+
+    @Override
+    public boolean publishConfigFile(String groupId, String dataId, byte[] stream) {
+        final PublishConfigRequest request = PublishConfigRequest.builder()
+                .groupId(groupId)
+                .dataId(dataId)
+                .file(stream)
                 .build();
         ResponseData<Boolean> response = configManager.publishConfig(request);
         return response.isOk();
@@ -111,15 +133,20 @@ public class ClientConfigService implements ConfigService {
 
     @Override
     public void addListener(String groupId, String dataId, AbstractListener... listeners) {
+        addListener(groupId, dataId, "", listeners);
+    }
+
+    @Override
+    public void addListener(String groupId, String dataId, String encryption, AbstractListener... listeners) {
         for (AbstractListener listener : listeners) {
-            watchConfigWorker.registerListener(groupId, dataId, listener);
+            watchConfigWorker.registerListener(groupId, dataId, encryption, listener);
         }
     }
 
     @Override
     public void removeListener(String groupId, String dataId, AbstractListener... listeners) {
         for (AbstractListener listener : listeners) {
-            watchConfigWorker.registerListener(groupId, dataId, listener);
+            watchConfigWorker.deregisterListener(groupId, dataId, listener);
         }
     }
 

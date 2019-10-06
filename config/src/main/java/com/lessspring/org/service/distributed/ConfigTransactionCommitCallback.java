@@ -16,11 +16,17 @@
  */
 package com.lessspring.org.service.distributed;
 
+import com.lessspring.org.raft.OperationEnum;
 import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
+import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -30,8 +36,20 @@ import org.springframework.stereotype.Component;
 @Component(value = "configTransactionCommitCallback")
 public class ConfigTransactionCommitCallback implements TransactionCommitCallback {
 
+    private final HashMap<OperationEnum, Consumer<Transaction>> consumerMap = new HashMap<>();
+
+    public ConfigTransactionCommitCallback() {
+    }
+
+    public void registerConsumer(Consumer<Transaction> consumer, OperationEnum operation) {
+        synchronized (this) {
+            consumerMap.put(operation, consumer);
+        }
+    }
+
     @Override
     public void onApply(Transaction transaction) {
+        consumerMap.get(transaction.getOperation()).accept(transaction);
     }
 
     @Override

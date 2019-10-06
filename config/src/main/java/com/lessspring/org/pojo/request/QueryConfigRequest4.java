@@ -14,32 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.model.vo;
+package com.lessspring.org.pojo.request;
+
+import com.lessspring.org.model.vo.QueryConfigRequest;
+
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DeleteConfigRequest extends BaseConfigRequest {
+public class QueryConfigRequest4 extends QueryConfigRequest {
 
-    private boolean beta;
+    private Map<String, Object> attribute;
 
-    public boolean isBeta() {
-        return beta;
+    public Map<String, Object> getAttribute() {
+        return attribute;
     }
 
-    public void setBeta(boolean beta) {
-        this.beta = beta;
+    public void setAttribute(Map<String, Object> attribute) {
+        this.attribute = attribute;
     }
 
-    public static Builder builder() {
+    public static Builder sBuilder() {
         return new Builder();
     }
 
     public static final class Builder {
         private String dataId;
         private String groupId;
-        private boolean beta;
+        private Map<String, Object> attribute;
 
         private Builder() {
         }
@@ -54,17 +58,17 @@ public class DeleteConfigRequest extends BaseConfigRequest {
             return this;
         }
 
-        public Builder beta(boolean beta) {
-            this.beta = beta;
+        public Builder attribute(Map<String, Object> attribute) {
+            this.attribute = attribute;
             return this;
         }
 
-        public DeleteConfigRequest build() {
-            DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
-            deleteConfigRequest.setDataId(dataId);
-            deleteConfigRequest.setGroupId(groupId);
-            deleteConfigRequest.setBeta(beta);
-            return deleteConfigRequest;
+        public QueryConfigRequest4 build() {
+            QueryConfigRequest4 queryConfigRequest4 = new QueryConfigRequest4();
+            queryConfigRequest4.setDataId(dataId);
+            queryConfigRequest4.setGroupId(groupId);
+            queryConfigRequest4.setAttribute(attribute);
+            return queryConfigRequest4;
         }
     }
 }

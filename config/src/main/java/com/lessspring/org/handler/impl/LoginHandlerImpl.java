@@ -17,6 +17,10 @@
 package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.handler.LoginHandler;
+import com.lessspring.org.model.vo.LoginRequest;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.service.security.SecurityService;
+import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -30,9 +34,19 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class LoginHandlerImpl implements LoginHandler {
 
+    private final SecurityService securityService;
+
+    public LoginHandlerImpl(SecurityService securityService) {
+        this.securityService = securityService;
+    }
+
     @NotNull
     @Override
     public Mono<ServerResponse> login(ServerRequest request) {
-        return null;
+        return request.bodyToMono(LoginRequest.class)
+                .map(securityService::apply4Authorization)
+                .map(ResponseData::success)
+                .map(Mono::just)
+                .flatMap(RenderUtils::render);
     }
 }

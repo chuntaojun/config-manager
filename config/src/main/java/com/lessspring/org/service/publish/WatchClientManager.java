@@ -18,39 +18,22 @@ package com.lessspring.org.service.publish;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
-import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
-import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.event.NotifyEvent;
-import com.lessspring.org.utils.GsonUtils;
-import com.lessspring.org.utils.ListenKeyUtils;
 import com.lessspring.org.utils.MD5Utils;
-import com.lessspring.org.utils.SseUtils;
-import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
-import reactor.core.Disposable;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -60,14 +43,20 @@ import java.util.function.Function;
 @Component
 public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
-    private Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>();
+    private final long parallelThreshold = 100;
+
+    private long clientCnt = 0;
+    private final Object monitor = new Object();
+    private Map<String, Map<String, Set<WatchClient>>> watchClientManager
+            = new ConcurrentHashMap<>(8);
 
     // Build with the Client corresponds to a monitored object is
     // used to monitor configuration changes
 
     public void createWatchClient(WatchRequest request, FluxSink<?> sink, ServerRequest serverRequest) {
         WatchClient client = WatchClient.builder()
-                .clientIp(Objects.requireNonNull(serverRequest.exchange().getRequest().getRemoteAddress()).getHostString())
+                .clientIp(Objects.requireNonNull(serverRequest.exchange().getRequest()
+                        .getRemoteAddress()).getHostString())
                 .checkKey(request.getWatchKey())
                 .namespaceId(request.getNamespaceId())
                 .response(serverRequest.exchange().getResponse())
@@ -76,7 +65,11 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
         // When event creation is cancelled, automatic cancellation of client
         // on the server side corresponding to monitor object
         sink.onDispose(() -> {
-            Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
+            synchronized (monitor) {
+                clientCnt --;
+            }
+            Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
+                    .getOrDefault(client.getNamespaceId(), Collections.emptyMap());
             for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher.entrySet()) {
                 entry.getValue().remove(client);
             }
@@ -85,16 +78,27 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
         // According to the monitoring configuration key, registered to a
         // different key corresponding to the listener list
         listenKeys.forEach((key, value) -> {
-            Map<String, Set<WatchClient>> clientsMap = watchClientManager.computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
+            Map<String, Set<WatchClient>> clientsMap = watchClientManager
+                    .computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
             clientsMap.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
             clientsMap.get(key).add(client);
         });
+        synchronized (monitor) {
+            clientCnt ++;
+        }
         // A quick comparison, listens for client direct access to the latest
         // configuration when registering for the first time
         doQuickCompare(client);
     }
 
     private void doQuickCompare(WatchClient watchClient) {
+        Map<String, String> checkMd5 = watchClient.getCheckKey();
+        checkMd5.forEach((key, value) -> {
+            String content = DiskUtils.readFile(watchClient.getNamespaceId(), key);
+            if (!Objects.equals(MD5Utils.md5Hex(content), value)) {
+                writeResponse(watchClient, content);
+            }
+        });
     }
 
     // Send the event to the client
@@ -113,10 +117,16 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
             final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
             final String configInfoJson = DiskUtils.readFile(event.getNamespaceId(), key);
             long[] finishWorks = new long[1];
-            watchClientManager.getOrDefault(event.getNamespaceId(), Collections.emptyMap())
-                    .entrySet()
-                    .stream()
-                    .flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+            Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
+                    .getOrDefault(event.getNamespaceId(), Collections.emptyMap())
+                    .entrySet();
+            Stream<Map.Entry<String, Set<WatchClient>>> stream;
+            if (clientCnt >= parallelThreshold) {
+                stream = set.parallelStream();
+            } else {
+                stream = set.stream();
+            }
+            stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
                     .forEach(client -> {
                         try {
                             writeResponse(client, configInfoJson);

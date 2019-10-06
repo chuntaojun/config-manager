@@ -14,12 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump.task;
+package com.lessspring.org.service.cluster;
+
+import com.lessspring.org.model.vo.ResponseData;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DumpTask4All extends DumpTask {
+@FunctionalInterface
+public interface FailCallback {
+
+    /**
+     * Error correction
+     *
+     * @param throwable {@link Throwable}
+     * @return {@link CompletableFuture<ResponseData<Boolean>>}
+     */
+    CompletableFuture<ResponseData<Boolean>> onError(Throwable throwable);
 
 }

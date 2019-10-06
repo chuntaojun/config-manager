@@ -18,6 +18,8 @@ package com.lessspring.org.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.Objects;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -30,6 +32,10 @@ public final class MD5Utils {
 
     public static String md5Hex(byte[] bytes) {
         return DigestUtils.md5Hex(bytes);
+    }
+
+    public static boolean compareMd5(String var1, String var2) {
+        return Objects.equals(md5Hex(var1), md5Hex(var2));
     }
 
 }

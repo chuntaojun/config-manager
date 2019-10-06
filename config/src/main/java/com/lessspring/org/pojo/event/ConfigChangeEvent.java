@@ -27,7 +27,10 @@ public class ConfigChangeEvent extends BaseEvent {
     public static final String TYPE = "ConfigChangeEvent";
 
     private String content;
+    private byte[] fileSource;
     private String configType;
+    private String clientIps;
+    private boolean beta;
 
     public String getContent() {
         return content;
@@ -45,6 +48,30 @@ public class ConfigChangeEvent extends BaseEvent {
         this.configType = configType;
     }
 
+    public boolean isBeta() {
+        return beta;
+    }
+
+    public void setBeta(boolean beta) {
+        this.beta = beta;
+    }
+
+    public byte[] getFileSource() {
+        return fileSource;
+    }
+
+    public void setFileSource(byte[] fileSource) {
+        this.fileSource = fileSource;
+    }
+
+    public String getClientIps() {
+        return clientIps;
+    }
+
+    public void setClientIps(String clientIps) {
+        this.clientIps = clientIps;
+    }
+
     @Override
     public String label() {
         return TYPE;
@@ -60,6 +87,10 @@ public class ConfigChangeEvent extends BaseEvent {
         target.setEventType(source.getEventType());
         target.setConfigType(source.getConfigType());
         target.setEncryption(source.getEncryption());
+        target.setFileSource(source.getFileSource());
+        target.setFile(source.isFile());
+        target.setClientIps(source.getClientIps());
+        target.setBeta(source.isBeta());
     }
 
     public static Builder builder() {
@@ -74,7 +105,11 @@ public class ConfigChangeEvent extends BaseEvent {
         private String content;
         private EventType eventType;
         private String configType;
-        private String entryption;
+        private String encryption;
+        private boolean file;
+        private byte[] fileSource;
+        private String clientIps;
+        private boolean beta;
 
         private Builder() {
         }
@@ -114,8 +149,28 @@ public class ConfigChangeEvent extends BaseEvent {
             return this;
         }
 
-        public Builder entryption(String entryption) {
-            this.entryption = entryption;
+        public Builder encryption(String encryption) {
+            this.encryption = encryption;
+            return this;
+        }
+
+        public Builder beta(boolean beta) {
+            this.beta = beta;
+            return this;
+        }
+
+        public Builder file(boolean file) {
+            this.file = file;
+            return this;
+        }
+
+        public Builder fileSource(byte[] fileSource) {
+            this.fileSource = fileSource;
+            return this;
+        }
+
+        public Builder clientIps(String clientIps) {
+            this.clientIps = clientIps;
             return this;
         }
 
@@ -128,7 +183,10 @@ public class ConfigChangeEvent extends BaseEvent {
             configChangeEvent.setContent(content);
             configChangeEvent.setEventType(eventType);
             configChangeEvent.setConfigType(configType);
-            configChangeEvent.setEncryption(entryption);
+            configChangeEvent.setEncryption(encryption);
+            configChangeEvent.setFile(file);
+            configChangeEvent.setFileSource(fileSource);
+            configChangeEvent.setClientIps(clientIps);
             return configChangeEvent;
         }
     }

@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.cluster;
 
+import com.alipay.remoting.exception.RemotingException;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.event.EventType;
@@ -24,8 +25,11 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.vo.NodeChangeRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ClusterServer;
+import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
+import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -34,6 +38,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -46,16 +51,17 @@ public class ClusterManager {
 
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
     private final NodeManager nodeManager = NodeManager.getInstance();
+    private ClusterServer clusterServer;
 
-    private final TransactionCommitCallback commitCallback;
+    private final ConfigTransactionCommitCallback commitCallback;
 
-    public ClusterManager(@Qualifier("configTransactionCommitCallback") TransactionCommitCallback commitCallback) {
+    public ClusterManager(ConfigTransactionCommitCallback commitCallback) {
         this.commitCallback = commitCallback;
     }
 
     @PostConstruct
     public void init() {
-        ClusterServer clusterServer = new ClusterServer();
+        clusterServer = new ClusterServer();
         clusterServer.init();
         clusterServer.registerTransactionCommitCallback(commitCallback);
         eventBus.register(this);
@@ -87,6 +93,15 @@ public class ClusterManager {
                 .withCode(200)
                 .withData(nodes)
                 .build();
+    }
+
+    public CompletableFuture<ResponseData<Boolean>> commit(Datum datum, final FailCallback failCallback) {
+        try {
+            return clusterServer.apply(datum);
+        } catch (Exception e) {
+            failCallback.onError(e);
+            return CompletableFuture.completedFuture(ResponseData.fail());
+        }
     }
 
     private void publishEvent(ServerNodeChangeEvent event) {

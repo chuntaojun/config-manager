@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.security.impl;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.repository.UserMapper;
@@ -57,8 +58,8 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public boolean verify(String token) {
-        return jwtBuildFactory.tokenVerify(token).isPresent();
+    public Optional<DecodedJWT> verify(String token) {
+        return jwtBuildFactory.tokenVerify(token);
     }
 
     @Override

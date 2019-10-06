@@ -14,12 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump.task;
+package com.lessspring.org.utils;
+
+import org.springframework.web.reactive.function.server.ServerRequest;
+
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DumpTask4All extends DumpTask {
+public final class ReactiveWebUtils {
+
+    public static Optional<Object> getAttribute(String name, ServerRequest request) {
+        return request.attribute(name);
+    }
 
 }

@@ -37,6 +37,16 @@ public interface ConfigService extends LifeCycle {
     ConfigInfo getConfig(String groupId, String dataId);
 
     /**
+     * get config by groupId and dataId with encryption
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param encryption encryption token
+     * @return config {@link ConfigInfo}
+     */
+    ConfigInfo getConfig(String groupId, String dataId, String encryption);
+
+    /**
      * publish config
      *
      * @param groupId groupId
@@ -46,6 +56,28 @@ public interface ConfigService extends LifeCycle {
      * @return Release successful logo
      */
     boolean publishConfig(String groupId, String dataId, String content, String type);
+
+    /**
+     * publish config
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param content config content
+     * @param type config type, such as {properties, yml, yaml, json, xml}
+     * @param encryption encryption token
+     * @return Release successful logo
+     */
+    boolean publishConfig(String groupId, String dataId, String content, String type, String encryption);
+
+    /**
+     * publish config file
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param stream file byte stream
+     * @return Release successful logo
+     */
+    boolean publishConfigFile(String groupId, String dataId, byte[] stream);
 
     /**
      * delete config
@@ -64,6 +96,16 @@ public interface ConfigService extends LifeCycle {
      * @param listeners listener list
      */
     void addListener(String groupId, String dataId, AbstractListener... listeners);
+
+    /**
+     * Add configuration changes the listener
+     *
+     * @param groupId groupId
+     * @param dataId dataId
+     * @param encryption encryption token
+     * @param listeners listener list
+     */
+    void addListener(String groupId, String dataId, String encryption, AbstractListener... listeners);
 
     /**
      * Remove configuration changes the listener

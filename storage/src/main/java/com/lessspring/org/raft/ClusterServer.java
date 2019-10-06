@@ -32,10 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -93,6 +95,7 @@ public class ClusterServer implements LifeCycle {
 
     public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException, InterruptedException {
         needInitialized();
+        final Throwable[] throwables = new Throwable[]{null};
         CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
         Task task = new Task();
         task.setData(ByteBuffer.wrap(SerializerUtils.getInstance().serialize(datum)));
@@ -103,6 +106,9 @@ public class ClusterServer implements LifeCycle {
                     .withErrMsg(status.getErrorMsg())
                     .build();
             future.complete(data);
+            if (!status.isOk()) {
+                throwables[0] = new RuntimeException(status.getErrorMsg());
+            }
         }));
         if (raftServer.isLeader()) {
             raftServer.getNode().apply(task);
@@ -116,8 +122,7 @@ public class ClusterServer implements LifeCycle {
 
                 @Override
                 public void onException(Throwable throwable) {
-                    ResponseData<Boolean> data = ResponseData.fail(throwable);
-                    future.complete(data);
+                    throwables[0] = throwable;
                 }
 
                 @Override
@@ -125,6 +130,9 @@ public class ClusterServer implements LifeCycle {
                     return null;
                 }
             }, 5000);
+        }
+        if (Objects.nonNull(throwables[0])) {
+            throw new RemotingException("Commit Error", throwables[0]);
         }
         return future;
     }

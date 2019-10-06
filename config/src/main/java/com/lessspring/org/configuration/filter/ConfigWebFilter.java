@@ -16,8 +16,10 @@
  */
 package com.lessspring.org.configuration.filter;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.service.security.SecurityService;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +30,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -38,7 +42,9 @@ import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.lessspring.org.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 
@@ -101,7 +107,13 @@ public class ConfigWebFilter implements WebFilter {
         if (StringUtils.isEmpty(token)) {
             return false;
         }
-        return securityService.verify(token);
+        Optional<DecodedJWT> result = securityService.verify(token);
+        result.ifPresent(decodedJWT -> {
+            ServerRequest serverRequest = (ServerRequest) request;
+            Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(), Privilege.class);
+            serverRequest.attributes().put("privilege", privilege);
+        });
+        return result.isPresent();
     }
 
     private Mono<Void> filterResponse(ServerHttpResponse response, HttpStatus status, String s) {

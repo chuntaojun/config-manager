@@ -14,12 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump.task;
+package com.lessspring.org.repository;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DumpTask4All extends DumpTask {
+@Mapper
+public interface NamespacePermissionsMapper {
+
+    /**
+     * find namespaceId by userId
+     *
+     * @param userId user-id
+     * @return namespace-id
+     */
+    String findNamespaceIdByUserId(@Param(value = "userId") Long userId);
 
 }

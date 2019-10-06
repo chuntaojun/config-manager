@@ -20,5 +20,5 @@ package com.lessspring.org.service.dump.task;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DumpTask4Beta {
+public class DumpTask4Beta extends DumpTask {
 }

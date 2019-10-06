@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.service.config;
 
-import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
@@ -28,12 +27,10 @@ import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.DiskUtils;
 import com.lessspring.org.service.publish.WatchClientManager;
 import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
 import com.lessspring.org.utils.DisruptorFactory;
-import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -56,10 +53,14 @@ public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<
 
     private final Disruptor<NotifyEvent> disruptorHolder;
 
+    private final ConfigCacheItemManager configCacheItemManager;
+
     @Resource
     private ConfigInfoMapper configInfoMapper;
 
-    public ConfigPersistenceHandler(WatchClientManager watchClientManager) {
+    public ConfigPersistenceHandler(WatchClientManager watchClientManager,
+                                    ConfigCacheItemManager configCacheItemManager) {
+        this.configCacheItemManager = configCacheItemManager;
         disruptorHolder = DisruptorFactory.build(NotifyEvent::new, "Notify-Event-Disruptor");
         disruptorHolder.handleEventsWithWorkerPool(watchClientManager);
         disruptorHolder.start();
@@ -81,11 +82,11 @@ public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<
                 .build();
         ConfigInfoDTO dto = configInfoMapper.findConfigInfo(queryConfigInfo);
         byte[] origin = dto.getContent();
+        // unable transport config-context encryption token
         ConfigInfo info = ConfigInfo.builder()
                 .groupId(dto.getGroupId())
                 .dataId(dto.getDataId())
                 .type(dto.getType())
-                .encryption(dto.getEncryption())
                 .build();
         byte type = ByteUtils.getByteByIndex(origin, 0);
         byte[] source = ByteUtils.cut(origin, 1, origin.length - 1);
@@ -150,7 +151,7 @@ public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<
                         .content(save)
                         .type(request.getType())
                         .clientIps(request.getClientIps())
-                        .createTime(System.currentTimeMillis())
+                        .lastModifyTime(System.currentTimeMillis())
                         .build();
                 affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
             } else {
@@ -160,7 +161,7 @@ public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<
                         .dataId(request.getDataId())
                         .content(save)
                         .type(request.getType())
-                        .createTime(System.currentTimeMillis())
+                        .lastModifyTime(System.currentTimeMillis())
                         .build();
                 affect = configInfoMapper.updateConfigInfo(infoDTO);
             }
@@ -191,15 +192,14 @@ public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<
     @Override
     public void onEvent(ConfigChangeEvent event) throws Exception {
         try {
-            final String namespaceId = event.getNamespaceId();
-            final String groupId = event.getGroupId();
-            final String dataId = event.getDataId();
-            if (event.getEventType() == EventType.DELETE) {
-                DiskUtils.deleteFile(namespaceId, NameUtils.buildName(groupId, dataId));
+            configCacheItemManager.updateContent(event.getNamespaceId(), event);
+            if (EventType.PUBLISH.compareTo(event.getEventType()) == 0){
+                configCacheItemManager.registerConfigCacheItem(event.getNamespaceId(), event);
+            }
+            if (EventType.DELETE.compareTo(event.getEventType()) == 0) {
+                configCacheItemManager.deregisterConfigCacheItem(event.getNamespaceId(), event);
                 return;
             }
-            final ConfigInfo configInfo = new ConfigInfo(groupId, dataId, event.getContent(), event.getConfigType(), event.getEncryption());
-            DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), GsonUtils.toJsonBytes(configInfo));
             NotifyEvent source = NotifyEvent.builder()
                     .namespaceId(event.getNamespaceId())
                     .groupId(event.getGroupId())
