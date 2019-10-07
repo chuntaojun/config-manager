@@ -14,11 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.configuration;
+package com.lessspring.org.raft;
+
+import com.alipay.sofa.jraft.Closure;
+import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
+import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class JwtTokenConfiguration {
+public interface SnapshotOperate {
+
+    /**
+     * do snapshot save operation
+     *
+     * @param writer {@link SnapshotWriter}
+     * @param done {@link Closure}
+     */
+    void onSnapshotSave(SnapshotWriter writer, Closure done);
+
+    /**
+     * do snapshot load operation
+     *
+     * @param reader {@link SnapshotReader}
+     * @return operation label
+     */
+    boolean onSnapshotLoad(SnapshotReader reader);
+
 }

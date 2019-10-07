@@ -67,16 +67,15 @@ public class ConfigOperationService {
 
     private final Type type = new TypeToken<Map<String, Object>>(){}.getType();
 
-
     public ConfigOperationService(@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
-                                  ConfigPersistenceHandler configPersistenceHandler,
+                                  ConfigPersistentHandler configPersistentHandler,
                                   ConfigTransactionCommitCallback commitCallback,
                                   ClusterManager clusterManager) {
         this.persistentHandler = persistentHandler;
         this.commitCallback = commitCallback;
         this.clusterManager = clusterManager;
         disruptorHolder = DisruptorFactory.build(ConfigChangeEvent::new, "Config-Change-Event-Disruptor");
-        disruptorHolder.handleEventsWithWorkerPool(configPersistenceHandler);
+        disruptorHolder.handleEventsWithWorkerPool(configPersistentHandler);
         disruptorHolder.start();
     }
 
@@ -108,7 +107,7 @@ public class ConfigOperationService {
         try {
             return future.get(1000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return ResponseData.fail();
+            return ResponseData.fail(e);
         }
     }
 
@@ -123,7 +122,7 @@ public class ConfigOperationService {
         try {
             return future.get(1000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return ResponseData.fail();
+            return ResponseData.fail(e);
         }
     }
 
@@ -138,7 +137,7 @@ public class ConfigOperationService {
         try {
             return future.get(1000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return ResponseData.fail();
+            return ResponseData.fail(e);
         }
     }
 

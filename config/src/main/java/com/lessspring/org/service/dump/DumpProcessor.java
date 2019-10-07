@@ -14,28 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.service.dump;
 
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
+import com.lessspring.org.service.dump.task.DumpTask;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
+public interface DumpProcessor<T extends DumpTask> {
 
     /**
-     * Register the transaction callback interface
+     * Processing configuration of dump operation
      *
-     * @param commitCallback {@link TransactionCommitCallback}
+     * @param dumpTask {@link DumpTask}
      */
-    public abstract void registerTransactionCommitCallback(TransactionCommitCallback commitCallback);
-
-    /**
-     * Register the snapshot operator
-     *
-     * @param snapshotOperate {@link SnapshotOperate}
-     */
-    public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
+    void process(T dumpTask);
 
 }

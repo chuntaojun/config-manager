@@ -14,4 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo;
+package com.lessspring.org.service.dump.task;
+
+import java.time.Duration;
+
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+public class DumpTask4Period extends DumpTask {
+
+    private Duration period;
+
+    public Duration getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Duration period) {
+        this.period = period;
+    }
+}

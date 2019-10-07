@@ -28,14 +28,17 @@ import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class LoginHandler implements LifeCycle {
+public class LoginHandler implements Observer, LifeCycle {
 
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, r -> {
         Thread thread = new Thread(r);
@@ -62,6 +65,7 @@ public class LoginHandler implements LifeCycle {
 
     private void firstLogin() {
         createLoginWork(() -> {});
+        executor.scheduleAtFixedRate(() -> createLoginWork(() -> {}), 15 * 60L, 30 * 60L, TimeUnit.SECONDS);
     }
 
     private void createLoginWork(Runnable call) {
@@ -79,13 +83,14 @@ public class LoginHandler implements LifeCycle {
         }
     }
 
-    @Subscribe
-    public void onExpire(CountDownLatch latch) {
-        createLoginWork(latch::countDown);
-    }
-
     @Override
     public void destroy() {
         executor.shutdown();
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        CountDownLatch latch = (CountDownLatch) arg;
+        createLoginWork(latch::countDown);
     }
 }

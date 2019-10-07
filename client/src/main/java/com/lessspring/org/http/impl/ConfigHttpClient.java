@@ -43,6 +43,7 @@ import okhttp3.sse.EventSources;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Iterator;
@@ -77,8 +78,8 @@ public class ConfigHttpClient implements HttpClient {
     @Override
     public void init() {
         client = new OkHttpClient.Builder()
-                .connectTimeout(Duration.ofSeconds(20_000))
-                .readTimeout(Duration.ofSeconds(30_000))
+                .connectTimeout(Duration.ofMillis(20_000))
+                .readTimeout(Duration.ofMillis(30_000))
                 .build();
     }
 
@@ -93,8 +94,11 @@ public class ConfigHttpClient implements HttpClient {
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (!data.isOk()) {
+                if (data.isOk()) {
                     return false;
+                }
+                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                    authHolder.refresh();
                 }
                 refresh();
                 return false;
@@ -126,6 +130,9 @@ public class ConfigHttpClient implements HttpClient {
                 if (!data.isOk()) {
                     return false;
                 }
+                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                    authHolder.refresh();
+                }
                 refresh();
                 return true;
             }
@@ -153,8 +160,11 @@ public class ConfigHttpClient implements HttpClient {
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (!data.isOk()) {
+                if (data.isOk()) {
                     return false;
+                }
+                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                    authHolder.refresh();
                 }
                 refresh();
                 return true;
@@ -184,8 +194,11 @@ public class ConfigHttpClient implements HttpClient {
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (!data.isOk()) {
+                if (data.isOk()) {
                     return false;
+                }
+                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                    authHolder.refresh();
                 }
                 refresh();
                 return true;

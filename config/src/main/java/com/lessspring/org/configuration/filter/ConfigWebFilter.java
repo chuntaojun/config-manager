@@ -92,7 +92,8 @@ public class ConfigWebFilter implements WebFilter {
         }
         boolean hasAuth = permissionIntercept(exchange);
         if (!hasAuth) {
-            return filterResponse(exchange.getResponse(), HttpStatus.FORBIDDEN, HASH_NO_PRIVILEGE.getDescribe());
+            return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
+                    HASH_NO_PRIVILEGE.getDescribe());
         }
         return chain.filter(exchange);
     }
@@ -107,6 +108,9 @@ public class ConfigWebFilter implements WebFilter {
         if (StringUtils.isEmpty(token)) {
             return false;
         }
+        if (securityService.isExpire(token)) {
+            return false;
+        }
         Optional<DecodedJWT> result = securityService.verify(token);
         result.ifPresent(decodedJWT -> {
             ServerRequest serverRequest = (ServerRequest) request;
@@ -116,9 +120,11 @@ public class ConfigWebFilter implements WebFilter {
         return result.isPresent();
     }
 
+    @SuppressWarnings("unchecked")
     private Mono<Void> filterResponse(ServerHttpResponse response, HttpStatus status, String s) {
         return response.writeWith(Mono.just(response.bufferFactory()
-                .wrap(GsonUtils.toJsonBytes(ResponseData.builder().withCode(status.value()).withData(s).build()))));
+                .wrap(GsonUtils.toJsonBytes(ResponseData.builder()
+                        .withCode(status.value()).withData(s).build()))));
     }
 
 }

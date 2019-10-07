@@ -27,6 +27,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class CacheItem {
 
+    public static final short CACHE_ITEM = 0;
+    public static final short TEMP_CACHE_ITEM = 0;
+
     private final String namespaceId;
 
     private final String groupId;

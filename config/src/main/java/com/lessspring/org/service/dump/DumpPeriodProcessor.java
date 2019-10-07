@@ -14,28 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.service.dump;
 
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
+import com.lessspring.org.service.dump.task.DumpTask4Period;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
+public class DumpPeriodProcessor implements DumpProcessor<DumpTask4Period> {
 
-    /**
-     * Register the transaction callback interface
-     *
-     * @param commitCallback {@link TransactionCommitCallback}
-     */
-    public abstract void registerTransactionCommitCallback(TransactionCommitCallback commitCallback);
+    @Override
+    public void process(DumpTask4Period dumpTask) {
 
-    /**
-     * Register the snapshot operator
-     *
-     * @param snapshotOperate {@link SnapshotOperate}
-     */
-    public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
-
+    }
 }

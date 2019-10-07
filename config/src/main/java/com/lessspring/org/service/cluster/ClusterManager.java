@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.service.cluster;
 
-import com.alipay.remoting.exception.RemotingException;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.event.EventType;
@@ -25,14 +24,11 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.vo.NodeChangeRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ClusterServer;
-import com.lessspring.org.raft.Transaction;
-import com.lessspring.org.raft.TransactionCommitCallback;
+import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -46,17 +42,18 @@ import java.util.stream.Collectors;
  * @since 0.0.1
  */
 @Slf4j
-@Component(value = "clusterManager")
 public class ClusterManager {
 
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
     private final NodeManager nodeManager = NodeManager.getInstance();
     private ClusterServer clusterServer;
-
+    private final SnapshotOperate snapshotOperate;
     private final ConfigTransactionCommitCallback commitCallback;
 
-    public ClusterManager(ConfigTransactionCommitCallback commitCallback) {
+    public ClusterManager(ConfigTransactionCommitCallback commitCallback,
+                          SnapshotOperate snapshotOperate) {
         this.commitCallback = commitCallback;
+        this.snapshotOperate = snapshotOperate;
     }
 
     @PostConstruct
@@ -64,6 +61,7 @@ public class ClusterManager {
         clusterServer = new ClusterServer();
         clusterServer.init();
         clusterServer.registerTransactionCommitCallback(commitCallback);
+        clusterServer.registerSnapshotOperator(snapshotOperate);
         eventBus.register(this);
         eventBus.register(clusterServer);
     }

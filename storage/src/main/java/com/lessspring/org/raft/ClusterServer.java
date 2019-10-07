@@ -93,6 +93,10 @@ public class ClusterServer implements LifeCycle {
         raftServer.registerTransactionCommitCallback(commitCallback);
     }
 
+    public void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
+        raftServer.registerSnapshotOperator(snapshotOperate);
+    }
+
     public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException, InterruptedException {
         needInitialized();
         final Throwable[] throwables = new Throwable[]{null};

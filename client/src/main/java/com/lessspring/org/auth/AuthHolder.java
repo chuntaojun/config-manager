@@ -16,8 +16,7 @@
  */
 package com.lessspring.org.auth;
 
-import com.google.common.eventbus.EventBus;
-
+import java.util.Observable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -26,9 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class AuthHolder {
-
-    private final EventBus eventBus = new EventBus("Overdue-refresh-token");
+public class AuthHolder extends Observable {
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
@@ -40,7 +37,7 @@ public class AuthHolder {
     private volatile String token = "";
 
     void register(LoginHandler handler) {
-        eventBus.register(handler);
+        addObserver(handler);
     }
 
     void updateToken(String token) {
@@ -58,13 +55,27 @@ public class AuthHolder {
         try {
             if (lastRefreshTime + expireTime - System.currentTimeMillis() < threshold) {
                 CountDownLatch latch = new CountDownLatch(1);
-                eventBus.post(latch);
+                notifyObservers(latch);
                 long waitTime = 10L;
                 latch.await(waitTime, TimeUnit.SECONDS);
             }
             return token;
         } catch (InterruptedException ignore) {
             return token;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public void refresh() {
+        readLock.lock();
+        try {
+            CountDownLatch latch = new CountDownLatch(1);
+            notifyObservers(latch);
+            long waitTime = 10L;
+            latch.await(waitTime, TimeUnit.SECONDS);
+        } catch (Exception ignore) {
+
         } finally {
             readLock.unlock();
         }

@@ -64,14 +64,17 @@ class ServerSentEventListener<T> extends EventSourceListener {
     }
 
     @Override
-    public void onEvent(@NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
-        ResponseData<String> result = GsonUtils.toObj(data, new TypeToken<ResponseData<String>>(){}.getType());
+    public void onEvent(@NotNull EventSource eventSource, @Nullable String id,
+                        @Nullable String type, @NotNull String data) {
+        ResponseData<String> result = GsonUtils.toObj(data,
+                new TypeToken<ResponseData<String>>(){}.getType());
         // For event distribution
         eventBusMap.get(receiver.attention()).post(GsonUtils.toObj(result.getData(), typeCls));
     }
 
     @Override
-    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t, @Nullable Response response) {
+    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t,
+                          @Nullable Response response) {
         super.onFailure(eventSource, t, response);
         receiver.onError(t);
     }

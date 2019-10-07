@@ -14,28 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.repository;
 
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
+@Mapper
+public interface SnapshotMapper {
 
     /**
-     * Register the transaction callback interface
+     * do snapshot save operation
      *
-     * @param commitCallback {@link TransactionCommitCallback}
+     * @param path
      */
-    public abstract void registerTransactionCommitCallback(TransactionCommitCallback commitCallback);
+    void doSnapshotSave(@Param(value = "path") String path);
 
     /**
-     * Register the snapshot operator
+     * do snapshot load operation
      *
-     * @param snapshotOperate {@link SnapshotOperate}
+     * @param path
      */
-    public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
+    void doSnapshotLoad(@Param(value = "path") String path);
 
 }

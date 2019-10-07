@@ -49,7 +49,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component(value = "persistentHandler")
-public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<ConfigChangeEvent> {
+public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<ConfigChangeEvent> {
 
     private final Disruptor<NotifyEvent> disruptorHolder;
 
@@ -58,8 +58,8 @@ public class ConfigPersistenceHandler implements PersistentHandler, WorkHandler<
     @Resource
     private ConfigInfoMapper configInfoMapper;
 
-    public ConfigPersistenceHandler(WatchClientManager watchClientManager,
-                                    ConfigCacheItemManager configCacheItemManager) {
+    public ConfigPersistentHandler(WatchClientManager watchClientManager,
+                                   ConfigCacheItemManager configCacheItemManager) {
         this.configCacheItemManager = configCacheItemManager;
         disruptorHolder = DisruptorFactory.build(NotifyEvent::new, "Notify-Event-Disruptor");
         disruptorHolder.handleEventsWithWorkerPool(watchClientManager);

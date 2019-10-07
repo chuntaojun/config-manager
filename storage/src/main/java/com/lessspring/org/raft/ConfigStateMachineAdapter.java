@@ -48,6 +48,8 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     private final Object monitor = new Object();
 
+    private SnapshotOperate snapshotOperate;
+
     @Override
     public void onApply(Iterator iter) {
         int index = 0;
@@ -89,12 +91,12 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     @Override
     public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        super.onSnapshotSave(writer, done);
+        snapshotOperate.onSnapshotSave(writer, done);
     }
 
     @Override
     public boolean onSnapshotLoad(SnapshotReader reader) {
-        return super.onSnapshotLoad(reader);
+        return snapshotOperate.onSnapshotLoad(reader);
     }
 
     @Override
@@ -102,5 +104,10 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
         synchronized (monitor) {
             callbacks.add(commitCallback);
         }
+    }
+
+    @Override
+    public void registerSnapshotManager(SnapshotOperate snapshotOperate) {
+        this.snapshotOperate = snapshotOperate;
     }
 }

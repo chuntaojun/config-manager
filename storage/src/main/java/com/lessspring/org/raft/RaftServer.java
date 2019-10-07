@@ -144,6 +144,10 @@ class RaftServer implements LifeCycle {
         csm.registerTransactionCommitCallback(commitCallback);
     }
 
+    public void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
+        csm.registerSnapshotManager(snapshotOperate);
+    }
+
     private PeerId leaderNode() {
         if (node.getLeaderId() != null) {
             return node.getLeaderId();

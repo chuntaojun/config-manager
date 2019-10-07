@@ -16,48 +16,69 @@
  */
 package com.lessspring.org.service.config;
 
+import com.lessspring.org.DiskUtils;
+import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
-import com.lessspring.org.service.encryption.EncryptionService;
+import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-@Primary
-@Service(value = "encryptionPersistentHandler")
-public class EncryptionPersistentHandler implements PersistentHandler {
+@Component(value = "cachePersistentHandler")
+public class CachePersistentHandler implements PersistentHandler {
 
-    private final EncryptionService encryptionService;
+    private final ConfigCacheItemManager configCacheItemManager;
     private final PersistentHandler persistentHandler;
 
-    public EncryptionPersistentHandler(EncryptionService encryptionService,
-                                       @Qualifier(value = "cachePersistentHandler") PersistentHandler persistentHandler) {
-        this.encryptionService = encryptionService;
+    public CachePersistentHandler(ConfigCacheItemManager configCacheItemManager,
+                                  @Qualifier(value = "persistentHandler") PersistentHandler persistentHandler) {
+        this.configCacheItemManager = configCacheItemManager;
         this.persistentHandler = persistentHandler;
     }
 
     @Override
     public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
-        return persistentHandler.readConfigContent(namespaceId, request);
+        CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
+                request.getGroupId(), request.getDataId());
+        final int lockResult = ConfigCacheItemManager.tryReadLock(cacheItem);
+        assert (lockResult != 0);
+        if (lockResult < 0) {
+            log.warn("[dump-error] write lock failed. {}", cacheItem.getKey());
+            return null;
+        }
+        ConfigInfo configInfo;
+        try {
+            String s = DiskUtils.readFile(namespaceId, NameUtils.buildName(request.getGroupId(),
+                    request.getDataId()));
+            // Directly read cache did not read to the configuration file,
+            // read the database directly
+            if (StringUtils.isEmpty(s)) {
+                return persistentHandler.readConfigContent(namespaceId, request);
+            }
+            configInfo = GsonUtils.toObj(s, ConfigInfo.class);
+        } finally {
+            ConfigCacheItemManager.releaseReadLock(cacheItem);
+        }
+        return configInfo;
     }
 
     @Override
     public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
-        encryptionService.handle(request);
         return persistentHandler.saveConfigInfo(namespaceId, request);
     }
 
     @Override
     public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
-        encryptionService.handle(request);
         return persistentHandler.modifyConfigInfo(namespaceId, request);
     }
 

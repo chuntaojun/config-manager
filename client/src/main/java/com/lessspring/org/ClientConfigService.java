@@ -81,6 +81,7 @@ public class ClientConfigService implements ConfigService {
     public void destroy() {
         if (destroyed.compareAndSet(false, true)) {
             httpClient.destroy();
+            loginHandler.destroy();
             clusterNodeWatch.destroy();
             watchConfigWorker.destroy();
             configManager.destroy();

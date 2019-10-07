@@ -16,12 +16,13 @@
  */
 package com.lessspring.org.cluster;
 
-import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.LifeCycle;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClusterChoose implements LifeCycle {
+public class ClusterChoose implements Observer, LifeCycle {
 
     private ClusterNodeWatch watch;
 
@@ -59,7 +60,6 @@ public class ClusterChoose implements LifeCycle {
 
     @Override
     public void destroy() {
-
     }
 
     public String getLastClusterIp() {
@@ -81,8 +81,9 @@ public class ClusterChoose implements LifeCycle {
         }
     }
 
-    @Subscribe
-    public final void clusterChange(Set<String> newClusterInfo) {
+    @Override
+    public void update(Observable o, Object arg) {
+        Set<String> newClusterInfo = (Set<String>) arg;
         writeLock.lock();
         try {
             clusterInfos = newClusterInfo;

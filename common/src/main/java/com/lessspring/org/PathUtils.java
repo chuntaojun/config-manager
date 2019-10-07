@@ -46,7 +46,7 @@ public final class PathUtils {
         if (subPath.startsWith(File.separator)) {
             subPath = subPath.substring(1);
         }
-        return FATHER_ROAD_KING + "/" + subPath;
+        return FATHER_ROAD_KING + File.separator + subPath;
     }
 
     public static String join(Object... objects) {

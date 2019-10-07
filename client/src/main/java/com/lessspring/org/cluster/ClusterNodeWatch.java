@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.cluster;
 
-import com.google.common.eventbus.EventBus;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.api.ApiConstant;
@@ -28,6 +27,8 @@ import com.lessspring.org.model.vo.ResponseData;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,11 +39,9 @@ import static com.lessspring.org.api.Code.SUCCESS;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClusterNodeWatch implements LifeCycle {
+public class ClusterNodeWatch extends Observable implements LifeCycle {
 
     private ScheduledThreadPoolExecutor executor;
-
-    private EventBus eventBus = new EventBus("cluster-watch-event");
 
     private final HttpClient httpClient;
 
@@ -64,7 +63,7 @@ public class ClusterNodeWatch implements LifeCycle {
             return thread;
         });
 
-        eventBus.post(nodeList);
+        notifyObservers(nodeList);
 
         executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(5), TimeUnit.MILLISECONDS);
 
@@ -108,8 +107,8 @@ public class ClusterNodeWatch implements LifeCycle {
         executor.schedule(this::refreshCluster, delay, TimeUnit.MILLISECONDS);
     }
 
-    public void register(Object watcher) {
-        eventBus.register(watcher);
+    public void register(Observer watcher) {
+        addObserver(watcher);
     }
 
     public Set<String> copyNodeList() {

@@ -27,7 +27,7 @@ public abstract class Retry<T> {
     /**
      * run work，Actual logic in this method
      *
-     * @throws Exception
+     * @throws Exception exception
      * @return Tasks are completed correctly
      */
     protected abstract T run() throws Exception;

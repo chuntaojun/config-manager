@@ -16,7 +16,9 @@
  */
 package com.lessspring.org.configuration.cluster;
 
-import com.lessspring.org.raft.ClusterServer;
+import com.lessspring.org.raft.SnapshotOperate;
+import com.lessspring.org.service.cluster.ClusterManager;
+import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,5 +28,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RaftNodeConfiguration {
+
+    @Bean
+    public ClusterManager clusterManager(ConfigTransactionCommitCallback commitCallback,
+                                         SnapshotOperate snapshotOperate) {
+        return new ClusterManager(commitCallback, snapshotOperate);
+    }
 
 }

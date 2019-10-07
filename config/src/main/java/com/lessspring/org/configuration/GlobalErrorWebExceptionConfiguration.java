@@ -59,12 +59,14 @@ public class GlobalErrorWebExceptionConfiguration {
             return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
         }
 
+        @SuppressWarnings("unchecked")
         private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
             final Map<String, Object> errorMap = getErrorAttributes(request, true);
             log.error("[请求url信息]：{}", request.uri());
             log.error("[内部错误信息]：{}", errorMap.get("trace"));
-            Mono<ResponseData> errMono = Mono.just(ResponseData.builder().withCode(Integer.parseInt(String.valueOf(errorMap.get("status"))))
-                    .withErrMsg("内部错误").withData(errorMap.get("trace")).build());
+            Mono<ResponseData> errMono = Mono.just(ResponseData.builder()
+                    .withCode(Integer.parseInt(String.valueOf(errorMap.get("status"))))
+                    .withErrMsg("Inner Error").withData(errorMap.get("trace")).build());
             return ServerResponse.ok().body(BodyInserters
                     .fromPublisher(errMono.publishOn(Schedulers.elastic()), ResponseData.class))
                     .subscribeOn(Schedulers.elastic());
