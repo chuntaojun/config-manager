@@ -46,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
+ * Requires user can customize the cluster parameters
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
@@ -78,7 +80,7 @@ class RaftServer implements LifeCycle {
         // 设置选举超时时间为 5 秒
         nodeOptions.setElectionTimeoutMs(5000);
         // 每隔600秒做一次 snapshot
-        nodeOptions.setSnapshotIntervalSecs(600);
+        nodeOptions.setSnapshotIntervalSecs(30);
         // 设置初始集群配置
         nodeOptions.setInitialConf(conf);
 

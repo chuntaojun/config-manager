@@ -29,14 +29,15 @@ public interface SnapshotMapper {
     /**
      * do snapshot save operation
      *
-     * @param path
+     * @param path parent file path
+     * @return dump db data sign
      */
-    void doSnapshotSave(@Param(value = "path") String path);
+    boolean doSnapshotSave(@Param(value = "path") String path);
 
     /**
      * do snapshot load operation
      *
-     * @param path
+     * @param path parent file path
      */
     void doSnapshotLoad(@Param(value = "path") String path);
 

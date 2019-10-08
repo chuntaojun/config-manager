@@ -29,10 +29,12 @@ import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.repository.SnapshotMapper;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Paths;
 import java.util.concurrent.Executor;
@@ -54,15 +56,6 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 
     private Executor executor;
 
-    private final String[] snapshotFiles = new String[]{
-            "snapshot_config_info.csv",
-            "snapshot_config_info_beta.csv",
-            "snapshot_user.csv",
-            "snapshot_user_role.csv",
-            "snapshot_namespace.csv",
-            "snapshot_namespace_permissions.csv"
-    };
-
     @Resource
     private SnapshotMapper snapshotMapper;
 
@@ -78,29 +71,29 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 
     @Override
     public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        final String parentPath = Paths.get(writer.getPath(), SNAPSHOT_DIR).toString();
-        for (String fileName : snapshotFiles) {
-            DiskUtils.deleteFile(parentPath, fileName);
-        }
         executor.execute(() -> {
-            System.out.println("Snapshot File Path : " + parentPath);
-            snapshotMapper.doSnapshotSave(parentPath);
-            final String writerPath = writer.getPath();
-            final String outputFile = Paths.get(writerPath, SNAPSHOT_ARCHIVE).toString();
             try {
+                final String writePath = writer.getPath();
+                final String parentPath = Paths.get(writePath, SNAPSHOT_DIR).toString();
+                final File file = new File(parentPath);
+                FileUtils.deleteDirectory(file);
+                FileUtils.forceMkdir(file);
+                snapshotMapper.doSnapshotSave(parentPath + File.separator);
+                final String outputFile = Paths.get(writePath, SNAPSHOT_ARCHIVE).toString();
                 try (final FileOutputStream fOut = new FileOutputStream(outputFile);
                      final ZipOutputStream zOut = new ZipOutputStream(fOut)) {
-                    DiskUtils.compressDirectoryToZipFile(writerPath, SNAPSHOT_DIR, zOut);
+                    DiskUtils.compressDirectoryToZipFile(writePath, SNAPSHOT_DIR, zOut);
                     fOut.getFD().sync();
+                    FileUtils.deleteDirectory(file);
                 }
                 if (writer.addFile(SNAPSHOT_ARCHIVE, buildMetadata(clusterMeta))) {
                     done.run(Status.OK());
                 } else {
-                    done.run(new Status(RaftError.EIO, "Fail to add snapshot file: %s", writerPath));
+                    done.run(new Status(RaftError.EIO, "Fail to add snapshot file: %s", parentPath));
                 }
             } catch (final Throwable t) {
-                log.error("Fail to compress snapshot, path={}, file list={}, {}.", writerPath, writer.listFiles(), t);
-                done.run(new Status(RaftError.EIO, "Fail to compress snapshot at %s, error is %s", writerPath, t
+                log.error("Fail to compress snapshot, path={}, file list={}, {}.", writer.getPath(), writer.listFiles(), t);
+                done.run(new Status(RaftError.EIO, "Fail to compress snapshot at %s, error is %s", writer.getPath(), t
                         .getMessage()));
             }
         });
