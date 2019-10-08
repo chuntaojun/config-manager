@@ -17,7 +17,7 @@
 package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.handler.ClusterHandler;
-import com.lessspring.org.pojo.vo.NodeChangeRequest;
+import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;

@@ -106,7 +106,7 @@ public final class PropertiesEnum {
         /**
          * CONFIG-DATA
          */
-        CONFIG_DARA("CONFIG-DATA"),
+        CONFIG_DATA("CONFIG-DATA"),
 
         /**
          * CONFIGURATION-DATA

@@ -26,7 +26,19 @@ import java.util.Map;
  */
 public class DeleteConfigRequest4 extends DeleteConfigRequest {
 
+    public static final String CLASS_NAME = DeleteConfigRequest4.class.getCanonicalName();
+
+    private String namespaceId;
+
     private Map<String, Object> attribute;
+
+    public String getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Map<String, Object> getAttribute() {
         return attribute;
@@ -41,12 +53,18 @@ public class DeleteConfigRequest4 extends DeleteConfigRequest {
     }
 
     public static final class Builder {
+        private String namespaceId;
         private String dataId;
         private String groupId;
         private boolean beta;
         private Map<String, Object> attribute;
 
         private Builder() {
+        }
+
+        public Builder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
         }
 
         public Builder dataId(String dataId) {
@@ -75,7 +93,17 @@ public class DeleteConfigRequest4 extends DeleteConfigRequest {
             deleteConfigRequest4.setGroupId(groupId);
             deleteConfigRequest4.setBeta(beta);
             deleteConfigRequest4.setAttribute(attribute);
+            deleteConfigRequest4.setNamespaceId(namespaceId);
             return deleteConfigRequest4;
         }
+    }
+
+    public static DeleteConfigRequest4 copy(String namespaceId, DeleteConfigRequest request) {
+        return DeleteConfigRequest4.sBuilder()
+                .namespaceId(namespaceId)
+                .groupId(request.getGroupId())
+                .dataId(request.getDataId())
+                .beta(request.isBeta())
+                .build();
     }
 }

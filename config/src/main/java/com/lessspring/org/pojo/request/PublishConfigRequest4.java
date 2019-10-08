@@ -26,7 +26,19 @@ import java.util.Map;
  */
 public class PublishConfigRequest4 extends PublishConfigRequest {
 
+    public static final String CLASS_NAME = PublishConfigRequest4.class.getCanonicalName();
+
+    private String namespaceId;
+
     private Map<String, Object> attribute;
+
+    public String getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Map<String, Object> getAttribute() {
         return attribute;
@@ -41,6 +53,7 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
     }
 
     public static final class Builder {
+        private String namespaceId;
         private String dataId;
         private String groupId;
         private boolean beta = false;
@@ -54,6 +67,11 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
         private boolean requiresEncryption = false;
 
         private Builder() {
+        }
+
+        public Builder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
         }
 
         public Builder dataId(String dataId) {
@@ -124,7 +142,24 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
             publishConfigRequest4.setEncryption(encryption);
             publishConfigRequest4.setRequiresEncryption(requiresEncryption);
             publishConfigRequest4.setFile(this.isFile);
+            publishConfigRequest4.setNamespaceId(namespaceId);
             return publishConfigRequest4;
         }
+    }
+
+    public static PublishConfigRequest4 copy(String namespaceId, PublishConfigRequest request) {
+        return PublishConfigRequest4.sBuilder()
+                .namespaceId(namespaceId)
+                .groupId(request.getGroupId())
+                .dataId(request.getDataId())
+                .beta(request.isBeta())
+                .clientIps(request.getClientIps())
+                .content(request.getContent())
+                .type(request.getType())
+                .file(request.getFile())
+                .isFile(request.isFile())
+                .encryption(request.getEncryption())
+                .requiresEncryption(request.isRequiresEncryption())
+                .build();
     }
 }

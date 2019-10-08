@@ -16,6 +16,9 @@
  */
 package com.lessspring.org;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +28,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -115,6 +122,40 @@ public final class DiskUtils {
             throw new RuntimeException(e);
         }
         return file;
+    }
+
+    public static void compressDirectoryToZipFile(final String rootDir, final String sourceDir,
+                                                  final ZipOutputStream zos) throws IOException {
+        final String dir = Paths.get(rootDir, sourceDir).toString();
+        final File[] files = new File(dir).listFiles();
+        assert files != null;
+        for (final File file : files) {
+            if (file.isDirectory()) {
+                compressDirectoryToZipFile(rootDir, Paths.get(sourceDir, file.getName()).toString(), zos);
+            } else {
+                zos.putNextEntry(new ZipEntry(Paths.get(sourceDir, file.getName()).toString()));
+                try (final FileInputStream in = new FileInputStream(Paths.get(rootDir, sourceDir, file.getName())
+                        .toString())) {
+                    IOUtils.copy(in, zos);
+                }
+            }
+        }
+    }
+
+    public static void unzipFile(final String sourceFile, final String outputDir) throws IOException {
+        try (final ZipInputStream zis = new ZipInputStream(new FileInputStream(sourceFile))) {
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                final String fileName = zipEntry.getName();
+                final File entryFile = new File(outputDir + File.separator + fileName);
+                FileUtils.forceMkdir(entryFile.getParentFile());
+                try (final FileOutputStream fos = new FileOutputStream(entryFile)) {
+                    IOUtils.copy(zis, fos);
+                }
+                zipEntry = zis.getNextEntry();
+            }
+            zis.closeEntry();
+        }
     }
 
 }

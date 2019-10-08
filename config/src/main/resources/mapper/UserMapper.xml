@@ -12,5 +12,5 @@
     <select id="findUserByName" resultType="com.lessspring.org.db.dto.UserDTO">
         select * from user where username = #{username}
     </select>
-    >
+
 </mapper>

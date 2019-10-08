@@ -30,6 +30,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  */
 public final class ResponseRenderUtils {
 
+    @SuppressWarnings("unchecked")
     public static Mono<ServerResponse> render(Mono dataMono) {
         return ok().header("Access-Control-Allow-Origin", "*")
                 .body(BodyInserters.fromPublisher(dataMono, ResponseData.class))

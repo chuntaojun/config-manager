@@ -14,39 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.vo;
+package com.lessspring.org.tps;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.lessspring.org.model.vo.ResponseData;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class NodeChangeRequest {
+public class ConfigFailStrategy extends FailStrategy {
 
-    private String nodeIp;
-    private int nodePort;
-
-    public String getNodeIp() {
-        return nodeIp;
-    }
-
-    public void setNodeIp(String nodeIp) {
-        this.nodeIp = nodeIp;
-    }
-
-    public int getNodePort() {
-        return nodePort;
-    }
-
-    public void setNodePort(int nodePort) {
-        this.nodePort = nodePort;
+    @Override
+    public ResponseData<?> onLimit() {
+        return ResponseData.fail();
     }
 }

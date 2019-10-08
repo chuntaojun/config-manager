@@ -14,21 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.tps;
-
-import com.lessspring.org.model.vo.ResponseData;
+package com.lessspring.org.utils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class FailStrategy {
+public final class TransactionUtils {
 
-    /**
-     * Reach the QPS threshold to trigger
-     *
-     * @return {@link ResponseData}
-     */
-    public abstract ResponseData<?> onLimit();
+    public static String buildTransactionKey(PropertiesEnum.InterestKey key, Object... more) {
+        StringBuilder sb = new StringBuilder()
+                .append(key.getType())
+                .append(".");
+        int i = 0;
+        for (; i < more.length - 1; i ++) {
+            sb.append(more[i]).append('-');
+        }
+        sb.append(more[i]);
+        return sb.toString();
+    }
 
 }

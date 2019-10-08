@@ -17,15 +17,15 @@
 package com.lessspring.org.service.config;
 
 import com.google.gson.reflect.TypeToken;
-import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.event.EventType;
+import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
-import com.lessspring.org.pojo.request.QueryConfigRequest4;
 import com.lessspring.org.raft.OperationEnum;
 import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.dto.Datum;
@@ -35,6 +35,7 @@ import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
+import com.lessspring.org.utils.TransactionUtils;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -65,8 +66,6 @@ public class ConfigOperationService {
     private final ClusterManager clusterManager;
     private FailCallback failCallback;
 
-    private final Type type = new TypeToken<Map<String, Object>>(){}.getType();
-
     public ConfigOperationService(@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
                                   ConfigPersistentHandler configPersistentHandler,
                                   ConfigTransactionCommitCallback commitCallback,
@@ -92,60 +91,43 @@ public class ConfigOperationService {
         disruptorHolder.shutdown();
     }
 
-    public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest4 request) {
+    public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request) {
         return ResponseData.success(persistentHandler.readConfigContent(namespaceId, request));
     }
 
-    public ResponseData<?> publishConfig(String namespaceId, PublishConfigRequest4 request) {
-        Map<String, Object> attribute = new HashMap<>(2);
-        attribute.put("namespaceId", namespaceId);
-        attribute.put("publishConfigRequest", request);
-        String key = NameUtils.buildName(PropertiesEnum.InterestKey.CONFIG_DARA.getType(), namespaceId, request.getGroupId(), request.getDataId());
-        Datum datum = new Datum(key, GsonUtils.toJsonBytes(attribute), Map.class.getCanonicalName());
+    public ResponseData<?> publishConfig(String namespaceId, PublishConfigRequest request) {
+        PublishConfigRequest4 request4 = PublishConfigRequest4.copy(namespaceId, request);
+        String key = TransactionUtils.buildTransactionKey(PropertiesEnum.InterestKey.CONFIG_DATA, namespaceId,
+                request.getGroupId(), request.getDataId());
+        Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4), PublishConfigRequest4.CLASS_NAME);
         datum.setOperationEnum(OperationEnum.PUBLISH);
-        CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum, failCallback);
-        try {
-            return future.get(1000, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return ResponseData.fail(e);
-        }
+        return commit(datum);
     }
 
-    public ResponseData<?> modifyConfig(String namespaceId, PublishConfigRequest4 request) {
-        Map<String, Object> attribute = new HashMap<>(2);
-        attribute.put("namespaceId", namespaceId);
-        attribute.put("publishConfigRequest", request);
-        String key = NameUtils.buildName(PropertiesEnum.InterestKey.CONFIG_DARA.getType(), namespaceId, request.getGroupId(), request.getDataId());
-        Datum datum = new Datum(key, GsonUtils.toJsonBytes(attribute), Map.class.getCanonicalName());
+    public ResponseData<?> modifyConfig(String namespaceId, PublishConfigRequest request) {
+        PublishConfigRequest4 request4 = PublishConfigRequest4.copy(namespaceId, request);
+        String key = TransactionUtils.buildTransactionKey(PropertiesEnum.InterestKey.CONFIG_DATA, namespaceId,
+                request.getGroupId(), request.getDataId());
+        Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4), PublishConfigRequest4.CLASS_NAME);
         datum.setOperationEnum(OperationEnum.MODIFY);
-        CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum, failCallback);
-        try {
-            return future.get(1000, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return ResponseData.fail(e);
-        }
+        return commit(datum);
     }
 
     public ResponseData<?> removeConfig(String namespaceId, DeleteConfigRequest request) {
-        Map<String, Object> attribute = new HashMap<>(2);
-        attribute.put("namespaceId", namespaceId);
-        attribute.put("deleteConfigRequest", request);
-        String key = NameUtils.buildName(PropertiesEnum.InterestKey.CONFIG_DARA.getType(), namespaceId, request.getGroupId(), request.getDataId());
-        Datum datum = new Datum(key, GsonUtils.toJsonBytes(attribute), Map.class.getCanonicalName());
+        DeleteConfigRequest4 request4 = DeleteConfigRequest4.copy(namespaceId, request);
+        String key = TransactionUtils.buildTransactionKey(PropertiesEnum.InterestKey.CONFIG_DATA, namespaceId,
+                request.getGroupId(), request.getDataId());
+        Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4), DeleteConfigRequest4.CLASS_NAME);
         datum.setOperationEnum(OperationEnum.DELETE);
-        CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum, failCallback);
-        try {
-            return future.get(1000, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return ResponseData.fail(e);
-        }
+        return commit(datum);
     }
 
     private void publishEvent(ConfigChangeEvent source) {
         disruptorHolder.publishEvent((target, sequence) -> ConfigChangeEvent.copy(sequence, source, target));
     }
 
-    private ConfigChangeEvent buildConfigChangeEvent(String namespaceId, BaseConfigRequest request, String content, String encryption, EventType type) {
+    private ConfigChangeEvent buildConfigChangeEvent(String namespaceId, BaseConfigRequest request,
+                                                     String content, String encryption, EventType type) {
         return ConfigChangeEvent.builder()
                 .namespaceId(namespaceId)
                 .dataId(request.getDataId())
@@ -157,14 +139,22 @@ public class ConfigOperationService {
                 .build();
     }
 
+    private ResponseData<?> commit(Datum datum) {
+        CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum, failCallback);
+        try {
+            return future.get(1000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return ResponseData.fail(e);
+        }
+    }
+
     private Consumer<Transaction> publishConsumer() {
         return transaction -> {
-            Map<String, Object> attribute = GsonUtils.toObj(transaction.getData(), type);
-            String namespaceId = (String) attribute.get("namespaceId");
-            PublishConfigRequest request = (PublishConfigRequest) attribute.get("publishConfigRequest");
-            if (persistentHandler.saveConfigInfo(namespaceId, request)) {
-                ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), request.getEncryption(), EventType.PUBLISH);
-                event.setConfigType(request.getType());
+            PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
+            if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)) {
+                ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                        request4.getContent(), request4.getEncryption(), EventType.PUBLISH);
+                event.setConfigType(request4.getType());
                 publishEvent(event);
             }
         };
@@ -172,12 +162,11 @@ public class ConfigOperationService {
 
     private Consumer<Transaction> modifyConsumer() {
         return transaction -> {
-            Map<String, Object> attribute = GsonUtils.toObj(transaction.getData(), type);
-            String namespaceId = (String) attribute.get("namespaceId");
-            PublishConfigRequest request = (PublishConfigRequest) attribute.get("publishConfigRequest");
-            if (persistentHandler.modifyConfigInfo(namespaceId, request)) {
-                ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, request.getContent(), request.getEncryption(), EventType.MODIFIED);
-                event.setConfigType(request.getType());
+            PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
+            if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(), request4)) {
+                ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                        request4.getContent(), request4.getEncryption(), EventType.MODIFIED);
+                event.setConfigType(request4.getType());
                 publishEvent(event);
             }
         };
@@ -185,11 +174,10 @@ public class ConfigOperationService {
 
     private Consumer<Transaction> deleteConsumer() {
         return transaction -> {
-            Map<String, Object> attribute = GsonUtils.toObj(transaction.getData(), type);
-            String namespaceId = (String) attribute.get("namespaceId");
-            DeleteConfigRequest request = (DeleteConfigRequest) attribute.get("deleteConfigRequest");
-            if (persistentHandler.removeConfigInfo(namespaceId, request)) {
-                ConfigChangeEvent event = buildConfigChangeEvent(namespaceId, request, "", "", EventType.DELETE);
+            DeleteConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), DeleteConfigRequest4.class);
+            if (persistentHandler.removeConfigInfo(request4.getNamespaceId(), request4)) {
+                ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                        "", "", EventType.DELETE);
                 publishEvent(event);
             }
         };

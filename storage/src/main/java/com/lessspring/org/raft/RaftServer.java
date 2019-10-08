@@ -72,7 +72,7 @@ class RaftServer implements LifeCycle {
             throw new RuntimeException(e);
         }
         String selfIp = nodeManager.getSelf().getNodeIp();
-        int selfPort = Integer.parseInt(nodeManager.getSelf().getNodeIp()) + 1000;
+        int selfPort = nodeManager.getSelf().getPort() + 1000;
         conf = new Configuration();
         nodeManager.stream().forEach(stringServerNodeEntry -> {
             ServerNode _node = stringServerNodeEntry.getValue();

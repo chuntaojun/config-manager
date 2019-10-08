@@ -48,6 +48,6 @@ public @interface LimitRule {
      *
      * @return class which extends FailStrategy
      */
-    Class<? extends FailStrategy> failStrategy();
+    Class<? extends FailStrategy> failStrategy() default ConfigFailStrategy.class;
 
 }

@@ -18,6 +18,7 @@ package com.lessspring.org.raft;
 
 import com.lessspring.org.raft.vo.ServerNode;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -57,4 +58,9 @@ public class NodeManager {
     public Stream<Map.Entry<String, ServerNode>> stream() {
         return nodeMap.entrySet().stream();
     }
+
+    public Collection<ServerNode> serverNodes() {
+        return nodeMap.values();
+    }
+
 }

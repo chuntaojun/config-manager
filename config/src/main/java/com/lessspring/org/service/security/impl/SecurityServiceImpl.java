@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -48,7 +50,7 @@ public class SecurityServiceImpl implements SecurityService {
     public String apply4Authorization(LoginRequest loginRequest) {
         Optional<UserDTO> userDTO = Optional.ofNullable(userMapper.findUserByName(loginRequest.getUsername()));
         String[] jwt = new String[]{null};
-        userDTO.ifPresent(userDTO1 -> jwt[0] = jwtBuildFactory.createToken(userDTO1));
+        userDTO.ifPresent(dto -> jwt[0] = jwtBuildFactory.createToken(dto));
         return jwt[0];
     }
 
@@ -64,7 +66,9 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     public boolean isExpire(String token) {
-        return false;
+        Optional<DecodedJWT> optional = verify(token);
+        return optional.map(decodedJWT -> TOKEN_STATUS_EXPIRE.compareTo(jwtBuildFactory.isExpire(decodedJWT)) == 0)
+                .orElse(true);
     }
 
 }

@@ -21,7 +21,7 @@ import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.pojo.vo.NodeChangeRequest;
+import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.SnapshotOperate;
@@ -58,12 +58,12 @@ public class ClusterManager {
 
     @PostConstruct
     public void init() {
-        clusterServer = new ClusterServer();
-        clusterServer.init();
-        clusterServer.registerTransactionCommitCallback(commitCallback);
-        clusterServer.registerSnapshotOperator(snapshotOperate);
-        eventBus.register(this);
-        eventBus.register(clusterServer);
+//        clusterServer = new ClusterServer();
+//        clusterServer.init();
+//        clusterServer.registerTransactionCommitCallback(commitCallback);
+//        clusterServer.registerSnapshotOperator(snapshotOperate);
+//        eventBus.register(this);
+//        eventBus.register(clusterServer);
     }
 
     public Mono<?> nodeAdd(NodeChangeRequest request) {

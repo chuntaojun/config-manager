@@ -23,6 +23,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.raft.NodeManager;
+import com.lessspring.org.raft.vo.ServerNode;
 import com.lessspring.org.repository.NamespacePermissionsMapper;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
@@ -53,15 +55,13 @@ public class JwtBuildFactory {
     @Resource
     private NamespacePermissionsMapper permissionsMapper;
 
+    private final NodeManager nodeManager = NodeManager.getInstance();
+
     private final Algorithm algorithm;
-    private final JwtTokenCache tokenCache;
 
     public JwtBuildFactory(@Qualifier(value = "JwtTokenAlgorithm") Algorithm algorithm) {
-        this.tokenCache = new JwtTokenCache();
         this.algorithm = algorithm;
     }
-
-    private final static String ISS_USER = "LESS_SPRING";
 
     public String createToken(UserDTO userDTO) {
         Calendar calendar = new GregorianCalendar();
@@ -73,21 +73,29 @@ public class JwtBuildFactory {
         privilege.setOwnerNamespace(permissionsMapper.findNamespaceIdByUserId(userDTO.getId()));
         String jwt =  JWT
                 .create()
-                .withIssuer(ISS_USER)
+                .withIssuer(GsonUtils.toJson(nodeManager.getSelf()))
                 .withSubject(GsonUtils.toJson(privilege))
                 .withExpiresAt(calendar.getTime())
                 .sign(algorithm);
-        tokenCache.addToken(jwt, userDTO.getId());
         return jwt;
     }
 
     public Optional<DecodedJWT> tokenVerify(String jwt) {
         DecodedJWT decodedJWT = null;
-        try {
-            JWTVerifier verifier = JWT.require(algorithm).withIssuer(ISS_USER).build();
-            decodedJWT = verifier.verify(jwt);
-        } catch (JWTVerificationException exception) {
-            log.error(exception.getMessage());
+        boolean goOn = false;
+        for (ServerNode node : nodeManager.serverNodes()) {
+            try {
+                JWTVerifier verifier = JWT.require(algorithm)
+                        .withIssuer(GsonUtils.toJson(node)).build();
+                decodedJWT = verifier.verify(jwt);
+                goOn = false;
+            } catch (JWTVerificationException exception) {
+                log.error(exception.getMessage());
+                goOn = true;
+            }
+            if (!goOn) {
+                break;
+            }
         }
         return Optional.ofNullable(decodedJWT);
     }

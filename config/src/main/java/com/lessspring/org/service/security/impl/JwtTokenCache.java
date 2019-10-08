@@ -32,7 +32,7 @@ public class JwtTokenCache {
 
     public JwtTokenCache() {
         this.tokenCache = CacheBuilder.newBuilder()
-                .maximumSize(Integer.MAX_VALUE)
+                .maximumSize(65535)
                 .expireAfterWrite(Duration.ofSeconds(30))
                 .build();
     }

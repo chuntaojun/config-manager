@@ -19,10 +19,8 @@ package com.lessspring.org.service.distributed;
 import com.lessspring.org.raft.OperationEnum;
 import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
-import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -54,6 +52,6 @@ public class ConfigTransactionCommitCallback implements TransactionCommitCallbac
 
     @Override
     public boolean interest(String trsKey) {
-        return trsKey.contains(PropertiesEnum.InterestKey.CONFIG_DARA.getType());
+        return trsKey.contains(PropertiesEnum.InterestKey.CONFIG_DATA.getType());
     }
 }

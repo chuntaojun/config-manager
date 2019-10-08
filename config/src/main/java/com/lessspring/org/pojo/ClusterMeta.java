@@ -14,21 +14,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.tps;
+package com.lessspring.org.pojo;
 
-import com.lessspring.org.model.vo.ResponseData;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class FailStrategy {
+public class ClusterMeta {
 
-    /**
-     * Reach the QPS threshold to trigger
-     *
-     * @return {@link ResponseData}
-     */
-    public abstract ResponseData<?> onLimit();
+    private String name;
+
+    private Map<String, Object> attributes = new HashMap<>(8);
+
+    public ClusterMeta(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public synchronized ClusterMeta addAttribute(String key, Object value) {
+        attributes.put(key, value);
+        return this;
+    }
+
+    public synchronized ClusterMeta removeAttribute(String key) {
+        attributes.remove(key);
+        return this;
+    }
 
 }
