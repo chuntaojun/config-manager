@@ -32,12 +32,12 @@
 
 <!--  find config-content by QueryConfigInfo  -->
     <select id="findConfigInfoContent" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="java.lang.String">
-        SELECT content FROM config_info WHERE namespace_id = #{queryConfigInfo.namespaceId} and group_id = #{queryConfigInfo.groupId} and data_id = #{queryConfigInfo.dataId}
+        SELECT content FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
     </select>
 
 <!--  find config by QueryConfigInfo  -->
     <select id="findConfigInfo" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
-        SELECT * FROM config_info WHERE namespace_id = #{queryConfigInfo.namespaceId} and group_id = #{queryConfigInfo.groupId} and data_id = #{queryConfigInfo.dataId}
+        SELECT * FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
     </select>
 
 </mapper>

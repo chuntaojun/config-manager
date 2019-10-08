@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.cluster;
 
+import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.api.ApiConstant;
@@ -33,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.lessspring.org.api.Code.SUCCESS;
+import static com.lessspring.org.constant.Code.SUCCESS;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -65,7 +66,7 @@ public class ClusterNodeWatch extends Observable implements LifeCycle {
 
         notifyObservers(nodeList);
 
-        executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(5), TimeUnit.MILLISECONDS);
+        executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(15), TimeUnit.MILLISECONDS);
 
     }
 
@@ -79,10 +80,10 @@ public class ClusterNodeWatch extends Observable implements LifeCycle {
         Retry<Boolean> retry = new Retry<Boolean>() {
             @Override
             protected Boolean run() throws Exception {
-                ResponseData<Set> response = httpClient.get(ApiConstant.REFRESH_CLUSTER_NODE_INFO, Header.EMPTY, Query.EMPTY, Set.class);
+                ResponseData<Set<String>> response = httpClient.get(ApiConstant.REFRESH_CLUSTER_NODE_INFO,
+                        Header.EMPTY, Query.EMPTY, new TypeToken<ResponseData<Set<String>>>(){});
                 if (response.getCode() == SUCCESS.getCode()) {
-                    Set<String> result = (Set<String>) response.getData();
-                    ClusterNodeWatch.this.nodeList = result;
+                    ClusterNodeWatch.this.nodeList = response.getData();
                     return true;
                 }
                 return false;

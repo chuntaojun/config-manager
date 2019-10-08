@@ -27,7 +27,7 @@ public class PublishConfigRequest extends BaseConfigRequest {
     private boolean beta = false;
     private String clientIps;
     private String content;
-    private String type;
+    private String type = "text";
     private boolean isFile = false;
     private byte[] file;
     private String encryption = StringUtils.EMPTY;

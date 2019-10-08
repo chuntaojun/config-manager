@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.http;
 
+import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.http.impl.EventReceiver;
 import com.lessspring.org.http.param.Body;
@@ -35,10 +36,10 @@ public interface HttpClient extends LifeCycle {
      * @param url url
      * @param header http header param
      * @param query http query param
-     * @param cls return type
+     * @param token return type
      * @return {@link ResponseData<T>}
      */
-    <T> ResponseData<T> get(String url, Header header, Query query, Class<T> cls);
+    <T> ResponseData<T> get(String url, Header header, Query query, TypeToken<ResponseData<T>> token);
 
     /**
      * http delete
@@ -46,10 +47,10 @@ public interface HttpClient extends LifeCycle {
      * @param url url
      * @param header http header param
      * @param query http query param
-     * @param cls return type
+     * @param token return type
      * @return {@link ResponseData<T>}
      */
-    <T> ResponseData<T> delete(String url, Header header, Query query, Class<T> cls);
+    <T> ResponseData<T> delete(String url, Header header, Query query, TypeToken<ResponseData<T>> token);
 
     /**
      * http put
@@ -58,10 +59,10 @@ public interface HttpClient extends LifeCycle {
      * @param header http header param
      * @param query http query param
      * @param body http body param
-     * @param cls return type
+     * @param token return type
      * @return {@link ResponseData}
      */
-    <T> ResponseData<T> put(String url, Header header, Query query, Body body, Class<T> cls);
+    <T> ResponseData<T> put(String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token);
 
     /**
      * http post
@@ -70,10 +71,10 @@ public interface HttpClient extends LifeCycle {
      * @param header http header param
      * @param query http query param
      * @param body http body param
-     * @param cls return type
+     * @param token return type
      * @return {@link ResponseData}
      */
-    <T> ResponseData<T> post(String url, Header header, Query query, Body body, Class<T> cls);
+    <T> ResponseData<T> post(String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token);
 
     /**
      * server send event

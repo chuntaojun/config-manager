@@ -91,12 +91,12 @@ public class WatchConfigWorker implements LifeCycle {
 
     public void registerListener(String groupId, String dataId, String encryption, AbstractListener listener) {
         CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
-        cacheItem.addListener(new WrapperListener(listener));
+        cacheItem.addListener(new WrapperListener(listener, encryption));
     }
 
     public void deregisterListener(String groupId, String dataId, AbstractListener listener) {
         CacheItem cacheItem = getCacheItem(groupId, dataId);
-        cacheItem.removeListener(new WrapperListener(listener));
+        cacheItem.removeListener(new WrapperListener(listener, ""));
     }
 
     private void notifyWatcher(ConfigInfo configInfo) {
@@ -183,7 +183,7 @@ public class WatchConfigWorker implements LifeCycle {
         final String groupId = configInfo.getGroupId();
         final String dataId = configInfo.getDataId();
         final String key = NameUtils.buildName(groupId, dataId);
-        final String lastMd5 = MD5Utils.md5Hex(configInfo.getBytes());
+        final String lastMd5 = MD5Utils.md5Hex(configInfo.toBytes());
         final CacheItem oldItem = cacheItemMap.get(key);
         if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {
             oldItem.setLastMd5(lastMd5);

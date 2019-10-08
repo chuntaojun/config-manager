@@ -25,14 +25,17 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.WebSession;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Authority inspection actuators
@@ -47,38 +50,49 @@ public class AuthOperationActuator {
 
     private final Map<String, Optional<NeedAuth>> cache = new ConcurrentHashMap<>(8);
 
+    @Value("${config.manager.environment}")
+    private String developEnv;
+
     @Pointcut(value = "@annotation(com.lessspring.org.configuration.security.NeedAuth)")
-    private void auth() {}
+    private void auth() {
+    }
 
     @Around("auth()")
     public Object aroundService(ProceedingJoinPoint pjp) throws Throwable {
-        String methodName = pjp.getSignature().getName();
-        Class<?> classTarget = pjp.getTarget().getClass();
-        cache.computeIfAbsent(methodName, s -> {
-            NeedAuth needAuth = null;
-            try {
-                Method method = classTarget.getMethod(methodName);
-                if (method.isAnnotationPresent(NeedAuth.class)) {
-                    needAuth = method.getDeclaredAnnotation(NeedAuth.class);
+        if (!Objects.equals(developEnv, "develop")) {
+            String methodName = pjp.getSignature().getName();
+            Class<?> classTarget = pjp.getTarget().getClass();
+            cache.computeIfAbsent(methodName, s -> {
+                NeedAuth needAuth = null;
+                try {
+                    Method method = classTarget.getMethod(methodName);
+                    if (method.isAnnotationPresent(NeedAuth.class)) {
+                        needAuth = method.getDeclaredAnnotation(NeedAuth.class);
+                    }
+                } catch (NoSuchMethodException ignore) {
                 }
-            } catch (NoSuchMethodException ignore) {
-            }
-            return Optional.ofNullable(needAuth);
-        });
-        Optional<NeedAuth> optionalNeedAuth = cache.getOrDefault(methodName, Optional.empty());
-        optionalNeedAuth.ifPresent(authMethod -> {
-            ServerRequest request = (ServerRequest) pjp.getArgs()[0];
-            Optional<Object> optional = ReactiveWebUtils.getAttribute("privilege", request);
-            String namespaceId = request.queryParam(authMethod.argueName()).orElse("default");
-            optional.ifPresent(o -> {
-                Privilege privilege = (Privilege) o;
-                if (!Objects.equals(namespaceId, privilege.getOwnerNamespace())) {
-                    log.error("No permission to access this resource, target namespaceId : {}, owner namespaceId : {}, " +
-                            "role : {}", namespaceId, privilege.getOwnerNamespace(), privilege.getRole());
+                return Optional.ofNullable(needAuth);
+            });
+            Optional<NeedAuth> optionalNeedAuth = cache.getOrDefault(methodName, Optional.empty());
+            optionalNeedAuth.ifPresent(authMethod -> {
+                ServerRequest request = (ServerRequest) pjp.getArgs()[0];
+                boolean[] throwables = new boolean[]{false};
+                request.exchange().getSession()
+                        .subscribe(webSession -> {
+                            String namespaceId = request.queryParam(authMethod.argueName()).orElse("default");
+                            Privilege privilege = webSession.getAttribute("privilege");
+                            log.info("privilege info : {}", privilege);
+                            if (Objects.isNull(privilege) || !Objects.equals(namespaceId, privilege.getOwnerNamespace())) {
+                                log.error("No permission to access this resource, target namespaceId : {}, owner namespaceId : {}, " +
+                                        "role : {}", namespaceId, privilege.getOwnerNamespace(), privilege.getRole());
+                                throwables[0] = true;
+                            }
+                        });
+                if (throwables[0]) {
                     throw new AuthForbidException("No permission to access this resource");
                 }
             });
-        });
+        }
         return pjp.proceed();
     }
 

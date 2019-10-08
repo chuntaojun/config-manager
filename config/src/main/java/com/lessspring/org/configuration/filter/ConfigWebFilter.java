@@ -59,8 +59,6 @@ public class ConfigWebFilter implements WebFilter {
     @Value("${com.lessspring.org.config-manager.anyuri}")
     private String[] anyOneUri;
 
-    private Set<String> whiteUrls = new HashSet<>();
-
     private final FilterChain filterChain = new DefaultFilterChain();
 
     private final SecurityService securityService;
@@ -72,13 +70,11 @@ public class ConfigWebFilter implements WebFilter {
     @PostConstruct
     public void init() {
         filterChain.init();
-        whiteUrls.addAll(Arrays.asList(anyOneUri));
     }
 
     @PreDestroy
     public void destroy() {
         filterChain.destroy();
-        whiteUrls.clear();
     }
 
     @NotNull
@@ -101,7 +97,7 @@ public class ConfigWebFilter implements WebFilter {
     boolean permissionIntercept(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
-        if (whiteUrls.contains(path)) {
+        if (uriMatcher(path, anyOneUri)) {
             return true;
         }
         String token = request.getHeaders().getFirst(StringConst.TOKEN_HEADER_NAME);
@@ -113,11 +109,16 @@ public class ConfigWebFilter implements WebFilter {
         }
         Optional<DecodedJWT> result = securityService.verify(token);
         result.ifPresent(decodedJWT -> {
-            ServerRequest serverRequest = (ServerRequest) request;
-            Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(), Privilege.class);
-            serverRequest.attributes().put("privilege", privilege);
+            exchange.getSession().subscribe(webSession -> {
+                Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(), Privilege.class);
+                webSession.getAttributes().put("privilege", privilege);
+            });
         });
         return result.isPresent();
+    }
+
+    private boolean uriMatcher(String path, String[] matcherUri) {
+        return Arrays.stream(matcherUri).anyMatch(path::startsWith);
     }
 
     @SuppressWarnings("unchecked")

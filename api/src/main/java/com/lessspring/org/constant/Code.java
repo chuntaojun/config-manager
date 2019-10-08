@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.api;
+package com.lessspring.org.constant;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -24,12 +24,47 @@ public enum Code {
     /**
      * success
      */
-    SUCCESS(200, "SUCCESS"),
+    SUCCESS(200, "Success"),
 
     /**
      * failure
      */
-    FAILURE(500, "FAILURE")
+    FAILURE(500, "Failure"),
+
+    /**
+     * inner error
+     */
+    ERROR(-1, "Inner Error"),
+
+    /**
+     * unauthorized
+     */
+    UNAUTHORIZED(401, "Unauthorized"),
+
+    /**
+     * not found
+     */
+    NOT_FOUND(404, "not found"),
+
+    /**
+     * redirect
+     */
+    REDIRECT(503, "Redirect"),
+
+    /**
+     * hash no privilege
+     */
+    HASH_NO_PRIVILEGE(1001, "no privilege"),
+
+    /**
+     * need login
+     */
+    NEED_LOGIN(1002, "need login"),
+
+    /**
+     * server busy
+     */
+    SERVER_BUSY(2001, "Server busy"),
     ;
 
     private final int code;

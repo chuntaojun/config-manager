@@ -67,4 +67,13 @@ public class Privilege {
         return 0 == target.compareTo(role);
     }
 
+    @Override
+    public String toString() {
+        return "Privilege{" +
+                "username='" + username + '\'' +
+                ", ownerNamespace='" + ownerNamespace + '\'' +
+                ", jwt='" + jwt + '\'' +
+                ", role=" + role +
+                '}';
+    }
 }

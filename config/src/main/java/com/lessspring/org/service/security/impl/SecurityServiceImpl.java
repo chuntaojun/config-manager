@@ -18,12 +18,14 @@ package com.lessspring.org.service.security.impl;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.db.dto.UserDTO;
+import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.repository.UserMapper;
 import com.lessspring.org.service.security.SecurityService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,10 +49,15 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public String apply4Authorization(LoginRequest loginRequest) {
+    public JwtResponse apply4Authorization(LoginRequest loginRequest) {
         Optional<UserDTO> userDTO = Optional.ofNullable(userMapper.findUserByName(loginRequest.getUsername()));
-        String[] jwt = new String[]{null};
-        userDTO.ifPresent(dto -> jwt[0] = jwtBuildFactory.createToken(dto));
+        JwtResponse[] jwt = new JwtResponse[]{null};
+        userDTO.ifPresent(dto -> {
+            if (!Objects.equals(loginRequest.getPassword(), dto.getPassword())) {
+                return;
+            }
+            jwt[0] = jwtBuildFactory.createToken(dto);
+        });
         return jwt[0];
     }
 

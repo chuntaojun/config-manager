@@ -66,6 +66,7 @@ public class CachePersistentHandler implements PersistentHandler {
                 return persistentHandler.readConfigContent(namespaceId, request);
             }
             configInfo = GsonUtils.toObj(s, ConfigInfo.class);
+            configInfo.setEncryption("");
         } finally {
             ConfigCacheItemManager.releaseReadLock(cacheItem);
         }

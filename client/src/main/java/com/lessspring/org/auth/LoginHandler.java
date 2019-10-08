@@ -16,7 +16,7 @@
  */
 package com.lessspring.org.auth;
 
-import com.google.common.eventbus.Subscribe;
+import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.api.ApiConstant;
@@ -75,10 +75,11 @@ public class LoginHandler implements Observer, LifeCycle {
         request.setUsername(username);
         request.setPassword(password);
         final Body body = Body.objToBody(request);
-        ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN, Header.EMPTY, Query.EMPTY, body, JwtResponse.class);
-        if (responseData.isOk()) {
+        ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN, Header.EMPTY, Query.EMPTY,
+                body, new TypeToken<ResponseData<JwtResponse>>(){});
+        if (responseData.ok()) {
             JwtResponse jwt = responseData.getData();
-            authHolder.updateToken(jwt.getToken());
+            authHolder.updateToken(jwt);
             call.run();
         }
     }

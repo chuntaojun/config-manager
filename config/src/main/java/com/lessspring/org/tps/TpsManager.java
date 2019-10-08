@@ -68,7 +68,7 @@ public class TpsManager {
         }
 
         public ResponseData<?> tryAcquire() {
-            return rateLimiter.tryAcquire() ? ResponseData.fail() : strategy.onLimit();
+            return rateLimiter.tryAcquire() ? null : strategy.onLimit();
         }
     }
 

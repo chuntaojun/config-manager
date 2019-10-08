@@ -18,7 +18,10 @@ package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.dto.Datum;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -39,6 +42,10 @@ public class ConfigStoreClosure implements Closure {
         if (closure != null) {
             closure.run(status);
         }
+    }
+
+    public Closure getClosure() {
+        return closure;
     }
 
     public Datum getDatum() {

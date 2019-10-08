@@ -17,6 +17,7 @@
 package com.lessspring.org.service.security;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
 
 import java.util.Optional;
@@ -33,7 +34,7 @@ public interface SecurityService {
      * @param loginRequest {@link LoginRequest}
      * @return jwt token
      */
-    String apply4Authorization(LoginRequest loginRequest);
+    JwtResponse apply4Authorization(LoginRequest loginRequest);
 
     /**
      * Refresh for authorization code

@@ -25,6 +25,7 @@ import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -81,6 +82,7 @@ public class ConfigCacheItemManager {
 
     public boolean updateContent(final String namespaceId, final ConfigChangeEvent event) {
         CacheItem cacheItem = queryCacheItem(namespaceId, event.getGroupId(), event.getDataId());
+        event.setEncryption(StringUtils.EMPTY);
         final int lockResult = tryWriteLock(cacheItem);
         assert (lockResult != 0);
         if (lockResult < 0) {

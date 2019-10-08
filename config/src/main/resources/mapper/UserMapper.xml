@@ -4,13 +4,13 @@
 
     <resultMap type="com.lessspring.org.db.dto.UserDTO" id="UserDTO">
         <id column="id" property="id"/>
-        <result column="username" property="username"/>
+        <result column="user_name" property="username"/>
         <result column="password" property="password"/>
         <result column="role_type" property="roleType"/>
     </resultMap>
 
     <select id="findUserByName" resultType="com.lessspring.org.db.dto.UserDTO">
-        select * from user where username = #{username}
+        select * from user where user_name = #{username}
     </select>
 
 </mapper>

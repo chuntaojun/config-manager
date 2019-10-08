@@ -18,12 +18,14 @@ package com.lessspring.org.cluster;
 
 import com.lessspring.org.LifeCycle;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -40,6 +42,8 @@ public class ClusterChoose implements Observer, LifeCycle {
 
     private String lastClusterIp;
 
+    private final AtomicBoolean initialize = new AtomicBoolean(false);
+
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
     private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
@@ -53,9 +57,11 @@ public class ClusterChoose implements Observer, LifeCycle {
 
     @Override
     public void init() {
-        watch.register(this);
-        clusterInfos = watch.copyNodeList();
-        clusterFind = clusterInfos.iterator();
+        if (initialize.compareAndSet(false, true)) {
+            watch.register(this);
+            clusterInfos = watch.copyNodeList();
+            clusterFind = clusterInfos.iterator();
+        }
     }
 
     @Override
@@ -72,6 +78,9 @@ public class ClusterChoose implements Observer, LifeCycle {
     public void refreshClusterIp() {
         readLock.lock();
         try {
+            if (Objects.isNull(clusterInfos)) {
+                init();
+            }
             if (Objects.isNull(clusterFind) || !clusterFind.hasNext()) {
                 clusterFind = clusterInfos.iterator();
             }

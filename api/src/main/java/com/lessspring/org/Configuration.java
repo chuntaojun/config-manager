@@ -19,6 +19,8 @@ package com.lessspring.org;
 import lombok.Data;
 import lombok.ToString;
 
+import java.nio.file.Paths;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -27,11 +29,11 @@ import lombok.ToString;
 @ToString
 public class Configuration {
 
-    private String namespaceId;
+    private String namespaceId = "default";
 
     private String servers;
 
-    private String cachePath;
+    private String cachePath = Paths.get(System.getProperty("user.home"), "config_manager_client").toString();
 
     private String clientId;
 
@@ -46,7 +48,7 @@ public class Configuration {
     }
 
     public static final class Builder {
-        private String namespaceId;
+        private String namespaceId = "default";
         private String servers;
         private String cachePath;
         private String clientId;

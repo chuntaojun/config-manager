@@ -14,9 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
-
-import com.lessspring.org.utils.GsonUtils;
+package com.lessspring.org.raft;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -42,10 +40,5 @@ public class TransactionException extends Exception {
 
     protected TransactionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-    }
-
-    @Override
-    public String toString() {
-        return GsonUtils.toJson(this.getCause());
     }
 }

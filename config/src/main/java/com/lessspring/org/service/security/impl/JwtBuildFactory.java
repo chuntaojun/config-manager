@@ -22,6 +22,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.db.dto.UserDTO;
+import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.vo.ServerNode;
@@ -30,6 +31,7 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -42,7 +44,6 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_EXPIRE_RANGE;
 import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
 import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_HEALTH;
 import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_REFRESH;
-import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_SURVIVAL_MILLISECOND;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -51,6 +52,9 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_SURVIVAL_MILLISE
 @Slf4j
 @Component
 public class JwtBuildFactory {
+
+    @Value("${com.lesspring.org.config-manger.jwt.survival.time.second}")
+    private int tokenSurvival;
 
     @Resource
     private NamespacePermissionsMapper permissionsMapper;
@@ -63,21 +67,25 @@ public class JwtBuildFactory {
         this.algorithm = algorithm;
     }
 
-    public String createToken(UserDTO userDTO) {
+    public JwtResponse createToken(UserDTO userDTO) {
+        final JwtResponse response = new JwtResponse();
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(new Date());
-        calendar.add(Calendar.SECOND, TOKEN_SURVIVAL_MILLISECOND.getValue());
+        calendar.add(Calendar.SECOND, tokenSurvival);
         Privilege privilege = new Privilege();
-        privilege.setRole(PropertiesEnum.Role.choose(userDTO.getRoleType()));
+        privilege.setRole(PropertiesEnum.Role.choose(userDTO.getRoleType() == null ?
+                PropertiesEnum.Role.CUSTOMER.getType() : userDTO.getRoleType()));
         privilege.setUsername(userDTO.getUsername());
         privilege.setOwnerNamespace(permissionsMapper.findNamespaceIdByUserId(userDTO.getId()));
-        String jwt =  JWT
+        String jwt = JWT
                 .create()
                 .withIssuer(GsonUtils.toJson(nodeManager.getSelf()))
                 .withSubject(GsonUtils.toJson(privilege))
                 .withExpiresAt(calendar.getTime())
                 .sign(algorithm);
-        return jwt;
+        response.setExpireTime(calendar.getTime().getTime());
+        response.setToken(jwt);
+        return response;
     }
 
     public Optional<DecodedJWT> tokenVerify(String jwt) {

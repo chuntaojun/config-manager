@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +50,7 @@ public class ClusterManager {
     private ClusterServer clusterServer;
     private final SnapshotOperate snapshotOperate;
     private final ConfigTransactionCommitCallback commitCallback;
+    private final AtomicBoolean initialize = new AtomicBoolean(false);
 
     public ClusterManager(ConfigTransactionCommitCallback commitCallback,
                           SnapshotOperate snapshotOperate) {
@@ -56,14 +58,15 @@ public class ClusterManager {
         this.snapshotOperate = snapshotOperate;
     }
 
-    @PostConstruct
     public void init() {
-//        clusterServer = new ClusterServer();
-//        clusterServer.init();
-//        clusterServer.registerTransactionCommitCallback(commitCallback);
-//        clusterServer.registerSnapshotOperator(snapshotOperate);
-//        eventBus.register(this);
-//        eventBus.register(clusterServer);
+        if (initialize.compareAndSet(false, true)) {
+            clusterServer = new ClusterServer();
+            clusterServer.registerTransactionCommitCallback(commitCallback);
+            clusterServer.registerSnapshotOperator(snapshotOperate);
+            clusterServer.init();
+            eventBus.register(this);
+            eventBus.register(clusterServer);
+        }
     }
 
     public Mono<?> nodeAdd(NodeChangeRequest request) {

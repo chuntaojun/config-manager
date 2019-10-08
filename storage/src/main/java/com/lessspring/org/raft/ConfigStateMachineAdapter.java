@@ -24,6 +24,7 @@ import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.lessspring.org.SerializerUtils;
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.dto.Datum;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -56,6 +58,7 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
         int applied = 0;
         try {
             while (iter.hasNext()) {
+                Status status = Status.OK();
                 Datum datum = null;
                 ConfigStoreClosure closure = null;
                 try {
@@ -70,17 +73,21 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
                             datum.getValue(), datum.getOperationEnum());
                     // For each transaction, according to the different processing of
                     // the key to the callback interface
-                    callbacks.forEach(commitCallback -> {
+                    for (TransactionCommitCallback commitCallback : callbacks) {
                         if (commitCallback.interest(transaction.getKey())) {
-                            commitCallback.onApply(transaction);
+                            try {
+                                commitCallback.onApply(transaction);
+                            } catch (TransactionException e) {
+                                status = new Status(RaftError.UNKNOWN, "Exception handling within a transaction");
+                            }
                         }
-                    });
+                    }
                 } catch (Throwable e) {
                     index++;
                     throw new RuntimeException("Decode operation error", e);
                 }
                 if (Objects.nonNull(closure)) {
-                    closure.run(Status.OK());
+                    closure.run(status);
                 }
                 applied ++;
                 index ++;

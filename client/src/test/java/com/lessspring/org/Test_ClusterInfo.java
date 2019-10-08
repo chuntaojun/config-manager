@@ -18,6 +18,7 @@ package com.lessspring.org;
 
 import com.lessspring.org.config.ConfigService;
 import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.utils.GsonUtils;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,18 +34,12 @@ public class Test_ClusterInfo {
         String clusterInfo = "127.0.0.1:2959";
         Configuration configuration = new Configuration();
         configuration.setServers(clusterInfo);
+        configuration.setUsername("lessSpring");
+        configuration.setPassword("29591314");
         ConfigService configService = new ClientConfigService(configuration);
         configService.init();
-        AtomicBoolean shutdown = new AtomicBoolean(false);
-        configService.addListener("DEFAULT_GROUP", "TEST", new AbstractListener() {
-            @Override
-            public void onReceive(ConfigInfo configInfo) {
-                System.out.println(configInfo.toString());
-                shutdown.set(true);
-            }
-        });
-        while (!shutdown.get()) {
-        }
+        ConfigInfo configInfo = configService.getConfig("DEVELOP", "liaochuntao", "com.lessspring.org");
+        System.out.println(GsonUtils.toJson(configInfo));
     }
 
 }

@@ -62,8 +62,9 @@ class RaftServer implements LifeCycle {
     private RpcServer rpcServer;
     private BoltCliClientService cliClientService;
     private ScheduledExecutorService scheduledExecutorService;
+    private final NodeManager nodeManager = NodeManager.getInstance();
 
-    void initRaftCluster(NodeManager nodeManager, String cacheDirPath) {
+    void initRaftCluster(String cacheDirPath) {
         final String path = PathUtils.finalPath(cacheDirPath);
         try {
             FileUtils.forceMkdir(new File(path));
@@ -73,14 +74,6 @@ class RaftServer implements LifeCycle {
         }
         String selfIp = nodeManager.getSelf().getNodeIp();
         int selfPort = nodeManager.getSelf().getPort() + 1000;
-        conf = new Configuration();
-        nodeManager.stream().forEach(stringServerNodeEntry -> {
-            ServerNode _node = stringServerNodeEntry.getValue();
-            String address = _node.getNodeIp() + ":" + (_node.getPort() + 1000);
-            PeerId peerId = JRaftUtils.getPeerId(address);
-            conf.addPeer(peerId);
-            com.alipay.sofa.jraft.NodeManager.getInstance().addAddress(peerId.getEndpoint());
-        });
         final NodeOptions nodeOptions = new NodeOptions();
         // 设置选举超时时间为 5 秒
         nodeOptions.setElectionTimeoutMs(5000);
@@ -96,8 +89,6 @@ class RaftServer implements LifeCycle {
         nodeOptions.setRaftMetaUri(path + File.separator + "raft_meta");
         // snapshot, 可选, 一般都推荐
         nodeOptions.setSnapshotUri(path + File.separator + "snapshot");
-
-        this.csm = new ConfigStateMachineAdapter();
 
         nodeOptions.setFsm(this.csm);
 
@@ -195,6 +186,18 @@ class RaftServer implements LifeCycle {
             thread.setName("config-manager-raft-node-refresh");
             return thread;
         });
+
+        this.csm = new ConfigStateMachineAdapter();
+
+        this.conf = new Configuration();
+        nodeManager.stream().forEach(stringServerNodeEntry -> {
+            ServerNode _node = stringServerNodeEntry.getValue();
+            String address = _node.getNodeIp() + ":" + (_node.getPort() + 1000);
+            PeerId peerId = JRaftUtils.getPeerId(address);
+            conf.addPeer(peerId);
+            com.alipay.sofa.jraft.NodeManager.getInstance().addAddress(peerId.getEndpoint());
+        });
+
     }
 
     @Override

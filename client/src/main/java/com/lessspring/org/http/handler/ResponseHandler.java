@@ -17,6 +17,7 @@
 package com.lessspring.org.http.handler;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * The response body processor
@@ -36,6 +37,14 @@ public final class ResponseHandler {
 
     public <T> T convert(String s, Class<T> cls) {
         return gson.fromJson(s, cls);
+    }
+
+    public <T> T convert(String s, TypeToken<T> token) {
+        try {
+            return gson.fromJson(s, token.getType());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

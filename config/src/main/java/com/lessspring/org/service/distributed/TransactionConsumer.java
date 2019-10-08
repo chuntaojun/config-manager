@@ -14,38 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.service.distributed;
 
-import com.lessspring.org.model.vo.ResponseData;
-
-import java.util.concurrent.CompletableFuture;
+import com.lessspring.org.raft.TransactionException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class Transaction {
+public interface TransactionConsumer<T> {
 
-    private final String key;
-    private final OperationEnum operation;
-    private final byte[] data;
+    /**
+     * Callback interface transaction consumers
+     *
+     * @param t transaction
+     * @throws Exception exception
+     */
+    void accept(T t) throws TransactionException;
 
-    public Transaction(String key, byte[] data, OperationEnum operation) {
-        this.key = key;
-        this.operation = operation;
-        this.data = data;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public OperationEnum getOperation() {
-        return operation;
-    }
-
-    public String getKey() {
-        return key;
-    }
+    /**
+     * Abnormal transaction callback handler
+     *
+     * @param te {@link TransactionException}
+     */
+    void onError(TransactionException te);
 
 }

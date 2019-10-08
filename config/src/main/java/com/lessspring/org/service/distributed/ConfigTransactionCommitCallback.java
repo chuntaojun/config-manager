@@ -19,12 +19,13 @@ package com.lessspring.org.service.distributed;
 import com.lessspring.org.raft.OperationEnum;
 import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
+import com.lessspring.org.raft.TransactionException;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -34,20 +35,26 @@ import java.util.function.Consumer;
 @Component(value = "configTransactionCommitCallback")
 public class ConfigTransactionCommitCallback implements TransactionCommitCallback {
 
-    private final HashMap<OperationEnum, Consumer<Transaction>> consumerMap = new HashMap<>();
+    private final HashMap<OperationEnum, TransactionConsumer<Transaction>> consumerMap = new HashMap<>();
 
     public ConfigTransactionCommitCallback() {
     }
 
-    public void registerConsumer(Consumer<Transaction> consumer, OperationEnum operation) {
+    public void registerConsumer(TransactionConsumer<Transaction> consumer, OperationEnum operation) {
         synchronized (this) {
             consumerMap.put(operation, consumer);
         }
     }
 
     @Override
-    public void onApply(Transaction transaction) {
-        consumerMap.get(transaction.getOperation()).accept(transaction);
+    public void onApply(Transaction transaction) throws TransactionException {
+        TransactionConsumer<Transaction> consumer = consumerMap.get(transaction.getOperation());
+        try {
+            consumer.accept(transaction);
+        } catch (TransactionException e) {
+            consumer.onError(e);
+            throw new TransactionException(e);
+        }
     }
 
     @Override

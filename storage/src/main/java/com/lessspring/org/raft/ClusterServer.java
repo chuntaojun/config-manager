@@ -37,7 +37,6 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -56,19 +55,22 @@ public class ClusterServer implements LifeCycle {
     private NodeManager nodeManager = NodeManager.getInstance();
     private RaftServer raftServer = new RaftServer();
 
+    public ClusterServer() {
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
+            Properties properties = new Properties();
+            properties.load(is);
+            initClusterNode(properties);
+            raftServer.init();
+        } catch (IOException e) {
+            log.error("Server");
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void init() {
         if (initialize.compareAndSet(false, true)) {
-            try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
-                Properties properties = new Properties();
-                properties.load(is);
-                initClusterNode(properties);
-                raftServer.init();
-                raftServer.initRaftCluster(nodeManager, CACHE_DIR_PATH);
-            } catch (IOException e) {
-                log.error("Server");
-                initialize.lazySet(false);
-            }
+            raftServer.initRaftCluster(CACHE_DIR_PATH);
         }
     }
 

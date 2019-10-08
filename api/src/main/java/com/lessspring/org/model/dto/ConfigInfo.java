@@ -103,7 +103,7 @@ public class ConfigInfo {
         return file != null;
     }
 
-    public byte[] getBytes() {
+    public byte[] toBytes() {
         if (isFile()) {
             return file;
         }
@@ -171,6 +171,7 @@ public class ConfigInfo {
             configInfo.setDataId(dataId);
             configInfo.setContent(content);
             configInfo.setType(type);
+            configInfo.setFile(file);
             configInfo.setEncryption(encryption);
             return configInfo;
         }

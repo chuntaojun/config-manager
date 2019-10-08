@@ -104,37 +104,32 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
         int affect = -1;
         long id = -1;
         byte[] save = ConfigRequestUtils.getByte(request);
-        try {
-            if (request.isBeta()) {
-                ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
-                        .namespaceId(namespaceId)
-                        .groupId(request.getGroupId())
-                        .dataId(request.getDataId())
-                        .content(save)
-                        .type(request.getType())
-                        .clientIps(request.getClientIps())
-                        .createTime(System.currentTimeMillis())
-                        .build();
-                affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
-                id = infoDTO.getId();
-            } else {
-                ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
-                        .namespaceId(namespaceId)
-                        .groupId(request.getGroupId())
-                        .dataId(request.getDataId())
-                        .content(save)
-                        .type(request.getType())
-                        .createTime(System.currentTimeMillis())
-                        .build();
-                affect = configInfoMapper.saveConfigInfo(infoDTO);
-                id = infoDTO.getId();
-            }
-            log.debug("save config-success, affect rows is : {}, primary key is : {}", affect, id);
-        } catch (Exception e) {
-            success = false;
-            log.error("save config-info failed, err is : {}", e.getLocalizedMessage());
+        if (request.isBeta()) {
+            ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
+                    .namespaceId(namespaceId)
+                    .groupId(request.getGroupId())
+                    .dataId(request.getDataId())
+                    .content(save)
+                    .type(request.getType())
+                    .clientIps(request.getClientIps())
+                    .createTime(System.currentTimeMillis())
+                    .build();
+            affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
+            id = infoDTO.getId();
+        } else {
+            ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
+                    .namespaceId(namespaceId)
+                    .groupId(request.getGroupId())
+                    .dataId(request.getDataId())
+                    .content(save)
+                    .type(request.getType())
+                    .createTime(System.currentTimeMillis())
+                    .build();
+            affect = configInfoMapper.saveConfigInfo(infoDTO);
+            id = infoDTO.getId();
         }
-        return success;
+        log.debug("save config-success, affect rows is : {}, primary key is : {}", affect, id);
+        return true;
     }
 
     @Override
@@ -142,58 +137,48 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
         boolean success = true;
         int affect = -1;
         byte[] save = ConfigRequestUtils.getByte(request);
-        try {
-            if (request.isBeta()) {
-                ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
-                        .namespaceId(namespaceId)
-                        .groupId(request.getGroupId())
-                        .dataId(request.getDataId())
-                        .content(save)
-                        .type(request.getType())
-                        .clientIps(request.getClientIps())
-                        .lastModifyTime(System.currentTimeMillis())
-                        .build();
-                affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
-            } else {
-                ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
-                        .namespaceId(namespaceId)
-                        .groupId(request.getGroupId())
-                        .dataId(request.getDataId())
-                        .content(save)
-                        .type(request.getType())
-                        .lastModifyTime(System.currentTimeMillis())
-                        .build();
-                affect = configInfoMapper.updateConfigInfo(infoDTO);
-            }
-            log.debug("save config-success, affect rows is : {}", affect);
-        } catch (Exception e) {
-            success = false;
-            log.error("modify config-info failed, err is : {}", e.getMessage());
+        if (request.isBeta()) {
+            ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
+                    .namespaceId(namespaceId)
+                    .groupId(request.getGroupId())
+                    .dataId(request.getDataId())
+                    .content(save)
+                    .type(request.getType())
+                    .clientIps(request.getClientIps())
+                    .lastModifyTime(System.currentTimeMillis())
+                    .build();
+            affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
+        } else {
+            ConfigInfoDTO infoDTO = ConfigInfoDTO.builder()
+                    .namespaceId(namespaceId)
+                    .groupId(request.getGroupId())
+                    .dataId(request.getDataId())
+                    .content(save)
+                    .type(request.getType())
+                    .lastModifyTime(System.currentTimeMillis())
+                    .build();
+            affect = configInfoMapper.updateConfigInfo(infoDTO);
         }
-        return success;
+        log.debug("modify config-success, affect rows is : {}", affect);
+        return true;
     }
 
     @Override
     public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
         boolean success = true;
-        try {
-            if (request.isBeta()) {
-                configInfoMapper.removeConfigBetaInfo(request);
-            } else {
-                configInfoMapper.removeConfigInfo(request);
-            }
-        } catch (Exception e) {
-            success = false;
-            log.error("remove config-info failed, err is : {}", e.getMessage());
+        if (request.isBeta()) {
+            configInfoMapper.removeConfigBetaInfo(request);
+        } else {
+            configInfoMapper.removeConfigInfo(request);
         }
-        return success;
+        return true;
     }
 
     @Override
     public void onEvent(ConfigChangeEvent event) throws Exception {
         try {
             configCacheItemManager.updateContent(event.getNamespaceId(), event);
-            if (EventType.PUBLISH.compareTo(event.getEventType()) == 0){
+            if (EventType.PUBLISH.compareTo(event.getEventType()) == 0) {
                 configCacheItemManager.registerConfigCacheItem(event.getNamespaceId(), event);
             }
             if (EventType.DELETE.compareTo(event.getEventType()) == 0) {

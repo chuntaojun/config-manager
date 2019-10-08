@@ -16,6 +16,7 @@
  */
 package com.lessspring.org;
 
+import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.param.Body;
@@ -23,12 +24,10 @@ import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
-import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PlaceholderProcessor;
 import com.lessspring.org.watch.WatchConfigWorker;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -68,16 +67,18 @@ public class CacheConfigManager implements LifeCycle {
                 .addParam("groupId", groupId)
                 .addParam("dataId", dataId);
         ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG,
-                Header.EMPTY, query, ConfigInfo.class);
+                Header.EMPTY, query, new TypeToken<ResponseData<ConfigInfo>>(){});
         ConfigInfo result = null;
-        if (response.isOk()) {
+        if (response.ok()) {
             ConfigInfo configInfo = response.getData();
             doSnapshot(groupId, dataId, configInfo);
             result = configInfo;
-        }
-        ConfigInfo local = loadFromDisk(groupId, dataId);
-        if (Objects.nonNull(local)) {
-            result = local;
+        } else {
+            // Disaster measures
+            ConfigInfo local = loadFromDisk(groupId, dataId);
+            if (Objects.nonNull(local)) {
+                result = local;
+            }
         }
         // Configure the decryption
         processor.decryption(Optional.ofNullable(result), token);
@@ -90,20 +91,20 @@ public class CacheConfigManager implements LifeCycle {
                 .addParam("groupId", groupId)
                 .addParam("dataId", dataId);
         return httpClient.delete(ApiConstant.DELETE_CONFIG, Header.EMPTY,
-                query, Boolean.class);
+                query, new TypeToken<ResponseData<Boolean>>(){});
     }
 
     ResponseData<Boolean> publishConfig(final PublishConfigRequest request) {
         final Query query = Query.newInstance()
                 .addParam("namespaceId", namespaceId);
         return httpClient.put(ApiConstant.PUBLISH_CONFIG, Header.EMPTY, query,
-                Body.objToBody(request), Boolean.class);
+                Body.objToBody(request), new TypeToken<ResponseData<Boolean>>(){});
     }
 
     private ConfigInfo loadFromDisk(String groupId, String dataId) {
         final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
         final byte[] content = DiskUtils.readFileBytes(namespaceId, fileName);
-        if (Objects.nonNull(content)) {
+        if (Objects.nonNull(content) && content.length > 0) {
             return serializer.deserialize(content, ConfigInfo.class);
         }
         return null;
@@ -111,7 +112,7 @@ public class CacheConfigManager implements LifeCycle {
 
     private void doSnapshot(String groupId, String dataId, ConfigInfo configInfo) {
         final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
-        DiskUtils.writeFile(namespaceId, fileName, serializer.serialize(configInfo));
+        DiskUtils.writeFile(namespaceId, fileName, GsonUtils.toJsonBytes(configInfo));
     }
 
     @Override

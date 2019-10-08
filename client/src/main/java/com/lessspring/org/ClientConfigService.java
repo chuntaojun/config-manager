@@ -68,9 +68,10 @@ public class ClientConfigService implements ConfigService {
             watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
             configManager = new CacheConfigManager(httpClient, configuration, watchConfigWorker);
 
+            // The calling component all initialization of the hook
             httpClient.init();
-            loginHandler.init();
             clusterNodeWatch.init();
+            loginHandler.init();
             watchConfigWorker.init();
             configManager.init();
             watchConfigWorker.setConfigManager(configManager);
@@ -113,7 +114,7 @@ public class ClientConfigService implements ConfigService {
                 .type(type)
                 .build();
         ResponseData<Boolean> response = configManager.publishConfig(request);
-        return response.isOk();
+        return response.ok();
     }
 
     @Override
@@ -124,12 +125,12 @@ public class ClientConfigService implements ConfigService {
                 .file(stream)
                 .build();
         ResponseData<Boolean> response = configManager.publishConfig(request);
-        return response.isOk();
+        return response.ok();
     }
 
     @Override
     public boolean deleteConfig(String groupId, String dataId) {
-        return configManager.removeConfig(groupId, dataId).isOk();
+        return configManager.removeConfig(groupId, dataId).ok();
     }
 
     @Override

@@ -26,8 +26,9 @@ public interface TransactionCommitCallback {
      * When raft transaction is completed, triggered the callback achieve business
      *
      * @param transaction {@link Transaction}
+     * @throws TransactionException
      */
-    void onApply(Transaction transaction);
+    void onApply(Transaction transaction) throws TransactionException;
 
     /**
      * To determine transaction key, if interested

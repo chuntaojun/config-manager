@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.service.config;
 
-import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -28,10 +27,12 @@ import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
 import com.lessspring.org.raft.OperationEnum;
 import com.lessspring.org.raft.Transaction;
+import com.lessspring.org.raft.TransactionException;
 import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
+import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
@@ -39,18 +40,15 @@ import com.lessspring.org.utils.TransactionUtils;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -63,16 +61,19 @@ public class ConfigOperationService {
     private final Disruptor<ConfigChangeEvent> disruptorHolder;
     private final PersistentHandler persistentHandler;
     private final ConfigTransactionCommitCallback commitCallback;
+    private final ConfigurableApplicationContext context;
     private final ClusterManager clusterManager;
     private FailCallback failCallback;
 
     public ConfigOperationService(@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
                                   ConfigPersistentHandler configPersistentHandler,
                                   ConfigTransactionCommitCallback commitCallback,
+                                  ConfigurableApplicationContext context,
                                   ClusterManager clusterManager) {
         this.persistentHandler = persistentHandler;
-        this.commitCallback = commitCallback;
         this.clusterManager = clusterManager;
+        this.commitCallback = commitCallback;
+        this.context = context;
         disruptorHolder = DisruptorFactory.build(ConfigChangeEvent::new, "Config-Change-Event-Disruptor");
         disruptorHolder.handleEventsWithWorkerPool(configPersistentHandler);
         disruptorHolder.start();
@@ -83,6 +84,7 @@ public class ConfigOperationService {
         commitCallback.registerConsumer(publishConsumer(), OperationEnum.PUBLISH);
         commitCallback.registerConsumer(modifyConsumer(), OperationEnum.MODIFY);
         commitCallback.registerConsumer(deleteConsumer(), OperationEnum.DELETE);
+        clusterManager.init();
         failCallback = throwable -> null;
     }
 
@@ -142,45 +144,85 @@ public class ConfigOperationService {
     private ResponseData<?> commit(Datum datum) {
         CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum, failCallback);
         try {
-            return future.get(1000, TimeUnit.MILLISECONDS);
+            return future.get(10_000L, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             return ResponseData.fail(e);
         }
     }
 
-    private Consumer<Transaction> publishConsumer() {
-        return transaction -> {
-            PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
-            if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)) {
-                ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
-                        request4.getContent(), request4.getEncryption(), EventType.PUBLISH);
-                event.setConfigType(request4.getType());
-                publishEvent(event);
+    public TransactionConsumer<Transaction> publishConsumer() {
+        return new TransactionConsumer<Transaction>() {
+            @Override
+            public void accept(Transaction transaction) throws TransactionException {
+                try {
+                    PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
+                    if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)) {
+                        ConfigChangeEvent event = ConfigOperationService.this.buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                                request4.getContent(), request4.getEncryption(), EventType.PUBLISH);
+                        event.setConfigType(request4.getType());
+                        ConfigOperationService.this.publishEvent(event);
+                    }
+                } catch (Throwable e) {
+                    log.error("publishConsumer has some error : {}", e);
+                    throw new TransactionException(e);
+                }
+            }
+
+            @Override
+            public void onError(TransactionException te) {
+
             }
         };
     }
 
-    private Consumer<Transaction> modifyConsumer() {
-        return transaction -> {
-            PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
-            if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(), request4)) {
-                ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
-                        request4.getContent(), request4.getEncryption(), EventType.MODIFIED);
-                event.setConfigType(request4.getType());
-                publishEvent(event);
+    public TransactionConsumer<Transaction> modifyConsumer() {
+        return new TransactionConsumer<Transaction>() {
+            @Override
+            public void accept(Transaction transaction) throws TransactionException {
+                try {
+                    PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
+                    if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(), request4)) {
+                        ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                                request4.getContent(), request4.getEncryption(), EventType.MODIFIED);
+                        event.setConfigType(request4.getType());
+                        publishEvent(event);
+                    }
+                } catch (Throwable e) {
+                    log.error("modifyConsumer has some error : {}", e);
+                    throw new TransactionException(e);
+                }
+            }
+
+            @Override
+            public void onError(TransactionException te) {
+
             }
         };
     }
 
-    private Consumer<Transaction> deleteConsumer() {
-        return transaction -> {
-            DeleteConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), DeleteConfigRequest4.class);
-            if (persistentHandler.removeConfigInfo(request4.getNamespaceId(), request4)) {
-                ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
-                        "", "", EventType.DELETE);
-                publishEvent(event);
+    public TransactionConsumer<Transaction> deleteConsumer() {
+        return new TransactionConsumer<Transaction>() {
+            @Override
+            public void accept(Transaction transaction) throws TransactionException {
+                try {
+                    DeleteConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), DeleteConfigRequest4.class);
+                    if (persistentHandler.removeConfigInfo(request4.getNamespaceId(), request4)) {
+                        ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                                "", "", EventType.DELETE);
+                        publishEvent(event);
+                    }
+                } catch (Throwable e) {
+                    log.error("deleteConsumer has some error : {}", e);
+                    throw new TransactionException(e);
+                }
+            }
+
+            @Override
+            public void onError(TransactionException te) {
+
             }
         };
+
     }
 
 }

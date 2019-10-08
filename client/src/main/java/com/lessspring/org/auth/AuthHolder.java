@@ -16,6 +16,9 @@
  */
 package com.lessspring.org.auth;
 
+import com.lessspring.org.model.vo.JwtResponse;
+
+import java.util.Objects;
 import java.util.Observable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,19 +35,20 @@ public class AuthHolder extends Observable {
     private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
     private long threshold = TimeUnit.SECONDS.toMillis(3);
-    private long expireTime = TimeUnit.SECONDS.toMillis(30);
     private volatile long lastRefreshTime;
+    private volatile long expireTime;
     private volatile String token = "";
 
     void register(LoginHandler handler) {
         addObserver(handler);
     }
 
-    void updateToken(String token) {
+    void updateToken(JwtResponse token) {
         writeLock.lock();
         try {
-            this.token = token;
+            this.token = Objects.isNull(token.getToken()) ? "" : token.getToken();
             lastRefreshTime = System.currentTimeMillis();
+            expireTime = token.getExpireTime();
         } finally {
             writeLock.unlock();
         }
@@ -53,7 +57,7 @@ public class AuthHolder extends Observable {
     public String getToken() {
         readLock.lock();
         try {
-            if (lastRefreshTime + expireTime - System.currentTimeMillis() < threshold) {
+            if (expireTime - lastRefreshTime < threshold) {
                 CountDownLatch latch = new CountDownLatch(1);
                 notifyObservers(latch);
                 long waitTime = 10L;
@@ -75,7 +79,6 @@ public class AuthHolder extends Observable {
             long waitTime = 10L;
             latch.await(waitTime, TimeUnit.SECONDS);
         } catch (Exception ignore) {
-
         } finally {
             readLock.unlock();
         }

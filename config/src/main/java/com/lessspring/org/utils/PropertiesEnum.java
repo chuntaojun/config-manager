@@ -168,11 +168,6 @@ public final class PropertiesEnum {
         TOKEN_STATUS_HEALTH(1, "token is alive"),
 
         /**
-         * json web token 存活秒数
-         */
-        TOKEN_SURVIVAL_MILLISECOND(30 * 60),
-
-        /**
          *
          */
         TOKEN_EXPIRE_RANGE(10);

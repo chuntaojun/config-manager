@@ -11,7 +11,7 @@
         CREATE TABLE namespace_permissions AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_namespace_permissions.csv'));
     </insert>
 
-    <select id="doSnapshotSave">
+    <select id="doSnapshotSave" resultType="boolean">
         CALL CSVWRITE(CONCAT(#{path}, 'snapshot_config_info.csv'), 'SELECT * FROM config_info');
         CALL CSVWRITE(CONCAT(#{path}, 'snapshot_config_info_beta.csv'), 'SELECT * FROM config_info_beta');
         CALL CSVWRITE(CONCAT(#{path}, 'snapshot_user.csv'), 'SELECT * FROM user');

@@ -60,7 +60,9 @@ public abstract class Retry<T> {
      * @param throwable if has throwable
      * @return Void
      */
-    protected abstract boolean shouldRetry(T data, Throwable throwable);
+    protected boolean shouldRetry(T data, Throwable throwable) {
+        return false;
+    }
 
     /**
      * The maximum number of retries

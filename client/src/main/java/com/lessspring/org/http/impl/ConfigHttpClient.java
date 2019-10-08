@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.http.impl;
 
+import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.auth.AuthHolder;
 import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.constant.StringConst;
@@ -29,10 +30,8 @@ import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.HttpMethod;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.HttpUtils;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,15 +40,18 @@ import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.lessspring.org.constant.Code.SERVER_BUSY;
+import static com.lessspring.org.constant.Code.UNAUTHORIZED;
 import static com.lessspring.org.http.param.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 /**
@@ -84,24 +86,17 @@ public class ConfigHttpClient implements HttpClient {
     }
 
     @Override
-    public <T> ResponseData<T> get(String url, Header header, Query query, Class<T> cls) {
+    public <T> ResponseData<T> get(String url, Header header, Query query, TypeToken<ResponseData<T>> token) {
         Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
             @Override
             protected ResponseData<T> run() throws Exception {
                 Request request = buildRequest(buildUrl(url, query), header, Body.EMPTY, HttpMethod.GET);
-                return execute(client.newCall(request), cls);
+                return execute(client.newCall(request), token);
             }
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (data.isOk()) {
-                    return false;
-                }
-                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
-                    authHolder.refresh();
-                }
-                refresh();
-                return false;
+                return retryStrategy(data, throwable);
             }
 
             @Override
@@ -117,24 +112,17 @@ public class ConfigHttpClient implements HttpClient {
     }
 
     @Override
-    public <T> ResponseData<T> delete(String url, Header header, Query query, Class<T> cls) {
+    public <T> ResponseData<T> delete(String url, Header header, Query query, TypeToken<ResponseData<T>> token) {
         Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
             @Override
             protected ResponseData<T> run() throws Exception {
                 Request request = buildRequest(buildUrl(url, query), header, Body.EMPTY, HttpMethod.DELETE);
-                return execute(client.newCall(request), cls);
+                return execute(client.newCall(request), token);
             }
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (!data.isOk()) {
-                    return false;
-                }
-                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
-                    authHolder.refresh();
-                }
-                refresh();
-                return true;
+                return retryStrategy(data, throwable);
             }
 
             @Override
@@ -150,24 +138,17 @@ public class ConfigHttpClient implements HttpClient {
     }
 
     @Override
-    public <T> ResponseData<T> put(String url, Header header, Query query, Body body, Class<T> cls) {
+    public <T> ResponseData<T> put(String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token) {
         Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
             @Override
             protected ResponseData<T> run() throws Exception {
                 Request request = buildRequest(buildUrl(url, query), header, body, HttpMethod.PUT);
-                return execute(client.newCall(request), cls);
+                return execute(client.newCall(request), token);
             }
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (data.isOk()) {
-                    return false;
-                }
-                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
-                    authHolder.refresh();
-                }
-                refresh();
-                return true;
+                return retryStrategy(data, throwable);
             }
 
             @Override
@@ -184,24 +165,17 @@ public class ConfigHttpClient implements HttpClient {
     }
 
     @Override
-    public <T> ResponseData<T> post(String url, Header header, Query query, Body body, Class<T> cls) {
+    public <T> ResponseData<T> post(String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token) {
         Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
             @Override
             protected ResponseData<T> run() throws Exception {
                 Request request = buildRequest(buildUrl(url, query), header, body, HttpMethod.POST);
-                return execute(client.newCall(request), cls);
+                return execute(client.newCall(request), token);
             }
 
             @Override
             protected boolean shouldRetry(ResponseData<T> data, Throwable throwable) {
-                if (data.isOk()) {
-                    return false;
-                }
-                if (data.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
-                    authHolder.refresh();
-                }
-                refresh();
-                return true;
+                return retryStrategy(data, throwable);
             }
 
             @Override
@@ -253,15 +227,11 @@ public class ConfigHttpClient implements HttpClient {
         ServerSentEventListener.clean();
     }
 
-    private <T> ResponseData<T> execute(Call call, Class<T> cls) throws IOException {
+    private <T> ResponseData<T> execute(Call call, TypeToken<ResponseData<T>> token) throws IOException {
         ResponseData<T> data;
         Response response = call.execute();
-        data = ResponseData.builder()
-                .withCode(response.code())
-                .withData(responseHandler.convert(response.body().string(), cls))
-                .withErrMsg(response.message())
-                .build();
-        return data;
+        data = responseHandler.convert(response.body().string(), token);
+        return data == null ? ResponseData.fail() : data;
     }
 
     private String buildUrl(String url) {
@@ -319,4 +289,31 @@ public class ConfigHttpClient implements HttpClient {
     private void refresh() {
         clusterIp.set("");
     }
+
+    private boolean retryStrategy(ResponseData<?> data, Throwable throwable) {
+        boolean canRetry = false;
+        if (Objects.nonNull(throwable)) {
+            if (throwable instanceof SocketTimeoutException) {
+                canRetry = true;
+            } else if (throwable instanceof ConnectException) {
+                refresh();
+                canRetry = true;
+            }
+        } else {
+            if (Objects.isNull(data)) {
+                canRetry = true;
+            } else {
+                int code = data.getCode();
+                if (code == UNAUTHORIZED.getCode()) {
+                    authHolder.refresh();
+                    canRetry = true;
+                } else if (code == SERVER_BUSY.getCode()) {
+                    refresh();
+                    canRetry = true;
+                }
+            }
+        }
+        return canRetry;
+    }
+
 }

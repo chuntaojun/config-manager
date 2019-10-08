@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Paths;
 import java.util.concurrent.Executor;
@@ -84,6 +83,7 @@ public class SnapshotOperateImpl implements SnapshotOperate {
             DiskUtils.deleteFile(parentPath, fileName);
         }
         executor.execute(() -> {
+            System.out.println("Snapshot File Path : " + parentPath);
             snapshotMapper.doSnapshotSave(parentPath);
             final String writerPath = writer.getPath();
             final String outputFile = Paths.get(writerPath, SNAPSHOT_ARCHIVE).toString();
