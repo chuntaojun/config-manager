@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.model.vo;
 
+import com.lessspring.org.constant.Code;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since
@@ -38,10 +40,21 @@ public class ResponseData<T> {
         return errMsg;
     }
 
+    public boolean ok() {
+        return code == Code.SUCCESS.getCode() || code == 0;
+    }
+
     public static ResponseData<Boolean> success() {
         return ResponseData.builder()
                 .withCode(200)
                 .withData(true)
+                .build();
+    }
+
+    public static <T> ResponseData<T> success(T data) {
+        return ResponseData.builder()
+                .withCode(200)
+                .withData(data)
                 .build();
     }
 
@@ -50,6 +63,13 @@ public class ResponseData<T> {
                 .withCode(500)
                 .withData(false)
                 .withErrMsg(throwable.getMessage())
+                .build();
+    }
+
+    public static <T> ResponseData<T> fail() {
+        return ResponseData.builder()
+                .withCode(500)
+                .withErrMsg("failed")
                 .build();
     }
 

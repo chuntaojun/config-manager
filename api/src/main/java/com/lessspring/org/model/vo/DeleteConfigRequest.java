@@ -21,4 +21,50 @@ package com.lessspring.org.model.vo;
  * @since 0.0.1
  */
 public class DeleteConfigRequest extends BaseConfigRequest {
+
+    private boolean beta;
+
+    public boolean isBeta() {
+        return beta;
+    }
+
+    public void setBeta(boolean beta) {
+        this.beta = beta;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private String dataId;
+        private String groupId;
+        private boolean beta;
+
+        private Builder() {
+        }
+
+        public Builder dataId(String dataId) {
+            this.dataId = dataId;
+            return this;
+        }
+
+        public Builder groupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public Builder beta(boolean beta) {
+            this.beta = beta;
+            return this;
+        }
+
+        public DeleteConfigRequest build() {
+            DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
+            deleteConfigRequest.setDataId(dataId);
+            deleteConfigRequest.setGroupId(groupId);
+            deleteConfigRequest.setBeta(beta);
+            return deleteConfigRequest;
+        }
+    }
 }

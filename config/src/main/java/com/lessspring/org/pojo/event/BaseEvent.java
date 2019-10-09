@@ -28,6 +28,8 @@ public abstract class BaseEvent {
     private String namespaceId;
     private String dataId;
     private String groupId;
+    private boolean isFile = false;
+    private String encryption;
     private Object source;
     private EventType eventType;
     private final long createTime = System.currentTimeMillis();
@@ -82,6 +84,22 @@ public abstract class BaseEvent {
 
     public void setEventType(EventType eventType) {
         this.eventType = eventType;
+    }
+
+    public String getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(String encryption) {
+        this.encryption = encryption;
+    }
+
+    public boolean isFile() {
+        return isFile;
+    }
+
+    public void setFile(boolean file) {
+        isFile = file;
     }
 
     public abstract String label();

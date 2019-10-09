@@ -16,11 +16,20 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.pojo.request.DeleteConfigRequest4;
+import com.lessspring.org.pojo.request.PublishConfigRequest4;
+import com.lessspring.org.pojo.request.QueryConfigRequest4;
 import com.lessspring.org.service.config.ConfigOperationService;
+import com.lessspring.org.tps.LimitRule;
+import com.lessspring.org.tps.OpenTpsLimit;
+import com.lessspring.org.utils.ReactiveWebUtils;
 import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -32,6 +41,7 @@ import reactor.core.publisher.Mono;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@OpenTpsLimit
 @Service(value = "configHandler")
 public class ConfigHandlerImpl implements ConfigHandler {
 
@@ -43,37 +53,61 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
     @NotNull
     @Override
+    @LimitRule
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> publishConfig(ServerRequest request) {
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
         return request.bodyToMono(PublishConfigRequest.class)
-                .map(operationService::publishConfig)
+                .map(publishRequest -> operationService.publishConfig(namespaceId, publishRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
 
     @NotNull
     @Override
+    @LimitRule
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> modifyConfig(ServerRequest request) {
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
         return request.bodyToMono(PublishConfigRequest.class)
-                .map(operationService::modifyConfig)
+                .map(publishRequest -> operationService.modifyConfig(namespaceId, publishRequest))
                 .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
 
     @NotNull
     @Override
+    @LimitRule
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> queryConfig(ServerRequest request) {
-        return request.bodyToMono(QueryConfigRequest.class)
-                .map(operationService::queryConfig)
-                .map(Mono::just)
-                .flatMap(RenderUtils::render);
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
+        final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
+        final String dataId = request.queryParam("dataId").orElse("");
+        final QueryConfigRequest queryRequest = QueryConfigRequest
+                .builder()
+                .groupId(groupId)
+                .dataId(dataId)
+                .build();
+        Mono<ResponseData<?>> mono = Mono.just(operationService.queryConfig(namespaceId, queryRequest));
+        return RenderUtils.render(mono);
     }
 
     @NotNull
     @Override
+    @LimitRule
+    @NeedAuth(argueName = "namespaceId")
     public Mono<ServerResponse> removeConfig(ServerRequest request) {
-        return request.bodyToMono(DeleteConfigRequest.class)
-                .map(operationService::removeConfig)
-                .map(Mono::just)
-                .flatMap(RenderUtils::render);
+        final String namespaceId = request.queryParam("namespaceId").orElse("default");
+        final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
+        final String dataId = request.queryParam("dataId").orElse("");
+        final boolean isBeta = Boolean.parseBoolean(request.queryParam("beta").orElse("false"));
+        final DeleteConfigRequest deleteRequest = DeleteConfigRequest
+                .builder()
+                .beta(isBeta)
+                .groupId(groupId)
+                .dataId(dataId)
+                .build();
+        Mono<ResponseData<?>> mono = Mono.just(operationService.removeConfig(namespaceId, deleteRequest));
+        return RenderUtils.render(mono);
     }
 }

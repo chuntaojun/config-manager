@@ -16,13 +16,22 @@
  */
 package com.lessspring.org.model.vo;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class PublishConfigRequest extends BaseConfigRequest {
 
+    private boolean beta = false;
+    private String clientIps;
     private String content;
+    private String type = "text";
+    private boolean isFile = false;
+    private byte[] file;
+    private String encryption = StringUtils.EMPTY;
+    private boolean requiresEncryption = false;
 
     public String getContent() {
         return content;
@@ -32,22 +41,79 @@ public class PublishConfigRequest extends BaseConfigRequest {
         this.content = content;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isBeta() {
+        return beta;
+    }
+
+    public void setBeta(boolean beta) {
+        this.beta = beta;
+    }
+
+    public String getClientIps() {
+        return clientIps;
+    }
+
+    public void setClientIps(String clientIps) {
+        this.clientIps = clientIps;
+    }
+
+    public String getEncryption() {
+        return encryption;
+    }
+
+    public void setEncryption(String encryption) {
+        this.encryption = encryption;
+    }
+
+    public boolean isRequiresEncryption() {
+        return requiresEncryption;
+    }
+
+    public void setRequiresEncryption(boolean requiresEncryption) {
+        this.requiresEncryption = requiresEncryption;
+    }
+
+    public boolean isFile() {
+        return isFile;
+    }
+
+    public void setFile(boolean file) {
+        isFile = file;
+    }
+
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
-        private String namespaceId;
         private String dataId;
         private String groupId;
+        private boolean beta = false;
+        private String clientIps;
         private String content;
+        private String type;
+        private boolean isFile = false;
+        private byte[] file;
+        private String encryption;
+        private boolean requiresEncryption = false;
 
         private Builder() {
-        }
-
-        public Builder namespaceId(String namespaceId) {
-            this.namespaceId = namespaceId;
-            return this;
         }
 
         public Builder dataId(String dataId) {
@@ -60,17 +126,58 @@ public class PublishConfigRequest extends BaseConfigRequest {
             return this;
         }
 
+        public Builder beta(boolean beta) {
+            this.beta = beta;
+            return this;
+        }
+
+        public Builder clientIps(String clientIps) {
+            this.clientIps = clientIps;
+            return this;
+        }
+
         public Builder content(String content) {
             this.content = content;
             return this;
         }
 
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder isFile(boolean isFile) {
+            this.isFile = isFile;
+            return this;
+        }
+
+        public Builder file(byte[] file) {
+            this.file = file;
+            return this;
+        }
+
+        public Builder encryption(String encryption) {
+            this.encryption = encryption;
+            return this;
+        }
+
+        public Builder requiresEncryption(boolean requiresEncryption) {
+            this.requiresEncryption = requiresEncryption;
+            return this;
+        }
+
         public PublishConfigRequest build() {
             PublishConfigRequest publishConfigRequest = new PublishConfigRequest();
-            publishConfigRequest.setGroupId(this.groupId);
-            publishConfigRequest.setContent(this.content);
-            publishConfigRequest.setDataId(this.dataId);
-            publishConfigRequest.setNamespaceId(this.namespaceId);
+            publishConfigRequest.setDataId(dataId);
+            publishConfigRequest.setGroupId(groupId);
+            publishConfigRequest.setBeta(beta);
+            publishConfigRequest.setClientIps(clientIps);
+            publishConfigRequest.setContent(content);
+            publishConfigRequest.setType(type);
+            publishConfigRequest.setFile(file);
+            publishConfigRequest.setEncryption(encryption);
+            publishConfigRequest.setRequiresEncryption(requiresEncryption);
+            publishConfigRequest.isFile = this.isFile;
             return publishConfigRequest;
         }
     }

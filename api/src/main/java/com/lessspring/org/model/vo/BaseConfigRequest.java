@@ -22,17 +22,8 @@ package com.lessspring.org.model.vo;
  */
 public class BaseConfigRequest {
 
-    private String namespaceId;
     private String dataId;
     private String groupId;
-
-    public String getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
-    }
 
     public String getDataId() {
         return dataId;
@@ -49,4 +40,6 @@ public class BaseConfigRequest {
     public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
+
+    
 }

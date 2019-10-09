@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.pojo.event;
 
+import com.lessspring.org.event.EventType;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -24,8 +26,97 @@ public class NotifyEvent extends BaseEvent {
 
     public static final String TYPE = "NotifyEvent";
 
+    public NotifyEvent() {
+    }
+
     @Override
     public String label() {
         return TYPE;
+    }
+
+    public static void copy(long sequence, NotifyEvent source, NotifyEvent target) {
+        target.setNamespaceId(source.getNamespaceId());
+        target.setGroupId(source.getGroupId());
+        target.setDataId(source.getDataId());
+        target.setEventType(source.getEventType());
+        target.setSource(source.getSource());
+        target.setEncryption(source.getEncryption());
+        target.setSequence(sequence);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        public static String TYPE = "NotifyEvent";
+        private long sequence;
+        private String namespaceId;
+        private String dataId;
+        private String groupId;
+        private Object source;
+        private EventType eventType;
+        private String entryption;
+        private long createTime = System.currentTimeMillis();
+
+        private Builder() {
+        }
+
+        public Builder sequence(long sequence) {
+            this.sequence = sequence;
+            return this;
+        }
+
+        public Builder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
+        }
+
+        public Builder dataId(String dataId) {
+            this.dataId = dataId;
+            return this;
+        }
+
+        public Builder groupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public Builder source(Object source) {
+            this.source = source;
+            return this;
+        }
+
+        public Builder entryption(String entryption) {
+            this.entryption = entryption;
+            return this;
+        }
+
+        public Builder TYPE(String TYPE) {
+            this.TYPE = TYPE;
+            return this;
+        }
+
+        public Builder eventType(EventType eventType) {
+            this.eventType = eventType;
+            return this;
+        }
+
+        public Builder createTime(long createTime) {
+            this.createTime = createTime;
+            return this;
+        }
+
+        public NotifyEvent build() {
+            NotifyEvent notifyEvent = new NotifyEvent();
+            notifyEvent.setSequence(sequence);
+            notifyEvent.setNamespaceId(namespaceId);
+            notifyEvent.setDataId(dataId);
+            notifyEvent.setGroupId(groupId);
+            notifyEvent.setSource(source);
+            notifyEvent.setEventType(eventType);
+            notifyEvent.setEncryption(entryption);
+            return notifyEvent;
+        }
     }
 }

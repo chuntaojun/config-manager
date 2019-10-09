@@ -21,18 +21,21 @@ import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.pojo.vo.NodeChangeRequest;
-import com.lessspring.org.raft.ServerChangeListener;
+import com.lessspring.org.pojo.request.NodeChangeRequest;
+import com.lessspring.org.raft.NodeManager;
+import com.lessspring.org.raft.ClusterServer;
+import com.lessspring.org.raft.SnapshotOperate;
+import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -40,27 +43,40 @@ import java.util.stream.Collectors;
  * @since 0.0.1
  */
 @Slf4j
-@Component
 public class ClusterManager {
 
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
+    private final NodeManager nodeManager = NodeManager.getInstance();
+    private ClusterServer clusterServer;
+    private final SnapshotOperate snapshotOperate;
+    private final ConfigTransactionCommitCallback commitCallback;
+    private final AtomicBoolean initialize = new AtomicBoolean(false);
 
-    private Map<String, ServerNode> nodeManager = new ConcurrentHashMap<>(3);
+    public ClusterManager(ConfigTransactionCommitCallback commitCallback,
+                          SnapshotOperate snapshotOperate) {
+        this.commitCallback = commitCallback;
+        this.snapshotOperate = snapshotOperate;
+    }
 
-    @PostConstruct
     public void init() {
-        eventBus.register(this);
-        eventBus.register(new ServerChangeListener());
+        if (initialize.compareAndSet(false, true)) {
+            clusterServer = new ClusterServer();
+            clusterServer.registerTransactionCommitCallback(commitCallback);
+            clusterServer.registerSnapshotOperator(snapshotOperate);
+            clusterServer.init();
+            eventBus.register(this);
+            eventBus.register(clusterServer);
+        }
     }
 
-    public ResponseData nodeAdd(NodeChangeRequest request) {
+    public Mono<?> nodeAdd(NodeChangeRequest request) {
         nodeChange(request, EventType.PUBLISH);
-        return ResponseData.success();
+        return Mono.just(ResponseData.success());
     }
 
-    public ResponseData nodeRemove(NodeChangeRequest request) {
+    public Mono<?> nodeRemove(NodeChangeRequest request) {
         nodeChange(request, EventType.DELETE);
-        return ResponseData.success();
+        return Mono.just(ResponseData.success());
     }
 
     private void nodeChange(NodeChangeRequest request, EventType type) {
@@ -72,12 +88,21 @@ public class ClusterManager {
         publishEvent(event);
     }
 
-    public ResponseData listNodes() {
-        List<ServerNode> nodes = nodeManager.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+    public ResponseData<List<ServerNode>> listNodes() {
+        List<ServerNode> nodes = nodeManager.stream().map(Map.Entry::getValue).collect(Collectors.toList());
         return ResponseData.builder()
                 .withCode(200)
                 .withData(nodes)
                 .build();
+    }
+
+    public CompletableFuture<ResponseData<Boolean>> commit(Datum datum, final FailCallback failCallback) {
+        try {
+            return clusterServer.apply(datum);
+        } catch (Exception e) {
+            failCallback.onError(e);
+            return CompletableFuture.completedFuture(ResponseData.fail());
+        }
     }
 
     private void publishEvent(ServerNodeChangeEvent event) {
@@ -92,10 +117,10 @@ public class ClusterManager {
                 .build();
         switch (event.getType()) {
             case PUBLISH:
-                nodeManager.putIfAbsent(node.getKey(), node);
+                nodeManager.nodeJoin(node);
                 break;
             case DELETE:
-                nodeManager.remove(node.getKey());
+                nodeManager.nodeLeave(node);
                 break;
             default:
                 throw new IllegalArgumentException("Illegal cluster nodes change event type");

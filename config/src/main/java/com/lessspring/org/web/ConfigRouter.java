@@ -44,7 +44,7 @@ public class ConfigRouter {
         this.configHandler = configHandler;
     }
 
-    @Bean(value = "configRouter")
+    @Bean(value = "configRouterImpl")
     public RouterFunction<ServerResponse> configRouter() {
         return route(
                 PUT(StringConst.API_V1 + "publish/config").and(accept(MediaType.APPLICATION_JSON_UTF8)), configHandler::publishConfig)

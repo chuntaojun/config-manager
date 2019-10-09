@@ -30,9 +30,9 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  */
 public final class RenderUtils {
 
-    public static Mono<ServerResponse> render(Mono<ResponseData> dataMono) {
+    public static Mono<ServerResponse> render(Mono<?> dataMono) {
         return ok().header("Access-Control-Allow-Origin", "*")
-                .body(BodyInserters.fromPublisher(dataMono, ResponseData.class))
+                .body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
                 .subscribeOn(Schedulers.elastic());
     }
 

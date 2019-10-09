@@ -17,7 +17,7 @@
 package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.handler.ClusterHandler;
-import com.lessspring.org.pojo.vo.NodeChangeRequest;
+import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +44,6 @@ public class ClusterHandlerImpl implements ClusterHandler {
     public Mono<ServerResponse> joinNode(ServerRequest request) {
         return request.bodyToMono(NodeChangeRequest.class)
                 .map(clusterManager::nodeAdd)
-                .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
 
@@ -53,7 +52,6 @@ public class ClusterHandlerImpl implements ClusterHandler {
     public Mono<ServerResponse> leaveNode(ServerRequest request) {
         return request.bodyToMono(NodeChangeRequest.class)
                 .map(clusterManager::nodeRemove)
-                .map(Mono::just)
                 .flatMap(RenderUtils::render);
     }
 

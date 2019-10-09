@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lessspring.org.repository.ConfigInfoMapper">
+
+    <resultMap type="com.lessspring.org.db.dto.ConfigInfoDTO" id="ConfigInfoDTO">
+        <id column="id" property="id"/>
+        <result column="data_id" property="dataId"/>
+        <result column="group_id" property="groupId"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="content" property="content"/>
+        <result column="config_type" property="type"/>
+    </resultMap>
+
+<!--  save config-infog  -->
+    <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
+        INSERT INTO config_info(data_id, group_id, namespace_id, content, config_type)
+        VALUES (#{dto.dataId},
+                #{dto.groupId},
+                #{dto.namespaceId},
+                #{dto.content},
+                #{dto.type});
+    </insert>
+
+<!--  save config-info-beta  -->
+    <insert id="saveConfigBetaInfo"></insert>
+
+<!--  update config-info  -->
+    <update id="updateConfigInfo"></update>
+
+<!--  update config-info-beta  -->
+    <update id="updateConfigBetaInfo"></update>
+
+<!--  find config-content by QueryConfigInfo  -->
+    <select id="findConfigInfoContent" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="java.lang.String">
+        SELECT content FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
+    </select>
+
+<!--  find config by QueryConfigInfo  -->
+    <select id="findConfigInfo" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
+        SELECT * FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
+    </select>
+
+</mapper>

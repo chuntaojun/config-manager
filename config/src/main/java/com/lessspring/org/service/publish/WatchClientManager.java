@@ -16,27 +16,24 @@
  */
 package com.lessspring.org.service.publish;
 
-import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.DiskUtils;
+import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.vo.WatchRequest;
-import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.event.NotifyEvent;
-import com.lessspring.org.utils.GsonUtils;
-import com.lessspring.org.utils.ListenKeyUtils;
-import com.lmax.disruptor.EventHandler;
+import com.lessspring.org.utils.MD5Utils;
+import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -44,48 +41,104 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-public class WatchClientManager implements EventHandler<NotifyEvent> {
+public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
-    private Map<String, Set<WatchClient>> watchClientManager = new ConcurrentHashMap<>();
+    private final long parallelThreshold = 100;
 
-    public void createWatchClient(WatchRequest request, FluxSink sink, ServerRequest serverRequest) {
+    private long clientCnt = 0;
+    private final Object monitor = new Object();
+    private Map<String, Map<String, Set<WatchClient>>> watchClientManager
+            = new ConcurrentHashMap<>(8);
+
+    // Build with the Client corresponds to a monitored object is
+    // used to monitor configuration changes
+
+    public void createWatchClient(WatchRequest request, FluxSink<?> sink, ServerRequest serverRequest) {
         WatchClient client = WatchClient.builder()
-                .clientIp(Objects.requireNonNull(serverRequest.exchange().getRequest().getRemoteAddress()).getHostString())
+                .clientIp(Objects.requireNonNull(serverRequest.exchange().getRequest()
+                        .getRemoteAddress()).getHostString())
                 .checkKey(request.getWatchKey())
                 .namespaceId(request.getNamespaceId())
                 .response(serverRequest.exchange().getResponse())
+                .sink(sink)
                 .build();
+        // When event creation is cancelled, automatic cancellation of client
+        // on the server side corresponding to monitor object
+        sink.onDispose(() -> {
+            synchronized (monitor) {
+                clientCnt --;
+            }
+            Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
+                    .getOrDefault(client.getNamespaceId(), Collections.emptyMap());
+            for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher.entrySet()) {
+                entry.getValue().remove(client);
+            }
+        });
         Map<String, String> listenKeys = client.getCheckKey();
+        // According to the monitoring configuration key, registered to a
+        // different key corresponding to the listener list
         listenKeys.forEach((key, value) -> {
-            Set<WatchClient> clients = watchClientManager.computeIfAbsent(key, s -> new HashSet<WatchClient>());
-            synchronized (clients) {
-                clients.add(client);
+            Map<String, Set<WatchClient>> clientsMap = watchClientManager
+                    .computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
+            clientsMap.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
+            clientsMap.get(key).add(client);
+        });
+        synchronized (monitor) {
+            clientCnt ++;
+        }
+        // A quick comparison, listens for client direct access to the latest
+        // configuration when registering for the first time
+        doQuickCompare(client);
+    }
+
+    private void doQuickCompare(WatchClient watchClient) {
+        Map<String, String> checkMd5 = watchClient.getCheckKey();
+        checkMd5.forEach((key, value) -> {
+            String content = DiskUtils.readFile(watchClient.getNamespaceId(), key);
+            if (!Objects.equals(MD5Utils.md5Hex(content), value)) {
+                writeResponse(watchClient, content);
             }
         });
     }
 
-    @Override
-    public void onEvent(NotifyEvent event, long sequence, boolean endOfBatch) throws Exception {
-        String listenKey = ListenKeyUtils.buildListenKey(event.getNamespaceId(), event.getDataId(), event.getGroupId());
-        long[] finishWorks = new long[1];
-        long works = watchClientManager.getOrDefault(listenKey, Collections.emptySet())
-                .stream()
-                .peek(client -> {
-                    try {
-//                        writeResponse(client, data);
-                        finishWorks[0] ++;
-                    } catch (Exception e) {
-                        log.error("[Notify WatchClient has Error] : {}", e.getMessage());
-                    }
-                })
-                .count();
-        log.info("total notify clients number is : {}, finish success is : {}", works, finishWorks[0]);
+    // Send the event to the client
+
+    @SuppressWarnings("unchecked")
+    private void writeResponse(WatchClient client, Object data) {
+        client.getSink().next(data);
     }
 
-    private void writeResponse(WatchClient client, ResponseData data) {
-        ServerHttpResponse response = client.getResponse();
-        client.getSink().next(response.writeWith(Mono.just(response.bufferFactory()
-                .wrap(GsonUtils.toJson(data).getBytes(StandardCharsets.UTF_8)))));
+    // Use the event framework, receiving NotifyEvent events, the
+    // configuration changes on delivery to the client
+
+    @Override
+    public void onEvent(NotifyEvent event) throws Exception {
+        try {
+            final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
+            final String configInfoJson = DiskUtils.readFile(event.getNamespaceId(), key);
+            long[] finishWorks = new long[1];
+            Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
+                    .getOrDefault(event.getNamespaceId(), Collections.emptyMap())
+                    .entrySet();
+            Stream<Map.Entry<String, Set<WatchClient>>> stream;
+            if (clientCnt >= parallelThreshold) {
+                stream = set.parallelStream();
+            } else {
+                stream = set.stream();
+            }
+            stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+                    .forEach(client -> {
+                        try {
+                            writeResponse(client, configInfoJson);
+                            finishWorks[0]++;
+                        } catch (Exception e) {
+                            log.error("[Notify WatchClient has Error] : {}", e.getMessage());
+                        }
+                    });
+            log.info("total notify clients finish success is : {}", finishWorks[0]);
+        } catch (Exception e) {
+            log.error("notify watcher has some error : {}", e);
+        }
     }
 
 }
