@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.cluster;
 
+import com.lessspring.org.LifeCycle;
 import com.lessspring.org.raft.NodeChangeListener;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.vo.ServerNode;
@@ -33,9 +34,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 0.0.1
  */
 @Slf4j
-public class DistroRouter implements NodeChangeListener {
+public class DistroRouter implements NodeChangeListener, LifeCycle {
 
-    private static final DistroRouter ROUTER = new DistroRouter();
+    private static final DistroRouter ROUTER;
+
+    static {
+        ROUTER = new DistroRouter();
+        ROUTER.init();
+    }
 
     public static DistroRouter getInstance() {
         return ROUTER;
@@ -46,13 +52,13 @@ public class DistroRouter implements NodeChangeListener {
     private final NodeManager nodeManager = NodeManager.getInstance();
     private AtomicReference<ServerNode[]> serverNodeAR = new AtomicReference<>();
 
-    @PostConstruct
+    @Override
     public void init() {
         nodeManager.registerListener(this);
         serverNodeAR.set(nodeManager.serverNodes().toArray(new ServerNode[0]));
     }
 
-    @PreDestroy
+    @Override
     public void destroy() {}
 
     // Data fragmentation judgment, if the node is responsible for,
