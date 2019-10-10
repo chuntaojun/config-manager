@@ -25,6 +25,8 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.google.protobuf.ByteString;
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.pojo.ClusterMeta;
+import com.lessspring.org.raft.NodeManager;
+import com.lessspring.org.raft.ServerStatus;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.repository.SnapshotMapper;
 import com.lessspring.org.utils.GsonUtils;
@@ -53,6 +55,7 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 
     private final String SNAPSHOT_DIR = "db";
     private final String SNAPSHOT_ARCHIVE = "db.zip";
+    private final NodeManager nodeManager = NodeManager.getInstance();
 
     private Executor executor;
 
@@ -101,6 +104,7 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 
     @Override
     public boolean onSnapshotLoad(SnapshotReader reader) {
+        nodeManager.getSelf().setServerStatus(ServerStatus.ONLY_READ);
         final String readerPath = reader.getPath();
         final String sourceFile = Paths.get(readerPath, SNAPSHOT_ARCHIVE).toString();
         try {
@@ -110,6 +114,8 @@ public class SnapshotOperateImpl implements SnapshotOperate {
         } catch (final Throwable t) {
             log.error("Fail to load snapshot, path={}, file list={}, {}.", readerPath, reader.listFiles(), t);
             return false;
+        } finally {
+            nodeManager.getSelf().setServerStatus(ServerStatus.HEALTH);
         }
     }
 

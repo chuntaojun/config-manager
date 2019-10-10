@@ -14,23 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump;
+package com.lessspring.org;
 
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.service.dump.task.DumpTask;
+import com.lessspring.org.config.ConfigService;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface DumpProcessor<T extends DumpTask> extends LifeCycle {
+public final class ConfigServiceFactory {
 
-    /**
-     * Processing configuration of dump operation
-     *
-     * @param dumpTask {@link DumpTask}
-     */
-    void process(T dumpTask);
-
+    public static ConfigService createConfigService(Configuration configuration) {
+        ConfigService configService = new ClientConfigService(configuration);
+        configService.init();
+        Runtime.getRuntime().addShutdownHook(new Thread(configService::destroy,
+                "config-manager.client.ShutdownHook"));
+        return configService;
+    }
 
 }

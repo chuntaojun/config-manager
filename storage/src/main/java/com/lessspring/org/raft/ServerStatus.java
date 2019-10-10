@@ -14,23 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump;
-
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.service.dump.task.DumpTask;
+package com.lessspring.org.raft;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface DumpProcessor<T extends DumpTask> extends LifeCycle {
+public enum ServerStatus {
 
     /**
-     * Processing configuration of dump operation
      *
-     * @param dumpTask {@link DumpTask}
      */
-    void process(T dumpTask);
+    ONLY_READ,
 
+    /**
+     *
+     */
+    ONLY_WRITE,
+
+    /**
+     *
+     */
+    DEATH,
+
+    /**
+     *
+     */
+    HEALTH
 
 }

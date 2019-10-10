@@ -66,6 +66,13 @@ public class ResponseData<T> {
                 .build();
     }
 
+    public static <T> ResponseData<T> fail(Code code) {
+        return ResponseData.builder()
+                .withCode(code.getCode())
+                .withErrMsg(code.getMsg())
+                .build();
+    }
+
     public static <T> ResponseData<T> fail() {
         return ResponseData.builder()
                 .withCode(500)

@@ -17,6 +17,7 @@
 package com.lessspring.org.tps;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.lessspring.org.constant.Code;
 import com.lessspring.org.model.vo.ResponseData;
 import org.springframework.stereotype.Component;
 
@@ -68,7 +69,8 @@ public class TpsManager {
         }
 
         public ResponseData<?> tryAcquire() {
-            return rateLimiter.tryAcquire() ? null : strategy.onLimit();
+            return rateLimiter.tryAcquire() ? null : (strategy == null ?
+                    ResponseData.fail(Code.SERVER_BUSY) : strategy.onLimit());
         }
     }
 

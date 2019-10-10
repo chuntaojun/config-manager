@@ -16,16 +16,73 @@
  */
 package com.lessspring.org.service.dump;
 
+import com.lessspring.org.NameUtils;
+import com.lessspring.org.db.dto.ConfigInfoDTO;
+import com.lessspring.org.repository.ConfigInfoMapper;
+import com.lessspring.org.service.cluster.DistroRouter;
+import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4All;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public class DumpAllProcessor implements DumpProcessor<DumpTask4All> {
+
+    private final ConfigCacheItemManager cacheItemManager;
+    private final ConfigInfoMapper configInfoMapper;
+    private final DistroRouter distroRouter = DistroRouter.getInstance();
+    private ExecutorService executor;
+
+    public DumpAllProcessor(ConfigCacheItemManager cacheItemManager, ConfigInfoMapper configInfoMapper) {
+        this.cacheItemManager = cacheItemManager;
+        this.configInfoMapper = configInfoMapper;
+
+    }
 
     @Override
     public void process(DumpTask4All dumpTask) {
+        executor.execute(() -> {
+            List<ConfigInfoDTO> configInfoDTOS = configInfoMapper
+                    .batchFindConfigInfo(Arrays.asList(dumpTask.getIds()));
+            configInfoDTOS.parallelStream()
+                    .filter(configInfoDTO ->
+                            distroRouter.isPrincipal(
+                                    NameUtils.buildName(configInfoDTO.getNamespaceId(), configInfoDTO.getGroupId(),
+                                            configInfoDTO.getDataId())))
+                    .forEach(configInfoDTO ->
+                            cacheItemManager.dumpConfig(configInfoDTO.getNamespaceId(), configInfoDTO));
+        });
+    }
 
+    @Override
+    public void init() {
+        this.executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
+
+            AtomicInteger id = new AtomicInteger(0);
+
+            @Override
+            public Thread newThread(@NotNull Runnable r) {
+                Thread thread = new Thread(r, "com.lessspring.org.config.DumpAll-"
+                        + id.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
+    }
+
+    @Override
+    public void destroy() {
+        this.executor.shutdown();
     }
 }

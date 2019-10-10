@@ -153,24 +153,18 @@ public class ConfigOperationService {
     public TransactionConsumer<Transaction> publishConsumer() {
         return new TransactionConsumer<Transaction>() {
             @Override
-            public void accept(Transaction transaction) throws TransactionException {
-                try {
-                    PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
-                    if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)) {
-                        ConfigChangeEvent event = ConfigOperationService.this.buildConfigChangeEvent(request4.getNamespaceId(), request4,
-                                request4.getContent(), request4.getEncryption(), EventType.PUBLISH);
-                        event.setConfigType(request4.getType());
-                        ConfigOperationService.this.publishEvent(event);
-                    }
-                } catch (Throwable e) {
-                    log.error("publishConsumer has some error : {}", e);
-                    throw new TransactionException(e);
+            public void accept(Transaction transaction) throws Throwable {
+                PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
+                if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)) {
+                    ConfigChangeEvent event = ConfigOperationService.this.buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                            request4.getContent(), request4.getEncryption(), EventType.PUBLISH);
+                    event.setConfigType(request4.getType());
+                    ConfigOperationService.this.publishEvent(event);
                 }
             }
 
             @Override
             public void onError(TransactionException te) {
-
             }
         };
     }
@@ -178,24 +172,18 @@ public class ConfigOperationService {
     public TransactionConsumer<Transaction> modifyConsumer() {
         return new TransactionConsumer<Transaction>() {
             @Override
-            public void accept(Transaction transaction) throws TransactionException {
-                try {
-                    PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
-                    if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(), request4)) {
-                        ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
-                                request4.getContent(), request4.getEncryption(), EventType.MODIFIED);
-                        event.setConfigType(request4.getType());
-                        publishEvent(event);
-                    }
-                } catch (Throwable e) {
-                    log.error("modifyConsumer has some error : {}", e);
-                    throw new TransactionException(e);
+            public void accept(Transaction transaction) throws Throwable {
+                PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), PublishConfigRequest4.class);
+                if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(), request4)) {
+                    ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                            request4.getContent(), request4.getEncryption(), EventType.MODIFIED);
+                    event.setConfigType(request4.getType());
+                    publishEvent(event);
                 }
             }
 
             @Override
             public void onError(TransactionException te) {
-
             }
         };
     }
@@ -203,23 +191,17 @@ public class ConfigOperationService {
     public TransactionConsumer<Transaction> deleteConsumer() {
         return new TransactionConsumer<Transaction>() {
             @Override
-            public void accept(Transaction transaction) throws TransactionException {
-                try {
-                    DeleteConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), DeleteConfigRequest4.class);
-                    if (persistentHandler.removeConfigInfo(request4.getNamespaceId(), request4)) {
-                        ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
-                                "", "", EventType.DELETE);
-                        publishEvent(event);
-                    }
-                } catch (Throwable e) {
-                    log.error("deleteConsumer has some error : {}", e);
-                    throw new TransactionException(e);
+            public void accept(Transaction transaction) throws Throwable {
+                DeleteConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(), DeleteConfigRequest4.class);
+                if (persistentHandler.removeConfigInfo(request4.getNamespaceId(), request4)) {
+                    ConfigChangeEvent event = buildConfigChangeEvent(request4.getNamespaceId(), request4,
+                            "", "", EventType.DELETE);
+                    publishEvent(event);
                 }
             }
 
             @Override
             public void onError(TransactionException te) {
-
             }
         };
 

@@ -14,23 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.dump;
+package com.lessspring.org.raft;
 
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.service.dump.task.DumpTask;
+import com.lessspring.org.raft.vo.ServerNode;
+
+import java.util.Collection;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface DumpProcessor<T extends DumpTask> extends LifeCycle {
+public interface NodeChangeListener {
 
     /**
-     * Processing configuration of dump operation
+     * Node change notification callback
      *
-     * @param dumpTask {@link DumpTask}
+     * @param newServerNodes {@link Collection<ServerNode>}
      */
-    void process(T dumpTask);
-
+    void onChange(Collection<ServerNode> newServerNodes);
 
 }

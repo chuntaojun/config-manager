@@ -28,9 +28,9 @@ public interface TransactionConsumer<T> {
      * Callback interface transaction consumers
      *
      * @param t transaction
-     * @throws Exception exception
+     * @throws Throwable exception
      */
-    void accept(T t) throws TransactionException;
+    void accept(T t) throws Throwable;
 
     /**
      * Abnormal transaction callback handler

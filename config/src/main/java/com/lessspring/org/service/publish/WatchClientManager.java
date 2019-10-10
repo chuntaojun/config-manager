@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.FluxSink;
 
+import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;

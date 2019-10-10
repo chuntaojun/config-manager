@@ -37,6 +37,8 @@ public class ConfigInfoDTO {
     private String namespaceId;
     private String groupId;
     private String dataId;
+    private Boolean file;
+    private byte[] fileSource;
     private byte[] content;
     private String type;
     private String encryption;

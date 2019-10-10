@@ -18,6 +18,8 @@ package com.lessspring.org.service.config;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
+import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
+import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.pojo.CacheItem;
@@ -25,9 +27,13 @@ import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -43,6 +49,33 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ConfigCacheItemManager {
 
     private final Map<String, CacheItem> cacheItemMap = new ConcurrentHashMap<>(16);
+
+    public void dumpConfig(final String namespaceId, final ConfigInfoDTO configInfoDTO) {
+        ConfigChangeEvent event = ConfigChangeEvent.builder()
+                .groupId(configInfoDTO.getGroupId())
+                .dataId(configInfoDTO.getDataId())
+                .content(new String(configInfoDTO.getContent(), Charset.forName(StandardCharsets.UTF_8.name())))
+                .file(configInfoDTO.getFile())
+                .fileSource(configInfoDTO.getFileSource())
+                .configType(configInfoDTO.getType())
+                .build();
+        registerConfigCacheItem(namespaceId, event);
+        updateContent(namespaceId, event);
+    }
+
+    public void dumpConfigBeta(final String namespaceId, final ConfigBetaInfoDTO betaInfoDTO) {
+        ConfigChangeEvent event = ConfigChangeEvent.builder()
+                .groupId(betaInfoDTO.getGroupId())
+                .dataId(betaInfoDTO.getDataId())
+                .content(new String(betaInfoDTO.getContent(), Charset.forName(StandardCharsets.UTF_8.name())))
+                .file(betaInfoDTO.getFile())
+                .fileSource(betaInfoDTO.getFileSource())
+                .clientIps(betaInfoDTO.getClientIps())
+                .configType(betaInfoDTO.getType())
+                .build();
+        registerConfigCacheItem(namespaceId, event);
+        updateContent(namespaceId, event);
+    }
 
     public void registerConfigCacheItem(final String namespaceId, final ConfigChangeEvent event) {
         final String key = NameUtils.buildName(namespaceId, event.getGroupId(), event.getDataId());

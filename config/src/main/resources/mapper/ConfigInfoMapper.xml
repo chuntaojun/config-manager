@@ -40,4 +40,24 @@
         SELECT * FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
     </select>
 
+    <select id="findMinAndMaxId" resultType="java.lang.Long">
+        SELECT MIN(id), MAX(id) FROM config_info
+    </select>
+
+    <select id="batchFindConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
+        SELECT * FROM config_info WHERE id in
+        <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+    <select id="findMinAndMaxId4Beta" resultType="java.lang.Long">
+        SELECT MIN(id), MAX(id) FROM config_info_beta
+    </select>
+    <select id="batchFindConfigInfo4Beta" resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO">
+        SELECT * FROM config_info_beta WHERE id in
+        <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

@@ -23,6 +23,8 @@ import com.lessspring.org.pojo.query.QueryConfigInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -45,6 +47,36 @@ public interface ConfigInfoMapper {
      * @return {@link ConfigInfoDTO}
      */
     ConfigInfoDTO findConfigInfo(@Param(value = "query") QueryConfigInfo queryConfigInfo);
+
+    /**
+     * find min and max id
+     *
+     * @return {@link List<Long>}
+     */
+    List<Long> findMinAndMaxId();
+
+    /**
+     * batch find config info by ids
+     *
+     * @param ids ids
+     * @return {@link List<ConfigInfoDTO>}
+     */
+    List<ConfigInfoDTO> batchFindConfigInfo(@Param("ids") List<Long> ids);
+
+    /**
+     * find min and max id
+     *
+     * @return {@link List<Long>}
+     */
+    List<Long> findMinAndMaxId4Beta();
+
+    /**
+     * batch find config info by ids
+     *
+     * @param ids ids
+     * @return {@link List<ConfigInfoDTO>}
+     */
+    List<ConfigBetaInfoDTO> batchFindConfigInfo4Beta(@Param("ids") List<Long> ids);
 
     /**
      * save config-info into db

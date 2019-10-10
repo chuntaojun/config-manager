@@ -51,9 +51,11 @@ public class ConfigTransactionCommitCallback implements TransactionCommitCallbac
         TransactionConsumer<Transaction> consumer = consumerMap.get(transaction.getOperation());
         try {
             consumer.accept(transaction);
-        } catch (TransactionException e) {
-            consumer.onError(e);
-            throw new TransactionException(e);
+        } catch (Throwable e) {
+            TransactionException exception = new TransactionException(e);
+            exception.setTransaction(transaction);
+            consumer.onError(exception);
+            throw exception;
         }
     }
 
