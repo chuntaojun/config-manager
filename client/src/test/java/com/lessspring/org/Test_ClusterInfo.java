@@ -21,6 +21,7 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.utils.GsonUtils;
 import org.junit.Test;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -36,8 +37,7 @@ public class Test_ClusterInfo {
         configuration.setServers(clusterInfo);
         configuration.setUsername("lessSpring");
         configuration.setPassword("29591314");
-        ConfigService configService = new ClientConfigService(configuration);
-        configService.init();
+        ConfigService configService = ConfigServiceFactory.createConfigService(configuration);
         ConfigInfo configInfo = configService.getConfig("DEVELOP", "liaochuntao", "com.lessspring.org");
         System.out.println(GsonUtils.toJson(configInfo));
     }

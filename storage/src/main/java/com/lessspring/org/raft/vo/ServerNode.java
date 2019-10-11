@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.raft.vo;
 
+import com.lessspring.org.raft.ServerStatus;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,6 +31,7 @@ public class ServerNode {
     private int port;
     private String role;
     private String key = "";
+    private ServerStatus serverStatus = ServerStatus.ONLY_READ;
 
     public String getKey() {
         if (StringUtils.isEmpty(key)) {
@@ -60,5 +62,13 @@ public class ServerNode {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public ServerStatus getServerStatus() {
+        return serverStatus;
+    }
+
+    public void setServerStatus(ServerStatus serverStatus) {
+        this.serverStatus = serverStatus;
     }
 }

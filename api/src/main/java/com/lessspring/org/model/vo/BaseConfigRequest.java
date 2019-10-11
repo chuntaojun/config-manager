@@ -16,6 +16,11 @@
  */
 package com.lessspring.org.model.vo;
 
+import com.google.gson.annotations.Expose;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -24,6 +29,8 @@ public class BaseConfigRequest {
 
     private String dataId;
     private String groupId;
+    @Expose
+    private transient final Map<String, Object> attributes = new HashMap<>(4);
 
     public String getDataId() {
         return dataId;
@@ -41,5 +48,16 @@ public class BaseConfigRequest {
         this.groupId = groupId;
     }
 
-    
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public <T> T getAttribute(String key) {
+        return (T) attributes.get(key);
+    }
+
+    public synchronized BaseConfigRequest setAttribute(String key, Object value) {
+        attributes.put(key, value);
+        return this;
+    }
 }

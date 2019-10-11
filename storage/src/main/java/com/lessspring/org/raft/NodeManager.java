@@ -19,7 +19,9 @@ package com.lessspring.org.raft;
 import com.lessspring.org.raft.vo.ServerNode;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -31,12 +33,18 @@ public class NodeManager {
 
     private ServerNode self = null;
 
+    private Set<NodeChangeListener> listeners = new LinkedHashSet<>();
+
     private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
 
     private static final NodeManager INSTANCE = new NodeManager();
 
     public static NodeManager getInstance() {
         return INSTANCE;
+    }
+
+    public synchronized void registerListener(NodeChangeListener listener) {
+        listeners.add(listener);
     }
 
     public ServerNode getSelf() {
@@ -49,10 +57,12 @@ public class NodeManager {
 
     public void nodeJoin(ServerNode node) {
         nodeMap.putIfAbsent(node.getKey(), node);
+        notifyListener();
     }
 
     public void nodeLeave(ServerNode node) {
         nodeMap.remove(node.getKey());
+        notifyListener();
     }
 
     public Stream<Map.Entry<String, ServerNode>> stream() {
@@ -61,6 +71,13 @@ public class NodeManager {
 
     public Collection<ServerNode> serverNodes() {
         return nodeMap.values();
+    }
+
+    private void notifyListener() {
+        Collection<ServerNode> nodes = nodeMap.values();
+        for (NodeChangeListener listener : listeners) {
+            listener.onChange(nodes);
+        }
     }
 
 }

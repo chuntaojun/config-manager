@@ -16,7 +16,20 @@
  */
 package com.lessspring.org.service.dump;
 
+import com.lessspring.org.NameUtils;
+import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
+import com.lessspring.org.repository.ConfigInfoMapper;
+import com.lessspring.org.service.cluster.DistroRouter;
+import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4Beta;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -24,8 +37,48 @@ import com.lessspring.org.service.dump.task.DumpTask4Beta;
  */
 public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 
+    private final ConfigCacheItemManager cacheItemManager;
+    private final ConfigInfoMapper configInfoMapper;
+    private final DistroRouter distroRouter = DistroRouter.getInstance();
+    private ExecutorService executor;
+
+    public DumpAllBetaProcessor(ConfigCacheItemManager cacheItemManager, ConfigInfoMapper configInfoMapper) {
+        this.cacheItemManager = cacheItemManager;
+        this.configInfoMapper = configInfoMapper;
+    }
+
     @Override
     public void process(DumpTask4Beta dumpTask) {
+        executor.execute(() -> {
+            List<ConfigBetaInfoDTO> betaInfoDTOS = configInfoMapper
+                    .batchFindConfigInfo4Beta(Arrays.asList(dumpTask.getIds()));
+            betaInfoDTOS.parallelStream()
+                    .filter(betaInfoDTO -> distroRouter.isPrincipal(
+                            NameUtils.buildName(betaInfoDTO.getNamespaceId(), betaInfoDTO.getGroupId(),
+                                    betaInfoDTO.getDataId())))
+                    .forEach(configInfoDTO ->
+                            cacheItemManager.dumpConfigBeta(configInfoDTO.getNamespaceId(), configInfoDTO));
+        });
+    }
 
+    @Override
+    public void init() {
+        this.executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
+
+            AtomicInteger id = new AtomicInteger(0);
+
+            @Override
+            public Thread newThread(@NotNull Runnable r) {
+                Thread thread = new Thread(r, "com.lessspring.org.config.DumpAllBeta-"
+                        + id.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
+    }
+
+    @Override
+    public void destroy() {
+        this.executor.shutdown();
     }
 }

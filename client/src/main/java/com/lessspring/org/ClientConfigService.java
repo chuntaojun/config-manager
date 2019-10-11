@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClientConfigService implements ConfigService {
+final class ClientConfigService implements ConfigService {
 
     private HttpClient httpClient;
     private WatchConfigWorker watchConfigWorker;
@@ -47,7 +47,7 @@ public class ClientConfigService implements ConfigService {
     private final AtomicBoolean inited = new AtomicBoolean(false);
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-    public ClientConfigService(Configuration configuration) {
+    ClientConfigService(Configuration configuration) {
         this.configuration = configuration;
     }
 

@@ -33,10 +33,14 @@ import java.sql.Clob;
 @AllArgsConstructor
 public class ConfigInfoDTO {
 
+    public static final String NAME = "ConfigInfoDTO";
+
     private Long id;
     private String namespaceId;
     private String groupId;
     private String dataId;
+    private Boolean file;
+    private byte[] fileSource;
     private byte[] content;
     private String type;
     private String encryption;

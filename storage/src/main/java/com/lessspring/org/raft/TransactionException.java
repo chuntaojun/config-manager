@@ -22,6 +22,8 @@ package com.lessspring.org.raft;
  */
 public class TransactionException extends Exception {
 
+    private Transaction transaction;
+
     public TransactionException() {
         super();
     }
@@ -40,5 +42,13 @@ public class TransactionException extends Exception {
 
     protected TransactionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
 }

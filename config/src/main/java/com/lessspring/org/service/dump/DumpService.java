@@ -16,16 +16,22 @@
  */
 package com.lessspring.org.service.dump;
 
+import com.lessspring.org.repository.ConfigInfoMapper;
+import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4All;
 import com.lessspring.org.service.dump.task.DumpTask4Beta;
 import com.lessspring.org.service.dump.task.DumpTask4Period;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -34,39 +40,47 @@ import java.util.concurrent.TimeUnit;
 @Component(value = "dumpService")
 public class DumpService {
 
+    @Resource
+    private ConfigInfoMapper configInfoMapper;
+
     private final DumpProcessor<DumpTask4All> task4AllDumpProcessor;
     private final DumpProcessor<DumpTask4Beta> task4BetaDumpProcessor;
-    private final DumpProcessor<DumpTask4Period> task4PeriodDumpProcessor;
+    private DumpProcessor<DumpTask4Period> periodProcessor;
 
-    private final ScheduledThreadPoolExecutor executor;
-
-    public DumpService() {
-        this.task4AllDumpProcessor = new DumpAllProcessor();
-        this.task4BetaDumpProcessor = new DumpAllBetaProcessor();
-        this.task4PeriodDumpProcessor = new DumpPeriodProcessor();
-
-        this.executor = new ScheduledThreadPoolExecutor(1, r -> {
-            Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            thread.setName("com.lessspring.org.service.dump.Executor");
-            return thread;
-        });
+    public DumpService(ConfigCacheItemManager cacheItemManager) {
+        this.task4AllDumpProcessor = new DumpAllProcessor(cacheItemManager, configInfoMapper);
+        this.task4BetaDumpProcessor = new DumpAllBetaProcessor(cacheItemManager, configInfoMapper);
     }
 
     @PostConstruct
     public void init() {
-        Long[] ids = new Long[]{0L};
-        dumpAll(ids).run();
-        dumpAllBeta(ids).run();
-        executor.scheduleAtFixedRate(dumpPeriod(), 10_000L, 15 * 60 * 1000L, TimeUnit.MILLISECONDS);
+        periodProcessor = new DumpPeriodProcessor(configInfoMapper, dumpAll(), dumpAllBeta());
+        task4AllDumpProcessor.init();
+        task4BetaDumpProcessor.init();
+        periodProcessor.init();
+
+        Long[] ids = configInfoMapper.findMinAndMaxId().toArray(new Long[0]);
+        dumpAll().accept(ids);
+        Long[] ids4Beta = configInfoMapper.findMinAndMaxId4Beta().toArray(new Long[0]);
+        dumpAllBeta().accept(ids4Beta);
+        DumpTask4Period period = new DumpTask4Period();
+        period.setPeriod(Duration.ofMinutes(15));
+        periodProcessor.process(period);
     }
 
-    private Runnable dumpAll(Long[] ids) {
-        return () -> {
+    @PreDestroy
+    public void destroy() {
+        task4AllDumpProcessor.destroy();
+        task4BetaDumpProcessor.destroy();
+        periodProcessor.destroy();
+    }
+
+    private Consumer<Long[]> dumpAll() {
+        return ids -> {
             int batchSize = 1_000;
             int counter = 0;
             List<Long> batchWork = new ArrayList<>(batchSize);
-            for (long id : ids) {
+            for (long id = ids[0]; id < ids[1]; id ++) {
                 batchWork.add(id);
                 counter ++;
                 if (counter > batchSize) {
@@ -79,12 +93,12 @@ public class DumpService {
         };
     }
 
-    private Runnable dumpAllBeta(Long[] ids) {
-        return () -> {
+    private Consumer<Long[]> dumpAllBeta() {
+        return ids -> {
             int batchSize = 1_000;
             int counter = 0;
             List<Long> batchWork = new ArrayList<>(batchSize);
-            for (long id : ids) {
+            for (long id = ids[0]; id < ids[1]; id ++) {
                 batchWork.add(id);
                 counter ++;
                 if (counter > batchSize) {
@@ -97,8 +111,4 @@ public class DumpService {
         };
     }
 
-    private Runnable dumpPeriod() {
-        return () -> {
-        };
-    }
 }

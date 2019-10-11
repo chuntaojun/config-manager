@@ -16,13 +16,14 @@
  */
 package com.lessspring.org.service.dump;
 
+import com.lessspring.org.LifeCycle;
 import com.lessspring.org.service.dump.task.DumpTask;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface DumpProcessor<T extends DumpTask> {
+public interface DumpProcessor<T extends DumpTask> extends LifeCycle {
 
     /**
      * Processing configuration of dump operation
@@ -30,5 +31,6 @@ public interface DumpProcessor<T extends DumpTask> {
      * @param dumpTask {@link DumpTask}
      */
     void process(T dumpTask);
+
 
 }
