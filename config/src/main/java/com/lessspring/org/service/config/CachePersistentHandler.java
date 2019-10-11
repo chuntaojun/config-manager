@@ -18,6 +18,7 @@ package com.lessspring.org.service.config;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
+import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
@@ -63,7 +64,11 @@ public class CachePersistentHandler implements PersistentHandler {
             // Directly read cache did not read to the configuration file,
             // read the database directly
             if (StringUtils.isEmpty(s)) {
-                return persistentHandler.readConfigContent(namespaceId, request);
+                ConfigInfo infoDB = persistentHandler.readConfigContent(namespaceId, request);
+                ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
+                request.getAttributes().clear();
+                configCacheItemManager.dumpConfig(namespaceId, dto);
+                return infoDB;
             }
             configInfo = GsonUtils.toObj(s, ConfigInfo.class);
             configInfo.setEncryption("");

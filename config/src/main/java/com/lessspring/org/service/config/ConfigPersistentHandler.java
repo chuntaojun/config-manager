@@ -83,9 +83,11 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
         ConfigInfoDTO dto = configInfoMapper.findConfigInfo(queryConfigInfo);
         byte[] origin = dto.getContent();
         // unable transport config-context encryption token
+        request.setAttribute(ConfigInfoDTO.NAME, dto);
         ConfigInfo info = ConfigInfo.builder()
                 .groupId(dto.getGroupId())
                 .dataId(dto.getDataId())
+                .file(dto.getFileSource())
                 .type(dto.getType())
                 .build();
         byte type = ByteUtils.getByteByIndex(origin, 0);
