@@ -14,38 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
+package com.lessspring.org.service.common;
 
-import com.lessspring.org.constant.Code;
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
+public interface CacheOperation {
 
-    @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
-    }
+    /**
+     * get value by key
+     *
+     * @param key key
+     * @return {@link Optional<byte[]>}
+     */
+    Optional<byte[]> get(String key);
 
-    public TpsLimitException() {
-        super();
-    }
+    /**
+     * put key-value
+     *
+     * @param key key
+     * @param value value
+     */
+    void put(String key, byte[] value);
 
-    public TpsLimitException(String message) {
-        super(message);
-    }
+    /**
+     * put key-value with life-Time
+     *
+     * @param key key
+     * @param value value
+     * @param liveTime liveTime
+     */
+    void put(String key, byte[] value, long liveTime);
 
-    public TpsLimitException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    /**
+     * expire this key
+     *
+     * @param key key
+     */
+    void expire(String key);
 
-    public TpsLimitException(Throwable cause) {
-        super(cause);
-    }
-
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

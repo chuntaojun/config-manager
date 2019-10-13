@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -38,6 +39,19 @@ import java.util.zip.ZipOutputStream;
  * @since 0.0.1
  */
 public final class DiskUtils {
+
+    private static Logger logger = Logger.getAnonymousLogger();
+
+    private final static String NO_SPACE_CN = "设备上没有空间";
+    private final static String NO_SPACE_EN = "No space left on device";
+    private final static String DISK_QUATA_CN = "超出磁盘限额";
+    private final static String DISK_QUATA_EN = "Disk quota exceeded";
+
+    // Just for test
+
+    public static Logger getLogger() {
+        return logger;
+    }
 
     public static String readFile(String path, String fileName) {
         String finalPath = PathUtils.finalPath(path);
@@ -81,7 +95,15 @@ public final class DiskUtils {
         try (OutputStream writer = new FileOutputStream(file)) {
             writer.write(content);
             return true;
-        } catch (IOException ignore) {
+        } catch (IOException ioe) {
+            if (ioe.getMessage() != null) {
+                String errMsg = ioe.getMessage();
+                if (NO_SPACE_CN.equals(errMsg) || NO_SPACE_EN.equals(errMsg) || errMsg.contains(DISK_QUATA_CN)
+                        || errMsg.contains(DISK_QUATA_EN)) {
+                    logger.info("磁盘满，自杀退出");
+                    System.exit(0);
+                }
+            }
         }
         return false;
     }
@@ -93,6 +115,15 @@ public final class DiskUtils {
             return file.delete();
         }
         return false;
+    }
+
+    public static boolean deleteDir(String path) {
+        try {
+            FileUtils.deleteDirectory(new File(path));
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private static File openFile(String path, String fileName) {

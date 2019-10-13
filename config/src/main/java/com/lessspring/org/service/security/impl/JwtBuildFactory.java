@@ -56,10 +56,11 @@ public class JwtBuildFactory {
     @Value("${com.lesspring.org.config-manger.jwt.survival.time.second}")
     private int tokenSurvival;
 
+    @Value("com.lesspring.org.config-manger.jwt.signature")
+    private String signature;
+
     @Resource
     private NamespacePermissionsMapper permissionsMapper;
-
-    private final NodeManager nodeManager = NodeManager.getInstance();
 
     private final Algorithm algorithm;
 
@@ -73,13 +74,14 @@ public class JwtBuildFactory {
         calendar.setTime(new Date());
         calendar.add(Calendar.SECOND, tokenSurvival);
         Privilege privilege = new Privilege();
+        privilege.setUserId(userDTO.getId());
         privilege.setRole(PropertiesEnum.Role.choose(userDTO.getRoleType() == null ?
                 PropertiesEnum.Role.CUSTOMER.getType() : userDTO.getRoleType()));
         privilege.setUsername(userDTO.getUsername());
-        privilege.setOwnerNamespace(permissionsMapper.findNamespaceIdByUserId(userDTO.getId()));
+        privilege.setOwnerNamespaces(permissionsMapper.findNamespaceIdByUserId(userDTO.getId()));
         String jwt = JWT
                 .create()
-                .withIssuer(GsonUtils.toJson(nodeManager.getSelf()))
+                .withIssuer(signature)
                 .withSubject(GsonUtils.toJson(privilege))
                 .withExpiresAt(calendar.getTime())
                 .sign(algorithm);
@@ -90,20 +92,12 @@ public class JwtBuildFactory {
 
     public Optional<DecodedJWT> tokenVerify(String jwt) {
         DecodedJWT decodedJWT = null;
-        boolean goOn = false;
-        for (ServerNode node : nodeManager.serverNodes()) {
-            try {
-                JWTVerifier verifier = JWT.require(algorithm)
-                        .withIssuer(GsonUtils.toJson(node)).build();
-                decodedJWT = verifier.verify(jwt);
-                goOn = false;
-            } catch (JWTVerificationException exception) {
-                log.error(exception.getMessage());
-                goOn = true;
-            }
-            if (!goOn) {
-                break;
-            }
+        try {
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer(signature).build();
+            decodedJWT = verifier.verify(jwt);
+        } catch (JWTVerificationException exception) {
+            log.error(exception.getMessage());
         }
         return Optional.ofNullable(decodedJWT);
     }

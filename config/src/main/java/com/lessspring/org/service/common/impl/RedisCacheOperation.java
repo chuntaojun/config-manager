@@ -14,38 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
+package com.lessspring.org.service.common.impl;
 
-import com.lessspring.org.constant.Code;
+import com.lessspring.org.service.common.CacheOperation;
+
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
+public class RedisCacheOperation implements CacheOperation {
 
     @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
+    public Optional<byte[]> get(String key) {
+        return Optional.empty();
     }
 
-    public TpsLimitException() {
-        super();
+    @Override
+    public void put(String key, byte[] value) {
+
     }
 
-    public TpsLimitException(String message) {
-        super(message);
+    @Override
+    public void put(String key, byte[] value, long liveTime) {
+
     }
 
-    public TpsLimitException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    @Override
+    public void expire(String key) {
 
-    public TpsLimitException(Throwable cause) {
-        super(cause);
-    }
-
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

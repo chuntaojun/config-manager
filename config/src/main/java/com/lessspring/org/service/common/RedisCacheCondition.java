@@ -14,38 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
+package com.lessspring.org.service.common;
 
-import com.lessspring.org.constant.Code;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
+public class RedisCacheCondition implements Condition {
 
     @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
-    }
-
-    public TpsLimitException() {
-        super();
-    }
-
-    public TpsLimitException(String message) {
-        super(message);
-    }
-
-    public TpsLimitException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TpsLimitException(Throwable cause) {
-        super(cause);
-    }
-
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        return Objects.equals(context.getEnvironment().getProperty("com.lessspring.org.config-manager.cache.type"), "redis");
     }
 }

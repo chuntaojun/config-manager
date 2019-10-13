@@ -14,26 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
+package com.lessspring.org.configuration;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface LoginHandler {
+@Order(value = Ordered.LOWEST_PRECEDENCE)
+public class ConfigManagerEnvironmentProcessor implements EnvironmentPostProcessor {
 
-    /**
-     * login
-     *
-     * @param request {@link ServerRequest}
-     * @return {@link Mono<ServerResponse>}
-     */
-    @NotNull
-    Mono<ServerResponse> login(ServerRequest request);
+    private String cacheType = "inner";
 
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+    }
 }

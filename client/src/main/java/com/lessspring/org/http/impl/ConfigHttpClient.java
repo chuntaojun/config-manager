@@ -195,7 +195,8 @@ public class ConfigHttpClient implements HttpClient {
         Retry<Void> retry = new Retry<Void>() {
             @Override
             protected Void run() throws Exception {
-                RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
+                RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE),
+                        requestHandler.handle(body.getData()));
                 Request.Builder builder = new Request.Builder()
                         .url(buildUrl(url))
                         .post(postBody);
@@ -257,10 +258,12 @@ public class ConfigHttpClient implements HttpClient {
         } else if (method == HttpMethod.DELETE) {
             builder = builder.delete();
         } else if (method == HttpMethod.PUT) {
-            RequestBody putBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
+            RequestBody putBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE),
+                    requestHandler.handle(body.getData()));
             builder = builder.put(putBody);
         } else if (method == HttpMethod.POST) {
-            RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE), requestHandler.handle(body.getData()));
+            RequestBody postBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_UTF8_VALUE),
+                    requestHandler.handle(body.getData()));
             builder = builder.post(postBody);
         } else {
             throw new IllegalArgumentException("Does not support HTTP request type");

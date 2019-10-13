@@ -29,8 +29,7 @@ import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -77,17 +76,19 @@ public class DumpService {
 
     private Consumer<Long[]> dumpAll() {
         return ids -> {
-            int batchSize = 1_000;
-            int counter = 0;
-            List<Long> batchWork = new ArrayList<>(batchSize);
-            for (long id = ids[0]; id < ids[1]; id ++) {
-                batchWork.add(id);
-                counter ++;
-                if (counter > batchSize) {
-                    counter = 0;
-                    DumpTask4All task4All = new DumpTask4All(batchWork.toArray(new Long[0]));
-                    task4AllDumpProcessor.process(task4All);
-                    batchWork.clear();
+            if (Objects.nonNull(ids) && ids.length == 2) {
+                int batchSize = 1_000;
+                int counter = 0;
+                List<Long> batchWork = new ArrayList<>(batchSize);
+                for (long id = ids[0]; id < ids[1]; id++) {
+                    batchWork.add(id);
+                    counter++;
+                    if (counter > batchSize) {
+                        counter = 0;
+                        DumpTask4All task4All = new DumpTask4All(batchWork.toArray(new Long[0]));
+                        task4AllDumpProcessor.process(task4All);
+                        batchWork.clear();
+                    }
                 }
             }
         };
@@ -95,17 +96,19 @@ public class DumpService {
 
     private Consumer<Long[]> dumpAllBeta() {
         return ids -> {
-            int batchSize = 1_000;
-            int counter = 0;
-            List<Long> batchWork = new ArrayList<>(batchSize);
-            for (long id = ids[0]; id < ids[1]; id ++) {
-                batchWork.add(id);
-                counter ++;
-                if (counter > batchSize) {
-                    counter = 0;
-                    DumpTask4Beta task4Beta = new DumpTask4Beta(batchWork.toArray(new Long[0]));
-                    task4BetaDumpProcessor.process(task4Beta);
-                    batchWork.clear();
+            if (Objects.nonNull(ids) && ids.length == 2) {
+                int batchSize = 1_000;
+                int counter = 0;
+                List<Long> batchWork = new ArrayList<>(batchSize);
+                for (long id = ids[0]; id < ids[1]; id++) {
+                    batchWork.add(id);
+                    counter++;
+                    if (counter > batchSize) {
+                        counter = 0;
+                        DumpTask4Beta task4Beta = new DumpTask4Beta(batchWork.toArray(new Long[0]));
+                        task4BetaDumpProcessor.process(task4Beta);
+                        batchWork.clear();
+                    }
                 }
             }
         };

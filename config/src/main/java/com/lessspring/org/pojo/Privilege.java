@@ -18,6 +18,8 @@ package com.lessspring.org.pojo;
 
 import com.lessspring.org.utils.PropertiesEnum;
 
+import java.util.List;
+
 /**
  * The custom of a simple access objects
  *
@@ -26,10 +28,27 @@ import com.lessspring.org.utils.PropertiesEnum;
  */
 public class Privilege {
 
+    private Long userId;
     private String username;
-    private String ownerNamespace;
+    private List<String> ownerNamespaces;
     private transient String jwt;
     private PropertiesEnum.Role role;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public List<String> getOwnerNamespaces() {
+        return ownerNamespaces;
+    }
+
+    public void setOwnerNamespaces(List<String> ownerNamespaces) {
+        this.ownerNamespaces = ownerNamespaces;
+    }
 
     public String getUsername() {
         return username;
@@ -37,14 +56,6 @@ public class Privilege {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getOwnerNamespace() {
-        return ownerNamespace;
-    }
-
-    public void setOwnerNamespace(String ownerNamespace) {
-        this.ownerNamespace = ownerNamespace;
     }
 
     public String getJwt() {
@@ -71,7 +82,7 @@ public class Privilege {
     public String toString() {
         return "Privilege{" +
                 "username='" + username + '\'' +
-                ", ownerNamespace='" + ownerNamespace + '\'' +
+                ", ownerNamespaces='" + ownerNamespaces + '\'' +
                 ", jwt='" + jwt + '\'' +
                 ", role=" + role +
                 '}';

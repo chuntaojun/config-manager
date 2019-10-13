@@ -14,38 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
+package com.lessspring.org.service.user;
 
-import com.lessspring.org.constant.Code;
+import com.lessspring.org.model.vo.ResponseData;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
+public interface UserService {
 
-    @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
-    }
+    ResponseData<Boolean> createUser();
 
-    public TpsLimitException() {
-        super();
-    }
+    ResponseData<Boolean> modifyUser();
 
-    public TpsLimitException(String message) {
-        super(message);
-    }
+    ResponseData<Boolean> removeUser();
 
-    public TpsLimitException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TpsLimitException(Throwable cause) {
-        super(cause);
-    }
-
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

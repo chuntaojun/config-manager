@@ -14,37 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.web;
+package com.lessspring.org.configuration.cache;
 
-import com.lessspring.org.constant.StringConst;
-import com.lessspring.org.handler.LoginHandler;
+import com.lessspring.org.service.common.CacheOperation;
+import com.lessspring.org.service.common.InnerCacheCondition;
+import com.lessspring.org.service.common.RedisCacheCondition;
+import com.lessspring.org.service.common.impl.InnerCacheOperation;
+import com.lessspring.org.service.common.impl.RedisCacheOperation;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Configuration
-public class LoginRouter {
+public class CacheConfiguration {
 
-    private final LoginHandler loginHandler;
-
-    public LoginRouter(LoginHandler loginHandler) {
-        this.loginHandler = loginHandler;
+    @Conditional(InnerCacheCondition.class)
+    @Bean
+    public CacheOperation innerCache() {
+        return new InnerCacheOperation();
     }
 
-    @Bean(value = "loginRouterImpl")
-    public RouterFunction<ServerResponse> loginRouterImpl() {
-        return route(
-                POST(StringConst.API_V1 + "login").and(accept(MediaType.APPLICATION_JSON_UTF8)), loginHandler::login);
+    @Conditional(RedisCacheCondition.class)
+    @Bean
+    public CacheOperation redisCache() {
+        return new RedisCacheOperation();
     }
 
 }

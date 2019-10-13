@@ -42,5 +42,11 @@ public class ApiConstant {
 
     public static final String REFRESH_CLUSTER_NODE_INFO = StringConst.API_V1 + "cluster/all";
 
+    public static final String DISTRO_SYNC_ALL = StringConst.API_V1 + "distro/sync/all";
+
+    public static final String DISTRO_SYNC_NODE = StringConst.API_V1 + "distro/sync/node";
+
+    public static final String DISTRO_CHECK = StringConst.API_V1 + "distro/sync/check";
+
 
 }

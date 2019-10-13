@@ -22,6 +22,7 @@ import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,9 @@ import java.util.function.Supplier;
 public class TpsConfiguration {
 
     private final TpsManager tpsManager;
+
+    @Value("${com.lessspring.org.config-manager.qps}")
+    private Long qps;
 
     public TpsConfiguration(TpsManager tpsManager) {
         this.tpsManager = tpsManager;
@@ -58,7 +62,7 @@ public class TpsConfiguration {
                     LimitRule rule = method.getAnnotation(LimitRule.class);
                     if (rule != null) {
                         Supplier<TpsManager.LimitRuleEntry> limiterSupplier = () -> {
-                            RateLimiter limiter = RateLimiter.create(rule.qps());
+                            RateLimiter limiter = RateLimiter.create(qps == null ? rule.qps() : qps);
                             Class<? extends FailStrategy> failStrategy = rule.failStrategy();
                             try {
                                 FailStrategy strategy = failStrategy.newInstance();

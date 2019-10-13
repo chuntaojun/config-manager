@@ -22,30 +22,27 @@ import com.lessspring.org.constant.Code;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
+public abstract class BaseException extends RuntimeException {
 
-    @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
-    }
+    public abstract Code code();
 
-    public TpsLimitException() {
+    public BaseException() {
         super();
     }
 
-    public TpsLimitException(String message) {
+    public BaseException(String message) {
         super(message);
     }
 
-    public TpsLimitException(String message, Throwable cause) {
+    public BaseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public TpsLimitException(Throwable cause) {
+    public BaseException(Throwable cause) {
         super(cause);
     }
 
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected BaseException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

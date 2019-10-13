@@ -14,39 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.security.impl;
+package com.lessspring.org.exception;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import java.time.Duration;
-import java.util.Objects;
+import com.lessspring.org.constant.Code;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class JwtTokenCache {
-
-    private final Cache<String, Long> tokenCache;
-
-    public JwtTokenCache() {
-        this.tokenCache = CacheBuilder.newBuilder()
-                .maximumSize(65535)
-                .expireAfterWrite(Duration.ofSeconds(30))
-                .build();
+public class DiskException extends BaseException {
+    @Override
+    public Code code() {
+        return Code.DISK_OVERFLOW;
     }
 
-    public boolean isExist(String key) {
-        return Objects.nonNull(tokenCache.getIfPresent(key));
+    public DiskException() {
+        super();
     }
 
-    public void addToken(String key, Long value) {
-        tokenCache.put(key, value);
+    public DiskException(String message) {
+        super(message);
     }
 
-    public void removeToken(String key) {
-        tokenCache.invalidate(key);
+    public DiskException(String message, Throwable cause) {
+        super(message, cause);
     }
 
+    public DiskException(Throwable cause) {
+        super(cause);
+    }
+
+    protected DiskException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

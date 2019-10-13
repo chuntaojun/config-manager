@@ -14,38 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
+package com.lessspring.org.service.user.impl;
 
-import com.lessspring.org.constant.Code;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.repository.UserMapper;
+import com.lessspring.org.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
+@Slf4j
+@Service(value = "userService")
+public class UserServiceImpl implements UserService {
+
+    @Resource
+    private UserMapper userMapper;
+    
+    @Override
+    public ResponseData<Boolean> createUser() {
+        return null;
+    }
 
     @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
+    public ResponseData<Boolean> modifyUser() {
+        return null;
     }
 
-    public TpsLimitException() {
-        super();
-    }
-
-    public TpsLimitException(String message) {
-        super(message);
-    }
-
-    public TpsLimitException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TpsLimitException(Throwable cause) {
-        super(cause);
-    }
-
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    @Override
+    public ResponseData<Boolean> removeUser() {
+        return null;
     }
 }

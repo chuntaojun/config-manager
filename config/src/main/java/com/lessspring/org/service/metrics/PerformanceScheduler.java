@@ -14,38 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
+package com.lessspring.org.service.metrics;
 
-import com.lessspring.org.constant.Code;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TpsLimitException extends BaseException {
-
-    @Override
-    public Code code() {
-        return Code.SERVER_BUSY;
-    }
-
-    public TpsLimitException() {
-        super();
-    }
-
-    public TpsLimitException(String message) {
-        super(message);
-    }
-
-    public TpsLimitException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TpsLimitException(Throwable cause) {
-        super(cause);
-    }
-
-    protected TpsLimitException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+@Slf4j
+@Component
+public class PerformanceScheduler {
 }

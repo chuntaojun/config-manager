@@ -19,6 +19,8 @@ package com.lessspring.org.repository;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -32,6 +34,6 @@ public interface NamespacePermissionsMapper {
      * @param userId user-id
      * @return namespace-id
      */
-    String findNamespaceIdByUserId(@Param(value = "userId") Long userId);
+    List<String> findNamespaceIdByUserId(@Param(value = "userId") Long userId);
 
 }

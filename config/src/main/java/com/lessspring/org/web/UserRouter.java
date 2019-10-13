@@ -14,39 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler.impl;
+package com.lessspring.org.web;
 
-import com.lessspring.org.handler.LoginHandler;
-import com.lessspring.org.model.vo.LoginRequest;
-import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.service.security.SecurityService;
-import com.lessspring.org.utils.RenderUtils;
-import org.jetbrains.annotations.NotNull;
+import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.handler.UserHandler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Configuration
-public class LoginHandlerImpl implements LoginHandler {
+public class UserRouter {
 
-    private final SecurityService securityService;
+    private final UserHandler userHandler;
 
-    public LoginHandlerImpl(SecurityService securityService) {
-        this.securityService = securityService;
+    public UserRouter(UserHandler userHandler) {
+        this.userHandler = userHandler;
     }
 
-    @NotNull
-    @Override
-    public Mono<ServerResponse> login(ServerRequest request) {
-        return request.bodyToMono(LoginRequest.class)
-                .map(securityService::apply4Authorization)
-                .map(ResponseData::success)
-                .map(Mono::just)
-                .flatMap(RenderUtils::render);
+    @Bean(value = "userRouterImpl")
+    public RouterFunction<ServerResponse> userRouterImpl() {
+        return route(
+                POST(StringConst.API_V1 + "login").and(accept(MediaType.APPLICATION_JSON_UTF8)), userHandler::login);
     }
+
 }

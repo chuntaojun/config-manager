@@ -3,12 +3,9 @@
 <mapper namespace="com.lessspring.org.repository.SnapshotMapper">
 
     <insert id="doSnapshotLoad">
-        CREATE TABLE config_info AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_config_info.csv'));
-        CREATE TABLE config_info_beta AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_config_info_beta.csv'));
-        CREATE TABLE user AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_user.csv'));
-        CREATE TABLE user_role AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_user_role.csv'));
-        CREATE TABLE namespace AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_namespace.csv'));
-        CREATE TABLE namespace_permissions AS SELECT * FROM CSVREAD(CONCAT(#{path}, 'snapshot_namespace_permissions.csv'));
+        CREATE TABLE CONFIG_MANAGER.config_info AS
+        SELECT *
+        FROM CSVREAD(CONCAT(#{path}, 'snapshot_config_info.csv'));
     </insert>
 
     <select id="doSnapshotSave" resultType="boolean">

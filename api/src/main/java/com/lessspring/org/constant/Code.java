@@ -65,6 +65,12 @@ public enum Code {
      * server busy
      */
     SERVER_BUSY(2001, "Server busy"),
+
+    /**
+     * Disk Overflow
+     */
+    DISK_OVERFLOW(4001, "Disk Overflow")
+
     ;
 
     private final int code;

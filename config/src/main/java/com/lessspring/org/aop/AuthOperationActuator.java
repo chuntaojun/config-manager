@@ -19,18 +19,22 @@ package com.lessspring.org.aop;
 import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.exception.AuthForbidException;
 import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.service.security.AuthorityProcessor;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.ReactiveWebUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.WebSession;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,8 +54,14 @@ public class AuthOperationActuator {
 
     private final Map<String, Optional<NeedAuth>> cache = new ConcurrentHashMap<>(8);
 
-    @Value("${config.manager.environment}")
+    private final AuthorityProcessor authorityProcessor;
+
+    @Value("${com.lesspring.org.config-manager.environment}")
     private String developEnv;
+
+    public AuthOperationActuator(AuthorityProcessor authorityProcessor) {
+        this.authorityProcessor = authorityProcessor;
+    }
 
     @Pointcut(value = "@annotation(com.lessspring.org.configuration.security.NeedAuth)")
     private void auth() {
@@ -82,9 +92,11 @@ public class AuthOperationActuator {
                             String namespaceId = request.queryParam(authMethod.argueName()).orElse("default");
                             Privilege privilege = webSession.getAttribute("privilege");
                             log.info("privilege info : {}", privilege);
-                            if (Objects.isNull(privilege) || !Objects.equals(namespaceId, privilege.getOwnerNamespace())) {
+                            if (Objects.isNull(privilege) || !authorityProcessor.hasAuth(privilege, namespaceId)) {
                                 log.error("No permission to access this resource, target namespaceId : {}, owner namespaceId : {}, " +
-                                        "role : {}", namespaceId, privilege.getOwnerNamespace(), privilege.getRole());
+                                        "role : {}", namespaceId, privilege ==
+                                        null ? Collections.emptyList() : privilege.getOwnerNamespaces(), privilege ==
+                                        null ? PropertiesEnum.Role.CUSTOMER : privilege.getRole());
                                 throwables[0] = true;
                             }
                         });

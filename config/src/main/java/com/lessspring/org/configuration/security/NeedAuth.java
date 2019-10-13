@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
 public @interface NeedAuth {
 
     /**
-     * Return the method name to check parameter name
+     * Return to check parameter name
      *
      * @return parameter name
      */

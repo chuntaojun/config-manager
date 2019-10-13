@@ -16,11 +16,18 @@
  */
 package com.lessspring.org.exception;
 
+import com.lessspring.org.constant.Code;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class AuthForbidException extends RuntimeException {
+public class AuthForbidException extends BaseException {
+
+    @Override
+    public Code code() {
+        return Code.UNAUTHORIZED;
+    }
 
     public AuthForbidException() {
         super();
