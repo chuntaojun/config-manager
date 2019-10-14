@@ -80,7 +80,7 @@ public class GlobalErrorWebExceptionConfiguration {
                 BaseException exception = (BaseException) throwable;
                 errMono = Mono.just(ResponseData.builder()
                         .withCode(exception.code().getCode())
-                        .withErrMsg("Inner Error").withData(exception.code()).build());
+                        .withErrMsg(exception.getMessage()).withData(exception.code()).build());
             } else {
                 errMono = Mono.just(ResponseData.builder()
                         .withCode(Integer.parseInt(String.valueOf(errorMap.get("status"))))

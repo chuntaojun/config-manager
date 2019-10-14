@@ -20,15 +20,18 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
+import com.lessspring.org.pojo.event.UserNotFoundException;
+import com.lessspring.org.pojo.event.VerifyException;
 import com.lessspring.org.repository.UserMapper;
+import com.lessspring.org.service.common.CacheOperation;
 import com.lessspring.org.service.security.SecurityService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
 
@@ -36,34 +39,43 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Service
 public class SecurityServiceImpl implements SecurityService {
 
     @Resource
     private UserMapper userMapper;
 
+    private final CacheOperation cacheOperation;
+
     private final JwtBuildFactory jwtBuildFactory;
 
-    public SecurityServiceImpl(JwtBuildFactory jwtBuildFactory) {
+    public SecurityServiceImpl(CacheOperation cacheOperation,
+                               JwtBuildFactory jwtBuildFactory) {
+        this.cacheOperation = cacheOperation;
         this.jwtBuildFactory = jwtBuildFactory;
     }
 
     @Override
     public JwtResponse apply4Authorization(LoginRequest loginRequest) {
-        Optional<UserDTO> userDTO = Optional.ofNullable(userMapper.findUserByName(loginRequest.getUsername()));
-        JwtResponse[] jwt = new JwtResponse[]{null};
+        final JwtResponse[] jwt = new JwtResponse[]{null};
+        final String userName = loginRequest.getUsername();
+        Optional<UserDTO> userDTO = cacheOperation.getObj(userName);
+        if (!userDTO.isPresent()) {
+            UserDTO dto = userMapper.findUserByName(loginRequest.getUsername());
+            if (dto == null) {
+                throw new UserNotFoundException();
+            }
+            cacheOperation.put(userName, dto, Duration.ofMinutes(15).toMillis());
+            userDTO = Optional.of(dto);
+        }
         userDTO.ifPresent(dto -> {
             if (!Objects.equals(loginRequest.getPassword(), dto.getPassword())) {
-                return;
+                throw new VerifyException("Username or password is wrong");
             }
             jwt[0] = jwtBuildFactory.createToken(dto);
         });
         return jwt[0];
-    }
-
-    @Override
-    public String refreshAuth(String oldToken, LoginRequest loginRequest) {
-        return null;
     }
 
     @Override
@@ -74,7 +86,8 @@ public class SecurityServiceImpl implements SecurityService {
     @Override
     public boolean isExpire(String token) {
         Optional<DecodedJWT> optional = verify(token);
-        return optional.map(decodedJWT -> TOKEN_STATUS_EXPIRE.compareTo(jwtBuildFactory.isExpire(decodedJWT)) == 0)
+        return optional.map(decodedJWT -> TOKEN_STATUS_EXPIRE
+                .compareTo(jwtBuildFactory.isExpire(decodedJWT)) == 0)
                 .orElse(true);
     }
 

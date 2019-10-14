@@ -18,22 +18,35 @@ package com.lessspring.org.service.publish;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
+import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.pojo.CacheDumpItem;
+import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.event.NotifyEvent;
+import com.lessspring.org.service.config.CachePersistentHandler;
+import com.lessspring.org.service.config.ConfigCacheItemManager;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.FluxSink;
 
 import java.nio.channels.FileChannel;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -51,6 +64,9 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
     private Map<String, Map<String, Set<WatchClient>>> watchClientManager
             = new ConcurrentHashMap<>(8);
 
+    @Autowired
+    private ConfigCacheItemManager cacheItemManager;
+
     // Build with the Client corresponds to a monitored object is
     // used to monitor configuration changes
 
@@ -67,7 +83,7 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
         // on the server side corresponding to monitor object
         sink.onDispose(() -> {
             synchronized (monitor) {
-                clientCnt --;
+                clientCnt--;
             }
             Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
                     .getOrDefault(client.getNamespaceId(), Collections.emptyMap());
@@ -85,7 +101,7 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
             clientsMap.get(key).add(client);
         });
         synchronized (monitor) {
-            clientCnt ++;
+            clientCnt++;
         }
         // A quick comparison, listens for client direct access to the latest
         // configuration when registering for the first time
@@ -95,9 +111,29 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
     private void doQuickCompare(WatchClient watchClient) {
         Map<String, String> checkMd5 = watchClient.getCheckKey();
         checkMd5.forEach((key, value) -> {
-            String content = DiskUtils.readFile(watchClient.getNamespaceId(), key);
-            if (!Objects.equals(MD5Utils.md5Hex(content), value)) {
-                writeResponse(watchClient, content);
+            String[] info = NameUtils.splitName(key);
+            final CacheItem cacheItem = cacheItemManager.queryCacheItem(watchClient.getNamespaceId(),
+                    info[0], info[1]);
+            final int lockResult = ConfigCacheItemManager.tryReadLock(cacheItem);
+            assert lockResult != 0;
+            if (lockResult < 0) {
+                log.warn("[dump-error] read lock failed. {}", cacheItem.getKey());
+                return;
+            }
+            try {
+                String content = DiskUtils.readFile(watchClient.getNamespaceId(), key);
+                if (StringUtils.isEmpty(content)) {
+                    // To conduct a read operation, will update CacheItem information
+                    ConfigInfo configInfo = cacheItemManager
+                            .loadConfigFromDB(watchClient.getNamespaceId(), info[0], info[1]);
+                    content = GsonUtils.toJson(configInfo);
+                }
+                Set<String> clientIps = cacheItem.getBetaClientIps();
+                if (clientIps.isEmpty() || clientIps.contains(watchClient.getClientIp())) {
+                    writeResponse(watchClient, GsonUtils.toJson(content));
+                }
+            } finally {
+                ConfigCacheItemManager.releaseReadLock(cacheItem);
             }
         });
     }
@@ -127,8 +163,18 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
             } else {
                 stream = set.stream();
             }
+            Set<String> clientIps = new HashSet<>();
+            for (String ip : event.getClientIps().split(",")) {
+                clientIps.add(ip.trim());
+            }
             stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
                     .forEach(client -> {
+                        // If it is beta configuration file, you need to check the client IP information
+                        if (event.isBeta()) {
+                            if (!clientIps.contains(client.getClientIp())) {
+                                return;
+                            }
+                        }
                         try {
                             writeResponse(client, configInfoJson);
                             finishWorks[0]++;

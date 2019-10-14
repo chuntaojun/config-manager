@@ -14,29 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.pojo.event;
+
+import com.lessspring.org.constant.Code;
+import com.lessspring.org.exception.BaseException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class NameUtils {
-
-    private static final String LINK_STRING = "@#@";
-
-    public static String buildName(Object... params) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < params.length; i ++) {
-            builder.append(params[i]);
-            if (i != params.length - 1) {
-                builder.append(LINK_STRING);
-            }
-        }
-        return builder.toString();
+public class VerifyException extends BaseException {
+    @Override
+    public Code code() {
+        return Code.VERIFY_ERROR;
     }
 
-    public static String[] splitName(String name) {
-        return name.split(LINK_STRING);
+    public VerifyException() {
+        super();
     }
 
+    public VerifyException(String message) {
+        super(message);
+    }
+
+    public VerifyException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public VerifyException(Throwable cause) {
+        super(cause);
+    }
+
+    protected VerifyException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

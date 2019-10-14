@@ -40,4 +40,11 @@ public class JwtResponse {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public static JwtResponse fail() {
+        JwtResponse response = new JwtResponse();
+        response.setToken("");
+        response.setExpireTime(System.currentTimeMillis());
+        return response;
+    }
 }

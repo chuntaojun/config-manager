@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class InnerCacheOperation implements CacheOperation {
 
-    private final InnerCache<String, byte[]> cache = new InnerCache<String, byte[]>();
+    private final InnerCache<String, Object> cache = new InnerCache<String, Object>();
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, r -> {
         Thread thread = new Thread(r, "com.lessspring.org.cache.clean-Worker");
         thread.setDaemon(true);
@@ -52,7 +52,12 @@ public class InnerCacheOperation implements CacheOperation {
 
     @Override
     public Optional<byte[]> get(String key) {
-        return Optional.ofNullable(cache.get(key));
+        return Optional.ofNullable((byte[]) cache.get(key));
+    }
+
+    @Override
+    public <T> Optional<T> getObj(String key) {
+        return Optional.ofNullable((T) cache.get(key));
     }
 
     @Override
@@ -61,8 +66,18 @@ public class InnerCacheOperation implements CacheOperation {
     }
 
     @Override
+    public <T> void put(String key, T t) {
+        cache.put(key, t);
+    }
+
+    @Override
     public void put(String key, byte[] value, long liveTime) {
         cache.put(key, value, liveTime);
+    }
+
+    @Override
+    public <T> void put(String key, T t, long liveTime) {
+        cache.put(key, t, liveTime);
     }
 
     @Override
@@ -77,6 +92,9 @@ public class InnerCacheOperation implements CacheOperation {
 
         public V get(String key) {
             Entry<V> entry = cache.get(key);
+            if (entry == null) {
+                return null;
+            }
             if (entry instanceof ExpireEntry) {
                 ExpireEntry<V> vExpireEntry = (ExpireEntry<V>) entry;
                 if (System.currentTimeMillis() > vExpireEntry.expireTime) {

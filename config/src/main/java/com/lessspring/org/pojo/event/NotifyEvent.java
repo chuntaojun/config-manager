@@ -41,6 +41,8 @@ public class NotifyEvent extends BaseEvent {
         target.setEventType(source.getEventType());
         target.setSource(source.getSource());
         target.setEncryption(source.getEncryption());
+        target.setClientIps(source.getClientIps());
+        target.setBeta(source.isBeta());
         target.setSequence(sequence);
     }
 
@@ -55,6 +57,8 @@ public class NotifyEvent extends BaseEvent {
         private String dataId;
         private String groupId;
         private Object source;
+        private boolean beta;
+        private String clientIps;
         private EventType eventType;
         private String entryption;
         private long createTime = System.currentTimeMillis();
@@ -82,8 +86,18 @@ public class NotifyEvent extends BaseEvent {
             return this;
         }
 
+        public Builder clientIps(String clientIps) {
+            this.clientIps = clientIps;
+            return this;
+        }
+
         public Builder source(Object source) {
             this.source = source;
+            return this;
+        }
+
+        public Builder beta(boolean beta) {
+            this.beta = beta;
             return this;
         }
 
@@ -114,6 +128,8 @@ public class NotifyEvent extends BaseEvent {
             notifyEvent.setDataId(dataId);
             notifyEvent.setGroupId(groupId);
             notifyEvent.setSource(source);
+            notifyEvent.setBeta(beta);
+            notifyEvent.setClientIps(clientIps);
             notifyEvent.setEventType(eventType);
             notifyEvent.setEncryption(entryption);
             return notifyEvent;

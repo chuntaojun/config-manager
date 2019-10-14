@@ -24,14 +24,17 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.ClusterServer;
+import com.lessspring.org.raft.RaftConfiguration;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -44,6 +47,15 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ClusterManager {
+
+    @Value("${com.lessspring.org.config-manager.raft.cacheDir}")
+    private String raftCacheDir;
+
+    @Value("${com.lessspring.org.config-manager.raft.electionTimeoutMs}")
+    private Integer electionTimeoutMs = Math.toIntExact(Duration.ofSeconds(5).toMillis());
+
+    @Value("${com.lessspring.org.config-manager.raft.snapshotIntervalSecs}")
+    private Integer snapshotIntervalSecs = Math.toIntExact(Duration.ofSeconds(600).getSeconds());
 
     private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
     private final NodeManager nodeManager = NodeManager.getInstance();
@@ -60,6 +72,12 @@ public class ClusterManager {
 
     public void init() {
         if (initialize.compareAndSet(false, true)) {
+            final RaftConfiguration configuration = RaftConfiguration
+                    .builder()
+                    .withCacheDir(raftCacheDir)
+                    .withElectionTimeoutMs(electionTimeoutMs)
+                    .withSnapshotIntervalSecs(snapshotIntervalSecs)
+                    .build();
             clusterServer = new ClusterServer();
             clusterServer.registerTransactionCommitCallback(commitCallback);
             clusterServer.registerSnapshotOperator(snapshotOperate);

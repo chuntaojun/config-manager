@@ -31,10 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.C;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -50,7 +52,7 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     private final Object monitor = new Object();
 
-    private SnapshotOperate snapshotOperate;
+    private List<SnapshotOperate> snapshotOperates = new CopyOnWriteArrayList<>();
 
     @Override
     public void onApply(Iterator iter) {
@@ -101,12 +103,19 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     @Override
     public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        snapshotOperate.onSnapshotSave(writer, done);
+        for (SnapshotOperate snapshotOperate : snapshotOperates) {
+            snapshotOperate.onSnapshotSave(writer, done);
+        }
     }
 
     @Override
     public boolean onSnapshotLoad(SnapshotReader reader) {
-        return snapshotOperate.onSnapshotLoad(reader);
+        for (SnapshotOperate snapshotOperate : snapshotOperates) {
+            if (!snapshotOperate.onSnapshotLoad(reader)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -118,6 +127,6 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
     @Override
     public void registerSnapshotManager(SnapshotOperate snapshotOperate) {
-        this.snapshotOperate = snapshotOperate;
+        this.snapshotOperates.add(snapshotOperate);
     }
 }

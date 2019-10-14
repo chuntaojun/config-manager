@@ -19,6 +19,7 @@ package com.lessspring.org.db.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -29,7 +30,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConfigBetaInfoDTO {
+@EqualsAndHashCode(callSuper = true)
+public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 
     private Long id;
     private String namespaceId;

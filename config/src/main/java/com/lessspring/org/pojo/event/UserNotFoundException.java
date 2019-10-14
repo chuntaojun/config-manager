@@ -14,29 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.pojo.event;
+
+import com.lessspring.org.constant.Code;
+import com.lessspring.org.exception.BaseException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class NameUtils {
+public class UserNotFoundException extends BaseException {
 
-    private static final String LINK_STRING = "@#@";
-
-    public static String buildName(Object... params) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < params.length; i ++) {
-            builder.append(params[i]);
-            if (i != params.length - 1) {
-                builder.append(LINK_STRING);
-            }
-        }
-        return builder.toString();
+    @Override
+    public Code code() {
+        return Code.USER_NOT_FOUNT;
     }
 
-    public static String[] splitName(String name) {
-        return name.split(LINK_STRING);
+    public UserNotFoundException() {
+        super();
     }
 
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+
+    public UserNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UserNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    protected UserNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

@@ -62,6 +62,11 @@ public enum Code {
     NEED_LOGIN(1002, "need login"),
 
     /**
+     * user not found
+     */
+    USER_NOT_FOUNT(1003, "User not found"),
+
+    /**
      * server busy
      */
     SERVER_BUSY(2001, "Server busy"),
@@ -69,7 +74,9 @@ public enum Code {
     /**
      * Disk Overflow
      */
-    DISK_OVERFLOW(4001, "Disk Overflow")
+    DISK_OVERFLOW(4001, "Disk Overflow"),
+
+    VERIFY_ERROR(5001, "Verify error")
 
     ;
 

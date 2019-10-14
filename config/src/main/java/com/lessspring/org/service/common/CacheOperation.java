@@ -33,12 +33,29 @@ public interface CacheOperation {
     Optional<byte[]> get(String key);
 
     /**
+     * get value by key
+     *
+     * @param key key
+     * @param <T> type
+     * @return {@link Optional<T>}
+     */
+    <T> Optional<T> getObj(String key);
+
+    /**
      * put key-value
      *
      * @param key key
      * @param value value
      */
     void put(String key, byte[] value);
+
+    /**
+     * put key-value
+     *
+     * @param key key
+     * @param t value
+     */
+    <T> void put(String key, T t);
 
     /**
      * put key-value with life-Time
@@ -48,6 +65,15 @@ public interface CacheOperation {
      * @param liveTime liveTime
      */
     void put(String key, byte[] value, long liveTime);
+
+    /**
+     * put key-value with life-Time
+     *
+     * @param key key
+     * @param t value
+     * @param liveTime liveTime
+     */
+    <T> void put(String key, T t, long liveTime);
 
     /**
      * expire this key

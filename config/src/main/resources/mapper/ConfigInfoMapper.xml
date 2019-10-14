@@ -29,8 +29,10 @@
 
 <!--  update config-info-beta  -->
     <update id="updateConfigBetaInfo"></update>
+    <delete id="removeConfigInfo"></delete>
+    <delete id="removeConfigBetaInfo"></delete>
 
-<!--  find config-content by QueryConfigInfo  -->
+    <!--  find config-content by QueryConfigInfo  -->
     <select id="findConfigInfoContent" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="java.lang.String">
         SELECT content FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
     </select>
@@ -59,5 +61,6 @@
             #{id}
         </foreach>
     </select>
+    <select id="findConfigBetaInfo" resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO"></select>
 
 </mapper>

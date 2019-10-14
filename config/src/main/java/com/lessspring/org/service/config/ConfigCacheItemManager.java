@@ -22,14 +22,15 @@ import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.C;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -49,6 +51,27 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ConfigCacheItemManager {
 
     private final Map<String, CacheItem> cacheItemMap = new ConcurrentHashMap<>(16);
+
+    private final PersistentHandler persistentHandler;
+
+    public ConfigCacheItemManager(@Qualifier(value = "persistentHandler") PersistentHandler persistentHandler) {
+        this.persistentHandler = persistentHandler;
+    }
+
+    public ConfigInfo loadConfigFromDB(final String namespaceId, final String groupId, final String dataId) {
+        BaseConfigRequest request = BaseConfigRequest.builder()
+                .withGroupId(groupId)
+                .withDataId(dataId)
+                .build();
+        ConfigInfo configInfo = persistentHandler.readConfigContent(namespaceId, request);
+        ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
+        if (dto instanceof ConfigBetaInfoDTO) {
+            dumpConfigBeta(namespaceId, (ConfigBetaInfoDTO) dto);
+        } else {
+            dumpConfig(namespaceId, dto);
+        }
+        return configInfo;
+    }
 
     public void dumpConfig(final String namespaceId, final ConfigInfoDTO configInfoDTO) {
         ConfigChangeEvent event = ConfigChangeEvent.builder()
@@ -79,13 +102,24 @@ public class ConfigCacheItemManager {
 
     public void registerConfigCacheItem(final String namespaceId, final ConfigChangeEvent event) {
         final String key = NameUtils.buildName(namespaceId, event.getGroupId(), event.getDataId());
-        cacheItemMap.computeIfAbsent(key, s -> {
-            Set<String> betaClientIps = new CopyOnWriteArraySet<>();
-            for (String ip : event.getClientIps().split(",")) {
-                betaClientIps.add(ip.trim());
-            }
-            final CacheItem item = new CacheItem(namespaceId, event.getGroupId(), event.getDataId(),
+        Set<String> betaClientIps = new CopyOnWriteArraySet<>();
+        for (String ip : event.getClientIps().split(",")) {
+            betaClientIps.add(ip.trim());
+        }
+        Supplier<CacheItem> supplier = () -> {
+            final CacheItem itemSave = new CacheItem(namespaceId, event.getGroupId(), event.getDataId(),
                     event.isFile());
+            if (event.isFile()) {
+                itemSave.setLastMd5(MD5Utils.md5Hex(event.getFileSource()));
+            } else {
+                itemSave.setLastMd5(MD5Utils.md5Hex(event.getContent()));
+            }
+            itemSave.setBeta(event.isBeta());
+            itemSave.setBetaClientIps(betaClientIps);
+            return itemSave;
+        };
+        CacheItem item = cacheItemMap.putIfAbsent(key, supplier.get());
+        if (Objects.nonNull(item)) {
             if (event.isFile()) {
                 item.setLastMd5(MD5Utils.md5Hex(event.getFileSource()));
             } else {
@@ -93,8 +127,7 @@ public class ConfigCacheItemManager {
             }
             item.setBeta(event.isBeta());
             item.setBetaClientIps(betaClientIps);
-            return item;
-        });
+        }
     }
 
     public void deregisterConfigCacheItem(final String namespaceId, final ConfigChangeEvent event) {
@@ -114,7 +147,7 @@ public class ConfigCacheItemManager {
     }
 
     public boolean updateContent(final String namespaceId, final ConfigChangeEvent event) {
-        CacheItem cacheItem = queryCacheItem(namespaceId, event.getGroupId(), event.getDataId());
+        final CacheItem cacheItem = queryCacheItem(namespaceId, event.getGroupId(), event.getDataId());
         event.setEncryption(StringUtils.EMPTY);
         final int lockResult = tryWriteLock(cacheItem);
         assert (lockResult != 0);
@@ -131,10 +164,12 @@ public class ConfigCacheItemManager {
             }
             final ConfigInfo configInfo;
             if (event.isFile()) {
-                configInfo = new ConfigInfo(groupId, dataId, event.getFileSource(), event.getConfigType(), event.getEncryption());
+                configInfo = new ConfigInfo(groupId, dataId, event.getFileSource(),
+                        event.getConfigType(), event.getEncryption());
                 cacheItem.setLastMd5(MD5Utils.md5Hex(event.getFileSource()));
             } else {
-                configInfo = new ConfigInfo(groupId, dataId, event.getContent(), event.getConfigType(), event.getEncryption());
+                configInfo = new ConfigInfo(groupId, dataId, event.getContent(),
+                        event.getConfigType(), event.getEncryption());
                 cacheItem.setLastMd5(MD5Utils.md5Hex(event.getContent()));
             }
             DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId), GsonUtils.toJsonBytes(configInfo));

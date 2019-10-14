@@ -28,6 +28,8 @@ public abstract class BaseEvent {
     private String namespaceId;
     private String dataId;
     private String groupId;
+    private String clientIps;
+    private boolean beta;
     private boolean isFile = false;
     private String encryption;
     private Object source;
@@ -92,6 +94,22 @@ public abstract class BaseEvent {
 
     public void setEncryption(String encryption) {
         this.encryption = encryption;
+    }
+
+    public boolean isBeta() {
+        return beta;
+    }
+
+    public void setBeta(boolean beta) {
+        this.beta = beta;
+    }
+
+    public String getClientIps() {
+        return clientIps;
+    }
+
+    public void setClientIps(String clientIps) {
+        this.clientIps = clientIps;
     }
 
     public boolean isFile() {

@@ -81,6 +81,9 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
                 .dataId(dataId)
                 .build();
         ConfigInfoDTO dto = configInfoMapper.findConfigInfo(queryConfigInfo);
+        if (dto == null) {
+            dto = configInfoMapper.findConfigBetaInfo(queryConfigInfo);
+        }
         byte[] origin = dto.getContent();
         // unable transport config-context encryption token
         request.setAttribute(ConfigInfoDTO.NAME, dto);
@@ -102,7 +105,6 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
 
     @Override
     public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
-        boolean success = true;
         int affect = -1;
         long id = -1;
         byte[] save = ConfigRequestUtils.getByte(request);
@@ -136,7 +138,6 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
 
     @Override
     public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
-        boolean success = true;
         int affect = -1;
         byte[] save = ConfigRequestUtils.getByte(request);
         if (request.isBeta()) {
@@ -167,7 +168,6 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
 
     @Override
     public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
-        boolean success = true;
         if (request.isBeta()) {
             configInfoMapper.removeConfigBetaInfo(request);
         } else {
@@ -179,7 +179,6 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
     @Override
     public void onEvent(ConfigChangeEvent event) throws Exception {
         try {
-            configCacheItemManager.updateContent(event.getNamespaceId(), event);
             if (EventType.PUBLISH.compareTo(event.getEventType()) == 0) {
                 configCacheItemManager.registerConfigCacheItem(event.getNamespaceId(), event);
             }
@@ -187,6 +186,7 @@ public class ConfigPersistentHandler implements PersistentHandler, WorkHandler<C
                 configCacheItemManager.deregisterConfigCacheItem(event.getNamespaceId(), event);
                 return;
             }
+            configCacheItemManager.updateContent(event.getNamespaceId(), event);
             NotifyEvent source = NotifyEvent.builder()
                     .namespaceId(event.getNamespaceId())
                     .groupId(event.getGroupId())

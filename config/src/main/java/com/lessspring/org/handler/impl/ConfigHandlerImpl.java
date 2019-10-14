@@ -37,6 +37,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.net.InetSocketAddress;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -88,6 +90,9 @@ public class ConfigHandlerImpl implements ConfigHandler {
                 .groupId(groupId)
                 .dataId(dataId)
                 .build();
+        final String clientIp = request.remoteAddress().orElse(ReactiveWebUtils.ALL_IP)
+                .getHostName();
+        queryRequest.setAttribute("clientIp", clientIp);
         Mono<ResponseData<?>> mono = Mono.just(operationService.queryConfig(namespaceId, queryRequest));
         return RenderUtils.render(mono);
     }

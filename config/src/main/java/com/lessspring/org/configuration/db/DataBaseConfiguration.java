@@ -42,7 +42,7 @@ import java.sql.Statement;
 @Configuration
 public class DataBaseConfiguration {
 
-    @Value("${config.manager.cache-dir}")
+    @Value("${com.lessspring.org.config.manager.cache-dir}")
     private String cacheDir;
 
     @Bean

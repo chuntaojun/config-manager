@@ -53,10 +53,10 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_REFRESH;
 @Component
 public class JwtBuildFactory {
 
-    @Value("${com.lesspring.org.config-manger.jwt.survival.time.second}")
+    @Value("${com.lessspring.org.config-manger.jwt.survival.time.second}")
     private int tokenSurvival;
 
-    @Value("com.lesspring.org.config-manger.jwt.signature")
+    @Value("${com.lessspring.org.config-manger.jwt.signature}")
     private String signature;
 
     @Resource

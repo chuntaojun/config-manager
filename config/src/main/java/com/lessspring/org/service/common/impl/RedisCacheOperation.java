@@ -17,8 +17,19 @@
 package com.lessspring.org.service.common.impl;
 
 import com.lessspring.org.service.common.CacheOperation;
+import com.lessspring.org.utils.GsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -26,23 +37,86 @@ import java.util.Optional;
  */
 public class RedisCacheOperation implements CacheOperation {
 
+    @Autowired
+    private ReactiveRedisTemplate redisTemplate;
+
     @Override
     public Optional<byte[]> get(String key) {
-        return Optional.empty();
+        CompletableFuture<byte[]> future = new CompletableFuture<>();
+        redisTemplate.opsForValue().get(key).subscribe(o -> {
+            Entry entry = GsonUtils.toObj(String.valueOf(o), Entry.class);
+            future.complete(entry.data.getBytes(Charset.forName(StandardCharsets.UTF_8.name())));
+        });
+        try {
+            return Optional.of(future.get(1000, TimeUnit.MILLISECONDS));
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public <T> Optional<T> getObj(String key) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        redisTemplate.opsForValue().get(key).subscribe(o -> {
+            Entry entry = GsonUtils.toObj(String.valueOf(o), Entry.class);
+            try {
+                T t = (T) GsonUtils.toObj(entry.data, Class.forName(entry.className));
+                future.complete(t);
+            } catch (ClassNotFoundException e) {
+                future.complete(null);
+            }
+        });
+        try {
+            return Optional.of(future.get(1000, TimeUnit.MILLISECONDS));
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public void put(String key, byte[] value) {
+        Entry entry = new Entry();
+        entry.data = new String(value, Charset.forName(StandardCharsets.UTF_8.name()));
+        redisTemplate.opsForValue().set(key, GsonUtils.toJson(entry));
+    }
 
+    @Override
+    public <T> void put(String key, T t) {
+        String className = t.getClass().getCanonicalName();
+        Entry entry = new Entry();
+        entry.data = GsonUtils.toJson(t);
+        entry.className = className;
+        redisTemplate.opsForValue().set(key, GsonUtils.toJson(entry));
     }
 
     @Override
     public void put(String key, byte[] value, long liveTime) {
+        Entry entry = new Entry();
+        entry.data = new String(value, Charset.forName(StandardCharsets.UTF_8.name()));
+        redisTemplate.opsForValue().set(key, GsonUtils.toJson(entry));
+        redisTemplate.expire(key, Duration.ofMillis(liveTime));
+    }
 
+    @Override
+    public <T> void put(String key, T t, long liveTime) {
+        String className = t.getClass().getCanonicalName();
+        Entry entry = new Entry();
+        entry.data = GsonUtils.toJson(t);
+        entry.className = className;
+        redisTemplate.opsForValue().set(key, GsonUtils.toJson(entry));
+        redisTemplate.expire(key, Duration.ofMillis(liveTime));
     }
 
     @Override
     public void expire(String key) {
+        redisTemplate.expireAt(key, Instant.now());
+    }
+
+    private static class Entry {
+
+        protected String data;
+        protected String className;
 
     }
+
 }

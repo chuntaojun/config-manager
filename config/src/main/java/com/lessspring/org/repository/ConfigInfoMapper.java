@@ -49,6 +49,14 @@ public interface ConfigInfoMapper {
     ConfigInfoDTO findConfigInfo(@Param(value = "query") QueryConfigInfo queryConfigInfo);
 
     /**
+     * query config-beta-info by {@link QueryConfigInfo}
+     *
+     * @param queryConfigInfo query config-beta-info param
+     * @return {@link ConfigBetaInfoDTO}
+     */
+    ConfigBetaInfoDTO findConfigBetaInfo(@Param(value = "query") QueryConfigInfo queryConfigInfo);
+
+    /**
      * find min and max id
      *
      * @return {@link List<Long>}

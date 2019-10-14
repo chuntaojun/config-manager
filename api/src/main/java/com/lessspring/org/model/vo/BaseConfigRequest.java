@@ -60,4 +60,33 @@ public class BaseConfigRequest {
         attributes.put(key, value);
         return this;
     }
+
+    public static BaseConfigRequestBuilder builder() {
+        return new BaseConfigRequestBuilder();
+    }
+
+    public static final class BaseConfigRequestBuilder {
+        private String dataId;
+        private String groupId;
+
+        private BaseConfigRequestBuilder() {
+        }
+
+        public BaseConfigRequestBuilder withDataId(String dataId) {
+            this.dataId = dataId;
+            return this;
+        }
+
+        public BaseConfigRequestBuilder withGroupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public BaseConfigRequest build() {
+            BaseConfigRequest baseConfigRequest = new BaseConfigRequest();
+            baseConfigRequest.setDataId(dataId);
+            baseConfigRequest.setGroupId(groupId);
+            return baseConfigRequest;
+        }
+    }
 }

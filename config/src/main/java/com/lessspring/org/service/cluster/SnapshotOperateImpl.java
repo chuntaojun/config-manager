@@ -135,7 +135,7 @@ public class SnapshotOperateImpl implements SnapshotOperate {
             List<String> sqls = new ArrayList<>();
             for (String[] tableInfo : fileNames) {
                 String file = loadPath + tableInfo[0];
-                String sql = "CREATE TABLE CONFIG_MANAGER.%s AS SELECT * FROM CSVREAD('%s');";
+                String sql = "CREATE TABLE IF NOT EXISTS CONFIG_MANAGER.%s AS SELECT * FROM CSVREAD('%s');";
                 sql = String.format(sql, tableInfo[1], file);
                 sqls.add(sql);
             }

@@ -18,17 +18,21 @@ package com.lessspring.org.service.config;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
+import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.pojo.CacheDumpItem;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -49,12 +53,12 @@ public class CachePersistentHandler implements PersistentHandler {
 
     @Override
     public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
-        CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
+        final CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
                 request.getGroupId(), request.getDataId());
         final int lockResult = ConfigCacheItemManager.tryReadLock(cacheItem);
         assert (lockResult != 0);
         if (lockResult < 0) {
-            log.warn("[dump-error] write lock failed. {}", cacheItem.getKey());
+            log.warn("[dump-error] read lock failed. {}", cacheItem.getKey());
             return null;
         }
         ConfigInfo configInfo;
@@ -65,16 +69,28 @@ public class CachePersistentHandler implements PersistentHandler {
             // read the database directly
             if (StringUtils.isEmpty(s)) {
                 ConfigInfo infoDB = persistentHandler.readConfigContent(namespaceId, request);
+                // After they perform query operations dto objects attached to the attributes
+                // Can't change the order
                 ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
-                request.getAttributes().clear();
-                configCacheItemManager.dumpConfig(namespaceId, dto);
+                if (dto instanceof ConfigBetaInfoDTO) {
+                    configCacheItemManager.dumpConfigBeta(namespaceId, (ConfigBetaInfoDTO) dto);
+                } else {
+                    configCacheItemManager.dumpConfig(namespaceId, dto);
+                }
                 return infoDB;
             }
             configInfo = GsonUtils.toObj(s, ConfigInfo.class);
+            if (cacheItem.isBeta()) {
+                Set<String> clientIps = cacheItem.getBetaClientIps();
+                if (!clientIps.isEmpty() && !clientIps.contains((String) request.getAttribute("clientIp"))) {
+                    return null;
+                }
+            }
             configInfo.setEncryption("");
         } finally {
             ConfigCacheItemManager.releaseReadLock(cacheItem);
         }
+        request.getAttributes().clear();
         return configInfo;
     }
 

@@ -29,8 +29,6 @@ public class ConfigChangeEvent extends BaseEvent {
     private String content;
     private byte[] fileSource;
     private String configType;
-    private String clientIps;
-    private boolean beta;
 
     public String getContent() {
         return content;
@@ -48,28 +46,12 @@ public class ConfigChangeEvent extends BaseEvent {
         this.configType = configType;
     }
 
-    public boolean isBeta() {
-        return beta;
-    }
-
-    public void setBeta(boolean beta) {
-        this.beta = beta;
-    }
-
     public byte[] getFileSource() {
         return fileSource;
     }
 
     public void setFileSource(byte[] fileSource) {
         this.fileSource = fileSource;
-    }
-
-    public String getClientIps() {
-        return clientIps;
-    }
-
-    public void setClientIps(String clientIps) {
-        this.clientIps = clientIps;
     }
 
     @Override
@@ -185,6 +167,7 @@ public class ConfigChangeEvent extends BaseEvent {
             configChangeEvent.setConfigType(configType);
             configChangeEvent.setEncryption(encryption);
             configChangeEvent.setFile(file);
+            configChangeEvent.setBeta(beta);
             configChangeEvent.setFileSource(fileSource);
             configChangeEvent.setClientIps(clientIps);
             return configChangeEvent;

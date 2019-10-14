@@ -35,10 +35,12 @@ import com.lessspring.org.PathUtils;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -66,8 +68,11 @@ class RaftServer implements LifeCycle {
     private ScheduledExecutorService scheduledExecutorService;
     private final NodeManager nodeManager = NodeManager.getInstance();
 
-    void initRaftCluster(String cacheDirPath) {
-        final String path = PathUtils.finalPath(cacheDirPath);
+    void initRaftCluster(RaftConfiguration raftConfiguration) {
+        String path = raftConfiguration.getCacheDir();
+        if (StringUtils.isEmpty(path)) {
+            path = PathUtils.finalPath("config-manager/server/config_manager_raft");
+        }
         try {
             FileUtils.forceMkdir(new File(path));
         } catch (IOException e) {
@@ -78,9 +83,9 @@ class RaftServer implements LifeCycle {
         int selfPort = nodeManager.getSelf().getPort() + 1000;
         final NodeOptions nodeOptions = new NodeOptions();
         // 设置选举超时时间为 5 秒
-        nodeOptions.setElectionTimeoutMs(5000);
+        nodeOptions.setElectionTimeoutMs(raftConfiguration.getElectionTimeoutMs());
         // 每隔600秒做一次 snapshot
-        nodeOptions.setSnapshotIntervalSecs(30);
+        nodeOptions.setSnapshotIntervalSecs(raftConfiguration.getSnapshotIntervalSecs());
         // 设置初始集群配置
         nodeOptions.setInitialConf(conf);
 

@@ -49,14 +49,22 @@ public class ClusterServer implements LifeCycle {
     private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
     private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
     private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
-    private static final String CACHE_DIR_PATH = "config_manager_raft";
     private AtomicBoolean initialize = new AtomicBoolean(false);
 
     private NodeManager nodeManager = NodeManager.getInstance();
     private RaftServer raftServer = new RaftServer();
+    private RaftConfiguration raftConfiguration = new RaftConfiguration();
 
     public ClusterServer() {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
+        this(null);
+    }
+
+    public ClusterServer(RaftConfiguration raftConfiguration) {
+        if (Objects.nonNull(raftConfiguration)) {
+            this.raftConfiguration = raftConfiguration;
+        }
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("cluster.properties")) {
             Properties properties = new Properties();
             properties.load(is);
             initClusterNode(properties);
@@ -70,14 +78,14 @@ public class ClusterServer implements LifeCycle {
     @Override
     public void init() {
         if (initialize.compareAndSet(false, true)) {
-            raftServer.initRaftCluster(CACHE_DIR_PATH);
+            raftServer.initRaftCluster(raftConfiguration);
         }
     }
 
     private void initClusterNode(Properties properties) {
         int nodes = properties.size() / 2;
         int selfIndex = Integer.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
-        for (int i = 0; i < nodes; i ++) {
+        for (int i = 0; i < nodes; i++) {
             String ip = properties.getProperty(SERVER_NODE_IP + i);
             String port = properties.getProperty(SERVER_NODE_PORT + i);
             ServerNode node = ServerNode.builder()
@@ -99,7 +107,8 @@ public class ClusterServer implements LifeCycle {
         raftServer.registerSnapshotOperator(snapshotOperate);
     }
 
-    public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException, InterruptedException {
+    public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException,
+            InterruptedException {
         needInitialized();
         final Throwable[] throwables = new Throwable[]{null};
         CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
@@ -119,23 +128,24 @@ public class ClusterServer implements LifeCycle {
         if (raftServer.isLeader()) {
             raftServer.getNode().apply(task);
         } else {
-            raftServer.getCliClientService().getRpcClient().invokeWithCallback(raftServer.leaderIp(), datum, new InvokeCallback() {
-                @Override
-                public void onResponse(Object o) {
-                    ResponseData<Boolean> data = ResponseData.success();
-                    future.complete(data);
-                }
+            raftServer.getCliClientService().getRpcClient()
+                    .invokeWithCallback(raftServer.leaderIp(), datum, new InvokeCallback() {
+                        @Override
+                        public void onResponse(Object o) {
+                            ResponseData<Boolean> data = ResponseData.success();
+                            future.complete(data);
+                        }
 
-                @Override
-                public void onException(Throwable throwable) {
-                    throwables[0] = throwable;
-                }
+                        @Override
+                        public void onException(Throwable throwable) {
+                            throwables[0] = throwable;
+                        }
 
-                @Override
-                public Executor getExecutor() {
-                    return null;
-                }
-            }, 5000);
+                        @Override
+                        public Executor getExecutor() {
+                            return null;
+                        }
+                    }, 5000);
         }
         if (Objects.nonNull(throwables[0])) {
             throw new RemotingException("Commit Error", throwables[0]);

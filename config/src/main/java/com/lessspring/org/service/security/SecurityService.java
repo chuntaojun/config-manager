@@ -37,15 +37,6 @@ public interface SecurityService {
     JwtResponse apply4Authorization(LoginRequest loginRequest);
 
     /**
-     * Refresh for authorization code
-     *
-     * @param oldToken old jwt
-     * @param loginRequest {@link LoginRequest}
-     * @return jwt token
-     */
-    String refreshAuth(String oldToken, LoginRequest loginRequest);
-
-    /**
      * verify token
      *
      * @param token jwt token

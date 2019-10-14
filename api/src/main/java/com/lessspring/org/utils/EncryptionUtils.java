@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -36,15 +37,23 @@ import java.security.SecureRandom;
 public final class EncryptionUtils {
 
     private static Cipher cipher;
+    private static String  aesKey;
+
+    private static BASE64Encoder encoder = new BASE64Encoder();
+    private static BASE64Decoder decoder = new BASE64Decoder();
 
     static {
         try {
+            aesKey = System.getProperty("com.lessspring.org.config-client.aes-key", "com.lessspring.org");
             cipher = Cipher.getInstance("AES");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public static void setAesKey(String aesKey) {
+        EncryptionUtils.aesKey = aesKey;
+    }
 
     public static String encrypt(String content, String token) {
         Key secretKey = getKey(token);
@@ -52,7 +61,6 @@ public final class EncryptionUtils {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] p = content.getBytes(StandardCharsets.UTF_8);
             byte[] result = cipher.doFinal(p);
-            BASE64Encoder encoder = new BASE64Encoder();
             return encoder.encode(result);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -64,7 +72,6 @@ public final class EncryptionUtils {
         try {
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            BASE64Decoder decoder = new BASE64Decoder();
             byte[] c = decoder.decodeBuffer(content);
             byte[] result = cipher.doFinal(c);
             return new String(result, Charset.forName(StandardCharsets.UTF_8.name()));
