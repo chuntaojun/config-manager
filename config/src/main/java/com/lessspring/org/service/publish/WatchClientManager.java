@@ -96,7 +96,8 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
         // different key corresponding to the listener list
         listenKeys.forEach((key, value) -> {
             Map<String, Set<WatchClient>> clientsMap = watchClientManager
-                    .computeIfAbsent(client.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
+                    .computeIfAbsent(client.getNamespaceId(), s ->
+                            new ConcurrentHashMap<>(4));
             clientsMap.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
             clientsMap.get(key).add(client);
         });

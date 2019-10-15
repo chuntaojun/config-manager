@@ -17,6 +17,10 @@
 package com.lessspring.org.pojo;
 
 import com.lessspring.org.AbstractListener;
+import com.lessspring.org.DiskUtils;
+import com.lessspring.org.NameUtils;
+import com.lessspring.org.SerializerUtils;
+import com.lessspring.org.model.dto.ConfigInfo;
 
 import java.util.List;
 import java.util.Objects;
@@ -81,10 +85,6 @@ public class CacheItem {
 
     public boolean isChange(String remoteMd5) {
         return !Objects.equals(lastMd5, remoteMd5);
-    }
-
-    private void loadFromDisk() {
-
     }
 
     @Override

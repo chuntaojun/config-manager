@@ -71,11 +71,11 @@ public class CacheConfigManager implements LifeCycle {
         ConfigInfo result = null;
         if (response.ok()) {
             ConfigInfo configInfo = response.getData();
-            doSnapshot(groupId, dataId, configInfo);
+            snapshotSave(groupId, dataId, configInfo);
             result = configInfo;
         } else {
             // Disaster measures
-            ConfigInfo local = loadFromDisk(groupId, dataId);
+            ConfigInfo local = snapshotLoad(groupId, dataId);
             if (Objects.nonNull(local)) {
                 result = local;
             }
@@ -101,7 +101,7 @@ public class CacheConfigManager implements LifeCycle {
                 Body.objToBody(request), new TypeToken<ResponseData<Boolean>>(){});
     }
 
-    private ConfigInfo loadFromDisk(String groupId, String dataId) {
+    private ConfigInfo snapshotLoad(String groupId, String dataId) {
         final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
         final byte[] content = DiskUtils.readFileBytes(namespaceId, fileName);
         if (Objects.nonNull(content) && content.length > 0) {
@@ -110,7 +110,7 @@ public class CacheConfigManager implements LifeCycle {
         return null;
     }
 
-    private void doSnapshot(String groupId, String dataId, ConfigInfo configInfo) {
+    private void snapshotSave(String groupId, String dataId, ConfigInfo configInfo) {
         final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
         DiskUtils.writeFile(namespaceId, fileName, GsonUtils.toJsonBytes(configInfo));
     }
