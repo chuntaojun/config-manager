@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.configuration.filter;
 
+import com.lessspring.org.service.cluster.DistroRouter;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -26,6 +27,8 @@ import reactor.core.publisher.Mono;
  * @since 0.0.1
  */
 public class DistroServerConfigFilter implements CustomerConfigFilter {
+
+    private final DistroRouter distroRouter = DistroRouter.getInstance();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, FilterChain chain) {

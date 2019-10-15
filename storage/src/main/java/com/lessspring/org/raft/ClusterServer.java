@@ -55,6 +55,19 @@ public class ClusterServer implements LifeCycle {
     private RaftServer raftServer = new RaftServer();
     private RaftConfiguration raftConfiguration = new RaftConfiguration();
 
+    static {
+        NodeManager nodeManager = NodeManager.getInstance();
+        try (InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("cluster.properties")) {
+            Properties properties = new Properties();
+            properties.load(is);
+            initClusterNode(nodeManager, properties);
+        } catch (IOException e) {
+            log.error("Server");
+            throw new RuntimeException(e);
+        }
+    }
+
     public ClusterServer() {
         this(null);
     }
@@ -63,39 +76,13 @@ public class ClusterServer implements LifeCycle {
         if (Objects.nonNull(raftConfiguration)) {
             this.raftConfiguration = raftConfiguration;
         }
-        try (InputStream is = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("cluster.properties")) {
-            Properties properties = new Properties();
-            properties.load(is);
-            initClusterNode(properties);
-            raftServer.init();
-        } catch (IOException e) {
-            log.error("Server");
-            throw new RuntimeException(e);
-        }
+        raftServer.init();
     }
 
     @Override
     public void init() {
         if (initialize.compareAndSet(false, true)) {
             raftServer.initRaftCluster(raftConfiguration);
-        }
-    }
-
-    private void initClusterNode(Properties properties) {
-        int nodes = properties.size() / 2;
-        int selfIndex = Integer.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
-        for (int i = 0; i < nodes; i++) {
-            String ip = properties.getProperty(SERVER_NODE_IP + i);
-            String port = properties.getProperty(SERVER_NODE_PORT + i);
-            ServerNode node = ServerNode.builder()
-                    .nodeIp(ip)
-                    .port(Integer.parseInt(port))
-                    .build();
-            if (i == selfIndex) {
-                nodeManager.setSelf(node);
-            }
-            nodeManager.nodeJoin(node);
         }
     }
 
@@ -166,6 +153,23 @@ public class ClusterServer implements LifeCycle {
     private void needInitialized() {
         if (!initialize.get()) {
             throw new IllegalStateException("Uninitialized cluster");
+        }
+    }
+
+    private static void initClusterNode(NodeManager nodeManager, Properties properties) {
+        int nodes = properties.size() / 2;
+        int selfIndex = Integer.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
+        for (int i = 0; i < nodes; i++) {
+            String ip = properties.getProperty(SERVER_NODE_IP + i);
+            String port = properties.getProperty(SERVER_NODE_PORT + i);
+            ServerNode node = ServerNode.builder()
+                    .nodeIp(ip)
+                    .port(Integer.parseInt(port))
+                    .build();
+            if (i == selfIndex) {
+                nodeManager.setSelf(node);
+            }
+            nodeManager.nodeJoin(node);
         }
     }
 

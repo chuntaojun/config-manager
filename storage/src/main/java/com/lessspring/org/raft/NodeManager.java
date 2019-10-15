@@ -37,7 +37,7 @@ public class NodeManager {
 
     private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
 
-    private static final NodeManager INSTANCE = new NodeManager();
+    private static volatile NodeManager INSTANCE = new NodeManager();
 
     public static NodeManager getInstance() {
         return INSTANCE;
