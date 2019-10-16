@@ -16,13 +16,13 @@
  */
 package com.lessspring.org.utils;
 
-import com.lessspring.org.constant.StringConst;
-import com.lessspring.org.model.dto.ConfigInfo;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.model.dto.ConfigInfo;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -30,48 +30,48 @@ import java.util.regex.Pattern;
  */
 public final class PlaceholderProcessor {
 
-    private final Pattern encryptionPattern;
-    private final Pattern decryptionPattern;
+	private final Pattern encryptionPattern;
+	private final Pattern decryptionPattern;
 
-    public PlaceholderProcessor() {
-        encryptionPattern = Pattern.compile(StringConst.ENCRYPTION_PLACEHOLDER);
-        decryptionPattern = Pattern.compile(StringConst.DECRYPTION_PLACEHOLDER);
-    }
+	public PlaceholderProcessor() {
+		encryptionPattern = Pattern.compile(StringConst.ENCRYPTION_PLACEHOLDER);
+		decryptionPattern = Pattern.compile(StringConst.DECRYPTION_PLACEHOLDER);
+	}
 
-    public void encryption(Optional<ConfigInfo> configInfoOptional) {
-        configInfoOptional.ifPresent(configInfo -> {
-            String token = configInfo.getEncryption();
-            String content = configInfo.getContent();
-            if (StringUtils.isEmpty(content)) {
-                return;
-            }
-            Matcher matcher = encryptionPattern.matcher(content);
-            while (matcher.find()) {
-                String target = matcher.group(0);
-                String value = target.replace("ENC{", "").replace("}", "");
-                String encryptTxt = EncryptionUtils.encrypt(value, token);
-                String replace = "DECR{" + encryptTxt + "}";
-                content = content.replace(target, replace);
-            }
-            configInfo.setContent(content);
-        });
-    }
+	public void encryption(Optional<ConfigInfo> configInfoOptional) {
+		configInfoOptional.ifPresent(configInfo -> {
+			String token = configInfo.getEncryption();
+			String content = configInfo.getContent();
+			if (StringUtils.isEmpty(content)) {
+				return;
+			}
+			Matcher matcher = encryptionPattern.matcher(content);
+			while (matcher.find()) {
+				String target = matcher.group(0);
+				String value = target.replace("ENC{", "").replace("}", "");
+				String encryptTxt = EncryptionUtils.encrypt(value, token);
+				String replace = "DECR{" + encryptTxt + "}";
+				content = content.replace(target, replace);
+			}
+			configInfo.setContent(content);
+		});
+	}
 
-    public void decryption(Optional<ConfigInfo> configInfoOptional, String token) {
-        configInfoOptional.ifPresent(configInfo -> {
-            String content = configInfo.getContent();
-            if (StringUtils.isAnyEmpty(content, token)) {
-                return;
-            }
-            Matcher matcher = decryptionPattern.matcher(content);
-            while (matcher.find()) {
-                String target = matcher.group(0);
-                String value = target.replace("DECR{", "").replace("}", "");
-                String replace = EncryptionUtils.decrypt(value, token);
-                content = content.replace(target, replace);
-            }
-            configInfo.setContent(content);
-        });
-    }
+	public void decryption(Optional<ConfigInfo> configInfoOptional, String token) {
+		configInfoOptional.ifPresent(configInfo -> {
+			String content = configInfo.getContent();
+			if (StringUtils.isAnyEmpty(content, token)) {
+				return;
+			}
+			Matcher matcher = decryptionPattern.matcher(content);
+			while (matcher.find()) {
+				String target = matcher.group(0);
+				String value = target.replace("DECR{", "").replace("}", "");
+				String replace = EncryptionUtils.decrypt(value, token);
+				content = content.replace(target, replace);
+			}
+			configInfo.setContent(content);
+		});
+	}
 
 }

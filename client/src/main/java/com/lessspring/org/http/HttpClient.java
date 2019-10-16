@@ -30,61 +30,66 @@ import com.lessspring.org.model.vo.ResponseData;
  */
 public interface HttpClient extends LifeCycle {
 
-    /**
-     * http get
-     *
-     * @param url url
-     * @param header http header param
-     * @param query http query param
-     * @param token return type
-     * @return {@link ResponseData<T>}
-     */
-    <T> ResponseData<T> get(String url, Header header, Query query, TypeToken<ResponseData<T>> token);
+	/**
+	 * http get
+	 *
+	 * @param url url
+	 * @param header http header param
+	 * @param query http query param
+	 * @param token return type
+	 * @return {@link ResponseData<T>}
+	 */
+	<T> ResponseData<T> get(String url, Header header, Query query,
+			TypeToken<ResponseData<T>> token);
 
-    /**
-     * http delete
-     *
-     * @param url url
-     * @param header http header param
-     * @param query http query param
-     * @param token return type
-     * @return {@link ResponseData<T>}
-     */
-    <T> ResponseData<T> delete(String url, Header header, Query query, TypeToken<ResponseData<T>> token);
+	/**
+	 * http delete
+	 *
+	 * @param url url
+	 * @param header http header param
+	 * @param query http query param
+	 * @param token return type
+	 * @return {@link ResponseData<T>}
+	 */
+	<T> ResponseData<T> delete(String url, Header header, Query query,
+			TypeToken<ResponseData<T>> token);
 
-    /**
-     * http put
-     *
-     * @param url url
-     * @param header http header param
-     * @param query http query param
-     * @param body http body param
-     * @param token return type
-     * @return {@link ResponseData}
-     */
-    <T> ResponseData<T> put(String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token);
+	/**
+	 * http put
+	 *
+	 * @param url url
+	 * @param header http header param
+	 * @param query http query param
+	 * @param body http body param
+	 * @param token return type
+	 * @return {@link ResponseData}
+	 */
+	<T> ResponseData<T> put(String url, Header header, Query query, Body body,
+			TypeToken<ResponseData<T>> token);
 
-    /**
-     * http post
-     *
-     * @param url url
-     * @param header http header param
-     * @param query http query param
-     * @param body http body param
-     * @param token return type
-     * @return {@link ResponseData}
-     */
-    <T> ResponseData<T> post(String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token);
+	/**
+	 * http post
+	 *
+	 * @param url url
+	 * @param header http header param
+	 * @param query http query param
+	 * @param body http body param
+	 * @param token return type
+	 * @return {@link ResponseData}
+	 */
+	<T> ResponseData<T> post(String url, Header header, Query query, Body body,
+			TypeToken<ResponseData<T>> token);
 
-    /**
-     * server send event
-     *
-     * @param url url
-     * @param header http header param
-     * @param body http body param
-     * @param cls return type
-     * @param receiver {@link EventReceiver}
-     */
-    <T> void serverSendEvent(String url, Header header, Body body, Class<T> cls, EventReceiver receiver);
+	/**
+	 * server send event
+	 *
+	 * @param url url
+	 * @param header http header param
+	 * @param body http body param
+	 * @param cls return type
+	 * @param receiver {@link EventReceiver}
+	 */
+	<T> void serverSendEvent(String url, Header header, Body body, Class<T> cls,
+			EventReceiver receiver);
 
 }

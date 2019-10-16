@@ -16,11 +16,14 @@
  */
 package com.lessspring.org;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.lessspring.org.auth.AuthHolder;
 import com.lessspring.org.auth.LoginHandler;
 import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.cluster.ClusterNodeWatch;
 import com.lessspring.org.config.ConfigService;
+import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.ConfigHttpClient;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -28,128 +31,128 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.watch.WatchConfigWorker;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 final class ClientConfigService implements ConfigService {
 
-    private HttpClient httpClient;
-    private WatchConfigWorker watchConfigWorker;
-    private ClusterNodeWatch clusterNodeWatch;
-    private CacheConfigManager configManager;
-    private LoginHandler loginHandler;
-    private final AuthHolder authHolder = new AuthHolder();
-    private final Configuration configuration;
+	private HttpClient httpClient;
+	private WatchConfigWorker watchConfigWorker;
+	private ClusterNodeWatch clusterNodeWatch;
+	private CacheConfigManager configManager;
+	private LoginHandler loginHandler;
+	private final AuthHolder authHolder = new AuthHolder();
+	private final Configuration configuration;
 
-    private final AtomicBoolean inited = new AtomicBoolean(false);
-    private final AtomicBoolean destroyed = new AtomicBoolean(false);
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-    ClientConfigService(Configuration configuration) {
-        this.configuration = configuration;
-    }
+	ClientConfigService(Configuration configuration) {
+		this.configuration = configuration;
+	}
 
-    @Override
-    public void init() {
-        if (inited.compareAndSet(false, true)) {
-            PathUtils.init(configuration.getCachePath());
-            // Build a cluster node selector
-            ClusterChoose choose = new ClusterChoose();
+	@Override
+	public void init() {
+		if (inited.compareAndSet(false, true)) {
+			final ConfigFilterManager configFilterManager = new ConfigFilterManager();
 
-            httpClient = new ConfigHttpClient(choose, authHolder);
-            loginHandler = new LoginHandler(httpClient, authHolder, configuration);
-            clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
-            clusterNodeWatch.register(choose);
+			PathUtils.init(configuration.getCachePath());
+			// Build a cluster node selector
+			ClusterChoose choose = new ClusterChoose();
 
-            choose.setWatch(clusterNodeWatch);
+			httpClient = new ConfigHttpClient(choose, authHolder);
+			loginHandler = new LoginHandler(httpClient, authHolder, configuration);
+			clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
+			clusterNodeWatch.register(choose);
 
-            watchConfigWorker = new WatchConfigWorker(httpClient, configuration);
-            configManager = new CacheConfigManager(httpClient, configuration, watchConfigWorker);
+			choose.setWatch(clusterNodeWatch);
 
-            // The calling component all initialization of the hook
-            httpClient.init();
-            clusterNodeWatch.init();
-            loginHandler.init();
-            watchConfigWorker.init();
-            configManager.init();
-            watchConfigWorker.setConfigManager(configManager);
-        }
-    }
+			watchConfigWorker = new WatchConfigWorker(httpClient, configuration,
+					configFilterManager);
+			configManager = new CacheConfigManager(httpClient, configuration,
+					watchConfigWorker, configFilterManager);
 
-    @Override
-    public void destroy() {
-        if (destroyed.compareAndSet(false, true)) {
-            httpClient.destroy();
-            loginHandler.destroy();
-            clusterNodeWatch.destroy();
-            watchConfigWorker.destroy();
-            configManager.destroy();
-        }
-    }
+			// The calling component all initialization of the hook
+			httpClient.init();
+			clusterNodeWatch.init();
+			loginHandler.init();
+			watchConfigWorker.init();
+			configManager.init();
+			watchConfigWorker.setConfigManager(configManager);
+		}
+	}
 
-    @Override
-    public ConfigInfo getConfig(String groupId, String dataId) {
-        return getConfig(groupId, dataId, "");
-    }
+	@Override
+	public void destroy() {
+		if (destroyed.compareAndSet(false, true)) {
+			httpClient.destroy();
+			loginHandler.destroy();
+			clusterNodeWatch.destroy();
+			watchConfigWorker.destroy();
+			configManager.destroy();
+		}
+	}
 
-    @Override
-    public ConfigInfo getConfig(String groupId, String dataId, String encryption) {
-        return configManager.query(groupId, dataId, encryption);
-    }
+	@Override
+	public ConfigInfo getConfig(String groupId, String dataId) {
+		return getConfig(groupId, dataId, "");
+	}
 
-    @Override
-    public boolean publishConfig(String groupId, String dataId, String content, String type) {
-        return publishConfig(groupId, dataId, content, type, "");
-    }
+	@Override
+	public ConfigInfo getConfig(String groupId, String dataId, String encryption) {
+		return configManager.query(groupId, dataId, encryption);
+	}
 
-    @Override
-    public boolean publishConfig(String groupId, String dataId, String content, String type, String encryption) {
-        final PublishConfigRequest request = PublishConfigRequest.builder()
-                .groupId(groupId)
-                .dataId(dataId)
-                .content(content)
-                .encryption(encryption)
-                .type(type)
-                .build();
-        ResponseData<Boolean> response = configManager.publishConfig(request);
-        return response.ok();
-    }
+	@Override
+	public boolean publishConfig(String groupId, String dataId, String content,
+			String type) {
+		return publishConfig(groupId, dataId, content, type, "");
+	}
 
-    @Override
-    public boolean publishConfigFile(String groupId, String dataId, byte[] stream) {
-        final PublishConfigRequest request = PublishConfigRequest.builder()
-                .groupId(groupId)
-                .dataId(dataId)
-                .file(stream)
-                .build();
-        ResponseData<Boolean> response = configManager.publishConfig(request);
-        return response.ok();
-    }
+	@Override
+	public boolean publishConfig(String groupId, String dataId, String content,
+			String type, String encryption) {
+		final PublishConfigRequest request = PublishConfigRequest.builder()
+				.groupId(groupId).dataId(dataId).content(content).encryption(encryption)
+				.type(type).build();
+		ResponseData<Boolean> response = configManager.publishConfig(request);
+		return response.ok();
+	}
 
-    @Override
-    public boolean deleteConfig(String groupId, String dataId) {
-        return configManager.removeConfig(groupId, dataId).ok();
-    }
+	@Override
+	public boolean publishConfigFile(String groupId, String dataId, byte[] stream) {
+		final PublishConfigRequest request = PublishConfigRequest.builder()
+				.groupId(groupId).dataId(dataId).file(stream).build();
+		ResponseData<Boolean> response = configManager.publishConfig(request);
+		return response.ok();
+	}
 
-    @Override
-    public void addListener(String groupId, String dataId, AbstractListener... listeners) {
-        addListener(groupId, dataId, "", listeners);
-    }
+	@Override
+	public boolean deleteConfig(String groupId, String dataId) {
+		return configManager.removeConfig(groupId, dataId).ok();
+	}
 
-    @Override
-    public void addListener(String groupId, String dataId, String encryption, AbstractListener... listeners) {
-        for (AbstractListener listener : listeners) {
-            watchConfigWorker.registerListener(groupId, dataId, encryption, listener);
-        }
-    }
+	@Override
+	public void addListener(String groupId, String dataId,
+			AbstractListener... listeners) {
+		addListener(groupId, dataId, "", listeners);
+	}
 
-    @Override
-    public void removeListener(String groupId, String dataId, AbstractListener... listeners) {
-        for (AbstractListener listener : listeners) {
-            watchConfigWorker.deregisterListener(groupId, dataId, listener);
-        }
-    }
+	@Override
+	public void addListener(String groupId, String dataId, String encryption,
+			AbstractListener... listeners) {
+		for (AbstractListener listener : listeners) {
+			watchConfigWorker.registerListener(groupId, dataId, encryption, listener);
+		}
+	}
+
+	@Override
+	public void removeListener(String groupId, String dataId,
+			AbstractListener... listeners) {
+		for (AbstractListener listener : listeners) {
+			watchConfigWorker.deregisterListener(groupId, dataId, listener);
+		}
+	}
 
 }

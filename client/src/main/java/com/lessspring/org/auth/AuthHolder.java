@@ -16,13 +16,13 @@
  */
 package com.lessspring.org.auth;
 
-import com.lessspring.org.model.vo.JwtResponse;
-
 import java.util.Objects;
 import java.util.Observable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.lessspring.org.model.vo.JwtResponse;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -30,58 +30,63 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class AuthHolder extends Observable {
 
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
-    private long threshold = TimeUnit.SECONDS.toMillis(3);
-    private volatile long lastRefreshTime;
-    private volatile long expireTime;
-    private volatile String token = "";
+	private long threshold = TimeUnit.SECONDS.toMillis(3);
+	private volatile long lastRefreshTime;
+	private volatile long expireTime;
+	private volatile String token = "";
 
-    void register(LoginHandler handler) {
-        addObserver(handler);
-    }
+	void register(LoginHandler handler) {
+		addObserver(handler);
+	}
 
-    void updateToken(JwtResponse token) {
-        writeLock.lock();
-        try {
-            this.token = Objects.isNull(token.getToken()) ? "" : token.getToken();
-            lastRefreshTime = System.currentTimeMillis();
-            expireTime = token.getExpireTime();
-        } finally {
-            writeLock.unlock();
-        }
-    }
+	void updateToken(JwtResponse token) {
+		writeLock.lock();
+		try {
+			this.token = Objects.isNull(token.getToken()) ? "" : token.getToken();
+			lastRefreshTime = System.currentTimeMillis();
+			expireTime = token.getExpireTime();
+		}
+		finally {
+			writeLock.unlock();
+		}
+	}
 
-    public String getToken() {
-        readLock.lock();
-        try {
-            if (expireTime - lastRefreshTime < threshold) {
-                CountDownLatch latch = new CountDownLatch(1);
-                notifyObservers(latch);
-                long waitTime = 10L;
-                latch.await(waitTime, TimeUnit.SECONDS);
-            }
-            return token;
-        } catch (InterruptedException ignore) {
-            return token;
-        } finally {
-            readLock.unlock();
-        }
-    }
+	public String getToken() {
+		readLock.lock();
+		try {
+			if (expireTime - lastRefreshTime < threshold) {
+				CountDownLatch latch = new CountDownLatch(1);
+				notifyObservers(latch);
+				long waitTime = 10L;
+				latch.await(waitTime, TimeUnit.SECONDS);
+			}
+			return token;
+		}
+		catch (InterruptedException ignore) {
+			return token;
+		}
+		finally {
+			readLock.unlock();
+		}
+	}
 
-    public void refresh() {
-        readLock.lock();
-        try {
-            CountDownLatch latch = new CountDownLatch(1);
-            notifyObservers(latch);
-            long waitTime = 10L;
-            latch.await(waitTime, TimeUnit.SECONDS);
-        } catch (Exception ignore) {
-        } finally {
-            readLock.unlock();
-        }
-    }
+	public void refresh() {
+		readLock.lock();
+		try {
+			CountDownLatch latch = new CountDownLatch(1);
+			notifyObservers(latch);
+			long waitTime = 10L;
+			latch.await(waitTime, TimeUnit.SECONDS);
+		}
+		catch (Exception ignore) {
+		}
+		finally {
+			readLock.unlock();
+		}
+	}
 
 }

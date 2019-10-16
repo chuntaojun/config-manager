@@ -24,12 +24,12 @@ import com.lessspring.org.config.ConfigService;
  */
 public final class ConfigServiceFactory {
 
-    public static ConfigService createConfigService(Configuration configuration) {
-        ConfigService configService = new ClientConfigService(configuration);
-        configService.init();
-        Runtime.getRuntime().addShutdownHook(new Thread(configService::destroy,
-                "config-manager.client.ShutdownHook"));
-        return configService;
-    }
+	public static ConfigService createConfigService(Configuration configuration) {
+		ConfigService configService = new ClientConfigService(configuration);
+		configService.init();
+		Runtime.getRuntime().addShutdownHook(
+				new Thread(configService::destroy, "config-manager.client.ShutdownHook"));
+		return configService;
+	}
 
 }

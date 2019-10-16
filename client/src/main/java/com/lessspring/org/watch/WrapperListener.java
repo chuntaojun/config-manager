@@ -16,13 +16,12 @@
  */
 package com.lessspring.org.watch;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.utils.PlaceholderProcessor;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -30,51 +29,51 @@ import java.util.Optional;
  */
 class WrapperListener extends AbstractListener {
 
-    private static final PlaceholderProcessor processor = new PlaceholderProcessor();
+	private static final PlaceholderProcessor processor = new PlaceholderProcessor();
 
-    private String lastMd5;
+	private String lastMd5;
 
-    private final String encryption;
+	private final String encryption;
 
-    private final AbstractListener listener;
+	private final AbstractListener listener;
 
-    WrapperListener(AbstractListener listener, String encryption) {
-        this.listener = listener;
-        this.encryption = encryption;
-    }
+	WrapperListener(AbstractListener listener, String encryption) {
+		this.listener = listener;
+		this.encryption = encryption;
+	}
 
-    public String getLastMd5() {
-        return lastMd5;
-    }
+	public String getLastMd5() {
+		return lastMd5;
+	}
 
-    public void setLastMd5(String lastMd5) {
-        this.lastMd5 = lastMd5;
-    }
+	public void setLastMd5(String lastMd5) {
+		this.lastMd5 = lastMd5;
+	}
 
-    public boolean isChange(String md5) {
-        return !Objects.equals(lastMd5, md5);
-    }
+	public boolean isChange(String md5) {
+		return !Objects.equals(lastMd5, md5);
+	}
 
-    @Override
-    public void onReceive(ConfigInfo configInfo) {
-        processor.decryption(Optional.ofNullable(configInfo), encryption);
-        listener.onReceive(configInfo);
-    }
+	@Override
+	public void onReceive(ConfigInfo configInfo) {
+		processor.decryption(Optional.ofNullable(configInfo), encryption);
+		listener.onReceive(configInfo);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        WrapperListener that = (WrapperListener) o;
-        return Objects.equals(listener, that.listener);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		WrapperListener that = (WrapperListener) o;
+		return Objects.equals(listener, that.listener);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(listener);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(listener);
+	}
 }

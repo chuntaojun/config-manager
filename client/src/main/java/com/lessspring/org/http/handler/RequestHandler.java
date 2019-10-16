@@ -26,16 +26,16 @@ import com.google.gson.Gson;
  */
 public final class RequestHandler {
 
-    private static final RequestHandler HANDLER = new RequestHandler();
+	private static final RequestHandler HANDLER = new RequestHandler();
 
-    public static RequestHandler getHandler() {
-        return HANDLER;
-    }
+	public static RequestHandler getHandler() {
+		return HANDLER;
+	}
 
-    private final Gson gson = new Gson();
+	private final Gson gson = new Gson();
 
-    public String handle(Object object) {
-        return gson.toJson(object);
-    }
+	public String handle(Object object) {
+		return gson.toJson(object);
+	}
 
 }

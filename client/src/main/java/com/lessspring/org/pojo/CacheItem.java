@@ -16,15 +16,11 @@
  */
 package com.lessspring.org.pojo;
 
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.DiskUtils;
-import com.lessspring.org.NameUtils;
-import com.lessspring.org.SerializerUtils;
-import com.lessspring.org.model.dto.ConfigInfo;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.lessspring.org.AbstractListener;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -32,112 +28,111 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class CacheItem {
 
-    private String groupId;
-    private String dataId;
-    private String lastMd5 = "";
-    private CopyOnWriteArrayList<AbstractListener> listeners;
+	private String groupId;
+	private String dataId;
+	private String lastMd5 = "";
+	private CopyOnWriteArrayList<AbstractListener> listeners;
 
-    public String getGroupId() {
-        return groupId;
-    }
+	public String getGroupId() {
+		return groupId;
+	}
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
 
-    public String getDataId() {
-        return dataId;
-    }
+	public String getDataId() {
+		return dataId;
+	}
 
-    public void setDataId(String dataId) {
-        this.dataId = dataId;
-    }
+	public void setDataId(String dataId) {
+		this.dataId = dataId;
+	}
 
-    public String getLastMd5() {
-        return lastMd5;
-    }
+	public String getLastMd5() {
+		return lastMd5;
+	}
 
-    public void setLastMd5(String lastMd5) {
-        this.lastMd5 = lastMd5;
-    }
+	public void setLastMd5(String lastMd5) {
+		this.lastMd5 = lastMd5;
+	}
 
-    public void addListener(AbstractListener listener) {
-        if (listeners == null) {
-            synchronized (this) {
-                if (listeners == null) {
-                    listeners = new CopyOnWriteArrayList<>();
-                }
-            }
-        }
-        listeners.add(listener);
-    }
+	public void addListener(AbstractListener listener) {
+		if (listeners == null) {
+			synchronized (this) {
+				if (listeners == null) {
+					listeners = new CopyOnWriteArrayList<>();
+				}
+			}
+		}
+		listeners.add(listener);
+	}
 
-    public void removeListener(AbstractListener listener) {
-        if (Objects.isNull(listeners)) {
-            throw new IllegalStateException("listener list is null");
-        }
-        listeners.remove(listener);
-    }
+	public void removeListener(AbstractListener listener) {
+		if (Objects.isNull(listeners)) {
+			throw new IllegalStateException("listener list is null");
+		}
+		listeners.remove(listener);
+	}
 
-    public List<AbstractListener> listListener() {
-        return listeners;
-    }
+	public List<AbstractListener> listListener() {
+		return listeners;
+	}
 
-    public boolean isChange(String remoteMd5) {
-        return !Objects.equals(lastMd5, remoteMd5);
-    }
+	public boolean isChange(String remoteMd5) {
+		return !Objects.equals(lastMd5, remoteMd5);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CacheItem cacheItem = (CacheItem) o;
-        return groupId.equals(cacheItem.groupId) &&
-                dataId.equals(cacheItem.dataId);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		CacheItem cacheItem = (CacheItem) o;
+		return groupId.equals(cacheItem.groupId) && dataId.equals(cacheItem.dataId);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(groupId, dataId);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(groupId, dataId);
+	}
 
-    public static CacheItemBuilder builder() {
-        return new CacheItemBuilder();
-    }
+	public static CacheItemBuilder builder() {
+		return new CacheItemBuilder();
+	}
 
-    public static final class CacheItemBuilder {
-        private String groupId;
-        private String dataId;
-        private String lastMd5 = "";
+	public static final class CacheItemBuilder {
+		private String groupId;
+		private String dataId;
+		private String lastMd5 = "";
 
-        private CacheItemBuilder() {
-        }
+		private CacheItemBuilder() {
+		}
 
-        public CacheItemBuilder withGroupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
+		public CacheItemBuilder withGroupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
 
-        public CacheItemBuilder withDataId(String dataId) {
-            this.dataId = dataId;
-            return this;
-        }
+		public CacheItemBuilder withDataId(String dataId) {
+			this.dataId = dataId;
+			return this;
+		}
 
-        public CacheItemBuilder withLastMd5(String lastMd5) {
-            this.lastMd5 = lastMd5;
-            return this;
-        }
+		public CacheItemBuilder withLastMd5(String lastMd5) {
+			this.lastMd5 = lastMd5;
+			return this;
+		}
 
-        public CacheItem build() {
-            CacheItem cacheItem = new CacheItem();
-            cacheItem.setGroupId(groupId);
-            cacheItem.setDataId(dataId);
-            cacheItem.setLastMd5(lastMd5);
-            return cacheItem;
-        }
-    }
+		public CacheItem build() {
+			CacheItem cacheItem = new CacheItem();
+			cacheItem.setGroupId(groupId);
+			cacheItem.setDataId(dataId);
+			cacheItem.setLastMd5(lastMd5);
+			return cacheItem;
+		}
+	}
 }
