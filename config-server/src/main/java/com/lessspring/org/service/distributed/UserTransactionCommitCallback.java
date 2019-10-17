@@ -14,25 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.configuration;
+package com.lessspring.org.service.distributed;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.env.ConfigurableEnvironment;
+import com.lessspring.org.utils.PropertiesEnum;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Order(value = Ordered.LOWEST_PRECEDENCE)
-public class ConfigManagerEnvironmentProcessor implements EnvironmentPostProcessor {
-
-	private String cacheType = "inner";
+@Slf4j
+@Component(value = "userTransactionCommitCallback")
+public class UserTransactionCommitCallback extends BaseTransactionCommitCallback {
 
 	@Override
-	public void postProcessEnvironment(ConfigurableEnvironment environment,
-			SpringApplication application) {
+	public boolean interest(String trsKey) {
+		return trsKey.contains(PropertiesEnum.InterestKey.USER_DATA.getType());
 	}
 }

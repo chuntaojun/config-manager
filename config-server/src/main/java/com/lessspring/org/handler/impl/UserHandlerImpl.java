@@ -19,7 +19,9 @@ package com.lessspring.org.handler.impl;
 import com.lessspring.org.handler.UserHandler;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.request.UserRequest;
 import com.lessspring.org.service.security.SecurityService;
+import com.lessspring.org.service.user.UserService;
 import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -36,9 +38,11 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class UserHandlerImpl implements UserHandler {
 
 	private final SecurityService securityService;
+	private final UserService userService;
 
-	public UserHandlerImpl(SecurityService securityService) {
+	public UserHandlerImpl(SecurityService securityService, UserService userService) {
 		this.securityService = securityService;
+		this.userService = userService;
 	}
 
 	@NotNull
@@ -52,7 +56,10 @@ public class UserHandlerImpl implements UserHandler {
 	@NotNull
 	@Override
 	public Mono<ServerResponse> createUser(ServerRequest request) {
-		return null;
+		return request.bodyToMono(UserRequest.class)
+				.map(userService::createUser)
+				.map(Mono::just)
+				.flatMap(RenderUtils::render);
 	}
 
 	@NotNull
@@ -64,6 +71,12 @@ public class UserHandlerImpl implements UserHandler {
 	@NotNull
 	@Override
 	public Mono<ServerResponse> modifyUser(ServerRequest request) {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Mono<ServerResponse> queryAll(ServerRequest request) {
 		return null;
 	}
 }

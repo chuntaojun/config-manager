@@ -14,42 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
+package com.lessspring.org.utils.vo;
 
-import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
-
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import com.lessspring.org.db.dto.NamespaceDTO;
+import com.lessspring.org.pojo.vo.NamespaceVO;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface NamespaceHandler {
+public final class NamespaceVOUtils {
 
-	/**
-	 * create namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> createNamespace(ServerRequest request);
+		private NamespaceVOUtils() {}
 
-	/**
-	 * delete namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> deleteNamespace(ServerRequest request);
-
-	/**
-	 * query all namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> queryAll(ServerRequest request);
+		public static NamespaceVO change(NamespaceDTO dto) {
+				return NamespaceVO
+						.builder()
+						.namespaceName(dto.getNamespace())
+						.namespaceId(dto.getNamespaceId())
+						.build();
+		}
 
 }

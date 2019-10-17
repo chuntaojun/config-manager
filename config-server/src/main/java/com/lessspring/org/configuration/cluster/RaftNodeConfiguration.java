@@ -16,10 +16,13 @@
  */
 package com.lessspring.org.configuration.cluster;
 
+import java.util.List;
+
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.service.cluster.ClusterManager;
-import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
+import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,9 +34,10 @@ import org.springframework.context.annotation.Configuration;
 public class RaftNodeConfiguration {
 
 	@Bean
-	public ClusterManager clusterManager(ConfigTransactionCommitCallback commitCallback,
+	public ClusterManager clusterManager(
+			@Autowired List<BaseTransactionCommitCallback> commitCallbacks,
 			SnapshotOperate snapshotOperate) {
-		return new ClusterManager(commitCallback, snapshotOperate);
+		return new ClusterManager(commitCallbacks, snapshotOperate);
 	}
 
 }

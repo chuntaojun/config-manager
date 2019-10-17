@@ -14,42 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
+package com.lessspring.org.exception;
 
-import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
-
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import com.lessspring.org.constant.Code;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface NamespaceHandler {
+public class NotThisResourceException extends BaseException {
+	@Override
+	public Code code() {
+		return Code.NOT_FOUND;
+	}
 
-	/**
-	 * create namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> createNamespace(ServerRequest request);
+	public NotThisResourceException() {
+		super();
+	}
 
-	/**
-	 * delete namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> deleteNamespace(ServerRequest request);
+	public NotThisResourceException(String message) {
+		super(message);
+	}
 
-	/**
-	 * query all namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> queryAll(ServerRequest request);
+	public NotThisResourceException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
+	public NotThisResourceException(Throwable cause) {
+		super(cause);
+	}
+
+	protected NotThisResourceException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

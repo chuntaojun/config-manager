@@ -14,42 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
+package com.lessspring.org.service.config;
 
-import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
+import java.util.List;
 
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.request.NamespaceRequest;
+import com.lessspring.org.pojo.vo.NamespaceVO;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface NamespaceHandler {
+public interface NamespaceService {
 
 	/**
-	 * create namespace
+	 * find one namespace by name
 	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
+	 * @param name namespace-name
+	 * @return namespace-name
 	 */
-	@NotNull Mono<ServerResponse> createNamespace(ServerRequest request);
+	ResponseData<String> findOneNamespaceByName(String name);
 
 	/**
-	 * delete namespace
+	 * create namespace request
 	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
+	 * @param request {@link NamespaceRequest}
+	 * @return operation label
 	 */
-	@NotNull Mono<ServerResponse> deleteNamespace(ServerRequest request);
+	ResponseData<?> createNamespace(NamespaceRequest request);
 
 	/**
-	 * query all namespace
+	 * remove namespace request
 	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
+	 * @param request {@link NamespaceRequest}
+	 * @return operation label
 	 */
-	@NotNull Mono<ServerResponse> queryAll(ServerRequest request);
+	ResponseData<?> removeNamespace(NamespaceRequest request);
+
+	/**
+	 * query all namespaces
+	 *
+	 * @return {@link List< NamespaceVO >} all namespace
+	 */
+	ResponseData<List<NamespaceVO>> queryAll();
 
 }

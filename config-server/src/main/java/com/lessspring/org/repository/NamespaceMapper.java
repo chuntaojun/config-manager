@@ -14,49 +14,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.user;
+package com.lessspring.org.repository;
 
 import java.util.List;
 
-import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.pojo.request.UserRequest;
-import com.lessspring.org.pojo.vo.UserVO;
+import com.lessspring.org.db.dto.NamespaceDTO;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface UserService {
+@Mapper
+public interface NamespaceMapper {
 
 	/**
-	 * create user
+	 * find namespace by name
 	 *
-	 * @param request {@link UserRequest}
-	 * @return operation label
+	 * @param name namespace-name
+	 * @return namespace-name
 	 */
-	ResponseData<?> createUser(UserRequest request);
+	String findNamespaceByName(@Param(value = "name") String name);
 
 	/**
-	 * modify user info
+	 * find {@link NamespaceDTO} by namespace-id
 	 *
-	 * @param request {@link UserRequest}
-	 * @return operation label
+	 * @param name namespace-name
+	 * @return {@link NamespaceDTO}
 	 */
-	ResponseData<?> modifyUser(UserRequest request);
+	NamespaceDTO findNamespaceDTOByName(@Param(value = "name") String name);
 
 	/**
-	 * remove user by user-request
+	 * save namespace
 	 *
-	 * @param request {@link UserRequest}
-	 * @return operation label
+	 * @param dto {@link NamespaceDTO}
+	 * @return affect row
 	 */
-	ResponseData<?> removeUser(UserRequest request);
+	int saveNamespace(@Param(value = "dto") NamespaceDTO dto);
 
 	/**
-	 * query all user info
+	 * remove namespace by namespace-name
 	 *
-	 * @return {@link List<UserVO>}
+	 * @param namespace namespace-name
+	 * @return affect row
 	 */
-	ResponseData<List<UserVO>> queryAll();
+	int removeNamespace(@Param(value = "namespace") String namespace);
+
+	/**
+	 * query all namespaces
+	 *
+	 * @return {@link List<String>}
+	 */
+	List<NamespaceDTO> queryAll();
 
 }

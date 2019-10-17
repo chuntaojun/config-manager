@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.config;
+package com.lessspring.org.service.config.impl;
 
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.service.encryption.EncryptionService;
 import lombok.extern.slf4j.Slf4j;
 

@@ -35,7 +35,7 @@ import com.lessspring.org.raft.RaftConfiguration;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
-import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
+import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -62,12 +62,12 @@ public class ClusterManager {
 	private final NodeManager nodeManager = NodeManager.getInstance();
 	private ClusterServer clusterServer;
 	private final SnapshotOperate snapshotOperate;
-	private final ConfigTransactionCommitCallback commitCallback;
+	private final List<BaseTransactionCommitCallback> commitCallbacks;
 	private final AtomicBoolean initialize = new AtomicBoolean(false);
 
-	public ClusterManager(ConfigTransactionCommitCallback commitCallback,
+	public ClusterManager(List<BaseTransactionCommitCallback> commitCallbacks,
 			SnapshotOperate snapshotOperate) {
-		this.commitCallback = commitCallback;
+		this.commitCallbacks = commitCallbacks;
 		this.snapshotOperate = snapshotOperate;
 	}
 
@@ -77,7 +77,9 @@ public class ClusterManager {
 					.withCacheDir(raftCacheDir).withElectionTimeoutMs(electionTimeoutMs)
 					.withSnapshotIntervalSecs(snapshotIntervalSecs).build();
 			clusterServer = new ClusterServer();
-			clusterServer.registerTransactionCommitCallback(commitCallback);
+			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
+				clusterServer.registerTransactionCommitCallback(commitCallback);
+			}
 			clusterServer.registerSnapshotOperator(snapshotOperate);
 			clusterServer.init();
 			eventBus.register(this);

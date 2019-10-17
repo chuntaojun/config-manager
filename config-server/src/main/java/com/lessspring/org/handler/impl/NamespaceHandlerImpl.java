@@ -17,6 +17,7 @@
 package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.handler.NamespaceHandler;
+import com.lessspring.org.service.config.NamespaceService;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
@@ -29,6 +30,12 @@ import org.springframework.web.reactive.function.server.ServerResponse;
  */
 @Service(value = "namespaceHandler")
 public class NamespaceHandlerImpl implements NamespaceHandler {
+
+	private final NamespaceService namespaceService;
+
+	public NamespaceHandlerImpl(NamespaceService namespaceService) {
+		this.namespaceService = namespaceService;
+	}
 
 	@Override
 	public Mono<ServerResponse> createNamespace(ServerRequest request) {

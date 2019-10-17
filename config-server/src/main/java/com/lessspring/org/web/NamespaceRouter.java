@@ -16,9 +16,20 @@
  */
 package com.lessspring.org.web;
 
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.NamespaceHandler;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -31,5 +42,21 @@ public class NamespaceRouter {
 
 	public NamespaceRouter(NamespaceHandler namespaceHandler) {
 		this.namespaceHandler = namespaceHandler;
+	}
+
+	@Bean(value = "namespaceRouterImpl")
+	public RouterFunction<ServerResponse> namespaceRouter() {
+		return route(
+				PUT(StringConst.API_V1 + "namespace/create")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				namespaceHandler::createNamespace)
+						.andRoute(
+								DELETE(StringConst.API_V1 + "namespace/delete")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								namespaceHandler::deleteNamespace)
+						.andRoute(
+								GET(StringConst.API_V1 + "namespace/all")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								namespaceHandler::queryAll);
 	}
 }

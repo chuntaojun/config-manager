@@ -14,42 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
+package com.lessspring.org.utils;
 
-import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
-
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface NamespaceHandler {
+public final class IDUtils {
 
-	/**
-	 * create namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> createNamespace(ServerRequest request);
+	private IDUtils() {
+	}
 
-	/**
-	 * delete namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> deleteNamespace(ServerRequest request);
+	public static String generateUuid(String name) {
+		return UUID.fromString(name).toString();
+	}
 
-	/**
-	 * query all namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> queryAll(ServerRequest request);
+	public static String generateUuid() {
+		return UUID.randomUUID().toString();
+	}
+
+	public static String generateMd5(String name) {
+		return MD5Utils.md5Hex(name);
+	}
 
 }

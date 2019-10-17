@@ -16,11 +16,15 @@
  */
 package com.lessspring.org.raft;
 
+import com.lessspring.org.constant.Code;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class TransactionException extends Exception {
+
+    private Code errorCode = Code.ERROR;
 
     private Transaction transaction;
 
@@ -50,5 +54,13 @@ public class TransactionException extends Exception {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    public Code getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(Code errorCode) {
+        this.errorCode = errorCode;
     }
 }

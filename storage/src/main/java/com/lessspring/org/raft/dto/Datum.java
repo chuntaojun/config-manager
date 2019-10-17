@@ -28,6 +28,7 @@ public class Datum {
     private byte[] value;
     private String className;
     private OperationEnum operationEnum;
+    private String bz;
 
     public Datum(String key, byte[] value, String className) {
         this.key = key;
@@ -65,5 +66,13 @@ public class Datum {
 
     public void setOperationEnum(OperationEnum operationEnum) {
         this.operationEnum = operationEnum;
+    }
+
+    public String getBz() {
+        return bz;
+    }
+
+    public void setBz(String bz) {
+        this.bz = bz;
     }
 }

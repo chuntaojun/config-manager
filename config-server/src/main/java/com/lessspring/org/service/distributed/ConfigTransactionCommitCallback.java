@@ -16,12 +16,6 @@
  */
 package com.lessspring.org.service.distributed;
 
-import java.util.HashMap;
-
-import com.lessspring.org.raft.OperationEnum;
-import com.lessspring.org.raft.Transaction;
-import com.lessspring.org.raft.TransactionCommitCallback;
-import com.lessspring.org.raft.TransactionException;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,34 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component(value = "configTransactionCommitCallback")
-public class ConfigTransactionCommitCallback implements TransactionCommitCallback {
-
-	private final HashMap<OperationEnum, TransactionConsumer<Transaction>> consumerMap = new HashMap<>();
-
-	public ConfigTransactionCommitCallback() {
-	}
-
-	public void registerConsumer(TransactionConsumer<Transaction> consumer,
-			OperationEnum operation) {
-		synchronized (this) {
-			consumerMap.put(operation, consumer);
-		}
-	}
-
-	@Override
-	public void onApply(Transaction transaction) throws TransactionException {
-		TransactionConsumer<Transaction> consumer = consumerMap
-				.get(transaction.getOperation());
-		try {
-			consumer.accept(transaction);
-		}
-		catch (Throwable e) {
-			TransactionException exception = new TransactionException(e);
-			exception.setTransaction(transaction);
-			consumer.onError(exception);
-			throw exception;
-		}
-	}
+public class ConfigTransactionCommitCallback extends BaseTransactionCommitCallback {
 
 	@Override
 	public boolean interest(String trsKey) {

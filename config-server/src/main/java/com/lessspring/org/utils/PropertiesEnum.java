@@ -22,6 +22,30 @@ package com.lessspring.org.utils;
  */
 public final class PropertiesEnum {
 
+	public enum Bz {
+
+		/**
+		 * 
+		 */
+		NAMESPACE,
+
+		/**
+		 * 
+		 */
+		CONFIG,
+
+		/**
+		 * 
+		 */
+		USER,
+
+		/**
+		 * 
+		 */
+		SETTING
+
+	}
+
 	public enum Role {
 
 		/**
@@ -107,6 +131,11 @@ public final class PropertiesEnum {
 		 * CONFIG-DATA
 		 */
 		CONFIG_DATA("CONFIG-DATA"),
+
+		/**
+		 * USER-DATA
+		 */
+		USER_DATA("USER-DATA"),
 
 		/**
 		 * CONFIGURATION-DATA

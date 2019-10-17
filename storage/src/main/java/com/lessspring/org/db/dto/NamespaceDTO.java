@@ -14,42 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
+package com.lessspring.org.db.dto;
 
-import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
-
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface NamespaceHandler {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NamespaceDTO {
 
-	/**
-	 * create namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> createNamespace(ServerRequest request);
-
-	/**
-	 * delete namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> deleteNamespace(ServerRequest request);
-
-	/**
-	 * query all namespace
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	@NotNull Mono<ServerResponse> queryAll(ServerRequest request);
+		private Long id;
+		private String namespace;
+		private String namespaceId;
 
 }

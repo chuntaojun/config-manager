@@ -64,4 +64,13 @@ public interface UserHandler {
 	@NotNull
 	Mono<ServerResponse> modifyUser(ServerRequest request);
 
+	/**
+	 * query all user
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> queryAll(ServerRequest request);
+
 }

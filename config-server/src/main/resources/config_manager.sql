@@ -60,4 +60,7 @@ CREATE TABLE namespace_permissions
 );
 
 INSERT INTO user(user_name, password)
-VALUES ('lessSpring', '29591314')
+VALUES ('lessSpring', '29591314');
+
+INSERT INTO namespace(namespace_name, namespace_id)
+VALUES ('default', 'default');

@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.config;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.lessspring.org.event.EventType;
+import com.lessspring.org.exception.NotThisResourceException;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -32,6 +34,7 @@ import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.request.DeleteConfigRequest4;
+import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
 import com.lessspring.org.raft.OperationEnum;
 import com.lessspring.org.raft.Transaction;
@@ -39,7 +42,8 @@ import com.lessspring.org.raft.TransactionException;
 import com.lessspring.org.raft.dto.Datum;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
-import com.lessspring.org.service.distributed.ConfigTransactionCommitCallback;
+import com.lessspring.org.service.config.impl.ConfigPersistentHandler;
+import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
@@ -60,22 +64,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigOperationService {
 
+	private final NamespaceService namespaceService;
 	private final Disruptor<ConfigChangeEvent> disruptorHolder;
 	private final PersistentHandler persistentHandler;
-	private final ConfigTransactionCommitCallback commitCallback;
-	private final ConfigurableApplicationContext context;
+	private final BaseTransactionCommitCallback commitCallback;
 	private final ClusterManager clusterManager;
 	private FailCallback failCallback;
 
 	public ConfigOperationService(
 			@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
 			ConfigPersistentHandler configPersistentHandler,
-			ConfigTransactionCommitCallback commitCallback,
+			NamespaceService namespaceService,
+			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
 			ConfigurableApplicationContext context, ClusterManager clusterManager) {
 		this.persistentHandler = persistentHandler;
+		this.namespaceService = namespaceService;
 		this.clusterManager = clusterManager;
 		this.commitCallback = commitCallback;
-		this.context = context;
 		disruptorHolder = DisruptorFactory.build(ConfigChangeEvent::new,
 				"Config-Change-Event-Disruptor");
 		disruptorHolder.handleEventsWithWorkerPool(configPersistentHandler);
@@ -84,9 +89,12 @@ public class ConfigOperationService {
 
 	@PostConstruct
 	public void init() {
-		commitCallback.registerConsumer(publishConsumer(), OperationEnum.PUBLISH);
-		commitCallback.registerConsumer(modifyConsumer(), OperationEnum.MODIFY);
-		commitCallback.registerConsumer(deleteConsumer(), OperationEnum.DELETE);
+		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, publishConsumer(),
+				OperationEnum.PUBLISH);
+		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, modifyConsumer(),
+				OperationEnum.MODIFY);
+		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, deleteConsumer(),
+				OperationEnum.DELETE);
 		clusterManager.init();
 		failCallback = throwable -> null;
 	}
@@ -151,6 +159,7 @@ public class ConfigOperationService {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
+		datum.setBz(PropertiesEnum.Bz.CONFIG.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {
@@ -167,6 +176,12 @@ public class ConfigOperationService {
 			public void accept(Transaction transaction) throws Throwable {
 				PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(),
 						PublishConfigRequest4.class);
+				String namespace = request4.getNamespaceId();
+				if (Objects.isNull(
+						namespaceService.findOneNamespaceByName(namespace).getData())) {
+					namespaceService.createNamespace(
+							NamespaceRequest.builder().namespace(namespace).build());
+				}
 				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(),
 						request4)) {
 					ConfigChangeEvent event = ConfigOperationService.this
@@ -190,6 +205,12 @@ public class ConfigOperationService {
 			public void accept(Transaction transaction) throws Throwable {
 				PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(),
 						PublishConfigRequest4.class);
+				String namespace = request4.getNamespaceId();
+				if (Objects.isNull(
+						namespaceService.findOneNamespaceByName(namespace).getData())) {
+					throw new NotThisResourceException(
+							"No resources in the namespace ：" + namespace);
+				}
 				if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(),
 						request4)) {
 					ConfigChangeEvent event = buildConfigChangeEvent(
