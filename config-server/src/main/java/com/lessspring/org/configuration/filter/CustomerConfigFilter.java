@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.configuration.filter;
 
+import com.lessspring.org.Priority;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.utils.GsonUtils;
 import reactor.core.publisher.Mono;
@@ -24,11 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface CustomerConfigFilter {
+public interface CustomerConfigFilter extends Priority {
 
 	/**
 	 * The interceptor
@@ -38,13 +42,6 @@ public interface CustomerConfigFilter {
 	 * @return {@link Mono<Void>}
 	 */
 	Mono<Void> filter(ServerWebExchange exchange, FilterChain chain);
-
-	/**
-	 * filter priority
-	 *
-	 * @return priority value
-	 */
-	int priority();
 
 	/**
 	 * Invoke this method returns a response
@@ -60,5 +57,18 @@ public interface CustomerConfigFilter {
 				Mono.just(response.bufferFactory().wrap(GsonUtils.toJsonBytes(ResponseData
 						.builder().withCode(status.value()).withData(s).build()))));
 	}
+
+		/**
+		 * Invoke this method returns a response
+		 *
+		 * @param response {@link ServerHttpResponse}
+		 * @param s response msg
+		 * @return {@link Mono<Void>}
+		 */
+		default Mono<Void> filterResponse(ServerHttpResponse response, String s) {
+				return response.writeWith(
+						Mono.just(response.bufferFactory().wrap(s.getBytes(Charset.forName(
+								StandardCharsets.UTF_8.name())))));
+		}
 
 }

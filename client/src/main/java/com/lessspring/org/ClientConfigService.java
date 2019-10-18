@@ -113,7 +113,7 @@ final class ClientConfigService implements ConfigService {
 	@Override
 	public boolean publishConfig(String groupId, String dataId, String content,
 			String type, String encryption) {
-		final PublishConfigRequest request = PublishConfigRequest.builder()
+		final PublishConfigRequest request = PublishConfigRequest.sbuilder()
 				.groupId(groupId).dataId(dataId).content(content).encryption(encryption)
 				.type(type).build();
 		ResponseData<Boolean> response = configManager.publishConfig(request);
@@ -122,7 +122,7 @@ final class ClientConfigService implements ConfigService {
 
 	@Override
 	public boolean publishConfigFile(String groupId, String dataId, byte[] stream) {
-		final PublishConfigRequest request = PublishConfigRequest.builder()
+		final PublishConfigRequest request = PublishConfigRequest.sbuilder()
 				.groupId(groupId).dataId(dataId).file(stream).build();
 		ResponseData<Boolean> response = configManager.publishConfig(request);
 		return response.ok();

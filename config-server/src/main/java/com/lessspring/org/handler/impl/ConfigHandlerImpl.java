@@ -80,7 +80,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
 		final String dataId = request.queryParam("dataId").orElse("");
-		final QueryConfigRequest queryRequest = QueryConfigRequest.builder()
+		final QueryConfigRequest queryRequest = QueryConfigRequest.sbuilder()
 				.groupId(groupId).dataId(dataId).build();
 		final String clientIp = request.remoteAddress().orElse(ReactiveWebUtils.ALL_IP)
 				.getHostName();
@@ -100,7 +100,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		final String dataId = request.queryParam("dataId").orElse("");
 		final boolean isBeta = Boolean
 				.parseBoolean(request.queryParam("beta").orElse("false"));
-		final DeleteConfigRequest deleteRequest = DeleteConfigRequest.builder()
+		final DeleteConfigRequest deleteRequest = DeleteConfigRequest.sbuilder()
 				.beta(isBeta).groupId(groupId).dataId(dataId).build();
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.removeConfig(namespaceId, deleteRequest));

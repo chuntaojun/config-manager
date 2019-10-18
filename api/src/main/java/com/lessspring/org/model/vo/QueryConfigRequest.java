@@ -24,8 +24,8 @@ import com.lessspring.org.utils.GsonUtils;
  */
 public class QueryConfigRequest extends BaseConfigRequest {
 
-    public static Builder builder() {
-        return new Builder();
+    public static QueryConfigRequestBuilder sbuilder() {
+        return new QueryConfigRequestBuilder();
     }
 
     @Override
@@ -34,23 +34,19 @@ public class QueryConfigRequest extends BaseConfigRequest {
     }
 
 
-    public static final class Builder {
+    public static final class QueryConfigRequestBuilder {
         private String dataId;
         private String groupId;
 
-        private Builder() {
+        private QueryConfigRequestBuilder() {
         }
 
-        public static Builder aQueryConfigRequest() {
-            return new Builder();
-        }
-
-        public Builder dataId(String dataId) {
+        public QueryConfigRequestBuilder dataId(String dataId) {
             this.dataId = dataId;
             return this;
         }
 
-        public Builder groupId(String groupId) {
+        public QueryConfigRequestBuilder groupId(String groupId) {
             this.groupId = groupId;
             return this;
         }

@@ -17,7 +17,6 @@
 package com.lessspring.org.db.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -27,23 +26,109 @@ import lombok.NoArgsConstructor;
  * @since 0.0.1
  */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 
-    private Long id;
-    private String namespaceId;
-    private String groupId;
-    private String dataId;
-    private Boolean file;
-    private byte[] fileSource;
-    private byte[] content;
-    private String type;
-    private String encryption;
     private String clientIps;
-    private Long createTime;
-    private Long lastModifyTime;
 
+    public static ConfigBetaInfoDTOBuilder sbuilder() {
+        return new ConfigBetaInfoDTOBuilder();
+    }
+
+    public static final class ConfigBetaInfoDTOBuilder {
+        private String clientIps;
+        private Long id;
+        private String namespaceId;
+        private String groupId;
+        private String dataId;
+        private Boolean file;
+        private byte[] fileSource;
+        private byte[] content;
+        private String type;
+        private String encryption;
+        private Long createTime;
+        private Long lastModifyTime;
+
+        private ConfigBetaInfoDTOBuilder() {
+        }
+
+        public ConfigBetaInfoDTOBuilder clientIps(String clientIps) {
+            this.clientIps = clientIps;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder groupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder dataId(String dataId) {
+            this.dataId = dataId;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder file(Boolean file) {
+            this.file = file;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder fileSource(byte[] fileSource) {
+            this.fileSource = fileSource;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder content(byte[] content) {
+            this.content = content;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder encryption(String encryption) {
+            this.encryption = encryption;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder createTime(Long createTime) {
+            this.createTime = createTime;
+            return this;
+        }
+
+        public ConfigBetaInfoDTOBuilder lastModifyTime(Long lastModifyTime) {
+            this.lastModifyTime = lastModifyTime;
+            return this;
+        }
+
+        public ConfigBetaInfoDTO build() {
+            ConfigBetaInfoDTO configBetaInfoDTO = new ConfigBetaInfoDTO();
+            configBetaInfoDTO.setClientIps(clientIps);
+            configBetaInfoDTO.setId(id);
+            configBetaInfoDTO.setNamespaceId(namespaceId);
+            configBetaInfoDTO.setGroupId(groupId);
+            configBetaInfoDTO.setDataId(dataId);
+            configBetaInfoDTO.setFile(file);
+            configBetaInfoDTO.setFileSource(fileSource);
+            configBetaInfoDTO.setContent(content);
+            configBetaInfoDTO.setType(type);
+            configBetaInfoDTO.setEncryption(encryption);
+            configBetaInfoDTO.setCreateTime(createTime);
+            configBetaInfoDTO.setLastModifyTime(lastModifyTime);
+            return configBetaInfoDTO;
+        }
+    }
 }

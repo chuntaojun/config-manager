@@ -27,7 +27,6 @@ import java.sql.Clob;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -47,4 +46,92 @@ public class ConfigInfoDTO {
     private Long createTime;
     private Long lastModifyTime;
 
+    public static ConfigInfoDTOBuilder builder() {
+        return new ConfigInfoDTOBuilder();
+    }
+
+    public static final class ConfigInfoDTOBuilder {
+        private String namespaceId;
+        private String groupId;
+        private String dataId;
+        private Boolean file;
+        private byte[] fileSource;
+        private byte[] content;
+        private String type;
+        private String encryption;
+        private Long createTime;
+        private Long lastModifyTime;
+
+        private ConfigInfoDTOBuilder() {
+        }
+
+        public static ConfigInfoDTOBuilder aConfigInfoDTO() {
+            return new ConfigInfoDTOBuilder();
+        }
+
+        public ConfigInfoDTOBuilder namespaceId(String namespaceId) {
+            this.namespaceId = namespaceId;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder groupId(String groupId) {
+            this.groupId = groupId;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder dataId(String dataId) {
+            this.dataId = dataId;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder file(Boolean file) {
+            this.file = file;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder fileSource(byte[] fileSource) {
+            this.fileSource = fileSource;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder content(byte[] content) {
+            this.content = content;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder encryption(String encryption) {
+            this.encryption = encryption;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder createTime(Long createTime) {
+            this.createTime = createTime;
+            return this;
+        }
+
+        public ConfigInfoDTOBuilder lastModifyTime(Long lastModifyTime) {
+            this.lastModifyTime = lastModifyTime;
+            return this;
+        }
+
+        public ConfigInfoDTO build() {
+            ConfigInfoDTO configInfoDTO = new ConfigInfoDTO();
+            configInfoDTO.setNamespaceId(namespaceId);
+            configInfoDTO.setGroupId(groupId);
+            configInfoDTO.setDataId(dataId);
+            configInfoDTO.setFile(file);
+            configInfoDTO.setFileSource(fileSource);
+            configInfoDTO.setContent(content);
+            configInfoDTO.setType(type);
+            configInfoDTO.setEncryption(encryption);
+            configInfoDTO.setCreateTime(createTime);
+            configInfoDTO.setLastModifyTime(lastModifyTime);
+            return configInfoDTO;
+        }
+    }
 }

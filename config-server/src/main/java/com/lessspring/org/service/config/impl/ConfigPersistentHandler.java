@@ -45,6 +45,8 @@ import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,14 +60,14 @@ public class ConfigPersistentHandler
 
 	private final Disruptor<NotifyEvent> disruptorHolder;
 
-	private final ConfigCacheItemManager configCacheItemManager;
+	@Autowired
+	@Lazy
+	private ConfigCacheItemManager configCacheItemManager;
 
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
 
-	public ConfigPersistentHandler(WatchClientManager watchClientManager,
-			ConfigCacheItemManager configCacheItemManager) {
-		this.configCacheItemManager = configCacheItemManager;
+	public ConfigPersistentHandler(WatchClientManager watchClientManager) {
 		disruptorHolder = DisruptorFactory.build(NotifyEvent::new,
 				"Notify-Event-Disruptor");
 		disruptorHolder.handleEventsWithWorkerPool(watchClientManager);
@@ -111,7 +113,7 @@ public class ConfigPersistentHandler
 		long id = -1;
 		byte[] save = ConfigRequestUtils.getByte(request);
 		if (request.isBeta()) {
-			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
+			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
 					.clientIps(request.getClientIps())
@@ -137,7 +139,7 @@ public class ConfigPersistentHandler
 		int affect = -1;
 		byte[] save = ConfigRequestUtils.getByte(request);
 		if (request.isBeta()) {
-			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.builder()
+			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
 					.clientIps(request.getClientIps())

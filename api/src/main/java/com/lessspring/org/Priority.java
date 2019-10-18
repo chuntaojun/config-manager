@@ -14,29 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.request;
-
-import com.lessspring.org.utils.PropertiesEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+package com.lessspring.org;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserRequest {
+public interface Priority {
 
-		public static final String CLASS_NAME = UserRequest.class.getCanonicalName();
+	public static final int HIGH_PRIORITY = Integer.MIN_VALUE;
+	public static final int LOW_PRIORITY = Integer.MAX_VALUE;
 
-		private String username;
-		private String password;
-		private String oldPassword;
-		private Short role = PropertiesEnum.Role.CUSTOMER.getType();
+	/**
+	 * filter priority
+	 *
+	 * @return priority value
+	 */
+	int priority();
 
 }

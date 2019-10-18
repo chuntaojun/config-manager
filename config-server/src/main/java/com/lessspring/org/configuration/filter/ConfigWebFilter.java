@@ -53,15 +53,15 @@ import static com.lessspring.org.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 @Configuration
 public class ConfigWebFilter implements WebFilter {
 
-	@Value("${com.lessspring.org.config-manager.anyuri}")
+	@Value("${com.lessspring.org.config-manager.anyuri:null}")
 	private String[] anyOneUri;
 
-	private final FilterChain filterChain = new DefaultFilterChain();
-
+	private final FilterChain filterChain;
 	private final SecurityService securityService;
 
-	public ConfigWebFilter(SecurityService securityService) {
+	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
 		this.securityService = securityService;
+		this.filterChain = filterChain;
 	}
 
 	@PostConstruct
@@ -78,6 +78,12 @@ public class ConfigWebFilter implements WebFilter {
 	@Override
 	public Mono<Void> filter(@NotNull ServerWebExchange exchange,
 			@NotNull WebFilterChain chain) {
+		ServerHttpRequest request = exchange.getRequest();
+		String path = request.getPath().value();
+		// To release the URL white list
+		if (uriMatcher(path, anyOneUri)) {
+			return chain.filter(exchange);
+		}
 		// Give priority to perform user custom interceptors
 		Mono<Void> mono = filterChain.filter(exchange);
 		filterChain.destroy();
@@ -94,10 +100,6 @@ public class ConfigWebFilter implements WebFilter {
 
 	boolean permissionIntercept(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
-		String path = request.getPath().value();
-		if (uriMatcher(path, anyOneUri)) {
-			return true;
-		}
 		String token = request.getHeaders().getFirst(StringConst.TOKEN_HEADER_NAME);
 		if (StringUtils.isEmpty(token)) {
 			return false;

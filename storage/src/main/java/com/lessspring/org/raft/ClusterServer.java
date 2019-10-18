@@ -31,6 +31,7 @@ import com.alipay.sofa.jraft.entity.Task;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.SerializerUtils;
+import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.dto.Datum;
@@ -146,6 +147,15 @@ public class ClusterServer implements LifeCycle {
 	@Subscribe
 	public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
 		needInitialized();
+		EventType type = nodeChangeEvent.getType();
+		ServerNode serverNode = ServerNode.builder().nodeIp(nodeChangeEvent.getNodeIp())
+				.port(nodeChangeEvent.getNodePort()).build();
+		if (EventType.PUBLISH.equals(type)) {
+			raftServer.addNode(serverNode);
+		}
+		else {
+			raftServer.removeNode(serverNode);
+		}
 	}
 
 	private void needInitialized() {

@@ -91,7 +91,7 @@ public final class PropertiesEnum {
 			if (type == (short) 3) {
 				return Role.TESTER;
 			}
-			throw new IllegalArgumentException("");
+			throw new IllegalArgumentException("Illegal user roles");
 		}
 	}
 

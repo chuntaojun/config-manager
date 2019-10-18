@@ -32,29 +32,29 @@ public class DeleteConfigRequest extends BaseConfigRequest {
         this.beta = beta;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static DeleteConfigRequestBuilder sbuilder() {
+        return new DeleteConfigRequestBuilder();
     }
 
-    public static final class Builder {
+    public static final class DeleteConfigRequestBuilder {
         private String dataId;
         private String groupId;
         private boolean beta;
 
-        private Builder() {
+        private DeleteConfigRequestBuilder() {
         }
 
-        public Builder dataId(String dataId) {
+        public DeleteConfigRequestBuilder dataId(String dataId) {
             this.dataId = dataId;
             return this;
         }
 
-        public Builder groupId(String groupId) {
+        public DeleteConfigRequestBuilder groupId(String groupId) {
             this.groupId = groupId;
             return this;
         }
 
-        public Builder beta(boolean beta) {
+        public DeleteConfigRequestBuilder beta(boolean beta) {
             this.beta = beta;
             return this;
         }

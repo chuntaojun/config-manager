@@ -22,29 +22,34 @@ import java.util.ServiceLoader;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Component
 class DefaultFilterChain implements FilterChain {
 
 	private final LinkedList<CustomerConfigFilter> filters = new LinkedList<>();
 
 	private ThreadLocal<LinkedList<CustomerConfigFilter>> filterLocal;
 
-	DefaultFilterChain() {
+	DefaultFilterChain(@Autowired DistroServerConfigFilter configFilter) {
 		ServiceLoader<CustomerConfigFilter> loader = ServiceLoader
 				.load(CustomerConfigFilter.class);
 		for (CustomerConfigFilter filter : loader) {
 			filters.add(filter);
 		}
 		filters.sort(Comparator.comparingInt(CustomerConfigFilter::priority));
+		filters.addFirst(configFilter);
 	}
 
 	@Override
 	public void init() {
+		// Each thread a copy interceptors
 		filterLocal = ThreadLocal.withInitial(() -> new LinkedList<>(filters));
 	}
 
@@ -55,10 +60,7 @@ class DefaultFilterChain implements FilterChain {
 			return null;
 		}
 		CustomerConfigFilter filter = filters.pollFirst();
-		assert filter != null;
-		Mono<Void> mono = filter.filter(exchange, this);
-		filters.add(filter);
-		return mono;
+		return filter.filter(exchange, this);
 	}
 
 	@Override

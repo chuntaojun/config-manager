@@ -76,7 +76,7 @@ public class ConfigOperationService {
 			ConfigPersistentHandler configPersistentHandler,
 			NamespaceService namespaceService,
 			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
-			ConfigurableApplicationContext context, ClusterManager clusterManager) {
+			ClusterManager clusterManager) {
 		this.persistentHandler = persistentHandler;
 		this.namespaceService = namespaceService;
 		this.clusterManager = clusterManager;

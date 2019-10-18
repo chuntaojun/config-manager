@@ -56,27 +56,27 @@ public class UserHandlerImpl implements UserHandler {
 	@NotNull
 	@Override
 	public Mono<ServerResponse> createUser(ServerRequest request) {
-		return request.bodyToMono(UserRequest.class)
-				.map(userService::createUser)
-				.map(Mono::just)
-				.flatMap(RenderUtils::render);
+		return request.bodyToMono(UserRequest.class).map(userService::createUser)
+				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
 	@NotNull
 	@Override
 	public Mono<ServerResponse> removeUser(ServerRequest request) {
-		return null;
+		return request.bodyToMono(UserRequest.class).map(userService::removeUser)
+				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
 	@NotNull
 	@Override
 	public Mono<ServerResponse> modifyUser(ServerRequest request) {
-		return null;
+		return request.bodyToMono(UserRequest.class).map(userService::modifyUser)
+				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
 	@NotNull
 	@Override
 	public Mono<ServerResponse> queryAll(ServerRequest request) {
-		return null;
+		return RenderUtils.render(Mono.just(userService.queryAll()));
 	}
 }

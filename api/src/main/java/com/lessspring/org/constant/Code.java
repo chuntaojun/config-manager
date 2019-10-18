@@ -67,6 +67,11 @@ public enum Code {
     USER_NOT_FOUNT(1003, "User not found"),
 
     /**
+     * role is illegal
+     */
+    ROLE_ILLEGAL(1004, "Role illegal"),
+
+    /**
      * server busy
      */
     SERVER_BUSY(2001, "Server busy"),

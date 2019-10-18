@@ -28,6 +28,30 @@ import org.apache.ibatis.annotations.Param;
 public interface UserMapper {
 
 	/**
+	 * save user info
+	 *
+	 * @param dto {@link UserDTO}
+	 * @return affect row
+	 */
+	int saveUser(@Param(value = "dto") UserDTO dto);
+
+	/**
+	 * modify user info
+	 *
+	 * @param dto {@link UserDTO}
+	 * @return affect row
+	 */
+	int modifyUser(@Param(value = "dto") UserDTO dto);
+
+	/**
+	 * remove user by username
+	 * 
+	 * @param username username
+	 * @return affect row
+	 */
+	int removeUser(@Param(value = "username") String username);
+
+	/**
 	 * find user by username
 	 *
 	 * @param username username

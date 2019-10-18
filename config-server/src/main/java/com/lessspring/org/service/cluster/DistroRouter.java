@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.cluster;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +54,9 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 	@Override
 	public void init() {
 		nodeManager.registerListener(this);
-		serverNodeAR.set(nodeManager.serverNodes().toArray(new ServerNode[0]));
+			ArrayList<ServerNode> serverNodes = new ArrayList<>(nodeManager.serverNodes());
+			serverNodes.remove(nodeManager.getSelf());
+		serverNodeAR.set(serverNodes.toArray(new ServerNode[0]));
 	}
 
 	@Override
@@ -67,15 +70,20 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 		ServerNode[] nodes = serverNodeAR.get();
 		int hash = distroHash(key);
 		int index = hash % nodes.length;
-		return Objects.equals(nodeManager.getSelf(), nodes[index]) ? null : nodes[index];
+		return Objects.equals(nodeManager.getSelf(), nodes[index]) ? nodeManager.getSelf()
+				: nodes[index];
 	}
 
 	public boolean isPrincipal(String key) {
-		return Objects.isNull(route(key));
+		return Objects.equals(route(key).getKey(), nodeManager.getSelf().getKey());
 	}
 
 	private int distroHash(String key) {
 		return Math.abs(key.hashCode() % Integer.MAX_VALUE);
+	}
+
+	public String self() {
+			return nodeManager.getSelf().getKey();
 	}
 
 	@Override

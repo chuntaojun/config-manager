@@ -36,6 +36,7 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import reactor.core.publisher.FluxSink;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 			8);
 
 	@Autowired
+	@Lazy
 	private ConfigCacheItemManager cacheItemManager;
 
 	// Build with the Client corresponds to a monitored object is

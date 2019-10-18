@@ -48,15 +48,14 @@ import org.springframework.beans.factory.annotation.Value;
 @Slf4j
 public class ClusterManager {
 
-	@Value("${com.lessspring.org.config-manager.raft.cacheDir}")
+	@Value("${com.lessspring.org.config-manager.raft.cacheDir:${user.home}/${server.port}}")
 	private String raftCacheDir;
 
-	@Value("${com.lessspring.org.config-manager.raft.electionTimeoutMs}")
-	private Integer electionTimeoutMs = Math.toIntExact(Duration.ofSeconds(5).toMillis());
+	@Value("${com.lessspring.org.config-manager.raft.electionTimeoutMs:1000}")
+	private Integer electionTimeoutMs;
 
-	@Value("${com.lessspring.org.config-manager.raft.snapshotIntervalSecs}")
-	private Integer snapshotIntervalSecs = Math
-			.toIntExact(Duration.ofSeconds(600).getSeconds());
+	@Value("${com.lessspring.org.config-manager.raft.snapshotIntervalSecs:600}")
+	private Integer snapshotIntervalSecs;
 
 	private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
 	private final NodeManager nodeManager = NodeManager.getInstance();
@@ -76,7 +75,7 @@ public class ClusterManager {
 			final RaftConfiguration configuration = RaftConfiguration.builder()
 					.withCacheDir(raftCacheDir).withElectionTimeoutMs(electionTimeoutMs)
 					.withSnapshotIntervalSecs(snapshotIntervalSecs).build();
-			clusterServer = new ClusterServer();
+			clusterServer = new ClusterServer(configuration);
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);
 			}

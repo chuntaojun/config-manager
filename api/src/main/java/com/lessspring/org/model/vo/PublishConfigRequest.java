@@ -97,11 +97,11 @@ public class PublishConfigRequest extends BaseConfigRequest {
         this.file = file;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static PublishConfigRequestBuilder sbuilder() {
+        return new PublishConfigRequestBuilder();
     }
 
-    public static final class Builder {
+    public static final class PublishConfigRequestBuilder {
         private String dataId;
         private String groupId;
         private boolean beta = false;
@@ -113,55 +113,55 @@ public class PublishConfigRequest extends BaseConfigRequest {
         private String encryption;
         private boolean requiresEncryption = false;
 
-        private Builder() {
+        private PublishConfigRequestBuilder() {
         }
 
-        public Builder dataId(String dataId) {
+        public PublishConfigRequestBuilder dataId(String dataId) {
             this.dataId = dataId;
             return this;
         }
 
-        public Builder groupId(String groupId) {
+        public PublishConfigRequestBuilder groupId(String groupId) {
             this.groupId = groupId;
             return this;
         }
 
-        public Builder beta(boolean beta) {
+        public PublishConfigRequestBuilder beta(boolean beta) {
             this.beta = beta;
             return this;
         }
 
-        public Builder clientIps(String clientIps) {
+        public PublishConfigRequestBuilder clientIps(String clientIps) {
             this.clientIps = clientIps;
             return this;
         }
 
-        public Builder content(String content) {
+        public PublishConfigRequestBuilder content(String content) {
             this.content = content;
             return this;
         }
 
-        public Builder type(String type) {
+        public PublishConfigRequestBuilder type(String type) {
             this.type = type;
             return this;
         }
 
-        public Builder isFile(boolean isFile) {
+        public PublishConfigRequestBuilder isFile(boolean isFile) {
             this.isFile = isFile;
             return this;
         }
 
-        public Builder file(byte[] file) {
+        public PublishConfigRequestBuilder file(byte[] file) {
             this.file = file;
             return this;
         }
 
-        public Builder encryption(String encryption) {
+        public PublishConfigRequestBuilder encryption(String encryption) {
             this.encryption = encryption;
             return this;
         }
 
-        public Builder requiresEncryption(boolean requiresEncryption) {
+        public PublishConfigRequestBuilder requiresEncryption(boolean requiresEncryption) {
             this.requiresEncryption = requiresEncryption;
             return this;
         }

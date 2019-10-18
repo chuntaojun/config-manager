@@ -53,7 +53,7 @@ public class AuthOperationActuator {
 
 	private final AuthorityProcessor authorityProcessor;
 
-	@Value("${com.lesspring.org.config-manager.environment}")
+	@Value("${com.lessspring.org.config-manager.environment}")
 	private String developEnv;
 
 	public AuthOperationActuator(AuthorityProcessor authorityProcessor) {

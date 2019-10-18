@@ -14,29 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.request;
+package com.lessspring.org.exception;
 
-import com.lessspring.org.utils.PropertiesEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.lessspring.org.constant.Code;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserRequest {
+public class NoSuchRoleException extends BaseException {
+	@Override
+	public Code code() {
+		return Code.ROLE_ILLEGAL;
+	}
 
-		public static final String CLASS_NAME = UserRequest.class.getCanonicalName();
+	public NoSuchRoleException() {
+		super();
+	}
 
-		private String username;
-		private String password;
-		private String oldPassword;
-		private Short role = PropertiesEnum.Role.CUSTOMER.getType();
+	public NoSuchRoleException(String message) {
+		super(message);
+	}
 
+	public NoSuchRoleException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public NoSuchRoleException(Throwable cause) {
+		super(cause);
+	}
+
+	protected NoSuchRoleException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

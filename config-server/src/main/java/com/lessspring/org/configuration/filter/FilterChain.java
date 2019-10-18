@@ -32,6 +32,7 @@ public interface FilterChain {
 	void init();
 
 	/**
+	 * Intercept request processing
 	 * @see org.springframework.web.server.WebFilterChain
 	 *
 	 * @param exchange {@link ServerWebExchange}

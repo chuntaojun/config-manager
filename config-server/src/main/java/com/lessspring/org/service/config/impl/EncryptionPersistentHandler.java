@@ -24,6 +24,7 @@ import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.service.encryption.EncryptionService;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -37,13 +38,14 @@ import org.springframework.stereotype.Service;
 @Service(value = "encryptionPersistentHandler")
 public class EncryptionPersistentHandler implements PersistentHandler {
 
-	private final EncryptionService encryptionService;
-	private final PersistentHandler persistentHandler;
+	@Autowired
+	private EncryptionService encryptionService;
 
-	public EncryptionPersistentHandler(EncryptionService encryptionService,
-			@Qualifier(value = "cachePersistentHandler") PersistentHandler persistentHandler) {
-		this.encryptionService = encryptionService;
-		this.persistentHandler = persistentHandler;
+	@Autowired
+	@Qualifier(value = "cachePersistentHandler")
+	private PersistentHandler persistentHandler;
+
+	public EncryptionPersistentHandler() {
 	}
 
 	@Override

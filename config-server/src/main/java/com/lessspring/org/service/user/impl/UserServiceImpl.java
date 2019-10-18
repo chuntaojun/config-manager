@@ -26,6 +26,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import com.lessspring.org.db.dto.UserDTO;
+import com.lessspring.org.exception.NoSuchRoleException;
+import com.lessspring.org.exception.NotThisResourceException;
+import com.lessspring.org.exception.ValidationException;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.UserRequest;
 import com.lessspring.org.pojo.vo.UserVO;
@@ -39,6 +42,7 @@ import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.service.user.UserService;
+import com.lessspring.org.utils.EncryptionUtils;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
@@ -119,11 +123,18 @@ public class UserServiceImpl implements UserService {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
-					UserRequest request = GsonUtils.toObj(transaction.getData(), UserRequest.class);
-					UserDTO dto = UserDTO.builder()
-							.username(request.getUsername())
-							.password()
-							.build();
+				UserRequest request = GsonUtils.toObj(transaction.getData(),
+						UserRequest.class);
+				try {
+					PropertiesEnum.Role.choose(request.getRole());
+				}
+				catch (Exception e) {
+					throw new NoSuchRoleException();
+				}
+				UserDTO dto = UserDTO.builder().username(request.getUsername())
+						.password(EncryptionUtils.encryptByBcrypt(request.getPassword()))
+						.roleType(request.getRole()).build();
+				userMapper.saveUser(dto);
 			}
 
 			@Override
@@ -137,7 +148,27 @@ public class UserServiceImpl implements UserService {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
-
+				UserRequest request = GsonUtils.toObj(transaction.getData(),
+						UserRequest.class);
+				UserDTO dtoDB = userMapper.findUserByName(request.getUsername());
+				if (dtoDB == null) {
+					throw new NotThisResourceException("Not this user info");
+				}
+				try {
+					PropertiesEnum.Role.choose(request.getRole());
+				}
+				catch (Exception e) {
+					throw new NoSuchRoleException();
+				}
+				if (EncryptionUtils.matchesByBcrypt(request.getOldPassword(),
+						dtoDB.getPassword())) {
+					UserDTO dto = UserDTO.builder().username(request.getUsername())
+							.password(EncryptionUtils
+									.encryptByBcrypt(request.getPassword()))
+							.roleType(request.getRole()).build();
+					userMapper.modifyUser(dto);
+				}
+				throw new ValidationException();
 			}
 
 			@Override
@@ -151,7 +182,9 @@ public class UserServiceImpl implements UserService {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
-
+				UserRequest request = GsonUtils.toObj(transaction.getData(),
+						UserRequest.class);
+				userMapper.removeUser(request.getUsername());
 			}
 
 			@Override
