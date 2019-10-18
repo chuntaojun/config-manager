@@ -16,10 +16,10 @@
  */
 package com.lessspring.org.model.vo;
 
-import com.google.gson.annotations.Expose;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.google.gson.annotations.Expose;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -27,66 +27,66 @@ import java.util.Map;
  */
 public class BaseConfigRequest {
 
-    private String dataId;
-    private String groupId;
-    @Expose
-    private transient final Map<String, Object> attributes = new HashMap<>(4);
+	private String dataId;
+	private String groupId;
+	@Expose
+	private transient final Map<String, Object> attributes = new HashMap<>(4);
 
-    public String getDataId() {
-        return dataId;
-    }
+	public String getDataId() {
+		return dataId;
+	}
 
-    public void setDataId(String dataId) {
-        this.dataId = dataId;
-    }
+	public void setDataId(String dataId) {
+		this.dataId = dataId;
+	}
 
-    public String getGroupId() {
-        return groupId;
-    }
+	public String getGroupId() {
+		return groupId;
+	}
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
+	public Map<String, Object> getAttributes() {
+		return attributes;
+	}
 
-    public <T> T getAttribute(String key) {
-        return (T) attributes.get(key);
-    }
+	public <T> T getAttribute(String key) {
+		return (T) attributes.get(key);
+	}
 
-    public synchronized BaseConfigRequest setAttribute(String key, Object value) {
-        attributes.put(key, value);
-        return this;
-    }
+	public synchronized BaseConfigRequest setAttribute(String key, Object value) {
+		attributes.put(key, value);
+		return this;
+	}
 
-    public static BaseConfigRequestBuilder builder() {
-        return new BaseConfigRequestBuilder();
-    }
+	public static BaseConfigRequestBuilder builder() {
+		return new BaseConfigRequestBuilder();
+	}
 
-    public static final class BaseConfigRequestBuilder {
-        private String dataId;
-        private String groupId;
+	public static final class BaseConfigRequestBuilder {
+		private String dataId;
+		private String groupId;
 
-        private BaseConfigRequestBuilder() {
-        }
+		private BaseConfigRequestBuilder() {
+		}
 
-        public BaseConfigRequestBuilder withDataId(String dataId) {
-            this.dataId = dataId;
-            return this;
-        }
+		public BaseConfigRequestBuilder withDataId(String dataId) {
+			this.dataId = dataId;
+			return this;
+		}
 
-        public BaseConfigRequestBuilder withGroupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
+		public BaseConfigRequestBuilder withGroupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
 
-        public BaseConfigRequest build() {
-            BaseConfigRequest baseConfigRequest = new BaseConfigRequest();
-            baseConfigRequest.setDataId(dataId);
-            baseConfigRequest.setGroupId(groupId);
-            return baseConfigRequest;
-        }
-    }
+		public BaseConfigRequest build() {
+			BaseConfigRequest baseConfigRequest = new BaseConfigRequest();
+			baseConfigRequest.setDataId(dataId);
+			baseConfigRequest.setGroupId(groupId);
+			return baseConfigRequest;
+		}
+	}
 }

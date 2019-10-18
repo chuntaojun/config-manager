@@ -22,39 +22,39 @@ package com.lessspring.org.event;
  */
 public class ServerNodeChangeEvent extends BaseServerEvent {
 
-    public static Builder builder() {
-        return new Builder();
-    }
+	public static Builder builder() {
+		return new Builder();
+	}
 
-    public static final class Builder {
-        private String nodeIp;
-        private int nodePort;
-        private EventType type;
+	public static final class Builder {
+		private String nodeIp;
+		private int nodePort;
+		private EventType type;
 
-        private Builder() {
-        }
+		private Builder() {
+		}
 
-        public Builder nodeIp(String nodeIp) {
-            this.nodeIp = nodeIp;
-            return this;
-        }
+		public Builder nodeIp(String nodeIp) {
+			this.nodeIp = nodeIp;
+			return this;
+		}
 
-        public Builder nodePort(int nodePort) {
-            this.nodePort = nodePort;
-            return this;
-        }
+		public Builder nodePort(int nodePort) {
+			this.nodePort = nodePort;
+			return this;
+		}
 
-        public Builder type(EventType type) {
-            this.type = type;
-            return this;
-        }
+		public Builder type(EventType type) {
+			this.type = type;
+			return this;
+		}
 
-        public ServerNodeChangeEvent build() {
-            ServerNodeChangeEvent serverNodeChangeEvent = new ServerNodeChangeEvent();
-            serverNodeChangeEvent.setNodeIp(nodeIp);
-            serverNodeChangeEvent.setNodePort(nodePort);
-            serverNodeChangeEvent.setType(type);
-            return serverNodeChangeEvent;
-        }
-    }
+		public ServerNodeChangeEvent build() {
+			ServerNodeChangeEvent serverNodeChangeEvent = new ServerNodeChangeEvent();
+			serverNodeChangeEvent.setNodeIp(nodeIp);
+			serverNodeChangeEvent.setNodePort(nodePort);
+			serverNodeChangeEvent.setType(type);
+			return serverNodeChangeEvent;
+		}
+	}
 }

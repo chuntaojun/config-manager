@@ -24,29 +24,29 @@ import com.lessspring.org.constant.StringConst;
  */
 public class ApiConstant {
 
-    public static final String LOGIN = StringConst.API_V1 + "login";
+	public static final String LOGIN = StringConst.API_V1 + "login";
 
-    public static final String PUBLISH_CONFIG = StringConst.API_V1 + "publish/config";
+	public static final String PUBLISH_CONFIG = StringConst.API_V1 + "publish/config";
 
-    public static final String UPDATE_CONFIG = StringConst.API_V1 + "update/config";
+	public static final String UPDATE_CONFIG = StringConst.API_V1 + "update/config";
 
-    public static final String DELETE_CONFIG = StringConst.API_V1 + "delete/config";
+	public static final String DELETE_CONFIG = StringConst.API_V1 + "delete/config";
 
-    public static final String QUERY_CONFIG = StringConst.API_V1 + "query/config";
+	public static final String QUERY_CONFIG = StringConst.API_V1 + "query/config";
 
-    public static final String WATCH_CONFIG = StringConst.API_V1 + "watch";
+	public static final String WATCH_CONFIG = StringConst.API_V1 + "watch";
 
-    public static final String CLUSTER_NODE_JOIN = StringConst.API_V1 + "cluster/join";
+	public static final String CLUSTER_NODE_JOIN = StringConst.API_V1 + "cluster/join";
 
-    public static final String CLUSTER_NODE_LEAVE = StringConst.API_V1 + "cluster/leave";
+	public static final String CLUSTER_NODE_LEAVE = StringConst.API_V1 + "cluster/leave";
 
-    public static final String REFRESH_CLUSTER_NODE_INFO = StringConst.API_V1 + "cluster/all";
+	public static final String REFRESH_CLUSTER_NODE_INFO = StringConst.API_V1
+			+ "cluster/all";
 
-    public static final String DISTRO_SYNC_ALL = StringConst.API_V1 + "distro/sync/all";
+	public static final String DISTRO_SYNC_ALL = StringConst.API_V1 + "distro/sync/all";
 
-    public static final String DISTRO_SYNC_NODE = StringConst.API_V1 + "distro/sync/node";
+	public static final String DISTRO_SYNC_NODE = StringConst.API_V1 + "distro/sync/node";
 
-    public static final String DISTRO_CHECK = StringConst.API_V1 + "distro/sync/check";
-
+	public static final String DISTRO_CHECK = StringConst.API_V1 + "distro/sync/check";
 
 }

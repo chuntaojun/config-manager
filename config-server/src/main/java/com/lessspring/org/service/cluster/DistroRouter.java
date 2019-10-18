@@ -54,8 +54,8 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 	@Override
 	public void init() {
 		nodeManager.registerListener(this);
-			ArrayList<ServerNode> serverNodes = new ArrayList<>(nodeManager.serverNodes());
-			serverNodes.remove(nodeManager.getSelf());
+		ArrayList<ServerNode> serverNodes = new ArrayList<>(nodeManager.serverNodes());
+		serverNodes.remove(nodeManager.getSelf());
 		serverNodeAR.set(serverNodes.toArray(new ServerNode[0]));
 	}
 
@@ -83,7 +83,7 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 	}
 
 	public String self() {
-			return nodeManager.getSelf().getKey();
+		return nodeManager.getSelf().getKey();
 	}
 
 	@Override

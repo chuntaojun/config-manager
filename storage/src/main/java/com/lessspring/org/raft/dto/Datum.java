@@ -24,55 +24,55 @@ import com.lessspring.org.raft.OperationEnum;
  */
 public class Datum {
 
-    private String key;
-    private byte[] value;
-    private String className;
-    private OperationEnum operationEnum;
-    private String bz;
+	private String key;
+	private byte[] value;
+	private String className;
+	private OperationEnum operationEnum;
+	private String bz;
 
-    public Datum(String key, byte[] value, String className) {
-        this.key = key;
-        this.value = value;
-        this.className = className;
-    }
+	public Datum(String key, byte[] value, String className) {
+		this.key = key;
+		this.value = value;
+		this.className = className;
+	}
 
-    public String getKey() {
-        return key;
-    }
+	public String getKey() {
+		return key;
+	}
 
-    public byte[] getValue() {
-        return value;
-    }
+	public byte[] getValue() {
+		return value;
+	}
 
-    public String getClassName() {
-        return className;
-    }
+	public String getClassName() {
+		return className;
+	}
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+	public void setKey(String key) {
+		this.key = key;
+	}
 
-    public void setValue(byte[] value) {
-        this.value = value;
-    }
+	public void setValue(byte[] value) {
+		this.value = value;
+	}
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-    public OperationEnum getOperationEnum() {
-        return operationEnum;
-    }
+	public OperationEnum getOperationEnum() {
+		return operationEnum;
+	}
 
-    public void setOperationEnum(OperationEnum operationEnum) {
-        this.operationEnum = operationEnum;
-    }
+	public void setOperationEnum(OperationEnum operationEnum) {
+		this.operationEnum = operationEnum;
+	}
 
-    public String getBz() {
-        return bz;
-    }
+	public String getBz() {
+		return bz;
+	}
 
-    public void setBz(String bz) {
-        this.bz = bz;
-    }
+	public void setBz(String bz) {
+		this.bz = bz;
+	}
 }

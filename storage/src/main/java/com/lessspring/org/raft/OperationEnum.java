@@ -22,34 +22,34 @@ package com.lessspring.org.raft;
  */
 public enum OperationEnum {
 
-    /**
-     *
-     */
-    PUBLISH,
+	/**
+	 *
+	 */
+	PUBLISH,
 
-    /**
-     *
-     */
-    MODIFY,
+	/**
+	 *
+	 */
+	MODIFY,
 
-    /**
-     *
-     */
-    DELETE,
+	/**
+	 *
+	 */
+	DELETE,
 
-    /**
-     *
-     */
-    BATCH_PUBLISH,
+	/**
+	 *
+	 */
+	BATCH_PUBLISH,
 
-    /**
-     *
-     */
-    BATCH_MODIFY,
+	/**
+	 *
+	 */
+	BATCH_MODIFY,
 
-    /**
-     *
-     */
-    BATCH_DELETE,
+	/**
+	 *
+	 */
+	BATCH_DELETE,
 
 }

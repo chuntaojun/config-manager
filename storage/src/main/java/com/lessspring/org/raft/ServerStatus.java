@@ -22,24 +22,24 @@ package com.lessspring.org.raft;
  */
 public enum ServerStatus {
 
-    /**
-     *
-     */
-    ONLY_READ,
+	/**
+	 *
+	 */
+	ONLY_READ,
 
-    /**
-     *
-     */
-    ONLY_WRITE,
+	/**
+	 *
+	 */
+	ONLY_WRITE,
 
-    /**
-     *
-     */
-    DEATH,
+	/**
+	 *
+	 */
+	DEATH,
 
-    /**
-     *
-     */
-    HEALTH
+	/**
+	 *
+	 */
+	HEALTH
 
 }

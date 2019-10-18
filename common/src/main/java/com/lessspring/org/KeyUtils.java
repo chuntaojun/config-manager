@@ -22,17 +22,17 @@ package com.lessspring.org;
  */
 public final class KeyUtils {
 
-    private static final char KEY_LINK = '#';
+	private static final char KEY_LINK = '#';
 
-    public static String createKey(Object... objects) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < objects.length; i ++) {
-            builder.append(objects[i]);
-            if (i != objects.length - 1) {
-                builder.append(KEY_LINK);
-            }
-        }
-        return builder.toString();
-    }
+	public static String createKey(Object... objects) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < objects.length; i++) {
+			builder.append(objects[i]);
+			if (i != objects.length - 1) {
+				builder.append(KEY_LINK);
+			}
+		}
+		return builder.toString();
+	}
 
 }

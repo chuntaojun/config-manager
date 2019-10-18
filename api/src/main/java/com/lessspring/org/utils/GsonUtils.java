@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.utils;
 
-import com.google.gson.Gson;
-
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+
+import com.google.gson.Gson;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -28,30 +28,32 @@ import java.nio.charset.StandardCharsets;
  */
 public final class GsonUtils {
 
-    private static final Gson GSON = new Gson();
+	private static final Gson GSON = new Gson();
 
-    public static String toJson(Object obj) {
-        return GSON.toJson(obj);
-    }
+	public static String toJson(Object obj) {
+		return GSON.toJson(obj);
+	}
 
-    public static byte[] toJsonBytes(Object obj) {
-        return GSON.toJson(obj).getBytes(StandardCharsets.UTF_8);
-    }
+	public static byte[] toJsonBytes(Object obj) {
+		return GSON.toJson(obj).getBytes(StandardCharsets.UTF_8);
+	}
 
-    public static <T> T toObj(byte[] json, Class<T> cls) {
-        return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())), cls);
-    }
+	public static <T> T toObj(byte[] json, Class<T> cls) {
+		return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())),
+				cls);
+	}
 
-    public static <T> T toObj(byte[] json, Type cls) {
-        return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())), cls);
-    }
+	public static <T> T toObj(byte[] json, Type cls) {
+		return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())),
+				cls);
+	}
 
-    public static <T> T toObj(String json, Class<T> cls) {
-        return GSON.fromJson(json, cls);
-    }
+	public static <T> T toObj(String json, Class<T> cls) {
+		return GSON.fromJson(json, cls);
+	}
 
-    public static <T> T toObj(String json, Type cls) {
-        return GSON.fromJson(json, cls);
-    }
+	public static <T> T toObj(String json, Type cls) {
+		return GSON.fromJson(json, cls);
+	}
 
 }

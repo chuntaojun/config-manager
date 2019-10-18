@@ -16,8 +16,6 @@
  */
 package com.lessspring.org.utils;
 
-import java.sql.PreparedStatement;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1

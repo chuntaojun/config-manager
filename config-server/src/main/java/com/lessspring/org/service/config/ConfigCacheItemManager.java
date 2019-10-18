@@ -34,14 +34,12 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
-import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -57,7 +55,8 @@ public class ConfigCacheItemManager {
 	@Autowired
 	private PersistentHandler persistentHandler;
 
-	public ConfigCacheItemManager() {}
+	public ConfigCacheItemManager() {
+	}
 
 	public ConfigInfo loadConfigFromDB(final String namespaceId, final String groupId,
 			final String dataId) {

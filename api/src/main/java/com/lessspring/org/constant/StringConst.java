@@ -16,22 +16,21 @@
  */
 package com.lessspring.org.constant;
 
-
 /**
  * @author liaochuntao
  */
 public class StringConst {
 
-    public static final String API_V1 = "/api/v1/";
+	public static final String API_V1 = "/api/v1/";
 
-    public static final String TOKEN_HEADER_NAME = "config-manager-token";
+	public static final String TOKEN_HEADER_NAME = "config-manager-token";
 
-    // Need to be configured for regular matching encrypted string
+	// Need to be configured for regular matching encrypted string
 
-    public static final String ENCRYPTION_PLACEHOLDER = "ENC\\{([^{}]+?)}";
+	public static final String ENCRYPTION_PLACEHOLDER = "ENC\\{([^{}]+?)}";
 
-    // Used for regular match need to decrypt the string
+	// Used for regular match need to decrypt the string
 
-    public static final String DECRYPTION_PLACEHOLDER = "DECR\\{([^{}]+?)\\}";
+	public static final String DECRYPTION_PLACEHOLDER = "DECR\\{([^{}]+?)\\}";
 
 }

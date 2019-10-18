@@ -31,8 +31,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NamespaceDTO {
 
-		private Long id;
-		private String namespace;
-		private String namespaceId;
+	private Long id;
+	private String namespace;
+	private String namespaceId;
 
 }

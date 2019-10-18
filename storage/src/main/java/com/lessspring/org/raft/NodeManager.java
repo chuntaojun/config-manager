@@ -16,8 +16,6 @@
  */
 package com.lessspring.org.raft;
 
-import com.lessspring.org.raft.vo.ServerNode;
-
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -25,59 +23,61 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import com.lessspring.org.raft.vo.ServerNode;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class NodeManager {
 
-    private ServerNode self = null;
+	private ServerNode self = null;
 
-    private Set<NodeChangeListener> listeners = new LinkedHashSet<>();
+	private Set<NodeChangeListener> listeners = new LinkedHashSet<>();
 
-    private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
+	private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
 
-    private static volatile NodeManager INSTANCE = new NodeManager();
+	private static volatile NodeManager INSTANCE = new NodeManager();
 
-    public static NodeManager getInstance() {
-        return INSTANCE;
-    }
+	public static NodeManager getInstance() {
+		return INSTANCE;
+	}
 
-    public synchronized void registerListener(NodeChangeListener listener) {
-        listeners.add(listener);
-    }
+	public synchronized void registerListener(NodeChangeListener listener) {
+		listeners.add(listener);
+	}
 
-    public ServerNode getSelf() {
-        return self;
-    }
+	public ServerNode getSelf() {
+		return self;
+	}
 
-    public void setSelf(ServerNode self) {
-        this.self = self;
-    }
+	public void setSelf(ServerNode self) {
+		this.self = self;
+	}
 
-    public void nodeJoin(ServerNode node) {
-        nodeMap.putIfAbsent(node.getKey(), node);
-        notifyListener();
-    }
+	public void nodeJoin(ServerNode node) {
+		nodeMap.putIfAbsent(node.getKey(), node);
+		notifyListener();
+	}
 
-    public void nodeLeave(ServerNode node) {
-        nodeMap.remove(node.getKey());
-        notifyListener();
-    }
+	public void nodeLeave(ServerNode node) {
+		nodeMap.remove(node.getKey());
+		notifyListener();
+	}
 
-    public Stream<Map.Entry<String, ServerNode>> stream() {
-        return nodeMap.entrySet().stream();
-    }
+	public Stream<Map.Entry<String, ServerNode>> stream() {
+		return nodeMap.entrySet().stream();
+	}
 
-    public Collection<ServerNode> serverNodes() {
-        return nodeMap.values();
-    }
+	public Collection<ServerNode> serverNodes() {
+		return nodeMap.values();
+	}
 
-    private void notifyListener() {
-        Collection<ServerNode> nodes = nodeMap.values();
-        for (NodeChangeListener listener : listeners) {
-            listener.onChange(nodes);
-        }
-    }
+	private void notifyListener() {
+		Collection<ServerNode> nodes = nodeMap.values();
+		for (NodeChangeListener listener : listeners) {
+			listener.onChange(nodes);
+		}
+	}
 
 }

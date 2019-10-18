@@ -25,14 +25,12 @@ import com.lessspring.org.pojo.vo.NamespaceVO;
  */
 public final class NamespaceVOUtils {
 
-		private NamespaceVOUtils() {}
+	private NamespaceVOUtils() {
+	}
 
-		public static NamespaceVO change(NamespaceDTO dto) {
-				return NamespaceVO
-						.builder()
-						.namespaceName(dto.getNamespace())
-						.namespaceId(dto.getNamespaceId())
-						.build();
-		}
+	public static NamespaceVO change(NamespaceDTO dto) {
+		return NamespaceVO.builder().namespaceName(dto.getNamespace())
+				.namespaceId(dto.getNamespaceId()).build();
+	}
 
 }

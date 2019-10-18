@@ -34,7 +34,8 @@ public interface NamespaceHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull Mono<ServerResponse> createNamespace(ServerRequest request);
+	@NotNull
+	Mono<ServerResponse> createNamespace(ServerRequest request);
 
 	/**
 	 * delete namespace
@@ -42,7 +43,8 @@ public interface NamespaceHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull Mono<ServerResponse> deleteNamespace(ServerRequest request);
+	@NotNull
+	Mono<ServerResponse> deleteNamespace(ServerRequest request);
 
 	/**
 	 * query all namespace
@@ -50,6 +52,7 @@ public interface NamespaceHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull Mono<ServerResponse> queryAll(ServerRequest request);
+	@NotNull
+	Mono<ServerResponse> queryAll(ServerRequest request);
 
 }

@@ -21,83 +21,83 @@ package com.lessspring.org.constant;
  * @since 0.0.1
  */
 public enum Code {
-    /**
-     * success
-     */
-    SUCCESS(200, "Success"),
+	/**
+	 * success
+	 */
+	SUCCESS(200, "Success"),
 
-    /**
-     * failure
-     */
-    FAILURE(500, "Failure"),
+	/**
+	 * failure
+	 */
+	FAILURE(500, "Failure"),
 
-    /**
-     * inner error
-     */
-    ERROR(-1, "Inner Error"),
+	/**
+	 * inner error
+	 */
+	ERROR(-1, "Inner Error"),
 
-    /**
-     * unauthorized
-     */
-    UNAUTHORIZED(401, "Unauthorized"),
+	/**
+	 * unauthorized
+	 */
+	UNAUTHORIZED(401, "Unauthorized"),
 
-    /**
-     * not found
-     */
-    NOT_FOUND(404, "not found"),
+	/**
+	 * not found
+	 */
+	NOT_FOUND(404, "not found"),
 
-    /**
-     * redirect
-     */
-    REDIRECT(503, "Redirect"),
+	/**
+	 * redirect
+	 */
+	REDIRECT(503, "Redirect"),
 
-    /**
-     * hash no privilege
-     */
-    HASH_NO_PRIVILEGE(1001, "no privilege"),
+	/**
+	 * hash no privilege
+	 */
+	HASH_NO_PRIVILEGE(1001, "no privilege"),
 
-    /**
-     * need login
-     */
-    NEED_LOGIN(1002, "need login"),
+	/**
+	 * need login
+	 */
+	NEED_LOGIN(1002, "need login"),
 
-    /**
-     * user not found
-     */
-    USER_NOT_FOUNT(1003, "User not found"),
+	/**
+	 * user not found
+	 */
+	USER_NOT_FOUNT(1003, "User not found"),
 
-    /**
-     * role is illegal
-     */
-    ROLE_ILLEGAL(1004, "Role illegal"),
+	/**
+	 * role is illegal
+	 */
+	ROLE_ILLEGAL(1004, "Role illegal"),
 
-    /**
-     * server busy
-     */
-    SERVER_BUSY(2001, "Server busy"),
+	/**
+	 * server busy
+	 */
+	SERVER_BUSY(2001, "Server busy"),
 
-    /**
-     * Disk Overflow
-     */
-    DISK_OVERFLOW(4001, "Disk Overflow"),
+	/**
+	 * Disk Overflow
+	 */
+	DISK_OVERFLOW(4001, "Disk Overflow"),
 
-    VERIFY_ERROR(5001, "Verify error")
+	VERIFY_ERROR(5001, "Verify error")
 
-    ;
+	;
 
-    private final int code;
-    private final String msg;
+	private final int code;
+	private final String msg;
 
-    Code(int code, String msg) {
-        this.code = code;
-        this.msg = msg;
-    }
+	Code(int code, String msg) {
+		this.code = code;
+		this.msg = msg;
+	}
 
-    public int getCode() {
-        return code;
-    }
+	public int getCode() {
+		return code;
+	}
 
-    public String getMsg() {
-        return msg;
-    }
+	public String getMsg() {
+		return msg;
+	}
 }

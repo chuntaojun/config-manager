@@ -24,38 +24,37 @@ import com.lessspring.org.utils.GsonUtils;
  */
 public class QueryConfigRequest extends BaseConfigRequest {
 
-    public static QueryConfigRequestBuilder sbuilder() {
-        return new QueryConfigRequestBuilder();
-    }
+	public static QueryConfigRequestBuilder sbuilder() {
+		return new QueryConfigRequestBuilder();
+	}
 
-    @Override
-    public String toString() {
-        return GsonUtils.toJson(this);
-    }
+	@Override
+	public String toString() {
+		return GsonUtils.toJson(this);
+	}
 
+	public static final class QueryConfigRequestBuilder {
+		private String dataId;
+		private String groupId;
 
-    public static final class QueryConfigRequestBuilder {
-        private String dataId;
-        private String groupId;
+		private QueryConfigRequestBuilder() {
+		}
 
-        private QueryConfigRequestBuilder() {
-        }
+		public QueryConfigRequestBuilder dataId(String dataId) {
+			this.dataId = dataId;
+			return this;
+		}
 
-        public QueryConfigRequestBuilder dataId(String dataId) {
-            this.dataId = dataId;
-            return this;
-        }
+		public QueryConfigRequestBuilder groupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
 
-        public QueryConfigRequestBuilder groupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
-
-        public QueryConfigRequest build() {
-            QueryConfigRequest queryConfigRequest = new QueryConfigRequest();
-            queryConfigRequest.setDataId(dataId);
-            queryConfigRequest.setGroupId(groupId);
-            return queryConfigRequest;
-        }
-    }
+		public QueryConfigRequest build() {
+			QueryConfigRequest queryConfigRequest = new QueryConfigRequest();
+			queryConfigRequest.setDataId(dataId);
+			queryConfigRequest.setGroupId(groupId);
+			return queryConfigRequest;
+		}
+	}
 }

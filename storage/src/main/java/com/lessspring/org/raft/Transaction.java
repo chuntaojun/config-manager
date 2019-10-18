@@ -22,31 +22,31 @@ package com.lessspring.org.raft;
  */
 public class Transaction {
 
-    private final String key;
-    private final OperationEnum operation;
-    private final byte[] data;
-    private final String bz;
+	private final String key;
+	private final OperationEnum operation;
+	private final byte[] data;
+	private final String bz;
 
-    public Transaction(String bz, String key, byte[] data, OperationEnum operation) {
-        this.bz = bz;
-        this.key = key;
-        this.operation = operation;
-        this.data = data;
-    }
+	public Transaction(String bz, String key, byte[] data, OperationEnum operation) {
+		this.bz = bz;
+		this.key = key;
+		this.operation = operation;
+		this.data = data;
+	}
 
-    public byte[] getData() {
-        return data;
-    }
+	public byte[] getData() {
+		return data;
+	}
 
-    public OperationEnum getOperation() {
-        return operation;
-    }
+	public OperationEnum getOperation() {
+		return operation;
+	}
 
-    public String getKey() {
-        return key;
-    }
+	public String getKey() {
+		return key;
+	}
 
-    public String getBz() {
-        return bz;
-    }
+	public String getBz() {
+		return bz;
+	}
 }

@@ -24,67 +24,68 @@ import java.time.Duration;
  */
 public class RaftConfiguration {
 
-    private String cacheDir = "";
-    private int electionTimeoutMs = (int) Duration.ofSeconds(5).toMillis();
-    private int snapshotIntervalSecs = (int) Duration.ofSeconds(600).getSeconds();
+	private String cacheDir = "";
+	private int electionTimeoutMs = (int) Duration.ofSeconds(5).toMillis();
+	private int snapshotIntervalSecs = (int) Duration.ofSeconds(600).getSeconds();
 
-    public String getCacheDir() {
-        return cacheDir;
-    }
+	public String getCacheDir() {
+		return cacheDir;
+	}
 
-    public void setCacheDir(String cacheDir) {
-        this.cacheDir = cacheDir;
-    }
+	public void setCacheDir(String cacheDir) {
+		this.cacheDir = cacheDir;
+	}
 
-    public int getElectionTimeoutMs() {
-        return electionTimeoutMs;
-    }
+	public int getElectionTimeoutMs() {
+		return electionTimeoutMs;
+	}
 
-    public void setElectionTimeoutMs(int electionTimeoutMs) {
-        this.electionTimeoutMs = electionTimeoutMs;
-    }
+	public void setElectionTimeoutMs(int electionTimeoutMs) {
+		this.electionTimeoutMs = electionTimeoutMs;
+	}
 
-    public int getSnapshotIntervalSecs() {
-        return snapshotIntervalSecs;
-    }
+	public int getSnapshotIntervalSecs() {
+		return snapshotIntervalSecs;
+	}
 
-    public void setSnapshotIntervalSecs(int snapshotIntervalSecs) {
-        this.snapshotIntervalSecs = snapshotIntervalSecs;
-    }
+	public void setSnapshotIntervalSecs(int snapshotIntervalSecs) {
+		this.snapshotIntervalSecs = snapshotIntervalSecs;
+	}
 
-    public static RaftConfigurationBuilder builder() {
-        return new RaftConfigurationBuilder();
-    }
+	public static RaftConfigurationBuilder builder() {
+		return new RaftConfigurationBuilder();
+	}
 
-    public static final class RaftConfigurationBuilder {
-        private String cacheDir;
-        private int electionTimeoutMs;
-        private int snapshotIntervalSecs;
+	public static final class RaftConfigurationBuilder {
+		private String cacheDir;
+		private int electionTimeoutMs;
+		private int snapshotIntervalSecs;
 
-        private RaftConfigurationBuilder() {
-        }
+		private RaftConfigurationBuilder() {
+		}
 
-        public RaftConfigurationBuilder withCacheDir(String cacheDir) {
-            this.cacheDir = cacheDir;
-            return this;
-        }
+		public RaftConfigurationBuilder withCacheDir(String cacheDir) {
+			this.cacheDir = cacheDir;
+			return this;
+		}
 
-        public RaftConfigurationBuilder withElectionTimeoutMs(int electionTimeoutMs) {
-            this.electionTimeoutMs = electionTimeoutMs;
-            return this;
-        }
+		public RaftConfigurationBuilder withElectionTimeoutMs(int electionTimeoutMs) {
+			this.electionTimeoutMs = electionTimeoutMs;
+			return this;
+		}
 
-        public RaftConfigurationBuilder withSnapshotIntervalSecs(int snapshotIntervalSecs) {
-            this.snapshotIntervalSecs = snapshotIntervalSecs;
-            return this;
-        }
+		public RaftConfigurationBuilder withSnapshotIntervalSecs(
+				int snapshotIntervalSecs) {
+			this.snapshotIntervalSecs = snapshotIntervalSecs;
+			return this;
+		}
 
-        public RaftConfiguration build() {
-            RaftConfiguration raftConfiguration = new RaftConfiguration();
-            raftConfiguration.setCacheDir(cacheDir);
-            raftConfiguration.setElectionTimeoutMs(electionTimeoutMs);
-            raftConfiguration.setSnapshotIntervalSecs(snapshotIntervalSecs);
-            return raftConfiguration;
-        }
-    }
+		public RaftConfiguration build() {
+			RaftConfiguration raftConfiguration = new RaftConfiguration();
+			raftConfiguration.setCacheDir(cacheDir);
+			raftConfiguration.setElectionTimeoutMs(electionTimeoutMs);
+			raftConfiguration.setSnapshotIntervalSecs(snapshotIntervalSecs);
+			return raftConfiguration;
+		}
+	}
 }

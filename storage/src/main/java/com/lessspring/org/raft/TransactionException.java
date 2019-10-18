@@ -24,43 +24,44 @@ import com.lessspring.org.constant.Code;
  */
 public class TransactionException extends Exception {
 
-    private Code errorCode = Code.ERROR;
+	private Code errorCode = Code.ERROR;
 
-    private Transaction transaction;
+	private Transaction transaction;
 
-    public TransactionException() {
-        super();
-    }
+	public TransactionException() {
+		super();
+	}
 
-    public TransactionException(String message) {
-        super(message);
-    }
+	public TransactionException(String message) {
+		super(message);
+	}
 
-    public TransactionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public TransactionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public TransactionException(Throwable cause) {
-        super(cause);
-    }
+	public TransactionException(Throwable cause) {
+		super(cause);
+	}
 
-    protected TransactionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	protected TransactionException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 
-    public Transaction getTransaction() {
-        return transaction;
-    }
+	public Transaction getTransaction() {
+		return transaction;
+	}
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
+	public void setTransaction(Transaction transaction) {
+		this.transaction = transaction;
+	}
 
-    public Code getErrorCode() {
-        return errorCode;
-    }
+	public Code getErrorCode() {
+		return errorCode;
+	}
 
-    public void setErrorCode(Code errorCode) {
-        this.errorCode = errorCode;
-    }
+	public void setErrorCode(Code errorCode) {
+		this.errorCode = errorCode;
+	}
 }

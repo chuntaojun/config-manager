@@ -16,10 +16,10 @@
  */
 package com.lessspring.org;
 
+import java.nio.file.Paths;
+
 import lombok.Data;
 import lombok.ToString;
-
-import java.nio.file.Paths;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -29,81 +29,82 @@ import java.nio.file.Paths;
 @ToString
 public class Configuration {
 
-    private String namespaceId = "default";
+	private String namespaceId = "default";
 
-    private String servers;
+	private String servers;
 
-    private String cachePath = Paths.get(System.getProperty("user.home"), "config_manager_client").toString();
+	private String cachePath = Paths
+			.get(System.getProperty("user.home"), "config_manager_client").toString();
 
-    private String clientId;
+	private String clientId;
 
-    private String username;
+	private String username;
 
-    private String password;
+	private String password;
 
-    private String authToken;
+	private String authToken;
 
-    public static Builder builder() {
-        return new Builder();
-    }
+	public static Builder builder() {
+		return new Builder();
+	}
 
-    public static final class Builder {
-        private String namespaceId = "default";
-        private String servers;
-        private String cachePath;
-        private String clientId;
-        private String username;
-        private String password;
-        private String authToken;
+	public static final class Builder {
+		private String namespaceId = "default";
+		private String servers;
+		private String cachePath;
+		private String clientId;
+		private String username;
+		private String password;
+		private String authToken;
 
-        private Builder() {
-        }
+		private Builder() {
+		}
 
-        public Builder namespaceId(String namespaceId) {
-            this.namespaceId = namespaceId;
-            return this;
-        }
+		public Builder namespaceId(String namespaceId) {
+			this.namespaceId = namespaceId;
+			return this;
+		}
 
-        public Builder servers(String servers) {
-            this.servers = servers;
-            return this;
-        }
+		public Builder servers(String servers) {
+			this.servers = servers;
+			return this;
+		}
 
-        public Builder cachePath(String cachePath) {
-            this.cachePath = cachePath;
-            return this;
-        }
+		public Builder cachePath(String cachePath) {
+			this.cachePath = cachePath;
+			return this;
+		}
 
-        public Builder clientId(String clientId) {
-            this.clientId = clientId;
-            return this;
-        }
+		public Builder clientId(String clientId) {
+			this.clientId = clientId;
+			return this;
+		}
 
-        public Builder username(String username) {
-            this.username = username;
-            return this;
-        }
+		public Builder username(String username) {
+			this.username = username;
+			return this;
+		}
 
-        public Builder password(String password) {
-            this.password = password;
-            return this;
-        }
+		public Builder password(String password) {
+			this.password = password;
+			return this;
+		}
 
-        public Builder authToken(String authToken) {
-            this.authToken = authToken;
-            return this;
-        }
+		public Builder authToken(String authToken) {
+			this.authToken = authToken;
+			return this;
+		}
 
-        public Configuration build() {
-            Configuration configuration = new Configuration();
-            configuration.setNamespaceId(namespaceId);
-            configuration.setServers(servers);
-            configuration.setCachePath(cachePath);
-            configuration.setClientId(clientId);
-            configuration.setUsername(username);
-            configuration.setPassword(password);
-            configuration.setAuthToken(authToken);
-            return configuration;
-        }
-    }
+		public Configuration build() {
+			Configuration configuration = new Configuration();
+			configuration.setNamespaceId(namespaceId);
+			configuration.setServers(servers);
+			configuration.setCachePath(cachePath);
+			configuration.setClientId(clientId);
+			configuration.setUsername(username);
+			configuration.setPassword(password);
+			configuration.setAuthToken(authToken);
+			return configuration;
+		}
+	}
 }

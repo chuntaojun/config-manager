@@ -22,20 +22,20 @@ package com.lessspring.org.raft;
  */
 public interface TransactionCommitCallback {
 
-    /**
-     * When raft transaction is completed, triggered the callback achieve business
-     *
-     * @param transaction {@link Transaction}
-     * @throws TransactionException
-     */
-    void onApply(Transaction transaction) throws TransactionException;
+	/**
+	 * When raft transaction is completed, triggered the callback achieve business
+	 *
+	 * @param transaction {@link Transaction}
+	 * @throws TransactionException
+	 */
+	void onApply(Transaction transaction) throws TransactionException;
 
-    /**
-     * To determine transaction key, if interested
-     *
-     * @param trsKey Transaction key
-     * @return is interest
-     */
-    boolean interest(String trsKey);
+	/**
+	 * To determine transaction key, if interested
+	 *
+	 * @param trsKey Transaction key
+	 * @return is interest
+	 */
+	boolean interest(String trsKey);
 
 }

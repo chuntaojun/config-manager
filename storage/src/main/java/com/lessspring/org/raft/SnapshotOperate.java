@@ -26,20 +26,20 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
  */
 public interface SnapshotOperate {
 
-    /**
-     * do snapshot save operation
-     *
-     * @param writer {@link SnapshotWriter}
-     * @param done {@link Closure}
-     */
-    void onSnapshotSave(SnapshotWriter writer, Closure done);
+	/**
+	 * do snapshot save operation
+	 *
+	 * @param writer {@link SnapshotWriter}
+	 * @param done {@link Closure}
+	 */
+	void onSnapshotSave(SnapshotWriter writer, Closure done);
 
-    /**
-     * do snapshot load operation
-     *
-     * @param reader {@link SnapshotReader}
-     * @return operation label
-     */
-    boolean onSnapshotLoad(SnapshotReader reader);
+	/**
+	 * do snapshot load operation
+	 *
+	 * @param reader {@link SnapshotReader}
+	 * @return operation label
+	 */
+	boolean onSnapshotLoad(SnapshotReader reader);
 
 }

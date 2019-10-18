@@ -22,19 +22,19 @@ package com.lessspring.org.event;
  */
 public enum EventType {
 
-    /**
-     *
-     */
-    PUBLISH,
+	/**
+	 *
+	 */
+	PUBLISH,
 
-    /**
-     *
-     */
-    MODIFIED,
+	/**
+	 *
+	 */
+	MODIFIED,
 
-    /**
-     *
-     */
-    DELETE
+	/**
+	 *
+	 */
+	DELETE
 
 }

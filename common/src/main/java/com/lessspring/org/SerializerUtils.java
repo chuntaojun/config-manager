@@ -16,13 +16,13 @@
  */
 package com.lessspring.org;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoPool;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -30,46 +30,47 @@ import java.io.ByteArrayOutputStream;
  */
 public final class SerializerUtils {
 
-    private static final SerializerUtils INSTANCE = new SerializerUtils();
+	private static final SerializerUtils INSTANCE = new SerializerUtils();
 
-    public static SerializerUtils getInstance() {
-        return INSTANCE;
-    }
+	public static SerializerUtils getInstance() {
+		return INSTANCE;
+	}
 
-    private KryoPool kryoPool;
+	private KryoPool kryoPool;
 
-    private SerializerUtils() {
-        kryoPool = new KryoPool.Builder(new KryoFactory()).softReferences().build();
-    }
+	private SerializerUtils() {
+		kryoPool = new KryoPool.Builder(new KryoFactory()).softReferences().build();
+	}
 
-    private class KryoFactory implements com.esotericsoftware.kryo.pool.KryoFactory {
+	private class KryoFactory implements com.esotericsoftware.kryo.pool.KryoFactory {
 
-        @Override
-        public Kryo create() {
-            Kryo kryo = new Kryo();
-            kryo.setRegistrationRequired(false);
-            kryo.setInstantiatorStrategy(new Kryo.DefaultInstantiatorStrategy(new org.objenesis.strategy.StdInstantiatorStrategy()));
-            return kryo;
-        }
+		@Override
+		public Kryo create() {
+			Kryo kryo = new Kryo();
+			kryo.setRegistrationRequired(false);
+			kryo.setInstantiatorStrategy(new Kryo.DefaultInstantiatorStrategy(
+					new org.objenesis.strategy.StdInstantiatorStrategy()));
+			return kryo;
+		}
 
-    }
+	}
 
-    public <T> byte[] serialize(T data) {
-        return kryoPool.run(kryo -> {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            Output output = new Output(byteArrayOutputStream);
-            kryo.writeClassAndObject(output, data);
-            output.close();
-            return byteArrayOutputStream.toByteArray();
-        });
-    }
+	public <T> byte[] serialize(T data) {
+		return kryoPool.run(kryo -> {
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			Output output = new Output(byteArrayOutputStream);
+			kryo.writeClassAndObject(output, data);
+			output.close();
+			return byteArrayOutputStream.toByteArray();
+		});
+	}
 
-    public <T> T deserialize(byte[] data, Class<T> clazz) {
-        return kryoPool.run(kryo -> {
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-            Input input = new Input(byteArrayInputStream);
-            return (T) kryo.readClassAndObject(input);
-        });
-    }
+	public <T> T deserialize(byte[] data, Class<T> clazz) {
+		return kryoPool.run(kryo -> {
+			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+			Input input = new Input(byteArrayInputStream);
+			return (T) kryo.readClassAndObject(input);
+		});
+	}
 
 }

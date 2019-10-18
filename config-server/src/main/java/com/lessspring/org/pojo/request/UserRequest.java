@@ -32,11 +32,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRequest {
 
-		public static final String CLASS_NAME = UserRequest.class.getCanonicalName();
+	public static final String CLASS_NAME = UserRequest.class.getCanonicalName();
 
-		private String username;
-		private String password;
-		private String oldPassword;
-		private Short role = PropertiesEnum.Role.CUSTOMER.getType();
+	private String username;
+	private String password;
+	private String oldPassword;
+	private Short role = PropertiesEnum.Role.CUSTOMER.getType();
 
 }

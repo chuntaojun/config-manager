@@ -90,12 +90,12 @@ public final class EncryptionUtils {
 	}
 
 	public static String encryptByBcrypt(String s) {
-	    return bcrypt.encode(s);
-    }
+		return bcrypt.encode(s);
+	}
 
-    public static boolean matchesByBcrypt(String raw, String encoded) {
-        return bcrypt.matches(raw, encoded);
-    }
+	public static boolean matchesByBcrypt(String raw, String encoded) {
+		return bcrypt.matches(raw, encoded);
+	}
 
 	private static Key getKey(String keySeed) {
 		if (StringUtils.isEmpty(keySeed)) {

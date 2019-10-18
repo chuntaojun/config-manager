@@ -16,10 +16,9 @@
  */
 package com.lessspring.org;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
-import java.util.Arrays;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -27,36 +26,38 @@ import java.util.Arrays;
  */
 public final class PathUtils {
 
-    private static volatile boolean initialized = false;
+	private static volatile boolean initialized = false;
 
-    private static String FATHER_ROAD_KING = System.getProperty("user.home");
+	private static String FATHER_ROAD_KING = System.getProperty("user.home");
 
-    public static void init(String path) {
-        if (!initialized) {
-            initialized = true;
-            if (StringUtils.isNoneEmpty(path)) {
-                FATHER_ROAD_KING = path;
-            }
-        } else {
-            throw new IllegalStateException("Initialization method can execute only once");
-        }
-    }
+	public static void init(String path) {
+		if (!initialized) {
+			initialized = true;
+			if (StringUtils.isNoneEmpty(path)) {
+				FATHER_ROAD_KING = path;
+			}
+		}
+		else {
+			throw new IllegalStateException(
+					"Initialization method can execute only once");
+		}
+	}
 
-    public static String finalPath(String subPath) {
-        if (subPath.startsWith(File.separator)) {
-            subPath = subPath.substring(1);
-        }
-        return FATHER_ROAD_KING + File.separator + subPath;
-    }
+	public static String finalPath(String subPath) {
+		if (subPath.startsWith(File.separator)) {
+			subPath = subPath.substring(1);
+		}
+		return FATHER_ROAD_KING + File.separator + subPath;
+	}
 
-    public static String join(Object... objects) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < objects.length; i ++) {
-            builder.append(objects[i]);
-            if (i != objects.length - 1) {
-                builder.append(File.separator);
-            }
-        }
-        return builder.toString();
-    }
+	public static String join(Object... objects) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < objects.length; i++) {
+			builder.append(objects[i]);
+			if (i != objects.length - 1) {
+				builder.append(File.separator);
+			}
+		}
+		return builder.toString();
+	}
 }

@@ -22,31 +22,31 @@ package com.lessspring.org.event;
  */
 public abstract class BaseServerEvent {
 
-    private String nodeIp;
-    private int nodePort;
-    private EventType type;
+	private String nodeIp;
+	private int nodePort;
+	private EventType type;
 
-    public String getNodeIp() {
-        return nodeIp;
-    }
+	public String getNodeIp() {
+		return nodeIp;
+	}
 
-    public void setNodeIp(String nodeIp) {
-        this.nodeIp = nodeIp;
-    }
+	public void setNodeIp(String nodeIp) {
+		this.nodeIp = nodeIp;
+	}
 
-    public int getNodePort() {
-        return nodePort;
-    }
+	public int getNodePort() {
+		return nodePort;
+	}
 
-    public void setNodePort(int nodePort) {
-        this.nodePort = nodePort;
-    }
+	public void setNodePort(int nodePort) {
+		this.nodePort = nodePort;
+	}
 
-    public EventType getType() {
-        return type;
-    }
+	public EventType getType() {
+		return type;
+	}
 
-    public void setType(EventType type) {
-        this.type = type;
-    }
+	public void setType(EventType type) {
+		this.type = type;
+	}
 }

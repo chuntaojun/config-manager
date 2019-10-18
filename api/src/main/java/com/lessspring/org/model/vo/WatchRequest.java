@@ -16,10 +16,10 @@
  */
 package com.lessspring.org.model.vo;
 
-import com.lessspring.org.utils.GsonUtils;
-
 import java.util.Collections;
 import java.util.Map;
+
+import com.lessspring.org.utils.GsonUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -27,37 +27,37 @@ import java.util.Map;
  */
 public class WatchRequest {
 
-    public static final String QUERY_KEY = "watchParams";
+	public static final String QUERY_KEY = "watchParams";
 
-    private String namespaceId = "default";
-    private Map<String, String> watchKey = Collections.emptyMap();
+	private String namespaceId = "default";
+	private Map<String, String> watchKey = Collections.emptyMap();
 
-    public WatchRequest() {
-    }
+	public WatchRequest() {
+	}
 
-    public WatchRequest(String namespaceId, Map<String, String> watchKey) {
-        this.namespaceId = namespaceId;
-        this.watchKey = watchKey;
-    }
+	public WatchRequest(String namespaceId, Map<String, String> watchKey) {
+		this.namespaceId = namespaceId;
+		this.watchKey = watchKey;
+	}
 
-    public String getNamespaceId() {
-        return namespaceId;
-    }
+	public String getNamespaceId() {
+		return namespaceId;
+	}
 
-    public void setNamespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
-    }
+	public void setNamespaceId(String namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
-    public Map<String, String> getWatchKey() {
-        return watchKey;
-    }
+	public Map<String, String> getWatchKey() {
+		return watchKey;
+	}
 
-    public void setWatchKey(Map<String, String> watchKey) {
-        this.watchKey = watchKey;
-    }
+	public void setWatchKey(Map<String, String> watchKey) {
+		this.watchKey = watchKey;
+	}
 
-    @Override
-    public String toString() {
-        return GsonUtils.toJson(this);
-    }
+	@Override
+	public String toString() {
+		return GsonUtils.toJson(this);
+	}
 }
