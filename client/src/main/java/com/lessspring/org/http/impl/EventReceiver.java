@@ -16,10 +16,10 @@
  */
 package com.lessspring.org.http.impl;
 
+import java.util.Objects;
+
 import com.google.common.eventbus.Subscribe;
 import okhttp3.sse.EventSource;
-
-import java.util.Objects;
 
 /**
  * For the use of user-defined SSE the receiving processor
@@ -29,42 +29,42 @@ import java.util.Objects;
  */
 public abstract class EventReceiver<T> {
 
-    private EventSource eventSource;
+	private EventSource eventSource;
 
-    public EventReceiver() {
-    }
+	public EventReceiver() {
+	}
 
-    /**
-     * Data receiving callback function
-     *
-     * @param data T
-     */
-    @Subscribe
-    public abstract void onReceive(T data);
+	/**
+	 * Data receiving callback function
+	 *
+	 * @param data T
+	 */
+	@Subscribe
+	public abstract void onReceive(T data);
 
-    /**
-     * When the error occurs when the callback function
-     *
-     * @param throwable {@link Throwable}
-     */
-    public abstract void onError(Throwable throwable);
+	/**
+	 * When the error occurs when the callback function
+	 *
+	 * @param throwable {@link Throwable}
+	 */
+	public abstract void onError(Throwable throwable);
 
-    /**
-     * Well what the receiver
-     *
-     * @return attention event name
-     */
-    public abstract String attention();
+	/**
+	 * Well what the receiver
+	 *
+	 * @return attention event name
+	 */
+	public abstract String attention();
 
-    final void setEventSource(EventSource eventSource) {
-        this.eventSource = eventSource;
-    }
+	final void setEventSource(EventSource eventSource) {
+		this.eventSource = eventSource;
+	}
 
-    // Cancel the sse request
+	// Cancel the sse request
 
-    public final void cancle() {
-        if (Objects.nonNull(eventSource)) {
-            eventSource.cancel();
-        }
-    }
+	public final void cancle() {
+		if (Objects.nonNull(eventSource)) {
+			eventSource.cancel();
+		}
+	}
 }

@@ -31,9 +31,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDTO {
 
-    private Long id;
-    private String username;
-    private String password;
-    private Short roleType = (short) 0;
+	private Long id;
+	private String username;
+	private String password;
+	private Short roleType = (short) 0;
 
 }

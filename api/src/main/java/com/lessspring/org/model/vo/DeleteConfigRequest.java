@@ -22,49 +22,49 @@ package com.lessspring.org.model.vo;
  */
 public class DeleteConfigRequest extends BaseConfigRequest {
 
-    private boolean beta;
+	private boolean beta;
 
-    public boolean isBeta() {
-        return beta;
-    }
+	public boolean isBeta() {
+		return beta;
+	}
 
-    public void setBeta(boolean beta) {
-        this.beta = beta;
-    }
+	public void setBeta(boolean beta) {
+		this.beta = beta;
+	}
 
-    public static Builder builder() {
-        return new Builder();
-    }
+	public static DeleteConfigRequestBuilder sbuilder() {
+		return new DeleteConfigRequestBuilder();
+	}
 
-    public static final class Builder {
-        private String dataId;
-        private String groupId;
-        private boolean beta;
+	public static final class DeleteConfigRequestBuilder {
+		private String dataId;
+		private String groupId;
+		private boolean beta;
 
-        private Builder() {
-        }
+		private DeleteConfigRequestBuilder() {
+		}
 
-        public Builder dataId(String dataId) {
-            this.dataId = dataId;
-            return this;
-        }
+		public DeleteConfigRequestBuilder dataId(String dataId) {
+			this.dataId = dataId;
+			return this;
+		}
 
-        public Builder groupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
+		public DeleteConfigRequestBuilder groupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
 
-        public Builder beta(boolean beta) {
-            this.beta = beta;
-            return this;
-        }
+		public DeleteConfigRequestBuilder beta(boolean beta) {
+			this.beta = beta;
+			return this;
+		}
 
-        public DeleteConfigRequest build() {
-            DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
-            deleteConfigRequest.setDataId(dataId);
-            deleteConfigRequest.setGroupId(groupId);
-            deleteConfigRequest.setBeta(beta);
-            return deleteConfigRequest;
-        }
-    }
+		public DeleteConfigRequest build() {
+			DeleteConfigRequest deleteConfigRequest = new DeleteConfigRequest();
+			deleteConfigRequest.setDataId(dataId);
+			deleteConfigRequest.setGroupId(groupId);
+			deleteConfigRequest.setBeta(beta);
+			return deleteConfigRequest;
+		}
+	}
 }

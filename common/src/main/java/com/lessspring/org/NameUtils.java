@@ -22,17 +22,21 @@ package com.lessspring.org;
  */
 public final class NameUtils {
 
-    public static final String LINK_STRING = "@#@";
+	private static final String LINK_STRING = "@#@";
 
-    public static String buildName(Object... params) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < params.length; i ++) {
-            builder.append(params[i]);
-            if (i != params.length - 1) {
-                builder.append(LINK_STRING);
-            }
-        }
-        return builder.toString();
-    }
+	public static String buildName(Object... params) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < params.length; i++) {
+			builder.append(params[i]);
+			if (i != params.length - 1) {
+				builder.append(LINK_STRING);
+			}
+		}
+		return builder.toString();
+	}
+
+	public static String[] splitName(String name) {
+		return name.split(LINK_STRING);
+	}
 
 }

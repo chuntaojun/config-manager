@@ -16,36 +16,37 @@
  */
 package com.lessspring.org.raft;
 
-import com.lessspring.org.model.vo.ResponseData;
-
-import java.util.concurrent.CompletableFuture;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class Transaction {
 
-    private final String key;
-    private final OperationEnum operation;
-    private final byte[] data;
+	private final String key;
+	private final OperationEnum operation;
+	private final byte[] data;
+	private final String bz;
 
-    public Transaction(String key, byte[] data, OperationEnum operation) {
-        this.key = key;
-        this.operation = operation;
-        this.data = data;
-    }
+	public Transaction(String bz, String key, byte[] data, OperationEnum operation) {
+		this.bz = bz;
+		this.key = key;
+		this.operation = operation;
+		this.data = data;
+	}
 
-    public byte[] getData() {
-        return data;
-    }
+	public byte[] getData() {
+		return data;
+	}
 
-    public OperationEnum getOperation() {
-        return operation;
-    }
+	public OperationEnum getOperation() {
+		return operation;
+	}
 
-    public String getKey() {
-        return key;
-    }
+	public String getKey() {
+		return key;
+	}
 
+	public String getBz() {
+		return bz;
+	}
 }

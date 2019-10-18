@@ -16,39 +16,52 @@
  */
 package com.lessspring.org.raft;
 
+import com.lessspring.org.constant.Code;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class TransactionException extends Exception {
 
-    private Transaction transaction;
+	private Code errorCode = Code.ERROR;
 
-    public TransactionException() {
-        super();
-    }
+	private Transaction transaction;
 
-    public TransactionException(String message) {
-        super(message);
-    }
+	public TransactionException() {
+		super();
+	}
 
-    public TransactionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public TransactionException(String message) {
+		super(message);
+	}
 
-    public TransactionException(Throwable cause) {
-        super(cause);
-    }
+	public TransactionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    protected TransactionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	public TransactionException(Throwable cause) {
+		super(cause);
+	}
 
-    public Transaction getTransaction() {
-        return transaction;
-    }
+	protected TransactionException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
+	public Transaction getTransaction() {
+		return transaction;
+	}
+
+	public void setTransaction(Transaction transaction) {
+		this.transaction = transaction;
+	}
+
+	public Code getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(Code errorCode) {
+		this.errorCode = errorCode;
+	}
 }

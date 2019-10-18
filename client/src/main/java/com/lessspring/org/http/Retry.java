@@ -24,51 +24,52 @@ package com.lessspring.org.http;
  */
 public abstract class Retry<T> {
 
-    /**
-     * run work，Actual logic in this method
-     *
-     * @throws Exception exception
-     * @return Tasks are completed correctly
-     */
-    protected abstract T run() throws Exception;
+	/**
+	 * run work，Actual logic in this method
+	 *
+	 * @throws Exception exception
+	 * @return Tasks are completed correctly
+	 */
+	protected abstract T run() throws Exception;
 
-    public final T work() {
-        int maxRetryNum = maxRetry();
-        T data = null;
-        while (maxRetryNum > 0) {
-            try {
-                data = run();
-                if (shouldRetry(data, null)) {
-                    maxRetryNum --;
-                    continue;
-                }
-                return data;
-            } catch (Throwable throwable) {
-                if (!shouldRetry(null, throwable)) {
-                    throw new UnSupportRetryException(throwable);
-                }
-                maxRetryNum --;
-            }
-        }
-        throw new MaxRetryException("Has reached its maximum retries");
-    }
+	public final T work() {
+		int maxRetryNum = maxRetry();
+		T data = null;
+		while (maxRetryNum > 0) {
+			try {
+				data = run();
+				if (shouldRetry(data, null)) {
+					maxRetryNum--;
+					continue;
+				}
+				return data;
+			}
+			catch (Throwable throwable) {
+				if (!shouldRetry(null, throwable)) {
+					throw new UnSupportRetryException(throwable);
+				}
+				maxRetryNum--;
+			}
+		}
+		throw new MaxRetryException("Has reached its maximum retries");
+	}
 
-    /**
-     * Retry strategy
-     *
-     * @param data receive data
-     * @param throwable if has throwable
-     * @return Void
-     */
-    protected boolean shouldRetry(T data, Throwable throwable) {
-        return false;
-    }
+	/**
+	 * Retry strategy
+	 *
+	 * @param data receive data
+	 * @param throwable if has throwable
+	 * @return Void
+	 */
+	protected boolean shouldRetry(T data, Throwable throwable) {
+		return false;
+	}
 
-    /**
-     * The maximum number of retries
-     *
-     * @return number
-     */
-    protected abstract int maxRetry();
+	/**
+	 * The maximum number of retries
+	 *
+	 * @return number
+	 */
+	protected abstract int maxRetry();
 
 }

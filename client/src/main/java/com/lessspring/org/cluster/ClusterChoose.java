@@ -16,10 +16,6 @@
  */
 package com.lessspring.org.cluster;
 
-import com.lessspring.org.LifeCycle;
-import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
-
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Observable;
@@ -28,77 +24,82 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.lessspring.org.LifeCycle;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class ClusterChoose implements Observer, LifeCycle {
 
-    private ClusterNodeWatch watch;
+	private ClusterNodeWatch watch;
 
-    private Iterator<String> clusterFind;
+	private Iterator<String> clusterFind;
 
-    private Set<String> clusterInfos;
+	private Set<String> clusterInfos;
 
-    private String lastClusterIp;
+	private String lastClusterIp;
 
-    private final AtomicBoolean initialize = new AtomicBoolean(false);
+	private final AtomicBoolean initialize = new AtomicBoolean(false);
 
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
-    public ClusterChoose() {
-    }
+	public ClusterChoose() {
+	}
 
-    public void setWatch(ClusterNodeWatch watch) {
-        this.watch = watch;
-    }
+	public void setWatch(ClusterNodeWatch watch) {
+		this.watch = watch;
+	}
 
-    @Override
-    public void init() {
-        if (initialize.compareAndSet(false, true)) {
-            watch.register(this);
-            clusterInfos = watch.copyNodeList();
-            clusterFind = clusterInfos.iterator();
-        }
-    }
+	@Override
+	public void init() {
+		if (initialize.compareAndSet(false, true)) {
+			watch.register(this);
+			clusterInfos = watch.copyNodeList();
+			clusterFind = clusterInfos.iterator();
+		}
+	}
 
-    @Override
-    public void destroy() {
-    }
+	@Override
+	public void destroy() {
+	}
 
-    public String getLastClusterIp() {
-        if (StringUtils.isEmpty(lastClusterIp)) {
-            refreshClusterIp();
-        }
-        return lastClusterIp;
-    }
+	public String getLastClusterIp() {
+		if (StringUtils.isEmpty(lastClusterIp)) {
+			refreshClusterIp();
+		}
+		return lastClusterIp;
+	}
 
-    public void refreshClusterIp() {
-        readLock.lock();
-        try {
-            if (Objects.isNull(clusterInfos)) {
-                init();
-            }
-            if (Objects.isNull(clusterFind) || !clusterFind.hasNext()) {
-                clusterFind = clusterInfos.iterator();
-            }
-            lastClusterIp = clusterFind.next();
-        } finally {
-            readLock.unlock();
-        }
-    }
+	public void refreshClusterIp() {
+		readLock.lock();
+		try {
+			if (Objects.isNull(clusterInfos)) {
+				init();
+			}
+			if (Objects.isNull(clusterFind) || !clusterFind.hasNext()) {
+				clusterFind = clusterInfos.iterator();
+			}
+			lastClusterIp = clusterFind.next();
+		}
+		finally {
+			readLock.unlock();
+		}
+	}
 
-    @Override
-    public void update(Observable o, Object arg) {
-        Set<String> newClusterInfo = (Set<String>) arg;
-        writeLock.lock();
-        try {
-            clusterInfos = newClusterInfo;
-            clusterFind = clusterInfos.iterator();
-        } finally {
-            writeLock.unlock();
-        }
-    }
+	@Override
+	public void update(Observable o, Object arg) {
+		Set<String> newClusterInfo = (Set<String>) arg;
+		writeLock.lock();
+		try {
+			clusterInfos = newClusterInfo;
+			clusterFind = clusterInfos.iterator();
+		}
+		finally {
+			writeLock.unlock();
+		}
+	}
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lessspring.org.repository.SnapshotMapper">
+
+    <insert id="doSnapshotLoad">
+        CREATE TABLE CONFIG_MANAGER.config_info AS
+        SELECT *
+        FROM CSVREAD(CONCAT(#{path}, 'snapshot_config_info.csv'));
+    </insert>
+
+    <select id="doSnapshotSave" resultType="boolean">
+        CALL CSVWRITE(CONCAT(#{path}, 'snapshot_config_info.csv'), 'SELECT * FROM config_info');
+        CALL CSVWRITE(CONCAT(#{path}, 'snapshot_config_info_beta.csv'), 'SELECT * FROM config_info_beta');
+        CALL CSVWRITE(CONCAT(#{path}, 'snapshot_user.csv'), 'SELECT * FROM user');
+        CALL CSVWRITE(CONCAT(#{path}, 'snapshot_user_role.csv'), 'SELECT * FROM user_role');
+        CALL CSVWRITE(CONCAT(#{path}, 'snapshot_namespace.csv'), 'SELECT * FROM namespace');
+        CALL CSVWRITE(CONCAT(#{path}, 'snapshot_namespace_permissions.csv'), 'SELECT * FROM namespace_permissions');
+    </select>
+
+</mapper>

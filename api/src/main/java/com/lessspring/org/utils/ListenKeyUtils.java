@@ -22,10 +22,11 @@ package com.lessspring.org.utils;
  */
 public final class ListenKeyUtils {
 
-    private static final String LINK_CHAR = "@@";
+	private static final String LINK_CHAR = "@@";
 
-    public static String buildListenKey(String namespaceId, String dataId, String groupId) {
-        return namespaceId + LINK_CHAR + dataId + LINK_CHAR + groupId;
-    }
+	public static String buildListenKey(String namespaceId, String dataId,
+			String groupId) {
+		return namespaceId + LINK_CHAR + dataId + LINK_CHAR + groupId;
+	}
 
 }

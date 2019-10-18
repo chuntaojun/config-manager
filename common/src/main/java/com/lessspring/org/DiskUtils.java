@@ -16,9 +16,6 @@
  */
 package com.lessspring.org;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,9 +26,13 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -39,123 +40,166 @@ import java.util.zip.ZipOutputStream;
  */
 public final class DiskUtils {
 
-    public static String readFile(String path, String fileName) {
-        String finalPath = PathUtils.finalPath(path);
-        File file = openFile(finalPath, fileName);
-        if (file.exists()) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
-                StringBuilder textBuilder = new StringBuilder();
-                String lineTxt = null;
-                while ((lineTxt = reader.readLine()) != null) {
-                    textBuilder.append(lineTxt);
-                }
-                return textBuilder.toString();
-            } catch (IOException e) {
-                return null;
-            }
-        }
-        return null;
-    }
+	private static Logger logger = Logger.getAnonymousLogger();
 
-    public static byte[] readFileBytes(String path, String fileName) {
-        String finalPath = PathUtils.finalPath(path);
-        File file = openFile(finalPath, fileName);
-        if (file.exists()) {
-            try (FileInputStream reader = new FileInputStream(file)) {
-                FileChannel channel = reader.getChannel();
-                ByteBuffer byteBuffer = ByteBuffer.allocate((int)channel.size());
-                while ((channel.read(byteBuffer)) > 0) {
-                    // do nothing
-                }
-                return byteBuffer.array();
-            } catch (IOException e) {
-                return null;
-            }
-        }
-        return null;
-    }
+	private final static String NO_SPACE_CN = "设备上没有空间";
+	private final static String NO_SPACE_EN = "No space left on device";
+	private final static String DISK_QUATA_CN = "超出磁盘限额";
+	private final static String DISK_QUATA_EN = "Disk quota exceeded";
 
-    public static boolean writeFile(String path, String fileName, byte[] content) {
-        String finalPath = PathUtils.finalPath(path);
-        File file = openFile(finalPath, fileName, true);
-        try (OutputStream writer = new FileOutputStream(file)) {
-            writer.write(content);
-            return true;
-        } catch (IOException ignore) {
-        }
-        return false;
-    }
+	// Just for test
 
-    public static boolean deleteFile(String path, String fileName) {
-        String finalPath = PathUtils.finalPath(path);
-        File file = openFile(finalPath, fileName);
-        if (file.exists()) {
-            return file.delete();
-        }
-        return false;
-    }
+	public static Logger getLogger() {
+		return logger;
+	}
 
-    private static File openFile(String path, String fileName) {
-        return openFile(path, fileName, false);
-    }
+	public static String readFile(String path, String fileName) {
+		String finalPath = PathUtils.finalPath(path);
+		File file = openFile(finalPath, fileName);
+		if (file.exists()) {
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(new FileInputStream(file)))) {
+				StringBuilder textBuilder = new StringBuilder();
+				String lineTxt = null;
+				while ((lineTxt = reader.readLine()) != null) {
+					textBuilder.append(lineTxt);
+				}
+				return textBuilder.toString();
+			}
+			catch (IOException e) {
+				return null;
+			}
+		}
+		return null;
+	}
 
-    private static File openFile(String path, String fileName, boolean rewrite) {
-        System.out.println("File Path : " + path);
-        File directory = new File(path);
-        if (!directory.exists()) {
-            boolean mkdirs = directory.mkdirs();
-        }
-        File file = new File(path, fileName);
-        try {
-            boolean create = true;
-            if (file.exists()) {
-                if (rewrite) {
-                    file.delete();
-                } else {
-                    create = false;
-                }
-            }
-            if (create) {
-                file.createNewFile();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return file;
-    }
+	public static byte[] readFileBytes(String path, String fileName) {
+		String finalPath = PathUtils.finalPath(path);
+		File file = openFile(finalPath, fileName);
+		if (file.exists()) {
+			try (FileInputStream reader = new FileInputStream(file)) {
+				FileChannel channel = reader.getChannel();
+				ByteBuffer byteBuffer = ByteBuffer.allocate((int) channel.size());
+				while ((channel.read(byteBuffer)) > 0) {
+					// do nothing
+				}
+				return byteBuffer.array();
+			}
+			catch (IOException e) {
+				return null;
+			}
+		}
+		return null;
+	}
 
-    public static void compressDirectoryToZipFile(final String rootDir, final String sourceDir,
-                                                  final ZipOutputStream zos) throws IOException {
-        final String dir = Paths.get(rootDir, sourceDir).toString();
-        final File[] files = new File(dir).listFiles();
-        assert files != null;
-        for (final File file : files) {
-            if (file.isDirectory()) {
-                compressDirectoryToZipFile(rootDir, Paths.get(sourceDir, file.getName()).toString(), zos);
-            } else {
-                zos.putNextEntry(new ZipEntry(Paths.get(sourceDir, file.getName()).toString()));
-                try (final FileInputStream in = new FileInputStream(Paths.get(rootDir, sourceDir, file.getName())
-                        .toString())) {
-                    IOUtils.copy(in, zos);
-                }
-            }
-        }
-    }
+	public static boolean writeFile(String path, String fileName, byte[] content) {
+		String finalPath = PathUtils.finalPath(path);
+		File file = openFile(finalPath, fileName, true);
+		try (OutputStream writer = new FileOutputStream(file)) {
+			writer.write(content);
+			return true;
+		}
+		catch (IOException ioe) {
+			if (ioe.getMessage() != null) {
+				String errMsg = ioe.getMessage();
+				if (NO_SPACE_CN.equals(errMsg) || NO_SPACE_EN.equals(errMsg)
+						|| errMsg.contains(DISK_QUATA_CN)
+						|| errMsg.contains(DISK_QUATA_EN)) {
+					logger.info("磁盘满，自杀退出");
+					System.exit(0);
+				}
+			}
+		}
+		return false;
+	}
 
-    public static void unzipFile(final String sourceFile, final String outputDir) throws IOException {
-        try (final ZipInputStream zis = new ZipInputStream(new FileInputStream(sourceFile))) {
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
-                final String fileName = zipEntry.getName();
-                final File entryFile = new File(outputDir + File.separator + fileName);
-                FileUtils.forceMkdir(entryFile.getParentFile());
-                try (final FileOutputStream fos = new FileOutputStream(entryFile)) {
-                    IOUtils.copy(zis, fos);
-                }
-                zipEntry = zis.getNextEntry();
-            }
-            zis.closeEntry();
-        }
-    }
+	public static boolean deleteFile(String path, String fileName) {
+		String finalPath = PathUtils.finalPath(path);
+		File file = openFile(finalPath, fileName);
+		if (file.exists()) {
+			return file.delete();
+		}
+		return false;
+	}
+
+	public static boolean deleteDir(String path) {
+		try {
+			FileUtils.deleteDirectory(new File(path));
+			return true;
+		}
+		catch (IOException e) {
+			return false;
+		}
+	}
+
+	private static File openFile(String path, String fileName) {
+		return openFile(path, fileName, false);
+	}
+
+	private static File openFile(String path, String fileName, boolean rewrite) {
+		System.out.println("File Path : " + path);
+		File directory = new File(path);
+		if (!directory.exists()) {
+			boolean mkdirs = directory.mkdirs();
+		}
+		File file = new File(path, fileName);
+		try {
+			boolean create = true;
+			if (file.exists()) {
+				if (rewrite) {
+					file.delete();
+				}
+				else {
+					create = false;
+				}
+			}
+			if (create) {
+				file.createNewFile();
+			}
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return file;
+	}
+
+	public static void compressDirectoryToZipFile(final String rootDir,
+			final String sourceDir, final ZipOutputStream zos) throws IOException {
+		final String dir = Paths.get(rootDir, sourceDir).toString();
+		final File[] files = new File(dir).listFiles();
+		assert files != null;
+		for (final File file : files) {
+			if (file.isDirectory()) {
+				compressDirectoryToZipFile(rootDir,
+						Paths.get(sourceDir, file.getName()).toString(), zos);
+			}
+			else {
+				zos.putNextEntry(
+						new ZipEntry(Paths.get(sourceDir, file.getName()).toString()));
+				try (final FileInputStream in = new FileInputStream(
+						Paths.get(rootDir, sourceDir, file.getName()).toString())) {
+					IOUtils.copy(in, zos);
+				}
+			}
+		}
+	}
+
+	public static void unzipFile(final String sourceFile, final String outputDir)
+			throws IOException {
+		try (final ZipInputStream zis = new ZipInputStream(
+				new FileInputStream(sourceFile))) {
+			ZipEntry zipEntry = zis.getNextEntry();
+			while (zipEntry != null) {
+				final String fileName = zipEntry.getName();
+				final File entryFile = new File(outputDir + File.separator + fileName);
+				FileUtils.forceMkdir(entryFile.getParentFile());
+				try (final FileOutputStream fos = new FileOutputStream(entryFile)) {
+					IOUtils.copy(zis, fos);
+				}
+				zipEntry = zis.getNextEntry();
+			}
+			zis.closeEntry();
+		}
+	}
 
 }

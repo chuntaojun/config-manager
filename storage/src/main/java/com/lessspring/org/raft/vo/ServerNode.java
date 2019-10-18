@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.raft.vo;
 
+import java.util.Objects;
+
 import com.lessspring.org.raft.ServerStatus;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
@@ -27,48 +29,66 @@ import org.apache.commons.lang3.StringUtils;
 @Builder
 public class ServerNode {
 
-    private String nodeIp;
-    private int port;
-    private String role;
-    private String key = "";
-    private ServerStatus serverStatus = ServerStatus.ONLY_READ;
+	private String nodeIp;
+	private int port;
+	private String role;
+	private String key = "";
+	private ServerStatus serverStatus = ServerStatus.ONLY_READ;
 
-    public String getKey() {
-        if (StringUtils.isEmpty(key)) {
-            key = nodeIp + ":" + port;
-        }
-        return key;
-    }
+	public String getKey() {
+		if (StringUtils.isEmpty(key)) {
+			key = nodeIp + ":" + port;
+		}
+		return key;
+	}
 
-    public String getNodeIp() {
-        return nodeIp;
-    }
+	public String getNodeIp() {
+		return nodeIp;
+	}
 
-    public void setNodeIp(String nodeIp) {
-        this.nodeIp = nodeIp;
-    }
+	public void setNodeIp(String nodeIp) {
+		this.nodeIp = nodeIp;
+	}
 
-    public int getPort() {
-        return port;
-    }
+	public int getPort() {
+		return port;
+	}
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+	public void setPort(int port) {
+		this.port = port;
+	}
 
-    public String getRole() {
-        return role;
-    }
+	public String getRole() {
+		return role;
+	}
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+	public void setRole(String role) {
+		this.role = role;
+	}
 
-    public ServerStatus getServerStatus() {
-        return serverStatus;
-    }
+	public ServerStatus getServerStatus() {
+		return serverStatus;
+	}
 
-    public void setServerStatus(ServerStatus serverStatus) {
-        this.serverStatus = serverStatus;
-    }
+	public void setServerStatus(ServerStatus serverStatus) {
+		this.serverStatus = serverStatus;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ServerNode node = (ServerNode) o;
+		return port == node.port && Objects.equals(nodeIp, node.nodeIp)
+				&& Objects.equals(key, node.key);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(nodeIp, port, key);
+	}
 }

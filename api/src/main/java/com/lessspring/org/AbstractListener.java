@@ -16,10 +16,10 @@
  */
 package com.lessspring.org;
 
+import java.util.concurrent.Executor;
+
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.dto.ConfigInfo;
-
-import java.util.concurrent.Executor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -27,20 +27,20 @@ import java.util.concurrent.Executor;
  */
 public abstract class AbstractListener {
 
-    @Subscribe
-    protected void receive(ConfigInfo configInfo) {
-        onReceive(configInfo);
-    }
+	@Subscribe
+	protected void receive(ConfigInfo configInfo) {
+		onReceive(configInfo);
+	}
 
-    /**
-     * receive when config has change
-     *
-     * @param configInfo {@link ConfigInfo}
-     */
-    public abstract void onReceive(ConfigInfo configInfo);
+	/**
+	 * receive when config has change
+	 *
+	 * @param configInfo {@link ConfigInfo}
+	 */
+	public abstract void onReceive(ConfigInfo configInfo);
 
-    public Executor executor() {
-        return null;
-    }
+	public Executor executor() {
+		return null;
+	}
 
 }

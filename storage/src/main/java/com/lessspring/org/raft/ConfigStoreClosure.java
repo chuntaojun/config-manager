@@ -18,10 +18,7 @@ package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
-import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.dto.Datum;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -29,26 +26,26 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ConfigStoreClosure implements Closure {
 
-    private final Datum datum;
-    private final Closure closure;
+	private final Datum datum;
+	private final Closure closure;
 
-    public ConfigStoreClosure(Datum datum, Closure closure) {
-        this.datum = datum;
-        this.closure = closure;
-    }
+	public ConfigStoreClosure(Datum datum, Closure closure) {
+		this.datum = datum;
+		this.closure = closure;
+	}
 
-    @Override
-    public void run(Status status) {
-        if (closure != null) {
-            closure.run(status);
-        }
-    }
+	@Override
+	public void run(Status status) {
+		if (closure != null) {
+			closure.run(status);
+		}
+	}
 
-    public Closure getClosure() {
-        return closure;
-    }
+	public Closure getClosure() {
+		return closure;
+	}
 
-    public Datum getDatum() {
-        return datum;
-    }
+	public Datum getDatum() {
+		return datum;
+	}
 }

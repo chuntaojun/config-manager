@@ -24,129 +24,125 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class WatchResponse {
 
-    private String groupId;
-    private String dataId;
-    private String content;
-    private byte[] file;
-    private String encryption;
-    private String type;
+	private String groupId;
+	private String dataId;
+	private String content;
+	private byte[] file;
+	private String encryption;
+	private String type;
 
-    public String getGroupId() {
-        return groupId;
-    }
+	public String getGroupId() {
+		return groupId;
+	}
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
 
-    public String getDataId() {
-        return dataId;
-    }
+	public String getDataId() {
+		return dataId;
+	}
 
-    public void setDataId(String dataId) {
-        this.dataId = dataId;
-    }
+	public void setDataId(String dataId) {
+		this.dataId = dataId;
+	}
 
-    public String getContent() {
-        return content;
-    }
+	public String getContent() {
+		return content;
+	}
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+	public void setContent(String content) {
+		this.content = content;
+	}
 
-    public String getType() {
-        return type;
-    }
+	public String getType() {
+		return type;
+	}
 
-    public void setType(String type) {
-        this.type = type;
-    }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    public byte[] getFile() {
-        return file;
-    }
+	public byte[] getFile() {
+		return file;
+	}
 
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
+	public void setFile(byte[] file) {
+		this.file = file;
+	}
 
-    public String getEncryption() {
-        return encryption;
-    }
+	public String getEncryption() {
+		return encryption;
+	}
 
-    public void setEncryption(String encryption) {
-        this.encryption = encryption;
-    }
+	public void setEncryption(String encryption) {
+		this.encryption = encryption;
+	}
 
-    public boolean isEmpty() {
-        return StringUtils.isAllEmpty(groupId, dataId, content, type);
-    }
+	public boolean isEmpty() {
+		return StringUtils.isAllEmpty(groupId, dataId, content, type);
+	}
 
-    public static Builder builder() {
-        return new Builder();
-    }
+	public static Builder builder() {
+		return new Builder();
+	}
 
-    public static final class Builder {
-        private String groupId;
-        private String dataId;
-        private String content;
-        private String type;
-        private byte[] file;
-        private String encryption;
+	public static final class Builder {
+		private String groupId;
+		private String dataId;
+		private String content;
+		private String type;
+		private byte[] file;
+		private String encryption;
 
-        private Builder() {
-        }
+		private Builder() {
+		}
 
-        public Builder groupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
+		public Builder groupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
 
-        public Builder dataId(String dataId) {
-            this.dataId = dataId;
-            return this;
-        }
+		public Builder dataId(String dataId) {
+			this.dataId = dataId;
+			return this;
+		}
 
-        public Builder content(String content) {
-            this.content = content;
-            return this;
-        }
+		public Builder content(String content) {
+			this.content = content;
+			return this;
+		}
 
-        public Builder type(String type) {
-            this.type = type;
-            return this;
-        }
+		public Builder type(String type) {
+			this.type = type;
+			return this;
+		}
 
-        public Builder encryption(String encryption) {
-            this.encryption = encryption;
-            return this;
-        }
+		public Builder encryption(String encryption) {
+			this.encryption = encryption;
+			return this;
+		}
 
-        public Builder file(byte[] file) {
-            this.file = file;
-            return this;
-        }
+		public Builder file(byte[] file) {
+			this.file = file;
+			return this;
+		}
 
-        public WatchResponse build() {
-            WatchResponse watchResponse = new WatchResponse();
-            watchResponse.setGroupId(groupId);
-            watchResponse.setDataId(dataId);
-            watchResponse.setContent(content);
-            watchResponse.setType(type);
-            watchResponse.setFile(file);
-            watchResponse.setEncryption(encryption);
-            return watchResponse;
-        }
-    }
+		public WatchResponse build() {
+			WatchResponse watchResponse = new WatchResponse();
+			watchResponse.setGroupId(groupId);
+			watchResponse.setDataId(dataId);
+			watchResponse.setContent(content);
+			watchResponse.setType(type);
+			watchResponse.setFile(file);
+			watchResponse.setEncryption(encryption);
+			return watchResponse;
+		}
+	}
 
-    @Override
-    public String toString() {
-        return "WatchResponse{" +
-                "groupId='" + groupId + '\'' +
-                ", dataId='" + dataId + '\'' +
-                ", content='" + content + '\'' +
-                ", type='" + type + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "WatchResponse{" + "groupId='" + groupId + '\'' + ", dataId='" + dataId
+				+ '\'' + ", content='" + content + '\'' + ", type='" + type + '\'' + '}';
+	}
 }

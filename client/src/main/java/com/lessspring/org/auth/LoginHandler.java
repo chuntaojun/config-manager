@@ -16,6 +16,12 @@
  */
 package com.lessspring.org.auth;
 
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
@@ -28,70 +34,70 @@ import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
 
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class LoginHandler implements Observer, LifeCycle {
 
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        thread.setName("com.lessspring.org.config-manager.client.auth");
-        return thread;
-    });
+	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
+			1, r -> {
+				Thread thread = new Thread(r);
+				thread.setDaemon(true);
+				thread.setName("com.lessspring.org.config-manager.client.auth");
+				return thread;
+			});
 
-    private final HttpClient httpClient;
-    private final AuthHolder authHolder;
-    private final Configuration configuration;
+	private final HttpClient httpClient;
+	private final AuthHolder authHolder;
+	private final Configuration configuration;
 
-    public LoginHandler(HttpClient httpClient, AuthHolder authHolder, Configuration configuration) {
-        this.httpClient = httpClient;
-        this.authHolder = authHolder;
-        this.configuration = configuration;
-    }
+	public LoginHandler(HttpClient httpClient, AuthHolder authHolder,
+			Configuration configuration) {
+		this.httpClient = httpClient;
+		this.authHolder = authHolder;
+		this.configuration = configuration;
+	}
 
-    @Override
-    public void init() {
-        authHolder.register(this);
-        firstLogin();
-    }
+	@Override
+	public void init() {
+		authHolder.register(this);
+		firstLogin();
+	}
 
-    private void firstLogin() {
-        createLoginWork(() -> {});
-        executor.scheduleAtFixedRate(() -> createLoginWork(() -> {}), 15 * 60L, 30 * 60L, TimeUnit.SECONDS);
-    }
+	private void firstLogin() {
+		createLoginWork(() -> {
+		});
+		executor.scheduleAtFixedRate(() -> createLoginWork(() -> {
+		}), 15 * 60L, 30 * 60L, TimeUnit.SECONDS);
+	}
 
-    private void createLoginWork(Runnable call) {
-        String username = configuration.getUsername();
-        String password = configuration.getPassword();
-        LoginRequest request = new LoginRequest();
-        request.setUsername(username);
-        request.setPassword(password);
-        final Body body = Body.objToBody(request);
-        ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN, Header.EMPTY, Query.EMPTY,
-                body, new TypeToken<ResponseData<JwtResponse>>(){});
-        if (responseData.ok()) {
-            JwtResponse jwt = responseData.getData();
-            authHolder.updateToken(jwt);
-            call.run();
-        }
-    }
+	private void createLoginWork(Runnable call) {
+		String username = configuration.getUsername();
+		String password = configuration.getPassword();
+		LoginRequest request = new LoginRequest();
+		request.setUsername(username);
+		request.setPassword(password);
+		final Body body = Body.objToBody(request);
+		ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN,
+				Header.EMPTY, Query.EMPTY, body,
+				new TypeToken<ResponseData<JwtResponse>>() {
+				});
+		if (responseData.ok()) {
+			JwtResponse jwt = responseData.getData();
+			authHolder.updateToken(jwt);
+			call.run();
+		}
+	}
 
-    @Override
-    public void destroy() {
-        executor.shutdown();
-    }
+	@Override
+	public void destroy() {
+		executor.shutdown();
+	}
 
-    @Override
-    public void update(Observable o, Object arg) {
-        CountDownLatch latch = (CountDownLatch) arg;
-        createLoginWork(latch::countDown);
-    }
+	@Override
+	public void update(Observable o, Object arg) {
+		CountDownLatch latch = (CountDownLatch) arg;
+		createLoginWork(latch::countDown);
+	}
 }

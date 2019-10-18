@@ -22,22 +22,29 @@ package com.lessspring.org.model.vo;
  */
 public class JwtResponse {
 
-    private long expireTime;
-    private String token;
+	private long expireTime;
+	private String token;
 
-    public long getExpireTime() {
-        return expireTime;
-    }
+	public long getExpireTime() {
+		return expireTime;
+	}
 
-    public void setExpireTime(long expireTime) {
-        this.expireTime = expireTime;
-    }
+	public void setExpireTime(long expireTime) {
+		this.expireTime = expireTime;
+	}
 
-    public String getToken() {
-        return token;
-    }
+	public String getToken() {
+		return token;
+	}
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public static JwtResponse fail() {
+		JwtResponse response = new JwtResponse();
+		response.setToken("");
+		response.setExpireTime(System.currentTimeMillis());
+		return response;
+	}
 }

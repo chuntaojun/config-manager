@@ -16,19 +16,6 @@
  */
 package com.lessspring.org.raft;
 
-
-import com.alipay.remoting.InvokeCallback;
-import com.alipay.remoting.exception.RemotingException;
-import com.alipay.sofa.jraft.entity.Task;
-import com.google.common.eventbus.Subscribe;
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.SerializerUtils;
-import com.lessspring.org.event.ServerNodeChangeEvent;
-import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.raft.dto.Datum;
-import com.lessspring.org.raft.vo.ServerNode;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -38,6 +25,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.alipay.remoting.InvokeCallback;
+import com.alipay.remoting.exception.RemotingException;
+import com.alipay.sofa.jraft.entity.Task;
+import com.google.common.eventbus.Subscribe;
+import com.lessspring.org.LifeCycle;
+import com.lessspring.org.SerializerUtils;
+import com.lessspring.org.event.EventType;
+import com.lessspring.org.event.ServerNodeChangeEvent;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.vo.ServerNode;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -46,117 +46,138 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SuppressWarnings("unchecked")
 public class ClusterServer implements LifeCycle {
 
-    private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
-    private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
-    private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
-    private static final String CACHE_DIR_PATH = "config_manager_raft";
-    private AtomicBoolean initialize = new AtomicBoolean(false);
+	private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
+	private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
+	private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
+	private AtomicBoolean initialize = new AtomicBoolean(false);
 
-    private NodeManager nodeManager = NodeManager.getInstance();
-    private RaftServer raftServer = new RaftServer();
+	private RaftServer raftServer = new RaftServer();
+	private RaftConfiguration raftConfiguration = new RaftConfiguration();
 
-    public ClusterServer() {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("cluster.properties")) {
-            Properties properties = new Properties();
-            properties.load(is);
-            initClusterNode(properties);
-            raftServer.init();
-        } catch (IOException e) {
-            log.error("Server");
-            throw new RuntimeException(e);
-        }
-    }
+	static {
+		NodeManager nodeManager = NodeManager.getInstance();
+		try (InputStream is = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("cluster.properties")) {
+			Properties properties = new Properties();
+			properties.load(is);
+			initClusterNode(nodeManager, properties);
+		}
+		catch (IOException e) {
+			log.error("Server");
+			throw new RuntimeException(e);
+		}
+	}
 
-    @Override
-    public void init() {
-        if (initialize.compareAndSet(false, true)) {
-            raftServer.initRaftCluster(CACHE_DIR_PATH);
-        }
-    }
+	public ClusterServer() {
+		this(null);
+	}
 
-    private void initClusterNode(Properties properties) {
-        int nodes = properties.size() / 2;
-        int selfIndex = Integer.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
-        for (int i = 0; i < nodes; i ++) {
-            String ip = properties.getProperty(SERVER_NODE_IP + i);
-            String port = properties.getProperty(SERVER_NODE_PORT + i);
-            ServerNode node = ServerNode.builder()
-                    .nodeIp(ip)
-                    .port(Integer.parseInt(port))
-                    .build();
-            if (i == selfIndex) {
-                nodeManager.setSelf(node);
-            }
-            nodeManager.nodeJoin(node);
-        }
-    }
+	public ClusterServer(RaftConfiguration raftConfiguration) {
+		if (Objects.nonNull(raftConfiguration)) {
+			this.raftConfiguration = raftConfiguration;
+		}
+		raftServer.init();
+	}
 
-    public void registerTransactionCommitCallback(TransactionCommitCallback commitCallback) {
-        raftServer.registerTransactionCommitCallback(commitCallback);
-    }
+	@Override
+	public void init() {
+		if (initialize.compareAndSet(false, true)) {
+			raftServer.initRaftCluster(raftConfiguration);
+		}
+	}
 
-    public void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
-        raftServer.registerSnapshotOperator(snapshotOperate);
-    }
+	public void registerTransactionCommitCallback(
+			TransactionCommitCallback commitCallback) {
+		raftServer.registerTransactionCommitCallback(commitCallback);
+	}
 
-    public CompletableFuture<ResponseData<Boolean>> apply(Datum datum) throws RemotingException, InterruptedException {
-        needInitialized();
-        final Throwable[] throwables = new Throwable[]{null};
-        CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
-        Task task = new Task();
-        task.setData(ByteBuffer.wrap(SerializerUtils.getInstance().serialize(datum)));
-        task.setDone(new ConfigStoreClosure(datum, status -> {
-            ResponseData<Boolean> data = ResponseData.builder()
-                    .withCode(status.getCode())
-                    .withData(status.isOk())
-                    .withErrMsg(status.getErrorMsg())
-                    .build();
-            future.complete(data);
-            if (!status.isOk()) {
-                throwables[0] = new RuntimeException(status.getErrorMsg());
-            }
-        }));
-        if (raftServer.isLeader()) {
-            raftServer.getNode().apply(task);
-        } else {
-            raftServer.getCliClientService().getRpcClient().invokeWithCallback(raftServer.leaderIp(), datum, new InvokeCallback() {
-                @Override
-                public void onResponse(Object o) {
-                    ResponseData<Boolean> data = ResponseData.success();
-                    future.complete(data);
-                }
+	public void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
+		raftServer.registerSnapshotOperator(snapshotOperate);
+	}
 
-                @Override
-                public void onException(Throwable throwable) {
-                    throwables[0] = throwable;
-                }
+	public CompletableFuture<ResponseData<Boolean>> apply(Datum datum)
+			throws RemotingException, InterruptedException {
+		needInitialized();
+		final Throwable[] throwables = new Throwable[] { null };
+		CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
+		Task task = new Task();
+		task.setData(ByteBuffer.wrap(SerializerUtils.getInstance().serialize(datum)));
+		task.setDone(new ConfigStoreClosure(datum, status -> {
+			ResponseData<Boolean> data = ResponseData.builder().withCode(status.getCode())
+					.withData(status.isOk()).withErrMsg(status.getErrorMsg()).build();
+			future.complete(data);
+			if (!status.isOk()) {
+				throwables[0] = new RuntimeException(status.getErrorMsg());
+			}
+		}));
+		if (raftServer.isLeader()) {
+			raftServer.getNode().apply(task);
+		}
+		else {
+			raftServer.getCliClientService().getRpcClient().invokeWithCallback(
+					raftServer.leaderIp(), datum, new InvokeCallback() {
+						@Override
+						public void onResponse(Object o) {
+							ResponseData<Boolean> data = ResponseData.success();
+							future.complete(data);
+						}
 
-                @Override
-                public Executor getExecutor() {
-                    return null;
-                }
-            }, 5000);
-        }
-        if (Objects.nonNull(throwables[0])) {
-            throw new RemotingException("Commit Error", throwables[0]);
-        }
-        return future;
-    }
+						@Override
+						public void onException(Throwable throwable) {
+							throwables[0] = throwable;
+						}
 
-    @Override
-    public void destroy() {
-        raftServer.destroy();
-    }
+						@Override
+						public Executor getExecutor() {
+							return null;
+						}
+					}, 5000);
+		}
+		if (Objects.nonNull(throwables[0])) {
+			throw new RemotingException("Commit Error", throwables[0]);
+		}
+		return future;
+	}
 
-    @Subscribe
-    public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
-        needInitialized();
-    }
+	@Override
+	public void destroy() {
+		raftServer.destroy();
+	}
 
-    private void needInitialized() {
-        if (!initialize.get()) {
-            throw new IllegalStateException("Uninitialized cluster");
-        }
-    }
+	@Subscribe
+	public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
+		needInitialized();
+		EventType type = nodeChangeEvent.getType();
+		ServerNode serverNode = ServerNode.builder().nodeIp(nodeChangeEvent.getNodeIp())
+				.port(nodeChangeEvent.getNodePort()).build();
+		if (EventType.PUBLISH.equals(type)) {
+			raftServer.addNode(serverNode);
+		}
+		else {
+			raftServer.removeNode(serverNode);
+		}
+	}
+
+	private void needInitialized() {
+		if (!initialize.get()) {
+			throw new IllegalStateException("Uninitialized cluster");
+		}
+	}
+
+	private static void initClusterNode(NodeManager nodeManager, Properties properties) {
+		int nodes = properties.size() / 2;
+		int selfIndex = Integer
+				.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
+		for (int i = 0; i < nodes; i++) {
+			String ip = properties.getProperty(SERVER_NODE_IP + i);
+			String port = properties.getProperty(SERVER_NODE_PORT + i);
+			ServerNode node = ServerNode.builder().nodeIp(ip).port(Integer.parseInt(port))
+					.build();
+			if (i == selfIndex) {
+				nodeManager.setSelf(node);
+			}
+			nodeManager.nodeJoin(node);
+		}
+	}
 
 }

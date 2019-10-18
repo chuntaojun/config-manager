@@ -22,31 +22,31 @@ package com.lessspring.org.db.dto;
  */
 public class AuthorityDTO {
 
-    private Long id;
-    private Long userId;
-    private String namespaceId;
+	private Long id;
+	private Long userId;
+	private String namespaceId;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Long getUserId() {
-        return userId;
-    }
+	public Long getUserId() {
+		return userId;
+	}
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
-    public String getNamespaceId() {
-        return namespaceId;
-    }
+	public String getNamespaceId() {
+		return namespaceId;
+	}
 
-    public void setNamespaceId(String namespaceId) {
-        this.namespaceId = namespaceId;
-    }
+	public void setNamespaceId(String namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 }

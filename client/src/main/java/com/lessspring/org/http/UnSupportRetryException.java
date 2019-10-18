@@ -22,23 +22,24 @@ package com.lessspring.org.http;
  */
 public class UnSupportRetryException extends RuntimeException {
 
-    public UnSupportRetryException() {
-        super();
-    }
+	public UnSupportRetryException() {
+		super();
+	}
 
-    public UnSupportRetryException(String message) {
-        super(message);
-    }
+	public UnSupportRetryException(String message) {
+		super(message);
+	}
 
-    public UnSupportRetryException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public UnSupportRetryException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public UnSupportRetryException(Throwable cause) {
-        super(cause);
-    }
+	public UnSupportRetryException(Throwable cause) {
+		super(cause);
+	}
 
-    protected UnSupportRetryException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	protected UnSupportRetryException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

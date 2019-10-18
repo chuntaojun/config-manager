@@ -22,13 +22,13 @@ package com.lessspring.org;
  */
 public interface LifeCycle {
 
-    /**
-     * init
-     */
-    void init();
+	/**
+	 * init
+	 */
+	void init();
 
-    /**
-     * destroy
-     */
-    void destroy();
+	/**
+	 * destroy
+	 */
+	void destroy();
 }

@@ -22,23 +22,24 @@ package com.lessspring.org.http;
  */
 public class MaxRetryException extends RuntimeException {
 
-    public MaxRetryException() {
-        super();
-    }
+	public MaxRetryException() {
+		super();
+	}
 
-    public MaxRetryException(String message) {
-        super(message);
-    }
+	public MaxRetryException(String message) {
+		super(message);
+	}
 
-    public MaxRetryException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public MaxRetryException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public MaxRetryException(Throwable cause) {
-        super(cause);
-    }
+	public MaxRetryException(Throwable cause) {
+		super(cause);
+	}
 
-    protected MaxRetryException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+	protected MaxRetryException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

@@ -24,18 +24,19 @@ import com.alipay.sofa.jraft.core.StateMachineAdapter;
  */
 public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
 
-    /**
-     * Register the transaction callback interface
-     *
-     * @param commitCallback {@link TransactionCommitCallback}
-     */
-    public abstract void registerTransactionCommitCallback(TransactionCommitCallback commitCallback);
+	/**
+	 * Register the transaction callback interface
+	 *
+	 * @param commitCallback {@link TransactionCommitCallback}
+	 */
+	public abstract void registerTransactionCommitCallback(
+			TransactionCommitCallback commitCallback);
 
-    /**
-     * Register the snapshot operator
-     *
-     * @param snapshotOperate {@link SnapshotOperate}
-     */
-    public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
+	/**
+	 * Register the snapshot operator
+	 *
+	 * @param snapshotOperate {@link SnapshotOperate}
+	 */
+	public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
 
 }

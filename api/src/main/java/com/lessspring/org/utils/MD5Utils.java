@@ -16,9 +16,9 @@
  */
 package com.lessspring.org.utils;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import java.util.Objects;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -26,16 +26,16 @@ import java.util.Objects;
  */
 public final class MD5Utils {
 
-    public static String md5Hex(String s) {
-        return DigestUtils.md5Hex(s);
-    }
+	public static String md5Hex(String s) {
+		return DigestUtils.md5Hex(s);
+	}
 
-    public static String md5Hex(byte[] bytes) {
-        return DigestUtils.md5Hex(bytes);
-    }
+	public static String md5Hex(byte[] bytes) {
+		return DigestUtils.md5Hex(bytes);
+	}
 
-    public static boolean compareMd5(String var1, String var2) {
-        return Objects.equals(md5Hex(var1), md5Hex(var2));
-    }
+	public static boolean compareMd5(String var1, String var2) {
+		return Objects.equals(md5Hex(var1), md5Hex(var2));
+	}
 
 }

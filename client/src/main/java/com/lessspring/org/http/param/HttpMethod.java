@@ -22,24 +22,24 @@ package com.lessspring.org.http.param;
  */
 public enum HttpMethod {
 
-    /**
-     *
-     */
-    GET,
+	/**
+	 *
+	 */
+	GET,
 
-    /**
-     *
-     */
-    DELETE,
+	/**
+	 *
+	 */
+	DELETE,
 
-    /**
-     *
-     */
-    PUT,
+	/**
+	 *
+	 */
+	PUT,
 
-    /**
-     *
-     */
-    POST
+	/**
+	 *
+	 */
+	POST
 
 }

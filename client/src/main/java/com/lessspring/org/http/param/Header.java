@@ -28,71 +28,71 @@ import java.util.Map;
  */
 public class Header {
 
-    public static final Header EMPTY = Header.newInstance();
+	public static final Header EMPTY = Header.newInstance();
 
-    private final Map<String, String> header;
+	private final Map<String, String> header;
 
-    private Header() {
-        header = new LinkedHashMap<String, String>();
-        addParam("Content-Type", "application/json;charset=UTF-8");
-        addParam("Accept-Charset", "UTF-8");
-        addParam("Accept-Encoding", "gzip");
-        addParam("Content-Encoding", "gzip");
-    }
+	private Header() {
+		header = new LinkedHashMap<String, String>();
+		addParam("Content-Type", "application/json;charset=UTF-8");
+		addParam("Accept-Charset", "UTF-8");
+		addParam("Accept-Encoding", "gzip");
+		addParam("Content-Encoding", "gzip");
+	}
 
-    public static Header newInstance() {
-        return new Header();
-    }
+	public static Header newInstance() {
+		return new Header();
+	}
 
-    public Header addParam(String key, String value) {
-        header.put(key, value);
-        return this;
-    }
+	public Header addParam(String key, String value) {
+		header.put(key, value);
+		return this;
+	}
 
-    public Header builded() {
-        return this;
-    }
+	public Header builded() {
+		return this;
+	}
 
-    public String getValue(String key) {
-        return header.get(key);
-    }
+	public String getValue(String key) {
+		return header.get(key);
+	}
 
-    public Map<String, String> getHeader() {
-        return header;
-    }
+	public Map<String, String> getHeader() {
+		return header;
+	}
 
-    public Iterator<Map.Entry<String, String>> iterator() {
-        return header.entrySet().iterator();
-    }
+	public Iterator<Map.Entry<String, String>> iterator() {
+		return header.entrySet().iterator();
+	}
 
-    public List<String> toList() {
-        List<String> list = new ArrayList<String>(header.size() * 2);
-        Iterator<Map.Entry<String, String>> iterator = iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            list.add(entry.getKey());
-            list.add(entry.getValue());
-        }
-        return list;
-    }
+	public List<String> toList() {
+		List<String> list = new ArrayList<String>(header.size() * 2);
+		Iterator<Map.Entry<String, String>> iterator = iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<String, String> entry = iterator.next();
+			list.add(entry.getKey());
+			list.add(entry.getValue());
+		}
+		return list;
+	}
 
-    public void addAll(List<String> list) {
-        if ((list.size() & 1) != 0) {
-            throw new IllegalArgumentException("list size must be a multiple of 2");
-        }
-        for (int i = 0; i < list.size();) {
-            header.put(list.get(i ++), list.get(i ++));
-        }
-    }
+	public void addAll(List<String> list) {
+		if ((list.size() & 1) != 0) {
+			throw new IllegalArgumentException("list size must be a multiple of 2");
+		}
+		for (int i = 0; i < list.size();) {
+			header.put(list.get(i++), list.get(i++));
+		}
+	}
 
-    public void initHeader(Map<String, String> params) {
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            addParam(entry.getKey(), entry.getValue());
-        }
-    }
+	public void initHeader(Map<String, String> params) {
+		for (Map.Entry<String, String> entry : params.entrySet()) {
+			addParam(entry.getKey(), entry.getValue());
+		}
+	}
 
-    public void clear() {
-        header.clear();
-    }
+	public void clear() {
+		header.clear();
+	}
 
 }

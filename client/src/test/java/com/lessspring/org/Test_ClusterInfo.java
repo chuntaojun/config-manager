@@ -21,25 +21,24 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.utils.GsonUtils;
 import org.junit.Test;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class Test_ClusterInfo {
 
-    @Test
-    public void testSplitClusterInfo() {
-        String clusterInfo = "127.0.0.1:2959";
-        Configuration configuration = new Configuration();
-        configuration.setServers(clusterInfo);
-        configuration.setUsername("lessSpring");
-        configuration.setPassword("29591314");
-        ConfigService configService = ConfigServiceFactory.createConfigService(configuration);
-        ConfigInfo configInfo = configService.getConfig("DEVELOP", "liaochuntao", "com.lessspring.org");
-        System.out.println(GsonUtils.toJson(configInfo));
-    }
+	@Test
+	public void testSplitClusterInfo() {
+		String clusterInfo = "127.0.0.1:2959";
+		Configuration configuration = new Configuration();
+		configuration.setServers(clusterInfo);
+		configuration.setUsername("lessSpring");
+		configuration.setPassword("29591314");
+		ConfigService configService = ConfigServiceFactory
+				.createConfigService(configuration);
+		ConfigInfo configInfo = configService.getConfig("DEVELOP", "liaochuntao",
+				"com.lessspring.org");
+		System.out.println(GsonUtils.toJson(configInfo));
+	}
 
 }

@@ -27,24 +27,25 @@ import com.google.gson.reflect.TypeToken;
  */
 public final class ResponseHandler {
 
-    private static final ResponseHandler HANDLER = new ResponseHandler();
+	private static final ResponseHandler HANDLER = new ResponseHandler();
 
-    public static ResponseHandler getHandler() {
-        return HANDLER;
-    }
+	public static ResponseHandler getHandler() {
+		return HANDLER;
+	}
 
-    private final Gson gson = new Gson();
+	private final Gson gson = new Gson();
 
-    public <T> T convert(String s, Class<T> cls) {
-        return gson.fromJson(s, cls);
-    }
+	public <T> T convert(String s, Class<T> cls) {
+		return gson.fromJson(s, cls);
+	}
 
-    public <T> T convert(String s, TypeToken<T> token) {
-        try {
-            return gson.fromJson(s, token.getType());
-        } catch (Exception e) {
-            return null;
-        }
-    }
+	public <T> T convert(String s, TypeToken<T> token) {
+		try {
+			return gson.fromJson(s, token.getType());
+		}
+		catch (Exception e) {
+			return null;
+		}
+	}
 
 }

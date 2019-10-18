@@ -22,8 +22,8 @@ package com.lessspring.org.utils;
  */
 public class HttpUtils {
 
-    public static String buildBasePath(String server, String basePath) {
-        return "http://" + server + basePath;
-    }
+	public static String buildBasePath(String server, String basePath) {
+		return "http://" + server + basePath;
+	}
 
 }
