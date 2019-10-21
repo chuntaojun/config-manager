@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lessspring.org.repository.ConfigInfoMapper">
 
     <resultMap type="com.lessspring.org.db.dto.ConfigInfoDTO" id="ConfigInfoDTO">
@@ -9,10 +10,29 @@
         <result column="namespace_id" property="namespaceId"/>
         <result column="content" property="content"/>
         <result column="config_type" property="type"/>
+        <result column="" property="createTime"/>
+        <result column="" property="encryption"/>
+        <result column="" property="fileSource"/>
+        <result column="" property="lastModifyTime"/>
     </resultMap>
 
-<!--  save config-infog  -->
-    <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id" parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
+    <resultMap type="com.lessspring.org.db.dto.ConfigBetaInfoDTO" id="ConfigBetaInfoDTO">
+        <id column="id" property="id"/>
+        <result column="data_id" property="dataId"/>
+        <result column="group_id" property="groupId"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="content" property="content"/>
+        <result column="config_type" property="type"/>
+        <result column="" property="createTime"/>
+        <result column="" property="encryption"/>
+        <result column="" property="fileSource"/>
+        <result column="" property="lastModifyTime"/>
+        <result column="" property="clientIps"/>
+    </resultMap>
+
+    <!--  save config-infog  -->
+    <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
+            parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
         INSERT INTO config_info(data_id, group_id, namespace_id, content, config_type)
         VALUES (#{dto.dataId},
                 #{dto.groupId},
@@ -21,46 +41,76 @@
                 #{dto.type});
     </insert>
 
-<!--  save config-info-beta  -->
+    <!--  save config-info-beta  -->
     <insert id="saveConfigBetaInfo"></insert>
 
-<!--  update config-info  -->
+    <!--  update config-info  -->
     <update id="updateConfigInfo"></update>
 
-<!--  update config-info-beta  -->
+    <!--  update config-info-beta  -->
     <update id="updateConfigBetaInfo"></update>
     <delete id="removeConfigInfo"></delete>
     <delete id="removeConfigBetaInfo"></delete>
 
     <!--  find config-content by QueryConfigInfo  -->
-    <select id="findConfigInfoContent" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="java.lang.String">
-        SELECT content FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
+    <select id="findConfigInfoContent"
+            parameterType="com.lessspring.org.pojo.query.QueryConfigInfo"
+            resultType="java.lang.String">
+        SELECT content
+        FROM config_info
+        WHERE namespace_id = #{query.namespaceId}
+          and group_id = #{query.groupId}
+          and data_id = #{query.dataId}
     </select>
 
-<!--  find config by QueryConfigInfo  -->
-    <select id="findConfigInfo" parameterType="com.lessspring.org.pojo.query.QueryConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
-        SELECT * FROM config_info WHERE namespace_id = #{query.namespaceId} and group_id = #{query.groupId} and data_id = #{query.dataId}
+    <!--  find config by QueryConfigInfo  -->
+    <select id="findConfigInfo"
+            parameterType="com.lessspring.org.pojo.query.QueryConfigInfo"
+            resultMap="ConfigInfoDTO">
+        SELECT *
+        FROM config_info
+        WHERE namespace_id = #{query.namespaceId}
+          and group_id like CONCAT('%', #{query.groupId}, '%')
+          and data_id like CONCAT('%', #{query.dataId}, '%')
     </select>
 
+    <!--  find min and max id from config-info  -->
     <select id="findMinAndMaxId" resultType="java.lang.Long">
-        SELECT MIN(id), MAX(id) FROM config_info
+        SELECT MIN(id), MAX(id)
+        FROM config_info
     </select>
 
+    <!--  batch find config-info  -->
     <select id="batchFindConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
         SELECT * FROM config_info WHERE id in
         <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
     </select>
+
+    <!--  find min and max id from config-beta-info  -->
     <select id="findMinAndMaxId4Beta" resultType="java.lang.Long">
-        SELECT MIN(id), MAX(id) FROM config_info_beta
+        SELECT MIN(id), MAX(id)
+        FROM config_info_beta
     </select>
-    <select id="batchFindConfigInfo4Beta" resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO">
+
+    <!--  batch find config-beta-info  -->
+    <select id="batchFindConfigInfo4Beta"
+            resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO">
         SELECT * FROM config_info_beta WHERE id in
         <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
     </select>
-    <select id="findConfigBetaInfo" resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO"></select>
+
+    <!--  query config-beta-info  -->
+    <select id="findConfigBetaInfo"
+            resultMap="ConfigBetaInfoDTO">
+        SELECT *
+        FROM config_beta_info
+        WHERE namespace_id = #{query.namespaceId}
+          and group_id like CONCAT('%', #{query.groupId}, '%')
+          and data_id like CONCAT('%', #{query.dataId}, '%')
+    </select>
 
 </mapper>

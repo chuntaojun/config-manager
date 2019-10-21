@@ -22,6 +22,8 @@ package com.lessspring.org.utils;
  */
 public final class TransactionUtils {
 
+		private TransactionUtils() {}
+
 	public static String buildTransactionKey(PropertiesEnum.InterestKey key,
 			Object... more) {
 		StringBuilder sb = new StringBuilder().append(key.getType()).append(".");

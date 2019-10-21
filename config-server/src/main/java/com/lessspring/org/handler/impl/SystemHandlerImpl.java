@@ -14,17 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.handler.impl;
+
+import com.lessspring.org.handler.SystemHandler;
+import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
+
+import org.springframework.boot.logging.LoggingSystem;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 
 /**
- * Notify the tracker
- *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class TracerUtils {
+@Service
+public class SystemHandlerImpl implements SystemHandler {
 
-	private TracerUtils() {
+	private final LoggingSystem loggingSystem;
+
+	public SystemHandlerImpl(LoggingSystem loggingSystem) {
+		this.loggingSystem = loggingSystem;
 	}
 
+	@NotNull
+	@Override
+	public Mono<ServerResponse> changeLogLevel(ServerRequest request) {
+		return null;
+	}
 }

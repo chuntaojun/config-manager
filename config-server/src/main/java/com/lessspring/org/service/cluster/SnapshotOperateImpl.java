@@ -18,6 +18,8 @@ package com.lessspring.org.service.cluster;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -107,8 +109,10 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 						.toString();
 				try (final FileOutputStream fOut = new FileOutputStream(outputFile);
 						final ZipOutputStream zOut = new ZipOutputStream(fOut)) {
-					DiskUtils.compressDirectoryToZipFile(writePath, SNAPSHOT_DIR, zOut);
-					fOut.getFD().sync();
+					WritableByteChannel channel = Channels.newChannel(zOut);
+					DiskUtils.compressDirectoryToZipFile(writePath, SNAPSHOT_DIR, zOut,
+							channel);
+					// fOut.getFD().sync();
 					FileUtils.deleteDirectory(file);
 				}
 				if (writer.addFile(SNAPSHOT_ARCHIVE, buildMetadata(clusterMeta))) {

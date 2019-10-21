@@ -16,15 +16,21 @@
  */
 package com.lessspring.org.utils;
 
+import java.util.regex.Pattern;
+
 /**
- * Notify the tracker
- *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class TracerUtils {
+public final class CheckUtils {
 
-	private TracerUtils() {
+	private static final Pattern regx4IllegalChar = Pattern.compile("^[A-Za-z0-9]+$");
+
+	private CheckUtils() {
+	}
+
+	public static boolean illegalCharChecking(String str) {
+		return !regx4IllegalChar.matcher(str).matches();
 	}
 
 }

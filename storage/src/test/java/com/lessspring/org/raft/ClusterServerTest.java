@@ -1,3 +1,13 @@
+package com.lessspring.org.raft;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.lessspring.org.DiskUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,17 +24,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+@Slf4j
+public class ClusterServerTest {
 
-/**
- * Notify the tracker
- *
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
- */
-public final class TracerUtils {
-
-	private TracerUtils() {
+	@Test
+	public void testReadFile() {
+		try (InputStream is = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("cluster.properties")) {
+			File file = new File(Thread.currentThread().getContextClassLoader()
+					.getResource("cluster.properties").getPath());
+			while (true) {
+				System.out.println(DiskUtils.readFile(file));
+				Thread.sleep(1000);
+			}
+		}
+		catch (IOException | InterruptedException e) {
+			log.error("Server");
+			throw new RuntimeException(e);
+		}
 	}
 
 }

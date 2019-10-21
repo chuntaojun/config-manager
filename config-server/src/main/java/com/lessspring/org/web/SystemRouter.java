@@ -14,17 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.web;
+
+import com.lessspring.org.handler.SystemHandler;
+
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Notify the tracker
- *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class TracerUtils {
+@Configuration
+public class SystemRouter {
 
-	private TracerUtils() {
+	private final SystemHandler systemHandler;
+
+	public SystemRouter(SystemHandler systemHandler) {
+		this.systemHandler = systemHandler;
 	}
-
 }

@@ -14,17 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.handler;
+
+import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
+
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 
 /**
- * Notify the tracker
- *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class TracerUtils {
+public interface SystemHandler {
 
-	private TracerUtils() {
-	}
+	/**
+	 * update logger level
+	 * 
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> changeLogLevel(ServerRequest request);
 
 }

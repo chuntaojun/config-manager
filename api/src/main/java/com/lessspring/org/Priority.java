@@ -22,8 +22,8 @@ package com.lessspring.org;
  */
 public interface Priority {
 
-	public static final int HIGH_PRIORITY = Integer.MIN_VALUE;
-	public static final int LOW_PRIORITY = Integer.MAX_VALUE;
+	int HIGH_PRIORITY = Integer.MIN_VALUE;
+	int LOW_PRIORITY = Integer.MAX_VALUE;
 
 	/**
 	 * filter priority
