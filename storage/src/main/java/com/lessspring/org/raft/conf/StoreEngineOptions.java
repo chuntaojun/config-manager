@@ -14,29 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.distributed;
+package com.lessspring.org.raft.conf;
 
-import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.Region;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface TransactionConsumer<T> {
+@Data
+@Builder
+@NoArgsConstructor
+public class StoreEngineOptions {
 
-	/**
-	 * Callback interface transaction consumers
-	 *
-	 * @param t transaction
-	 * @throws Throwable exception
-	 */
-	void accept(T t) throws Throwable;
-
-	/**
-	 * Abnormal transaction callback handler
-	 *
-	 * @param te {@link TransactionException}
-	 */
-	void onError(TransactionException te);
+	private String cacheDir;
+	private String dbUsername;
+	private String dbPassword;
+	private int maxPoolSize = 10;
+	private String raftDataPath;
+	private List<Region> regionList = Collections.emptyList();
+	private List<RegionEngineOptions> rOptList = Collections.emptyList();
 
 }

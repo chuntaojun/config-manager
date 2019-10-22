@@ -30,9 +30,9 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.raft.RaftConfiguration;
+import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.SnapshotOperate;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +71,7 @@ public class ClusterManager {
 
 	public void init() {
 		if (initialize.compareAndSet(false, true)) {
-			final RaftConfiguration configuration = RaftConfiguration.builder()
+			final RaftServerOptions configuration = RaftServerOptions.builder()
 					.withCacheDir(raftCacheDir).withElectionTimeoutMs(electionTimeoutMs)
 					.withSnapshotIntervalSecs(snapshotIntervalSecs).build();
 			clusterServer = new ClusterServer(configuration);

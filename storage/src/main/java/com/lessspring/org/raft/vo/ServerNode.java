@@ -18,7 +18,7 @@ package com.lessspring.org.raft.vo;
 
 import java.util.Objects;
 
-import com.lessspring.org.raft.ServerStatus;
+import com.lessspring.org.raft.utils.ServerStatus;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
 

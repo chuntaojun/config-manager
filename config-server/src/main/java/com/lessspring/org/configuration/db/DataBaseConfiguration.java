@@ -47,43 +47,4 @@ public class DataBaseConfiguration {
 	@Value("${com.lessspring.org.config.manager.cache-dir}")
 	private String cacheDir;
 
-	@Bean
-	public DataSource dataSource() {
-		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl("jdbc:h2:" + cacheDir + File.separator + "/db/config_manager");
-		config.setUsername("root");
-		config.setPassword("");
-		config.setMaximumPoolSize(10);
-		config.addDataSourceProperty("cachePrepStmts", "true");
-		config.addDataSourceProperty("prepStmtCacheSize", "250");
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-		DataSource dataSource = new HikariDataSource(config);
-		init(dataSource);
-		return dataSource;
-	}
-
-	private void init(DataSource dataSource) {
-		final String sql;
-		try (InputStream stream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("config_manager.sql")) {
-			assert stream != null;
-			BufferedSource bufferedSource = Okio.buffer(Okio.source(stream));
-			sql = bufferedSource.readUtf8();
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		if (StringUtils.isEmpty(sql)) {
-			throw new IllegalArgumentException("Database initialization scripts illegal");
-		}
-		try (Connection connection = dataSource.getConnection()) {
-			Statement statement = connection.createStatement();
-			statement.execute(sql);
-			connection.commit();
-		}
-		catch (SQLException e) {
-			log.error("load sql file and execute has error : {}", e.getMessage());
-		}
-	}
-
 }

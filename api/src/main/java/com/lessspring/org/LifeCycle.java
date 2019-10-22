@@ -31,4 +31,18 @@ public interface LifeCycle {
 	 * destroy
 	 */
 	void destroy();
+
+	/**
+	 * is already init
+	 *
+	 * @return init label
+	 */
+	boolean isInited();
+
+	/**
+	 * is already destroy
+	 *
+	 * @return destroy label
+	 */
+	boolean isDestroyed();
 }

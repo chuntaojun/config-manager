@@ -15,3 +15,30 @@
  * limitations under the License.
  */
 package com.lessspring.org;
+
+import java.util.Objects;
+
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+public final class LifeCycleHelper {
+
+	public static void invokeInit(final LifeCycle lifeCycle) {
+		if (Objects.nonNull(lifeCycle)) {
+			lifeCycle.init();
+		}
+	}
+
+	public static void invokeDestroy(final LifeCycle lifeCycle) {
+		if (Objects.nonNull(lifeCycle)) {
+			lifeCycle.destroy();
+		}
+	}
+
+	public static void registerShutdownHook(final LifeCycle lifeCycle, final String name) {
+		Runtime.getRuntime().addShutdownHook(
+				new Thread(() -> invokeDestroy(lifeCycle), name));
+	}
+
+}

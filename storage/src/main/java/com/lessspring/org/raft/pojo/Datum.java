@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft.dto;
+package com.lessspring.org.raft.pojo;
 
-import com.lessspring.org.raft.OperationEnum;
+import com.lessspring.org.raft.utils.OperationEnum;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

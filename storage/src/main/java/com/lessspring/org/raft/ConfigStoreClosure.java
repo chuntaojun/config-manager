@@ -18,7 +18,7 @@ package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.pojo.Datum;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

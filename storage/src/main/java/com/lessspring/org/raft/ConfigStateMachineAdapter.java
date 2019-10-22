@@ -29,7 +29,9 @@ import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.lessspring.org.SerializerUtils;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Datum;
+import com.lessspring.org.raft.pojo.Transaction;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,13 +41,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
+	private final Region region;
+	private final StoreEngine storeEngine;
 	private final List<TransactionCommitCallback> callbacks = new LinkedList<>();
-
 	private final SerializerUtils serializer = SerializerUtils.getInstance();
-
 	private final Object monitor = new Object();
 
 	private List<SnapshotOperate> snapshotOperates = new CopyOnWriteArrayList<>();
+
+	public ConfigStateMachineAdapter(Region region, StoreEngine storeEngine) {
+		this.region = region;
+		this.storeEngine = storeEngine;
+	}
 
 	@Override
 	public void onApply(Iterator iter) {

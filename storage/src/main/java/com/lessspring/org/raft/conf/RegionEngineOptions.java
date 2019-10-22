@@ -14,29 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.distributed;
+package com.lessspring.org.raft.conf;
 
-import com.lessspring.org.raft.exception.TransactionException;
+import lombok.Builder;
+import lombok.Data;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface TransactionConsumer<T> {
+@Data
+@Builder
+public class RegionEngineOptions {
 
-	/**
-	 * Callback interface transaction consumers
-	 *
-	 * @param t transaction
-	 * @throws Throwable exception
-	 */
-	void accept(T t) throws Throwable;
-
-	/**
-	 * Abnormal transaction callback handler
-	 *
-	 * @param te {@link TransactionException}
-	 */
-	void onError(TransactionException te);
+	private String groupId;
+	private String raftDataPath;
+	private String serverAddr;
 
 }

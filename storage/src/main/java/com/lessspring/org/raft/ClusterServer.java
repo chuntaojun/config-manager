@@ -34,7 +34,8 @@ import com.lessspring.org.SerializerUtils;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.conf.RaftServerOptions;
+import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,9 +51,9 @@ public class ClusterServer implements LifeCycle {
 	private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
 	private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
 	private AtomicBoolean initialize = new AtomicBoolean(false);
+	private RaftServer raftServer;
 
-	private RaftServer raftServer = new RaftServer();
-	private RaftConfiguration raftConfiguration = new RaftConfiguration();
+	private RaftServerOptions raftServerOptions = new RaftServerOptions();
 
 	static {
 		NodeManager nodeManager = NodeManager.getInstance();
@@ -68,21 +69,18 @@ public class ClusterServer implements LifeCycle {
 		}
 	}
 
-	public ClusterServer() {
-		this(null);
-	}
-
-	public ClusterServer(RaftConfiguration raftConfiguration) {
-		if (Objects.nonNull(raftConfiguration)) {
-			this.raftConfiguration = raftConfiguration;
+	public ClusterServer(RaftServerOptions raftServerOptions) {
+		if (Objects.nonNull(raftServerOptions)) {
+			this.raftServerOptions = raftServerOptions;
 		}
+		raftServer = new RaftServer(raftServerOptions);
 		raftServer.init();
 	}
 
 	@Override
 	public void init() {
 		if (initialize.compareAndSet(false, true)) {
-			raftServer.initRaftCluster(raftConfiguration);
+			raftServer.initRaftCluster();
 		}
 	}
 
@@ -142,6 +140,16 @@ public class ClusterServer implements LifeCycle {
 	@Override
 	public void destroy() {
 		raftServer.destroy();
+	}
+
+	@Override
+	public boolean isInited() {
+		return initialize.get();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
 	}
 
 	@Subscribe

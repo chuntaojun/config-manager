@@ -16,52 +16,47 @@
  */
 package com.lessspring.org.raft;
 
-import com.lessspring.org.constant.Code;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.lessspring.org.LifeCycle;
+import com.lessspring.org.db.store.RDBStore;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TransactionException extends Exception {
+public class StoreEngine implements LifeCycle {
 
-	private Code errorCode = Code.ERROR;
+	private final ConcurrentHashMap<Long, RegionEngine> regionEngineTable = new ConcurrentHashMap<>(
+			8);
+	private Long storeId;
+	private ClusterServer clusterServer;
+	private RDBStore rdbStore;
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-	private Transaction transaction;
+	@Override
+	public void init() {
+		if (inited.compareAndSet(false, true)) {
 
-	public TransactionException() {
-		super();
+		}
 	}
 
-	public TransactionException(String message) {
-		super(message);
+	@Override
+	public void destroy() {
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+
+		}
 	}
 
-	public TransactionException(String message, Throwable cause) {
-		super(message, cause);
+	@Override
+	public boolean isInited() {
+		return inited.get();
 	}
 
-	public TransactionException(Throwable cause) {
-		super(cause);
-	}
-
-	protected TransactionException(String message, Throwable cause,
-			boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
-	public Transaction getTransaction() {
-		return transaction;
-	}
-
-	public void setTransaction(Transaction transaction) {
-		this.transaction = transaction;
-	}
-
-	public Code getErrorCode() {
-		return errorCode;
-	}
-
-	public void setErrorCode(Code errorCode) {
-		this.errorCode = errorCode;
+	@Override
+	public boolean isDestroyed() {
+		return destroyed.get();
 	}
 }

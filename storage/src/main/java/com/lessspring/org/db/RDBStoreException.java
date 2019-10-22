@@ -14,29 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.distributed;
-
-import com.lessspring.org.raft.exception.TransactionException;
+package com.lessspring.org.db;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface TransactionConsumer<T> {
+public class RDBStoreException extends RuntimeException {
 
-	/**
-	 * Callback interface transaction consumers
-	 *
-	 * @param t transaction
-	 * @throws Throwable exception
-	 */
-	void accept(T t) throws Throwable;
+	public RDBStoreException() {
+		super();
+	}
 
-	/**
-	 * Abnormal transaction callback handler
-	 *
-	 * @param te {@link TransactionException}
-	 */
-	void onError(TransactionException te);
+	public RDBStoreException(String message) {
+		super(message);
+	}
 
+	public RDBStoreException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public RDBStoreException(Throwable cause) {
+		super(cause);
+	}
+
+	protected RDBStoreException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }
