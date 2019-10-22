@@ -16,9 +16,11 @@
  */
 package com.lessspring.org;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import com.lessspring.org.config.ConfigService;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.utils.GsonUtils;
 import org.junit.Test;
 
 /**
@@ -28,7 +30,7 @@ import org.junit.Test;
 public class Test_ClusterInfo {
 
 	@Test
-	public void testSplitClusterInfo() {
+	public void testSplitClusterInfo() throws InterruptedException {
 		String clusterInfo = "127.0.0.1:2959";
 		Configuration configuration = new Configuration();
 		configuration.setServers(clusterInfo);
@@ -36,9 +38,20 @@ public class Test_ClusterInfo {
 		configuration.setPassword("29591314");
 		ConfigService configService = ConfigServiceFactory
 				.createConfigService(configuration);
-		ConfigInfo configInfo = configService.getConfig("DEVELOP", "liaochuntao",
-				"com.lessspring.org");
-		System.out.println(GsonUtils.toJson(configInfo));
+		configService.addListener("DEFAULT_GROUP", "liaochuntao", new AbstractListener() {
+			@Override
+			public void onReceive(ConfigInfo configInfo) {
+				System.out.println(configInfo);
+			}
+
+			@Override
+			public Executor executor() {
+				return Executors.newFixedThreadPool(2);
+			}
+		});
+		while (true) {
+			Thread.sleep(1000);
+		}
 	}
 
 }

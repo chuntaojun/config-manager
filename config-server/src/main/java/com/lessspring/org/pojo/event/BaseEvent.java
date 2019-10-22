@@ -25,10 +25,10 @@ import com.lessspring.org.event.EventType;
 public abstract class BaseEvent {
 
 	private long sequence;
-	private String namespaceId;
+	private String namespaceId = "default";
 	private String dataId;
-	private String groupId;
-	private String clientIps;
+	private String groupId = "DEFAULT_GROUP";
+	private String clientIps = "";
 	private boolean beta;
 	private boolean isFile = false;
 	private String encryption;

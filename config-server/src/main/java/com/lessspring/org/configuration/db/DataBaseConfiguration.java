@@ -47,12 +47,18 @@ public class DataBaseConfiguration {
 	@Value("${com.lessspring.org.config.manager.cache-dir}")
 	private String cacheDir;
 
+	@Value("${com.lessspring.org.config.manager.db.name:lessSpring}")
+	private String username;
+
+	@Value("${com.lessspring.org.config.manager.db.password:lessSpring}")
+	private String password;
+
 	@Bean
 	public DataSource dataSource() {
 		HikariConfig config = new HikariConfig();
 		config.setJdbcUrl("jdbc:h2:" + cacheDir + File.separator + "/db/config_manager");
-		config.setUsername("root");
-		config.setPassword("");
+		config.setUsername(username);
+		config.setPassword(password);
 		config.setMaximumPoolSize(10);
 		config.addDataSourceProperty("cachePrepStmts", "true");
 		config.addDataSourceProperty("prepStmtCacheSize", "250");

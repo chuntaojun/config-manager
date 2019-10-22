@@ -25,11 +25,13 @@ import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
 import com.lessspring.org.raft.TransactionException;
 import com.lessspring.org.utils.PropertiesEnum;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public abstract class BaseTransactionCommitCallback implements TransactionCommitCallback {
 
 	private final HashMap<PropertiesEnum.Bz, Map<OperationEnum, TransactionConsumer<Transaction>>> consumerMap = new HashMap<>(
@@ -52,6 +54,7 @@ public abstract class BaseTransactionCommitCallback implements TransactionCommit
 			consumer.accept(transaction);
 		}
 		catch (Throwable e) {
+			log.info("error : {}", e);
 			TransactionException exception = new TransactionException(e);
 			if (e instanceof BaseException) {
 				exception.setErrorCode(((BaseException) e).code());

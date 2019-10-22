@@ -43,7 +43,11 @@ public final class PathUtils {
 		}
 	}
 
-	public static String finalPath(String subPath) {
+		public static String getFatherRoadKing() {
+				return FATHER_ROAD_KING;
+		}
+
+		public static String finalPath(String subPath) {
 		if (subPath.startsWith(File.separator)) {
 			subPath = subPath.substring(1);
 		}

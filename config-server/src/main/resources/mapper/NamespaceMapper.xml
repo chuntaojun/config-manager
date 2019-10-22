@@ -40,6 +40,6 @@
             resultMap="NamespaceDTO">
         SELECT *
         FROM namespace
-        WHERE namesapce_name = #{name};
+        WHERE namespace_name = #{name};
     </select>
 </mapper>

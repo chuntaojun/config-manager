@@ -164,11 +164,11 @@ public final class DiskUtils {
 		}
 	}
 
-	private static File openFile(String path, String fileName) {
+	public static File openFile(String path, String fileName) {
 		return openFile(path, fileName, false);
 	}
 
-	private static File openFile(String path, String fileName, boolean rewrite) {
+	public static File openFile(String path, String fileName, boolean rewrite) {
 		System.out.println("File Path : " + path);
 		File directory = new File(path);
 		if (!directory.exists()) {

@@ -102,8 +102,10 @@ public class ConfigCacheItemManager {
 		final String key = NameUtils.buildName(namespaceId, event.getGroupId(),
 				event.getDataId());
 		Set<String> betaClientIps = new CopyOnWriteArraySet<>();
-		for (String ip : event.getClientIps().split(",")) {
-			betaClientIps.add(ip.trim());
+		if (StringUtils.isNotEmpty(event.getClientIps())) {
+			for (String ip : event.getClientIps().split(",")) {
+				betaClientIps.add(ip.trim());
+			}
 		}
 		Supplier<CacheItem> supplier = () -> {
 			final CacheItem itemSave = new CacheItem(namespaceId, event.getGroupId(),

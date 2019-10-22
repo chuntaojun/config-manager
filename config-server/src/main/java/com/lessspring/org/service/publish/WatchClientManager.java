@@ -31,8 +31,10 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.event.NotifyEvent;
+import com.lessspring.org.pojo.event.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.TracerUtils;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +54,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
 	private final long parallelThreshold = 100;
+
+	private final TracerUtils tracer = TracerUtils.getSingleton();
 
 	private long clientCnt = 0;
 	private final Object monitor = new Object();
@@ -146,6 +150,8 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 	// Use the event framework, receiving NotifyEvent events, the
 	// configuration changes on delivery to the client
 
+	// TODO Push the trajectory logging
+
 	@Override
 	public void onEvent(NotifyEvent event) throws Exception {
 		try {
@@ -163,8 +169,10 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 				stream = set.stream();
 			}
 			Set<String> clientIps = new HashSet<>();
-			for (String ip : event.getClientIps().split(",")) {
-				clientIps.add(ip.trim());
+			if (event.isBeta()) {
+				for (String ip : event.getClientIps().split(",")) {
+					clientIps.add(ip.trim());
+				}
 			}
 			stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
 					.forEach(client -> {
@@ -178,6 +186,11 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 						try {
 							writeResponse(client, configInfoJson);
 							finishWorks[0]++;
+							tracer.publishPublishEvent(PublishLogEvent.builder()
+									.namespaceId(event.getNamespaceId())
+									.groupId(event.getGroupId()).dataId(event.getDataId())
+									.clientIp(client.getClientIp())
+									.publishTime(System.currentTimeMillis()).build());
 						}
 						catch (Exception e) {
 							log.error("[Notify WatchClient has Error] : {}",
