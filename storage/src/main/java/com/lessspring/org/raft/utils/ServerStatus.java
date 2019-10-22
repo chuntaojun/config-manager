@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.raft.utils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

@@ -25,8 +25,6 @@ dependencies {
     compile(project(":common"))
     compile(project(":storage"))
     compile 'com.auth0:java-jwt:3.4.1'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.0'
-    compile group: 'com.h2database', name: 'h2', version: '1.4.199'
     compile 'org.springframework.boot:spring-boot-starter-webflux'
     compile 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation('org.springframework.boot:spring-boot-starter-aop')

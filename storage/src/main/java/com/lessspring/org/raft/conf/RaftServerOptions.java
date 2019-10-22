@@ -14,42 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
+package com.lessspring.org.raft.conf;
+
+import com.lessspring.org.PathUtils;
+import com.lessspring.org.raft.Region;
+import com.lessspring.org.raft.StoreEngine;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Duration;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public enum OperationEnum {
+@Data
+@Builder
+@NoArgsConstructor
+public class RaftServerOptions {
 
-	/**
-	 *
-	 */
-	PUBLISH,
-
-	/**
-	 *
-	 */
-	MODIFY,
-
-	/**
-	 *
-	 */
-	DELETE,
-
-	/**
-	 *
-	 */
-	BATCH_PUBLISH,
-
-	/**
-	 *
-	 */
-	BATCH_MODIFY,
-
-	/**
-	 *
-	 */
-	BATCH_DELETE,
+	private String cacheDir = PathUtils.finalPath("config-manager/server/config_manager_raft");
+	private int electionTimeoutMs = (int) Duration.ofSeconds(5).toMillis();
+	private int snapshotIntervalSecs = (int) Duration.ofSeconds(600).getSeconds();
+	private Region region;
+	private StoreEngine storeEngine;
+	private String logUri;
+	private String raftMetaUri;
+	private String snapshotUri;
+	private boolean startRpcServer = true;
 
 }

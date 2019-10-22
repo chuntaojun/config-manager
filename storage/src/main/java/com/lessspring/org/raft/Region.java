@@ -14,29 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.distributed;
-
-import com.lessspring.org.raft.exception.TransactionException;
+package com.lessspring.org.raft;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface TransactionConsumer<T> {
-
-	/**
-	 * Callback interface transaction consumers
-	 *
-	 * @param t transaction
-	 * @throws Throwable exception
-	 */
-	void accept(T t) throws Throwable;
-
-	/**
-	 * Abnormal transaction callback handler
-	 *
-	 * @param te {@link TransactionException}
-	 */
-	void onError(TransactionException te);
-
+public class Region {
 }

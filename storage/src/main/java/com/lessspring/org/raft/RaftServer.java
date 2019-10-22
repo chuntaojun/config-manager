@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.alipay.remoting.rpc.RpcServer;
 import com.alipay.sofa.jraft.CliService;
@@ -40,11 +41,10 @@ import com.alipay.sofa.jraft.rpc.RpcResponseClosure;
 import com.alipay.sofa.jraft.rpc.impl.cli.BoltCliClientService;
 import com.google.protobuf.Message;
 import com.lessspring.org.LifeCycle;
-import com.lessspring.org.PathUtils;
+import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Requires user can customize the cluster parameters
@@ -66,12 +66,16 @@ class RaftServer implements LifeCycle {
 	private BoltCliClientService cliClientService;
 	private ScheduledExecutorService scheduledExecutorService;
 	private final NodeManager nodeManager = NodeManager.getInstance();
+	private final RaftServerOptions raftServerOptions;
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-	void initRaftCluster(RaftConfiguration raftConfiguration) {
-		String path = raftConfiguration.getCacheDir();
-		if (StringUtils.isEmpty(path)) {
-			path = PathUtils.finalPath("config-manager/server/config_manager_raft");
-		}
+	public RaftServer(RaftServerOptions raftServerOptions) {
+		this.raftServerOptions = raftServerOptions;
+	}
+
+	void initRaftCluster() {
+		String path = raftServerOptions.getCacheDir();
 		try {
 			FileUtils.forceMkdir(new File(path));
 		}
@@ -83,24 +87,24 @@ class RaftServer implements LifeCycle {
 		int selfPort = nodeManager.getSelf().getPort() + 1000;
 		final NodeOptions nodeOptions = new NodeOptions();
 		// 设置选举超时时间为 5 秒
-		nodeOptions.setElectionTimeoutMs(raftConfiguration.getElectionTimeoutMs());
+		nodeOptions.setElectionTimeoutMs(raftServerOptions.getElectionTimeoutMs());
 		// 每隔600秒做一次 snapshot
-		nodeOptions.setSnapshotIntervalSecs(raftConfiguration.getSnapshotIntervalSecs());
+		nodeOptions.setSnapshotIntervalSecs(raftServerOptions.getSnapshotIntervalSecs());
 		// 设置初始集群配置
 		nodeOptions.setInitialConf(conf);
 
 		// 设置存储路径
 		// 日志, 必须
-		nodeOptions.setLogUri(path + File.separator + "log");
+		nodeOptions.setLogUri(path + File.separator + raftServerOptions.getLogUri());
 		// 元信息, 必须
-		nodeOptions.setRaftMetaUri(path + File.separator + "raft_meta");
+		nodeOptions.setRaftMetaUri(path + File.separator + raftServerOptions.getRaftMetaUri());
 		// snapshot, 可选, 一般都推荐
-		nodeOptions.setSnapshotUri(path + File.separator + "snapshot");
+		nodeOptions.setSnapshotUri(path + File.separator + raftServerOptions.getSnapshotUri());
 
 		nodeOptions.setFsm(this.csm);
 
 		// rpc port = server.port + 1000
-		rpcServer = new RpcServer(selfPort);
+		rpcServer = new RpcServer(selfPort, true, true);
 
 		RaftRpcServerFactory.addRaftRequestProcessors(rpcServer);
 
@@ -109,7 +113,7 @@ class RaftServer implements LifeCycle {
 				JRaftUtils.getPeerId(selfIp + ":" + selfPort), nodeOptions, rpcServer);
 		// 启动
 
-		this.node = this.raftGroupService.start();
+		this.node = this.raftGroupService.start(raftServerOptions.isStartRpcServer());
 
 		RouteTable.getInstance().updateConfiguration(raftGroupId, conf);
 
@@ -241,29 +245,44 @@ class RaftServer implements LifeCycle {
 
 	@Override
 	public void init() {
-		scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
-			Thread thread = new Thread(r);
-			thread.setDaemon(true);
-			thread.setName("config-manager-raft-node-refresh");
-			return thread;
-		});
+		if (inited.compareAndSet(false, true)) {
+			scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+				Thread thread = new Thread(r);
+				thread.setDaemon(true);
+				thread.setName("config-manager-raft-node-refresh");
+				return thread;
+			});
 
-		this.csm = new ConfigStateMachineAdapter();
+			this.csm = new ConfigStateMachineAdapter(raftServerOptions.getRegion(),
+					raftServerOptions.getStoreEngine());
 
-		this.conf = new Configuration();
-		nodeManager.stream().forEach(stringServerNodeEntry -> {
-			ServerNode _node = stringServerNodeEntry.getValue();
-			String address = _node.getNodeIp() + ":" + (_node.getPort() + 1000);
-			PeerId peerId = JRaftUtils.getPeerId(address);
-			conf.addPeer(peerId);
-			com.alipay.sofa.jraft.NodeManager.getInstance()
-					.addAddress(peerId.getEndpoint());
-		});
+			this.conf = new Configuration();
+			nodeManager.stream().forEach(stringServerNodeEntry -> {
+				ServerNode _node = stringServerNodeEntry.getValue();
+				String address = _node.getNodeIp() + ":" + (_node.getPort() + 1000);
+				PeerId peerId = JRaftUtils.getPeerId(address);
+				conf.addPeer(peerId);
+				com.alipay.sofa.jraft.NodeManager.getInstance()
+						.addAddress(peerId.getEndpoint());
+			});
+		}
 
 	}
 
 	@Override
 	public void destroy() {
-		scheduledExecutorService.shutdown();
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+			scheduledExecutorService.shutdown();
+		}
+	}
+
+	@Override
+	public boolean isInited() {
+		return inited.get();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return destroyed.get();
 	}
 }

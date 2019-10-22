@@ -42,7 +42,7 @@ import com.google.protobuf.ByteString;
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.pojo.ClusterMeta;
 import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.raft.ServerStatus;
+import com.lessspring.org.raft.utils.ServerStatus;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
