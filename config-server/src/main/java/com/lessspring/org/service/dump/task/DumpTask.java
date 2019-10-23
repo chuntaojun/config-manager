@@ -22,8 +22,18 @@ package com.lessspring.org.service.dump.task;
  */
 public class DumpTask {
 
+	private boolean async = true;
 	private Long[] ids;
 	private boolean status = false;
+
+	public DumpTask(boolean async) {
+		this.async = async;
+	}
+
+	public DumpTask(boolean async, Long[] ids) {
+		this.async = async;
+		this.ids = ids;
+	}
 
 	public Long[] getIds() {
 		return ids;
@@ -41,4 +51,11 @@ public class DumpTask {
 		this.status = status;
 	}
 
+	public boolean isAsync() {
+		return async;
+	}
+
+	public void setAsync(boolean async) {
+		this.async = async;
+	}
 }

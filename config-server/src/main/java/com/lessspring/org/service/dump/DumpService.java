@@ -22,7 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -82,12 +82,8 @@ public class DumpService {
 		task4AllDumpProcessor.init();
 		task4BetaDumpProcessor.init();
 		periodProcessor.init();
-
-		Long[] ids = configInfoMapper.findMinAndMaxId().toArray(new Long[0]);
-		dumpAll().accept(ids);
-		Long[] ids4Beta = configInfoMapper.findMinAndMaxId4Beta().toArray(new Long[0]);
-		dumpAllBeta().accept(ids4Beta);
-		DumpTask4Period period = new DumpTask4Period();
+		forceDump(true);
+		DumpTask4Period period = new DumpTask4Period(true);
 		period.setPeriod(Duration.ofMinutes(15));
 		periodProcessor.process(period);
 	}
@@ -97,6 +93,13 @@ public class DumpService {
 		task4AllDumpProcessor.destroy();
 		task4BetaDumpProcessor.destroy();
 		periodProcessor.destroy();
+	}
+
+	public synchronized void forceDump(boolean async) {
+		Long[] ids = configInfoMapper.findMinAndMaxId().toArray(new Long[0]);
+		dumpAll().accept(ids, async);
+		Long[] ids4Beta = configInfoMapper.findMinAndMaxId4Beta().toArray(new Long[0]);
+		dumpAllBeta().accept(ids4Beta, async);
 	}
 
 	private void deleteWhenStart() {
@@ -109,8 +112,8 @@ public class DumpService {
 		}
 	}
 
-	private Consumer<Long[]> dumpAll() {
-		return ids -> {
+	private BiConsumer<Long[], Boolean> dumpAll() {
+		return (ids, async) -> {
 			if (Objects.nonNull(ids) && ids.length == 2) {
 				int batchSize = 1_000;
 				int counter = 0;
@@ -121,7 +124,7 @@ public class DumpService {
 					if (counter > batchSize) {
 						counter = 0;
 						DumpTask4All task4All = new DumpTask4All(
-								batchWork.toArray(new Long[0]));
+								batchWork.toArray(new Long[0]), async);
 						task4AllDumpProcessor.process(task4All);
 						batchWork.clear();
 					}
@@ -130,8 +133,8 @@ public class DumpService {
 		};
 	}
 
-	private Consumer<Long[]> dumpAllBeta() {
-		return ids -> {
+	private BiConsumer<Long[], Boolean> dumpAllBeta() {
+		return (ids, async) -> {
 			if (Objects.nonNull(ids) && ids.length == 2) {
 				int batchSize = 1_000;
 				int counter = 0;
@@ -142,7 +145,7 @@ public class DumpService {
 					if (counter > batchSize) {
 						counter = 0;
 						DumpTask4Beta task4Beta = new DumpTask4Beta(
-								batchWork.toArray(new Long[0]));
+								batchWork.toArray(new Long[0]), async);
 						task4BetaDumpProcessor.process(task4Beta);
 						batchWork.clear();
 					}

@@ -37,4 +37,13 @@ public interface SystemHandler {
 	@NotNull
 	Mono<ServerResponse> changeLogLevel(ServerRequest request);
 
+	/**
+	 * force dump config-file and config-beta-info
+	 * 
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> forceDumoConfig(ServerRequest request);
+
 }

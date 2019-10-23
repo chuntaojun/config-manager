@@ -17,9 +17,13 @@
 package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.handler.SystemHandler;
+import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.service.dump.DumpService;
+import com.lessspring.org.utils.RenderUtils;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -33,14 +37,34 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class SystemHandlerImpl implements SystemHandler {
 
 	private final LoggingSystem loggingSystem;
+	private final DumpService dumpService;
 
-	public SystemHandlerImpl(LoggingSystem loggingSystem) {
+	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService) {
 		this.loggingSystem = loggingSystem;
+		this.dumpService = dumpService;
 	}
 
 	@NotNull
 	@Override
 	public Mono<ServerResponse> changeLogLevel(ServerRequest request) {
-		return null;
+		final String logLevel = request.queryParam("logLevel").orElse("info");
+		LogLevel newLevel;
+		try {
+			newLevel = LogLevel.valueOf(logLevel);
+		}
+		catch (Exception e) {
+			newLevel = LogLevel.INFO;
+		}
+		LogLevel finalNewLevel = newLevel;
+		loggingSystem.getLoggerConfigurations().forEach(
+				conf -> loggingSystem.setLogLevel(conf.getName(), finalNewLevel));
+		return RenderUtils.render(Mono.just(ResponseData.success()));
+	}
+
+	@NotNull
+	@Override
+	public Mono<ServerResponse> forceDumoConfig(ServerRequest request) {
+		dumpService.forceDump(false);
+		return RenderUtils.render(Mono.just(ResponseData.success()));
 	}
 }

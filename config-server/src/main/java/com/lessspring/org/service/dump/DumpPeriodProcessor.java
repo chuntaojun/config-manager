@@ -18,7 +18,7 @@ package com.lessspring.org.service.dump;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.dump.task.DumpTask4Period;
@@ -30,13 +30,13 @@ import com.lessspring.org.service.dump.task.DumpTask4Period;
 public class DumpPeriodProcessor implements DumpProcessor<DumpTask4Period> {
 
 	private final ConfigInfoMapper configInfoMapper;
-	private final Consumer<Long[]> task4AllDumpProcessor;
-	private final Consumer<Long[]> task4BetaDumpProcessor;
+	private final BiConsumer<Long[], Boolean> task4AllDumpProcessor;
+	private final BiConsumer<Long[], Boolean> task4BetaDumpProcessor;
 	private ScheduledThreadPoolExecutor executor;
 
 	public DumpPeriodProcessor(ConfigInfoMapper configInfoMapper,
-			Consumer<Long[]> task4AllDumpProcessor,
-			Consumer<Long[]> task4BetaDumpProcessor) {
+			BiConsumer<Long[], Boolean> task4AllDumpProcessor,
+			BiConsumer<Long[], Boolean> task4BetaDumpProcessor) {
 		this.configInfoMapper = configInfoMapper;
 		this.task4AllDumpProcessor = task4AllDumpProcessor;
 		this.task4BetaDumpProcessor = task4BetaDumpProcessor;
@@ -50,10 +50,10 @@ public class DumpPeriodProcessor implements DumpProcessor<DumpTask4Period> {
 		executor.scheduleAtFixedRate(() -> {
 			// Asynchronous dump mission operations
 			Long[] ids = configInfoMapper.findMinAndMaxId().toArray(new Long[0]);
-			task4AllDumpProcessor.accept(ids);
+			task4AllDumpProcessor.accept(ids, dumpTask.isAsync());
 			Long[] ids4Beta = configInfoMapper.findMinAndMaxId4Beta()
 					.toArray(new Long[0]);
-			task4BetaDumpProcessor.accept(ids4Beta);
+			task4BetaDumpProcessor.accept(ids4Beta, dumpTask.isAsync());
 		}, seconds / 2, seconds, TimeUnit.SECONDS);
 	}
 
