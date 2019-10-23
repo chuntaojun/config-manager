@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.service.dump;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,20 +28,33 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
+import com.lessspring.org.PathUtils;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4All;
 import com.lessspring.org.service.dump.task.DumpTask4Beta;
 import com.lessspring.org.service.dump.task.DumpTask4Period;
+import com.lessspring.org.utils.PathConstants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Component(value = "dumpService")
 public class DumpService {
+
+	@Value("${com.lessspring.org.config-manager.environment}")
+	private String developEnv;
+
+	@Autowired
+	private PathConstants pathConstants;
 
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
@@ -57,6 +72,11 @@ public class DumpService {
 
 	@PostConstruct
 	public void init() {
+		if (Objects.equals(developEnv, "develop")) {
+			log.warn(
+					"Development mode, the start automatically delete the last dump data");
+			deleteWhenStart();
+		}
 		periodProcessor = new DumpPeriodProcessor(configInfoMapper, dumpAll(),
 				dumpAllBeta());
 		task4AllDumpProcessor.init();
@@ -77,6 +97,16 @@ public class DumpService {
 		task4AllDumpProcessor.destroy();
 		task4BetaDumpProcessor.destroy();
 		periodProcessor.destroy();
+	}
+
+	private void deleteWhenStart() {
+		final String cachePath = PathUtils.finalPath("config-cache");
+		try {
+			FileUtils.deleteDirectory(new File(cachePath));
+		}
+		catch (IOException e) {
+			log.error("Delete expired files error");
+		}
 	}
 
 	private Consumer<Long[]> dumpAll() {

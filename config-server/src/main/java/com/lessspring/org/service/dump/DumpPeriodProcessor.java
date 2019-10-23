@@ -71,4 +71,14 @@ public class DumpPeriodProcessor implements DumpProcessor<DumpTask4Period> {
 	public void destroy() {
 		this.executor.shutdown();
 	}
+
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
 }

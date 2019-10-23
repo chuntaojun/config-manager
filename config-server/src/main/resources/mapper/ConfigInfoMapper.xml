@@ -107,7 +107,7 @@
     <select id="findConfigBetaInfo"
             resultMap="ConfigBetaInfoDTO">
         SELECT *
-        FROM config_beta_info
+        FROM config_info_beta
         WHERE namespace_id = #{query.namespaceId}
           and group_id like CONCAT('%', #{query.groupId}, '%')
           and data_id like CONCAT('%', #{query.dataId}, '%')

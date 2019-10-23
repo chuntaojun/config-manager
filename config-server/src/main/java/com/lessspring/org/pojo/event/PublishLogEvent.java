@@ -19,7 +19,6 @@ package com.lessspring.org.pojo.event;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

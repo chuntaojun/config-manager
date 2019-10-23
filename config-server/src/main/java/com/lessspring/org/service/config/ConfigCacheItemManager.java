@@ -18,6 +18,7 @@ package com.lessspring.org.service.config;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -63,7 +64,13 @@ public class ConfigCacheItemManager {
 		BaseConfigRequest request = BaseConfigRequest.builder().withGroupId(groupId)
 				.withDataId(dataId).build();
 		ConfigInfo configInfo = persistentHandler.readConfigContent(namespaceId, request);
+		if (Objects.isNull(configInfo)) {
+			return null;
+		}
 		ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
+		if (Objects.isNull(dto)) {
+			return null;
+		}
 		if (dto instanceof ConfigBetaInfoDTO) {
 			dumpConfigBeta(namespaceId, (ConfigBetaInfoDTO) dto);
 		}
@@ -74,10 +81,13 @@ public class ConfigCacheItemManager {
 	}
 
 	public void dumpConfig(final String namespaceId, final ConfigInfoDTO configInfoDTO) {
+		if (Objects.isNull(configInfoDTO)) {
+			return;
+		}
 		ConfigChangeEvent event = ConfigChangeEvent.builder()
 				.groupId(configInfoDTO.getGroupId()).dataId(configInfoDTO.getDataId())
-				.content(new String(configInfoDTO.getContent(),
-						Charset.forName(StandardCharsets.UTF_8.name())))
+				.content(com.lessspring.org.utils.StringUtils
+						.newString4UTF8(configInfoDTO.getContent()))
 				.file(configInfoDTO.getFile()).fileSource(configInfoDTO.getFileSource())
 				.configType(configInfoDTO.getType()).build();
 		registerConfigCacheItem(namespaceId, event);
@@ -86,6 +96,9 @@ public class ConfigCacheItemManager {
 
 	public void dumpConfigBeta(final String namespaceId,
 			final ConfigBetaInfoDTO betaInfoDTO) {
+		if (Objects.isNull(betaInfoDTO)) {
+			return;
+		}
 		ConfigChangeEvent event = ConfigChangeEvent.builder()
 				.groupId(betaInfoDTO.getGroupId()).dataId(betaInfoDTO.getDataId())
 				.content(new String(betaInfoDTO.getContent(),
@@ -152,8 +165,20 @@ public class ConfigCacheItemManager {
 		return (null == item) ? tmp : item;
 	}
 
+	public String readCacheFromDisk(final String namespaceId, final String groupId,
+			final String dataId) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return readCacheFromDisk(namespaceId, key);
+	}
+
+	public String readCacheFromDisk(final String namespaceId, final String key) {
+		final String path = Paths.get("config-cache", namespaceId).toString();
+		return DiskUtils.readFile(path, key);
+	}
+
 	public boolean updateContent(final String namespaceId,
 			final ConfigChangeEvent event) {
+		final String parentPath = Paths.get("config-cache", namespaceId).toString();
 		final CacheItem cacheItem = queryCacheItem(namespaceId, event.getGroupId(),
 				event.getDataId());
 		event.setEncryption(StringUtils.EMPTY);
@@ -167,7 +192,7 @@ public class ConfigCacheItemManager {
 			final String groupId = event.getGroupId();
 			final String dataId = event.getDataId();
 			if (Objects.equals(EventType.DELETE, event.getEventType())) {
-				DiskUtils.deleteFile(namespaceId, NameUtils.buildName(groupId, dataId));
+				DiskUtils.deleteFile(parentPath, NameUtils.buildName(groupId, dataId));
 				return true;
 			}
 			final ConfigInfo configInfo;
@@ -181,7 +206,7 @@ public class ConfigCacheItemManager {
 						event.getConfigType(), event.getEncryption());
 				cacheItem.setLastMd5(MD5Utils.md5Hex(event.getContent()));
 			}
-			DiskUtils.writeFile(namespaceId, NameUtils.buildName(groupId, dataId),
+			DiskUtils.writeFile(parentPath, NameUtils.buildName(groupId, dataId),
 					GsonUtils.toJsonBytes(configInfo));
 			cacheItem.setLastUpdateTime(System.currentTimeMillis());
 		}

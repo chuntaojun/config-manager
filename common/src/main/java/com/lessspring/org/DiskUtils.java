@@ -137,7 +137,7 @@ public final class DiskUtils {
 				if (NO_SPACE_CN.equals(errMsg) || NO_SPACE_EN.equals(errMsg)
 						|| errMsg.contains(DISK_QUATA_CN)
 						|| errMsg.contains(DISK_QUATA_EN)) {
-					logger.info("磁盘满，自杀退出");
+					logger.warning("磁盘满，自杀退出");
 					System.exit(0);
 				}
 			}
@@ -169,7 +169,6 @@ public final class DiskUtils {
 	}
 
 	public static File openFile(String path, String fileName, boolean rewrite) {
-		System.out.println("File Path : " + path);
 		File directory = new File(path);
 		if (!directory.exists()) {
 			boolean mkdirs = directory.mkdirs();

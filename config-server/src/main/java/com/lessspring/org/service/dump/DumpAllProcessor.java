@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.lessspring.org.NameUtils;
@@ -43,6 +44,9 @@ public class DumpAllProcessor implements DumpProcessor<DumpTask4All> {
 	private final ConfigInfoMapper configInfoMapper;
 	private final DistroRouter distroRouter = DistroRouter.getInstance();
 	private ExecutorService executor;
+
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 	public DumpAllProcessor(ConfigCacheItemManager cacheItemManager,
 			ConfigInfoMapper configInfoMapper) {
@@ -67,22 +71,36 @@ public class DumpAllProcessor implements DumpProcessor<DumpTask4All> {
 
 	@Override
 	public void init() {
-		this.executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
+		if (inited.compareAndSet(false, true)) {
+			this.executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
 
-			AtomicInteger id = new AtomicInteger(0);
+				AtomicInteger id = new AtomicInteger(0);
 
-			@Override
-			public Thread newThread(@NotNull Runnable r) {
-				Thread thread = new Thread(r,
-						"com.lessspring.org.config.DumpAll-" + id.getAndIncrement());
-				thread.setDaemon(true);
-				return thread;
-			}
-		});
+				@Override
+				public Thread newThread(@NotNull Runnable r) {
+					Thread thread = new Thread(r,
+							"com.lessspring.org.config.DumpAll-" + id.getAndIncrement());
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
+		}
 	}
 
 	@Override
 	public void destroy() {
-		this.executor.shutdown();
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+			this.executor.shutdown();
+		}
+	}
+
+	@Override
+	public boolean isInited() {
+		return inited.get();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return destroyed.get();
 	}
 }

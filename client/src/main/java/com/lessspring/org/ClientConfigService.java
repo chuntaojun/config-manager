@@ -74,24 +74,34 @@ final class ClientConfigService implements ConfigService {
 					watchConfigWorker, configFilterManager);
 
 			// The calling component all initialization of the hook
-			httpClient.init();
-			clusterNodeWatch.init();
-			loginHandler.init();
-			watchConfigWorker.init();
-			configManager.init();
+			LifeCycleHelper.invokeInit(httpClient);
+			LifeCycleHelper.invokeInit(clusterNodeWatch);
+			LifeCycleHelper.invokeInit(loginHandler);
+			LifeCycleHelper.invokeInit(watchConfigWorker);
+			LifeCycleHelper.invokeInit(configManager);
 			watchConfigWorker.setConfigManager(configManager);
 		}
 	}
 
 	@Override
 	public void destroy() {
-		if (destroyed.compareAndSet(false, true)) {
-			httpClient.destroy();
-			loginHandler.destroy();
-			clusterNodeWatch.destroy();
-			watchConfigWorker.destroy();
-			configManager.destroy();
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+			LifeCycleHelper.invokeDestroy(httpClient);
+			LifeCycleHelper.invokeDestroy(loginHandler);
+			LifeCycleHelper.invokeDestroy(clusterNodeWatch);
+			LifeCycleHelper.invokeDestroy(watchConfigWorker);
+			LifeCycleHelper.invokeDestroy(configManager);
 		}
+	}
+
+	@Override
+	public boolean isInited() {
+		return inited.get();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return destroyed.get();
 	}
 
 	@Override

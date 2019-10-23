@@ -16,30 +16,17 @@
  */
 package com.lessspring.org.utils;
 
-import com.lessspring.org.model.vo.ResponseData;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class RenderUtils {
+public class StringUtils {
 
-	@SuppressWarnings("unchecked")
-	public static Mono<ServerResponse> render(Mono<?> dataMono) {
-		return ok().header("Access-Control-Allow-Origin", "*")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
-				.subscribeOn(Schedulers.elastic());
+	public static String newString4UTF8(byte[] bytes) {
+		return new String(bytes, Charset.forName(StandardCharsets.UTF_8.name()));
 	}
 
 }

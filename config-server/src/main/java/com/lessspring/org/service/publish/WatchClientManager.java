@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
-import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
@@ -102,6 +101,7 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 		});
 		synchronized (monitor) {
 			clientCnt++;
+			log.info("【WatchClientManager】now watchClient count is : {}", clientCnt);
 		}
 		// A quick comparison, listens for client direct access to the latest
 		// configuration when registering for the first time
@@ -121,11 +121,15 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 				return;
 			}
 			try {
-				String content = DiskUtils.readFile(watchClient.getNamespaceId(), key);
+				String content = cacheItemManager
+						.readCacheFromDisk(watchClient.getNamespaceId(), key);
 				if (StringUtils.isEmpty(content)) {
 					// To conduct a read operation, will update CacheItem information
 					ConfigInfo configInfo = cacheItemManager.loadConfigFromDB(
 							watchClient.getNamespaceId(), info[0], info[1]);
+					if (configInfo == null) {
+						return;
+					}
 					content = GsonUtils.toJson(configInfo);
 				}
 				Set<String> clientIps = cacheItem.getBetaClientIps();
@@ -155,8 +159,8 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 	@Override
 	public void onEvent(NotifyEvent event) throws Exception {
 		try {
-			final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
-			final String configInfoJson = DiskUtils.readFile(event.getNamespaceId(), key);
+			final String configInfoJson = cacheItemManager.readCacheFromDisk(
+					event.getNamespaceId(), event.getGroupId(), event.getDataId());
 			long[] finishWorks = new long[1];
 			Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
 					.getOrDefault(event.getNamespaceId(), Collections.emptyMap())

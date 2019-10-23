@@ -16,13 +16,14 @@
  */
 package com.lessspring.org.raft.conf;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.lessspring.org.raft.Region;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -31,6 +32,7 @@ import java.util.List;
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class StoreEngineOptions {
 
 	private String cacheDir;

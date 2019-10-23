@@ -14,28 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.configuration;
 
-import com.lessspring.org.model.vo.ResponseData;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import com.lessspring.org.utils.PathConstants;
 
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class ResponseRenderUtils {
+@Configuration
+public class CommonConfiguration {
 
-	@SuppressWarnings("unchecked")
-	public static Mono<ServerResponse> render(Mono dataMono) {
-		return ok().header("Access-Control-Allow-Origin", "*")
-				.body(BodyInserters.fromPublisher(dataMono, ResponseData.class))
-				.subscribeOn(Schedulers.elastic());
+	@Bean
+	public PathConstants pathConstants() {
+		return new PathConstants();
 	}
 
 }

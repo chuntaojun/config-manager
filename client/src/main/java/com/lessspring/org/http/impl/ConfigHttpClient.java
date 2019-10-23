@@ -241,6 +241,16 @@ public class ConfigHttpClient implements HttpClient {
 		ServerSentEventListener.clean();
 	}
 
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
+
 	private <T> ResponseData<T> execute(Call call, TypeToken<ResponseData<T>> token)
 			throws IOException {
 		ResponseData<T> data;

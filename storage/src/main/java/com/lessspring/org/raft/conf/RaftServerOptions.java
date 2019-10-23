@@ -16,32 +16,90 @@
  */
 package com.lessspring.org.raft.conf;
 
-import com.lessspring.org.PathUtils;
-import com.lessspring.org.raft.Region;
-import com.lessspring.org.raft.StoreEngine;
-import lombok.Builder;
+import java.time.Duration;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Duration;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Data
-@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class RaftServerOptions {
 
-	private String cacheDir = PathUtils.finalPath("config-manager/server/config_manager_raft");
+	private String cacheDir;
 	private int electionTimeoutMs = (int) Duration.ofSeconds(5).toMillis();
 	private int snapshotIntervalSecs = (int) Duration.ofSeconds(600).getSeconds();
-	private Region region;
-	private StoreEngine storeEngine;
-	private String logUri;
-	private String raftMetaUri;
-	private String snapshotUri;
+	private String logUri = "raft-log";
+	private String raftMetaUri = "raft-meta";
+	private String snapshotUri = "raft-snapshot";
 	private boolean startRpcServer = true;
 
+	public static RaftServerOptionsBuilder builder() {
+		return new RaftServerOptionsBuilder();
+	}
+
+	public static final class RaftServerOptionsBuilder {
+		private String cacheDir;
+		private int electionTimeoutMs = (int) Duration.ofSeconds(5).toMillis();
+		private int snapshotIntervalSecs = (int) Duration.ofSeconds(600).getSeconds();
+		private String logUri = "raft-log";
+		private String raftMetaUri = "raft-meta";
+		private String snapshotUri = "raft-snapshot";
+		private boolean startRpcServer = true;
+
+		private RaftServerOptionsBuilder() {
+		}
+
+		public RaftServerOptionsBuilder cacheDir(String cacheDir) {
+			this.cacheDir = cacheDir;
+			return this;
+		}
+
+		public RaftServerOptionsBuilder electionTimeoutMs(int electionTimeoutMs) {
+			this.electionTimeoutMs = electionTimeoutMs;
+			return this;
+		}
+
+		public RaftServerOptionsBuilder snapshotIntervalSecs(int snapshotIntervalSecs) {
+			this.snapshotIntervalSecs = snapshotIntervalSecs;
+			return this;
+		}
+
+		public RaftServerOptionsBuilder logUri(String logUri) {
+			this.logUri = logUri;
+			return this;
+		}
+
+		public RaftServerOptionsBuilder raftMetaUri(String raftMetaUri) {
+			this.raftMetaUri = raftMetaUri;
+			return this;
+		}
+
+		public RaftServerOptionsBuilder snapshotUri(String snapshotUri) {
+			this.snapshotUri = snapshotUri;
+			return this;
+		}
+
+		public RaftServerOptionsBuilder startRpcServer(boolean startRpcServer) {
+			this.startRpcServer = startRpcServer;
+			return this;
+		}
+
+		public RaftServerOptions build() {
+			RaftServerOptions raftServerOptions = new RaftServerOptions();
+			raftServerOptions.setCacheDir(cacheDir);
+			raftServerOptions.setElectionTimeoutMs(electionTimeoutMs);
+			raftServerOptions.setSnapshotIntervalSecs(snapshotIntervalSecs);
+			raftServerOptions.setLogUri(logUri);
+			raftServerOptions.setRaftMetaUri(raftMetaUri);
+			raftServerOptions.setSnapshotUri(snapshotUri);
+			raftServerOptions.setStartRpcServer(startRpcServer);
+			return raftServerOptions;
+		}
+	}
 }

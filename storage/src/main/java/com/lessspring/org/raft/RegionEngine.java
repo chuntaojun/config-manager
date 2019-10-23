@@ -49,9 +49,8 @@ public class RegionEngine implements LifeCycle {
 	@Override
 	public void init() {
 		if (inited.compareAndSet(false, true)) {
-				RaftServerOptions configuration = RaftServerOptions.builder()
-						.build();
-				serverNode = new ClusterServer(configuration);
+			RaftServerOptions configuration = RaftServerOptions.builder().build();
+			serverNode = new ClusterServer(configuration);
 		}
 	}
 

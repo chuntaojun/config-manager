@@ -67,6 +67,16 @@ public class ClusterChoose implements Observer, LifeCycle {
 	public void destroy() {
 	}
 
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
+
 	public String getLastClusterIp() {
 		if (StringUtils.isEmpty(lastClusterIp)) {
 			refreshClusterIp();

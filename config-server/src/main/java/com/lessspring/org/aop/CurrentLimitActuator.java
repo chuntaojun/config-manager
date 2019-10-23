@@ -24,7 +24,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
-import com.lessspring.org.utils.ResponseRenderUtils;
+import com.lessspring.org.utils.RenderUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -76,7 +76,7 @@ public class CurrentLimitActuator {
 				if (data == null) {
 					return pjp.proceed();
 				}
-				return ResponseRenderUtils.render(Mono.just(data));
+				return RenderUtils.render(Mono.just(data));
 			}
 		}
 		return pjp.proceed();

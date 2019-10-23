@@ -25,6 +25,7 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
+import com.lessspring.org.utils.PathConstants;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import okio.BufferedSource;
 import okio.Okio;
 import org.apache.commons.lang3.StringUtils;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,8 +46,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DataBaseConfiguration {
 
-	@Value("${com.lessspring.org.config.manager.cache-dir}")
-	private String cacheDir;
+	@Autowired
+	private PathConstants pathConstants;
 
 	@Value("${com.lessspring.org.config.manager.db.name:lessSpring}")
 	private String username;
@@ -56,7 +58,8 @@ public class DataBaseConfiguration {
 	@Bean
 	public DataSource dataSource() {
 		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl("jdbc:h2:" + cacheDir + File.separator + "/db/config_manager");
+		config.setJdbcUrl("jdbc:h2:" + pathConstants.getParentPath() + File.separator
+				+ "/db/config_manager");
 		config.setUsername(username);
 		config.setPassword(password);
 		config.setMaximumPoolSize(10);

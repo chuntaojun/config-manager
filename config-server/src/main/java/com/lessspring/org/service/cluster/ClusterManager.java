@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.cluster;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -30,14 +31,16 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.SnapshotOperate;
+import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
+import com.lessspring.org.utils.PathConstants;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -47,8 +50,8 @@ import org.springframework.beans.factory.annotation.Value;
 @Slf4j
 public class ClusterManager {
 
-	@Value("${com.lessspring.org.config-manager.raft.cacheDir:${user.home}/${server.port}}")
-	private String raftCacheDir;
+	@Autowired
+	private PathConstants pathConstants;
 
 	@Value("${com.lessspring.org.config-manager.raft.electionTimeoutMs:1000}")
 	private Integer electionTimeoutMs;
@@ -71,9 +74,11 @@ public class ClusterManager {
 
 	public void init() {
 		if (initialize.compareAndSet(false, true)) {
+			final String raftCacheDir = Paths
+					.get(pathConstants.getParentPath(), "raft-data").toString();
 			final RaftServerOptions configuration = RaftServerOptions.builder()
-					.withCacheDir(raftCacheDir).withElectionTimeoutMs(electionTimeoutMs)
-					.withSnapshotIntervalSecs(snapshotIntervalSecs).build();
+					.cacheDir(raftCacheDir).electionTimeoutMs(electionTimeoutMs)
+					.snapshotIntervalSecs(snapshotIntervalSecs).build();
 			clusterServer = new ClusterServer(configuration);
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);
@@ -83,6 +88,10 @@ public class ClusterManager {
 			eventBus.register(this);
 			eventBus.register(clusterServer);
 		}
+	}
+
+	public void destroy() {
+		clusterServer.destroy();
 	}
 
 	public Mono<?> nodeAdd(NodeChangeRequest request) {

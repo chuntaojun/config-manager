@@ -16,10 +16,9 @@
  */
 package com.lessspring.org.service.config.impl;
 
+import java.util.Objects;
 import java.util.Set;
 
-import com.lessspring.org.DiskUtils;
-import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -65,8 +64,8 @@ public class CachePersistentHandler implements PersistentHandler {
 		}
 		ConfigInfo configInfo;
 		try {
-			String s = DiskUtils.readFile(namespaceId,
-					NameUtils.buildName(request.getGroupId(), request.getDataId()));
+			String s = configCacheItemManager.readCacheFromDisk(namespaceId,
+					request.getGroupId(), request.getDataId());
 			// Directly read cache did not read to the configuration file,
 			// read the database directly
 			if (StringUtils.isEmpty(s)) {
@@ -76,6 +75,9 @@ public class CachePersistentHandler implements PersistentHandler {
 				// attributes
 				// Can't change the order
 				ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
+				if (Objects.isNull(dto)) {
+					return infoDB;
+				}
 				if (dto instanceof ConfigBetaInfoDTO) {
 					configCacheItemManager.dumpConfigBeta(namespaceId,
 							(ConfigBetaInfoDTO) dto);

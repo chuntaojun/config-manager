@@ -96,6 +96,16 @@ public class LoginHandler implements Observer, LifeCycle {
 	}
 
 	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
+
+	@Override
 	public void update(Observable o, Object arg) {
 		CountDownLatch latch = (CountDownLatch) arg;
 		createLoginWork(latch::countDown);

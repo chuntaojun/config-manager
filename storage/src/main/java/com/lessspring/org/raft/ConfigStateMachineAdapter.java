@@ -41,18 +41,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
-	private final Region region;
-	private final StoreEngine storeEngine;
 	private final List<TransactionCommitCallback> callbacks = new LinkedList<>();
 	private final SerializerUtils serializer = SerializerUtils.getInstance();
 	private final Object monitor = new Object();
 
 	private List<SnapshotOperate> snapshotOperates = new CopyOnWriteArrayList<>();
-
-	public ConfigStateMachineAdapter(Region region, StoreEngine storeEngine) {
-		this.region = region;
-		this.storeEngine = storeEngine;
-	}
 
 	@Override
 	public void onApply(Iterator iter) {

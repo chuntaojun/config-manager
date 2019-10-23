@@ -22,7 +22,8 @@ package com.lessspring.org.utils;
  */
 public final class TransactionUtils {
 
-		private TransactionUtils() {}
+	private TransactionUtils() {
+	}
 
 	public static String buildTransactionKey(PropertiesEnum.InterestKey key,
 			Object... more) {

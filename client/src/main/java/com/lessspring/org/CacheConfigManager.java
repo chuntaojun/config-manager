@@ -17,6 +17,7 @@
 package com.lessspring.org;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
@@ -47,6 +48,9 @@ public class CacheConfigManager implements LifeCycle {
 
 	private final ConfigFilterManager configFilterManager;
 
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
+
 	CacheConfigManager(HttpClient client, Configuration configuration,
 			WatchConfigWorker worker, ConfigFilterManager configFilterManager) {
 		this.httpClient = client;
@@ -57,7 +61,9 @@ public class CacheConfigManager implements LifeCycle {
 
 	@Override
 	public void init() {
-		this.worker.setConfigManager(this);
+		if (inited.compareAndSet(false, true)) {
+			this.worker.setConfigManager(this);
+		}
 	}
 
 	ConfigInfo query(String groupId, String dataId, String token) {
@@ -119,9 +125,21 @@ public class CacheConfigManager implements LifeCycle {
 
 	@Override
 	public void destroy() {
-		httpClient.destroy();
-		worker.destroy();
-		worker = null;
-		httpClient = null;
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+			LifeCycleHelper.invokeDestroy(httpClient);
+			LifeCycleHelper.invokeDestroy(worker);
+			worker = null;
+			httpClient = null;
+		}
+	}
+
+	@Override
+	public boolean isInited() {
+		return inited.get();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return destroyed.get();
 	}
 }

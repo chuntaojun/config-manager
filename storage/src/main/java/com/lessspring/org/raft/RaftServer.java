@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.alipay.remoting.rpc.RpcServer;
-import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.JRaftUtils;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
@@ -41,6 +40,7 @@ import com.alipay.sofa.jraft.rpc.RpcResponseClosure;
 import com.alipay.sofa.jraft.rpc.impl.cli.BoltCliClientService;
 import com.google.protobuf.Message;
 import com.lessspring.org.LifeCycle;
+import com.lessspring.org.ThreadPoolHelper;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,6 @@ class RaftServer implements LifeCycle {
 	private RaftGroupService raftGroupService;
 	private Node node;
 	private Configuration conf;
-	private CliService cliService;
 	private ConfigStateMachineAdapter csm;
 	private RpcServer rpcServer;
 	private BoltCliClientService cliClientService;
@@ -97,9 +96,11 @@ class RaftServer implements LifeCycle {
 		// 日志, 必须
 		nodeOptions.setLogUri(path + File.separator + raftServerOptions.getLogUri());
 		// 元信息, 必须
-		nodeOptions.setRaftMetaUri(path + File.separator + raftServerOptions.getRaftMetaUri());
+		nodeOptions.setRaftMetaUri(
+				path + File.separator + raftServerOptions.getRaftMetaUri());
 		// snapshot, 可选, 一般都推荐
-		nodeOptions.setSnapshotUri(path + File.separator + raftServerOptions.getSnapshotUri());
+		nodeOptions.setSnapshotUri(
+				path + File.separator + raftServerOptions.getSnapshotUri());
 
 		nodeOptions.setFsm(this.csm);
 
@@ -130,10 +131,6 @@ class RaftServer implements LifeCycle {
 
 	public Node getNode() {
 		return node;
-	}
-
-	public CliService getCliService() {
-		return cliService;
 	}
 
 	public RpcServer getRpcServer() {
@@ -235,7 +232,7 @@ class RaftServer implements LifeCycle {
 		try {
 			if (!RouteTable.getInstance()
 					.refreshLeader(cliClientService, raftGroupId, timeoutMs).isOk()) {
-				log.error("refresh raft node info failed");
+				log.warn("refresh raft node info failed");
 			}
 		}
 		catch (InterruptedException | TimeoutException e) {
@@ -253,8 +250,7 @@ class RaftServer implements LifeCycle {
 				return thread;
 			});
 
-			this.csm = new ConfigStateMachineAdapter(raftServerOptions.getRegion(),
-					raftServerOptions.getStoreEngine());
+			this.csm = new ConfigStateMachineAdapter();
 
 			this.conf = new Configuration();
 			nodeManager.stream().forEach(stringServerNodeEntry -> {
@@ -272,7 +268,10 @@ class RaftServer implements LifeCycle {
 	@Override
 	public void destroy() {
 		if (isInited() && destroyed.compareAndSet(false, true)) {
-			scheduledExecutorService.shutdown();
+			ThreadPoolHelper.invokeShutdown(scheduledExecutorService);
+			raftGroupService.shutdown();
+			cliClientService.shutdown();
+			rpcServer.stop();
 		}
 	}
 

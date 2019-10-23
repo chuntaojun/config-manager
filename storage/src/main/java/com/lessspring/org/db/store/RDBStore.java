@@ -96,7 +96,8 @@ public class RDBStore implements LifeCycle {
 			throw new RDBStoreException(e);
 		}
 		if (StringUtils.isEmpty(sql)) {
-			throw new RDBStoreException(new IllegalArgumentException("Database initialization scripts illegal"));
+			throw new RDBStoreException(new IllegalArgumentException(
+					"Database initialization scripts illegal"));
 		}
 		try (Connection connection = dataSource.getConnection()) {
 			Statement statement = connection.createStatement();

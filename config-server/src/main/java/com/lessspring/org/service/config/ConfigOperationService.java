@@ -36,10 +36,10 @@ import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
-import com.lessspring.org.raft.utils.OperationEnum;
-import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
+import com.lessspring.org.raft.pojo.Transaction;
+import com.lessspring.org.raft.utils.OperationEnum;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.config.impl.ConfigPersistentHandler;
@@ -101,6 +101,7 @@ public class ConfigOperationService {
 	@PreDestroy
 	public void shutdown() {
 		disruptorHolder.shutdown();
+		clusterManager.destroy();
 	}
 
 	public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request) {

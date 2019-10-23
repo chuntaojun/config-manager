@@ -63,6 +63,16 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 	public void destroy() {
 	}
 
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
+
 	// Data fragmentation judgment, if the node is responsible for,
 	// it returns null said without forwarding the request
 

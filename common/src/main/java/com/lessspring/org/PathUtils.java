@@ -17,6 +17,7 @@
 package com.lessspring.org;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,7 +29,7 @@ public final class PathUtils {
 
 	private static volatile boolean initialized = false;
 
-	private static String FATHER_ROAD_KING = System.getProperty("user.home");
+	private static String FATHER_ROAD_KING = Paths.get(System.getProperty("user.home"), "config-manager-client").toString();
 
 	public static void init(String path) {
 		if (!initialized) {

@@ -16,30 +16,26 @@
  */
 package com.lessspring.org.utils;
 
-import com.lessspring.org.model.vo.ResponseData;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import javax.annotation.PostConstruct;
 
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import com.lessspring.org.PathUtils;
+import lombok.Getter;
 
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class RenderUtils {
+@Getter
+public class PathConstants {
 
-	@SuppressWarnings("unchecked")
-	public static Mono<ServerResponse> render(Mono<?> dataMono) {
-		return ok().header("Access-Control-Allow-Origin", "*")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
-				.subscribeOn(Schedulers.elastic());
+	@Value("${com.lessspring.org.config.manager.cache-dir:${user.home}/config-manager/server-${server.port}}")
+	private String parentPath;
+
+	@PostConstruct
+	public void init() {
+		PathUtils.init(parentPath);
 	}
 
 }

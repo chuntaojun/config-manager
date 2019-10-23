@@ -89,6 +89,9 @@ public class ConfigPersistentHandler
 		if (dto == null) {
 			dto = configInfoMapper.findConfigBetaInfo(queryConfigInfo);
 		}
+		if (dto == null) {
+			return null;
+		}
 		byte[] origin = dto.getContent();
 		// unable transport config-context encryption token
 		request.setAttribute(ConfigInfoDTO.NAME, dto);
