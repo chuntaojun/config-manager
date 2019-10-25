@@ -19,16 +19,23 @@ package com.lessspring.org.configuration.filter;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.lessspring.org.constant.Code;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.service.security.SecurityService;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.SchedulerUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +65,7 @@ public class ConfigWebFilter implements WebFilter {
 
 	private final FilterChain filterChain;
 	private final SecurityService securityService;
+	private final ThreadPoolExecutor executor = SchedulerUtils.WEB_HANDLER;
 
 	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
 		this.securityService = securityService;
@@ -78,27 +86,36 @@ public class ConfigWebFilter implements WebFilter {
 	@Override
 	public Mono<Void> filter(@NotNull ServerWebExchange exchange,
 			@NotNull WebFilterChain chain) {
-		ServerHttpRequest request = exchange.getRequest();
-		String path = request.getPath().value();
-		// To release the URL white list
-		if (uriMatcher(path, anyOneUri)) {
+		Future<Mono<Void>> future = executor.submit(() -> {
+			ServerHttpRequest request = exchange.getRequest();
+			String path = request.getPath().value();
+			// To release the URL white list
+			if (uriMatcher(path, anyOneUri)) {
+				return chain.filter(exchange);
+			}
+			// Give priority to perform user custom interceptors
+			Mono<Void> mono = filterChain.filter(exchange);
+			filterChain.destroy();
+			if (Objects.nonNull(mono)) {
+				return mono;
+			}
+			boolean hasAuth = permissionIntercept(exchange);
+			if (!hasAuth) {
+				return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
+						HASH_NO_PRIVILEGE.getDescribe());
+			}
 			return chain.filter(exchange);
+		});
+		try {
+			return future.get(5000, TimeUnit.MILLISECONDS);
 		}
-		// Give priority to perform user custom interceptors
-		Mono<Void> mono = filterChain.filter(exchange);
-		filterChain.destroy();
-		if (Objects.nonNull(mono)) {
-			return mono;
+		catch (InterruptedException | ExecutionException | TimeoutException e) {
+			return filterResponse(exchange.getResponse(), Code.SERVER_BUSY.getCode(),
+					Code.SERVER_BUSY.getMsg());
 		}
-		boolean hasAuth = permissionIntercept(exchange);
-		if (!hasAuth) {
-			return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
-					HASH_NO_PRIVILEGE.getDescribe());
-		}
-		return chain.filter(exchange);
 	}
 
-	boolean permissionIntercept(ServerWebExchange exchange) {
+	private boolean permissionIntercept(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		String token = request.getHeaders().getFirst(StringConst.TOKEN_HEADER_NAME);
 		if (StringUtils.isEmpty(token)) {
@@ -128,6 +145,13 @@ public class ConfigWebFilter implements WebFilter {
 		return response.writeWith(
 				Mono.just(response.bufferFactory().wrap(GsonUtils.toJsonBytes(ResponseData
 						.builder().withCode(status.value()).withData(s).build()))));
+	}
+
+	@SuppressWarnings("unchecked")
+	private Mono<Void> filterResponse(ServerHttpResponse response, int code, String s) {
+		return response
+				.writeWith(Mono.just(response.bufferFactory().wrap(GsonUtils.toJsonBytes(
+						ResponseData.builder().withCode(code).withData(s).build()))));
 	}
 
 }

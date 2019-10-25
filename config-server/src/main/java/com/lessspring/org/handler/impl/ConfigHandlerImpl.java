@@ -50,7 +50,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@NotNull
 	@Override
-	@LimitRule
+	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
 	public Mono<ServerResponse> publishConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
@@ -62,7 +62,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@NotNull
 	@Override
-	@LimitRule
+	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
 	public Mono<ServerResponse> modifyConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
@@ -74,7 +74,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@NotNull
 	@Override
-	@LimitRule
+	@LimitRule(resource = "query-config", qps = 2000)
 	@NeedAuth(argueName = "namespaceId")
 	public Mono<ServerResponse> queryConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
@@ -92,7 +92,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@NotNull
 	@Override
-	@LimitRule
+	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
 	public Mono<ServerResponse> removeConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");

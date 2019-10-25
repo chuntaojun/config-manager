@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ConfigInfo {
 
-	public static final ConfigInfo EMPTY = new ConfigInfo();
+	public transient static final ConfigInfo EMPTY = new ConfigInfo();
 
 	private String groupId;
 	private String dataId;

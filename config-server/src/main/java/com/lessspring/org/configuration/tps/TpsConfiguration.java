@@ -40,9 +40,6 @@ public class TpsConfiguration {
 
 	private final TpsManager tpsManager;
 
-	@Value("${com.lessspring.org.config-manager.qps}")
-	private Long qps;
-
 	public TpsConfiguration(TpsManager tpsManager) {
 		this.tpsManager = tpsManager;
 	}
@@ -65,7 +62,7 @@ public class TpsConfiguration {
 					if (rule != null) {
 						Supplier<TpsManager.LimitRuleEntry> limiterSupplier = () -> {
 							RateLimiter limiter = RateLimiter
-									.create(qps == null ? rule.qps() : qps);
+									.create(rule.qps());
 							Class<? extends FailStrategy> failStrategy = rule
 									.failStrategy();
 							try {

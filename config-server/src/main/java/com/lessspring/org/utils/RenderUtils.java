@@ -39,7 +39,7 @@ public final class RenderUtils {
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
 				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
-				.subscribeOn(Schedulers.elastic());
+				.subscribeOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
 	}
 
 }

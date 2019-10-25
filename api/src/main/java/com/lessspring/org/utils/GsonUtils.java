@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -28,7 +29,7 @@ import com.google.gson.Gson;
  */
 public final class GsonUtils {
 
-	private static final Gson GSON = new Gson();
+	private static final Gson GSON = new GsonBuilder().setLenient().create();
 
 	public static String toJson(Object obj) {
 		return GSON.toJson(obj);

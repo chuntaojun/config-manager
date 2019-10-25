@@ -27,6 +27,7 @@ import javax.annotation.PreDestroy;
 
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.exception.NotThisResourceException;
+import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -105,8 +106,11 @@ public class ConfigOperationService {
 	}
 
 	public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request) {
-		return ResponseData
-				.success(persistentHandler.readConfigContent(namespaceId, request));
+		ConfigInfo info = persistentHandler.readConfigContent(namespaceId, request);
+		if (Objects.isNull(info)) {
+			throw new NotThisResourceException("Config-Info data not found");
+		}
+		return ResponseData.success(info);
 	}
 
 	public ResponseData<?> publishConfig(String namespaceId,

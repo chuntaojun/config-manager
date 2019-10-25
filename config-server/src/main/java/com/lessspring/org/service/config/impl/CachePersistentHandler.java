@@ -87,17 +87,21 @@ public class CachePersistentHandler implements PersistentHandler {
 					}
 					configInfo[0] = infoDB;
 				}
-				configInfo[0] = GsonUtils.toObj(s, ConfigInfo.class);
+				else {
+					configInfo[0] = GsonUtils.toObj(s, ConfigInfo.class);
+				}
+				configInfo[0].setEncryption("");
 				if (cacheItem.isBeta() && !cacheItem
 						.canRead((String) request.getAttribute("clientIp"))) {
 					configInfo[0] = null;
 				}
-				configInfo[0].setEncryption("");
+				log.debug("config-info : {}", configInfo[0]);
 			}
 
 			@Override
 			public void onError(Exception exception) {
-					configInfo[0] = null;
+				configInfo[0] = null;
+				log.error("Has some error : {}", exception);
 			}
 		});
 		request.getAttributes().clear();
