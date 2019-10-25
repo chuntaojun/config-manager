@@ -170,7 +170,7 @@ public class ConfigOperationService {
 		}
 	}
 
-	public TransactionConsumer<Transaction> publishConsumer() {
+	private TransactionConsumer<Transaction> publishConsumer() {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
@@ -199,7 +199,7 @@ public class ConfigOperationService {
 		};
 	}
 
-	public TransactionConsumer<Transaction> modifyConsumer() {
+	private TransactionConsumer<Transaction> modifyConsumer() {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
@@ -227,7 +227,7 @@ public class ConfigOperationService {
 		};
 	}
 
-	public TransactionConsumer<Transaction> deleteConsumer() {
+	private TransactionConsumer<Transaction> deleteConsumer() {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {

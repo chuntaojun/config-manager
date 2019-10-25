@@ -17,7 +17,6 @@
 package com.lessspring.org.service.publish;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +28,7 @@ import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.event.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
@@ -114,33 +114,32 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 			String[] info = NameUtils.splitName(key);
 			final CacheItem cacheItem = cacheItemManager
 					.queryCacheItem(watchClient.getNamespaceId(), info[0], info[1]);
-			final int lockResult = ConfigCacheItemManager.tryReadLock(cacheItem);
-			assert lockResult != 0;
-			if (lockResult < 0) {
-				log.warn("[dump-error] read lock failed. {}", cacheItem.getKey());
-				return;
-			}
-			try {
-				String content = cacheItemManager
-						.readCacheFromDisk(watchClient.getNamespaceId(), key);
-				if (StringUtils.isEmpty(content)) {
-					// To conduct a read operation, will update CacheItem information
-					ConfigInfo configInfo = cacheItemManager.loadConfigFromDB(
-							watchClient.getNamespaceId(), info[0], info[1]);
-					if (configInfo == null) {
-						return;
+			cacheItem.executeReadWork(new ReadWork() {
+				@Override
+				public void job() {
+					String content = cacheItemManager
+							.readCacheFromDisk(watchClient.getNamespaceId(), key);
+					if (StringUtils.isEmpty(content)) {
+						// To conduct a read operation, will update CacheItem
+						// information
+						ConfigInfo configInfo = cacheItemManager.loadConfigFromDB(
+								watchClient.getNamespaceId(), info[0], info[1]);
+						if (configInfo == null) {
+							return;
+						}
+						content = GsonUtils.toJson(configInfo);
 					}
-					content = GsonUtils.toJson(configInfo);
+					if (cacheItem.isBeta()
+							&& cacheItem.canRead(watchClient.getClientIp())) {
+						writeResponse(watchClient, GsonUtils.toJson(content));
+					}
 				}
-				Set<String> clientIps = cacheItem.getBetaClientIps();
-				if (clientIps.isEmpty()
-						|| clientIps.contains(watchClient.getClientIp())) {
-					writeResponse(watchClient, GsonUtils.toJson(content));
+
+				@Override
+				public void onError(Exception exception) {
+
 				}
-			}
-			finally {
-				ConfigCacheItemManager.releaseReadLock(cacheItem);
-			}
+			});
 		});
 	}
 
@@ -158,54 +157,57 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
 	@Override
 	public void onEvent(NotifyEvent event) throws Exception {
-		try {
-			final String configInfoJson = cacheItemManager.readCacheFromDisk(
-					event.getNamespaceId(), event.getGroupId(), event.getDataId());
-			long[] finishWorks = new long[1];
-			Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
-					.getOrDefault(event.getNamespaceId(), Collections.emptyMap())
-					.entrySet();
-			Stream<Map.Entry<String, Set<WatchClient>>> stream;
-			if (clientCnt >= parallelThreshold) {
-				stream = set.parallelStream();
-			}
-			else {
-				stream = set.stream();
-			}
-			Set<String> clientIps = new HashSet<>();
-			if (event.isBeta()) {
-				for (String ip : event.getClientIps().split(",")) {
-					clientIps.add(ip.trim());
-				}
-			}
-			stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
-					.forEach(client -> {
-						// If it is beta configuration file, you need to check the client
-						// IP information
-						if (event.isBeta()) {
-							if (!clientIps.contains(client.getClientIp())) {
-								return;
+		final CacheItem cacheItem = cacheItemManager.queryCacheItem(
+				event.getNamespaceId(), event.getGroupId(), event.getDataId());
+		final String configInfoJson = cacheItemManager.readCacheFromDisk(
+				event.getNamespaceId(), event.getGroupId(), event.getDataId());
+		long[] finishWorks = new long[1];
+		Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
+				.getOrDefault(event.getNamespaceId(), Collections.emptyMap()).entrySet();
+		Stream<Map.Entry<String, Set<WatchClient>>> stream;
+		if (clientCnt >= parallelThreshold) {
+			stream = set.parallelStream();
+		}
+		else {
+			stream = set.stream();
+		}
+		cacheItem.executeReadWork(new ReadWork() {
+			@Override
+			public void job() {
+				stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+						.forEach(client -> {
+							// If it is beta configuration file, you need to check the
+							// client
+							// IP information
+							if (event.isBeta()) {
+								if (cacheItem.canRead(client.getClientIp())) {
+									return;
+								}
 							}
-						}
-						try {
-							writeResponse(client, configInfoJson);
-							finishWorks[0]++;
-							tracer.publishPublishEvent(PublishLogEvent.builder()
-									.namespaceId(event.getNamespaceId())
-									.groupId(event.getGroupId()).dataId(event.getDataId())
-									.clientIp(client.getClientIp())
-									.publishTime(System.currentTimeMillis()).build());
-						}
-						catch (Exception e) {
-							log.error("[Notify WatchClient has Error] : {}",
-									e.getMessage());
-						}
-					});
-			log.info("total notify clients finish success is : {}", finishWorks[0]);
-		}
-		catch (Exception e) {
-			log.error("notify watcher has some error : {}", e);
-		}
+							try {
+								writeResponse(client, configInfoJson);
+								finishWorks[0]++;
+								tracer.publishPublishEvent(PublishLogEvent.builder()
+										.namespaceId(event.getNamespaceId())
+										.groupId(event.getGroupId())
+										.dataId(event.getDataId())
+										.clientIp(client.getClientIp())
+										.publishTime(System.currentTimeMillis()).build());
+							}
+							catch (Exception e) {
+								log.error("[Notify WatchClient has Error] : {}",
+										e.getMessage());
+							}
+						});
+				log.info("total notify clients finish success is : {}", finishWorks[0]);
+			}
+
+			@Override
+			public void onError(Exception exception) {
+				log.error("notify watcher has some error : {}", exception);
+
+			}
+		});
 	}
 
 }

@@ -30,6 +30,7 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.PathConstants;
 import com.lessspring.org.watch.WatchConfigWorker;
 
 /**
@@ -45,7 +46,7 @@ public class CacheConfigManager implements LifeCycle {
 	private HttpClient httpClient;
 
 	private final String namespaceId;
-
+	private final boolean localPref;
 	private final ConfigFilterManager configFilterManager;
 
 	private final AtomicBoolean inited = new AtomicBoolean(false);
@@ -57,6 +58,7 @@ public class CacheConfigManager implements LifeCycle {
 		this.worker = worker;
 		this.namespaceId = configuration.getNamespaceId();
 		this.configFilterManager = configFilterManager;
+		this.localPref = configuration.isLocalPref();
 	}
 
 	@Override
@@ -67,6 +69,12 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	ConfigInfo query(String groupId, String dataId, String token) {
+		if (localPref) {
+			ConfigInfo local = localPref(groupId, dataId);
+			if (Objects.nonNull(local)) {
+				return local;
+			}
+		}
 		final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
 				.addParam("groupId", groupId).addParam("dataId", dataId);
 		ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG,
@@ -109,8 +117,19 @@ public class CacheConfigManager implements LifeCycle {
 				});
 	}
 
+	private ConfigInfo localPref(String groupId, String dataId) {
+		final String fileName = NameUtils.buildName(PathConstants.FILE_LOCAL_PREF_PATH,
+				groupId, dataId);
+		final byte[] content = DiskUtils.readFileBytes(namespaceId, fileName);
+		if (Objects.nonNull(content) && content.length > 0) {
+			return serializer.deserialize(content, ConfigInfo.class);
+		}
+		return null;
+	}
+
 	private ConfigInfo snapshotLoad(String groupId, String dataId) {
-		final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
+		final String fileName = NameUtils.buildName(PathConstants.FILE_CACHE_PATH,
+				groupId, dataId);
 		final byte[] content = DiskUtils.readFileBytes(namespaceId, fileName);
 		if (Objects.nonNull(content) && content.length > 0) {
 			return serializer.deserialize(content, ConfigInfo.class);
@@ -119,7 +138,8 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	private void snapshotSave(String groupId, String dataId, ConfigInfo configInfo) {
-		final String fileName = NameUtils.buildName("snapshot", groupId, dataId);
+		final String fileName = NameUtils.buildName(PathConstants.FILE_CACHE_PATH,
+				groupId, dataId);
 		DiskUtils.writeFile(namespaceId, fileName, GsonUtils.toJsonBytes(configInfo));
 	}
 

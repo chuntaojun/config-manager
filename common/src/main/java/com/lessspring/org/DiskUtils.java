@@ -30,6 +30,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -60,12 +61,12 @@ public final class DiskUtils {
 		String finalPath = PathUtils.finalPath(path);
 		File file = openFile(finalPath, fileName);
 		if (file.exists()) {
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(new FileInputStream(file)))) {
+			try (FileInputStream reader = new FileInputStream(file)) {
+				FileChannel channel = reader.getChannel();
+				ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
 				StringBuilder textBuilder = new StringBuilder();
-				String lineTxt = null;
-				while ((lineTxt = reader.readLine()) != null) {
-					textBuilder.append(lineTxt);
+				while (channel.read(byteBuffer) > 0) {
+					textBuilder.append(Arrays.toString(byteBuffer.array()));
 				}
 				return textBuilder.toString();
 			}
@@ -91,18 +92,21 @@ public final class DiskUtils {
 	}
 
 	public static String readFile(File file) {
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(file)))) {
-			StringBuilder textBuilder = new StringBuilder();
-			String lineTxt = null;
-			while ((lineTxt = reader.readLine()) != null) {
-				textBuilder.append(lineTxt);
+		if (file.exists()) {
+			try (FileInputStream reader = new FileInputStream(file)) {
+				FileChannel channel = reader.getChannel();
+				ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
+				StringBuilder textBuilder = new StringBuilder();
+				while (channel.read(byteBuffer) > 0) {
+					textBuilder.append(Arrays.toString(byteBuffer.array()));
+				}
+				return textBuilder.toString();
 			}
-			return textBuilder.toString();
+			catch (IOException e) {
+				return null;
+			}
 		}
-		catch (IOException e) {
-			return null;
-		}
+		return null;
 	}
 
 	public static byte[] readFileBytes(String path, String fileName) {
@@ -111,11 +115,12 @@ public final class DiskUtils {
 		if (file.exists()) {
 			try (FileInputStream reader = new FileInputStream(file)) {
 				FileChannel channel = reader.getChannel();
-				ByteBuffer byteBuffer = ByteBuffer.allocate((int) channel.size());
-				while ((channel.read(byteBuffer)) > 0) {
-					// do nothing
+				ByteBuffer byteBuffer = ByteBuffer.allocate(4096);
+				StringBuilder textBuilder = new StringBuilder();
+				while (channel.read(byteBuffer) > 0) {
+					textBuilder.append(Arrays.toString(byteBuffer.array()));
 				}
-				return byteBuffer.array();
+				return ByteUtils.toBytes(textBuilder.toString());
 			}
 			catch (IOException e) {
 				return null;

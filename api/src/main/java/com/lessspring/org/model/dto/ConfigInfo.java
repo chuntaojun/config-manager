@@ -32,7 +32,7 @@ public class ConfigInfo {
 	private String content;
 	private String type;
 	private byte[] file;
-	private String encryption = "";
+	private transient String encryption = "";
 
 	public ConfigInfo() {
 	}

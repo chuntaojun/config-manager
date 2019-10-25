@@ -61,7 +61,7 @@ final class ClientConfigService implements ConfigService {
 			// Build a cluster node selector
 			ClusterChoose choose = new ClusterChoose();
 
-			httpClient = new ConfigHttpClient(choose, authHolder);
+			httpClient = new ConfigHttpClient(choose, authHolder, configuration);
 			loginHandler = new LoginHandler(httpClient, authHolder, configuration);
 			clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
 			clusterNodeWatch.register(choose);
@@ -102,6 +102,16 @@ final class ClientConfigService implements ConfigService {
 	@Override
 	public boolean isDestroyed() {
 		return destroyed.get();
+	}
+
+	@Override
+	public void setClientId(String clientId) {
+		configuration.setClientId(clientId);
+	}
+
+	@Override
+	public String getClientId() {
+		return configuration.getClientId();
 	}
 
 	@Override

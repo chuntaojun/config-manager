@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.pojo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class PathConstants {
+public interface WriteWork {
 
-	public static final String FILE_LOCAL_PREF_PATH = "config_file_local";
+	void job();
 
-	public static final String FILE_CACHE_PATH = "config_file_snapshot";
+	void onError(Exception exception);
 
 }

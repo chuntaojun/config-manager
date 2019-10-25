@@ -20,10 +20,6 @@ package com.lessspring.org;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class DestructionFactory {
-
-	public static void registerShutdownHook(Runnable runnable) {
-		Runtime.getRuntime().addShutdownHook(new Thread(runnable));
-	}
+public class JvmUtils {
 
 }

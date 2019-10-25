@@ -42,7 +42,7 @@ import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.service.user.UserService;
-import com.lessspring.org.utils.EncryptionUtils;
+import com.lessspring.org.EncryptionUtils;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;

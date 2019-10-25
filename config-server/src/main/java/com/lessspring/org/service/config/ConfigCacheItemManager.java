@@ -34,6 +34,7 @@ import com.lessspring.org.event.EventType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.pojo.WriteWork;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
@@ -182,65 +183,39 @@ public class ConfigCacheItemManager {
 		final CacheItem cacheItem = queryCacheItem(namespaceId, event.getGroupId(),
 				event.getDataId());
 		event.setEncryption(StringUtils.EMPTY);
-		final int lockResult = tryWriteLock(cacheItem);
-		assert (lockResult != 0);
-		if (lockResult < 0) {
-			log.warn("[dump-error] write lock failed. {}", cacheItem.getKey());
-			return false;
-		}
-		try {
-			final String groupId = event.getGroupId();
-			final String dataId = event.getDataId();
-			if (Objects.equals(EventType.DELETE, event.getEventType())) {
-				DiskUtils.deleteFile(parentPath, NameUtils.buildName(groupId, dataId));
-				return true;
+		final boolean[] result = new boolean[] { false };
+		cacheItem.executeWriteWork(new WriteWork() {
+			@Override
+			public void job() {
+				final String groupId = event.getGroupId();
+				final String dataId = event.getDataId();
+				if (Objects.equals(EventType.DELETE, event.getEventType())) {
+					DiskUtils.deleteFile(parentPath,
+							NameUtils.buildName(groupId, dataId));
+					result[0] = true;
+				}
+				final ConfigInfo configInfo;
+				if (event.isFile()) {
+					configInfo = new ConfigInfo(groupId, dataId, event.getFileSource(),
+							event.getConfigType(), event.getEncryption());
+					cacheItem.setLastMd5(MD5Utils.md5Hex(event.getFileSource()));
+				}
+				else {
+					configInfo = new ConfigInfo(groupId, dataId, event.getContent(),
+							event.getConfigType(), event.getEncryption());
+					cacheItem.setLastMd5(MD5Utils.md5Hex(event.getContent()));
+				}
+				DiskUtils.writeFile(parentPath, NameUtils.buildName(groupId, dataId),
+						GsonUtils.toJsonBytes(configInfo));
+				cacheItem.setLastUpdateTime(System.currentTimeMillis());
 			}
-			final ConfigInfo configInfo;
-			if (event.isFile()) {
-				configInfo = new ConfigInfo(groupId, dataId, event.getFileSource(),
-						event.getConfigType(), event.getEncryption());
-				cacheItem.setLastMd5(MD5Utils.md5Hex(event.getFileSource()));
+
+			@Override
+			public void onError(Exception exception) {
+
 			}
-			else {
-				configInfo = new ConfigInfo(groupId, dataId, event.getContent(),
-						event.getConfigType(), event.getEncryption());
-				cacheItem.setLastMd5(MD5Utils.md5Hex(event.getContent()));
-			}
-			DiskUtils.writeFile(parentPath, NameUtils.buildName(groupId, dataId),
-					GsonUtils.toJsonBytes(configInfo));
-			cacheItem.setLastUpdateTime(System.currentTimeMillis());
-		}
-		catch (Exception e) {
-			log.error("update config content has some error : {}", e);
-		}
-		finally {
-			releaseWriteLock(cacheItem);
-		}
-		return true;
-	}
-
-	public static int tryReadLock(CacheItem cacheItem) {
-		int result = (cacheItem.tryReadLock() ? 1 : -1);
-		if (result < 0) {
-			log.warn("[read-lock] failed, {}, {}", result, cacheItem.getKey());
-		}
-		return result;
-	}
-
-	public static void releaseReadLock(CacheItem cacheItem) {
-		cacheItem.releaseReadLock();
-	}
-
-	public static int tryWriteLock(CacheItem cacheItem) {
-		int result = (cacheItem.tryWriteLock() ? 1 : -1);
-		if (result < 0) {
-			log.warn("[write-lock] failed, {}, {}", result, cacheItem.getKey());
-		}
-		return result;
-	}
-
-	public static void releaseWriteLock(CacheItem cacheItem) {
-		cacheItem.releaseWriteLock();
+		});
+		return result[0];
 	}
 
 }

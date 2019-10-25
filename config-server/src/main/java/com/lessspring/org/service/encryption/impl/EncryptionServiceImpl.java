@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.service.encryption.EncryptionService;
-import com.lessspring.org.utils.EncryptionUtils;
+import com.lessspring.org.EncryptionUtils;
 
 import org.springframework.stereotype.Component;
 

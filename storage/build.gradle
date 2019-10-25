@@ -1,5 +1,7 @@
 version '0.0.1'
 
+sourceCompatibility = 11
+
 dependencies {
     compile(project(":api"))
     compile(project(":common"))

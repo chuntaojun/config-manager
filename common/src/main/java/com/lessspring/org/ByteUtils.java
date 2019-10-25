@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -44,6 +46,13 @@ public final class ByteUtils {
 			return EMPTY;
 		}
 		return s.getBytes(Charset.forName(StandardCharsets.UTF_8.name()));
+	}
+
+	public static String toString(byte[] bytes) {
+		if (Objects.isNull(bytes)) {
+			return StringUtils.EMPTY;
+		}
+		return new String(bytes, Charset.forName(StandardCharsets.UTF_8.name()));
 	}
 
 	public static byte[] copyAndAdd(byte[] source, byte b, int pos, int length) {

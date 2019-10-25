@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +23,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,8 +32,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.lang3.StringUtils;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -43,8 +42,8 @@ public final class EncryptionUtils {
 	private static Cipher cipher;
 	private static String aesKey;
 
-	private static final BASE64Encoder encoder = new BASE64Encoder();
-	private static final BASE64Decoder decoder = new BASE64Decoder();
+	private static final Base64.Encoder encoder = Base64.getEncoder();
+	private static final Base64.Decoder decoder = Base64.getDecoder();
 	private static final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
 
 	static {
@@ -68,7 +67,7 @@ public final class EncryptionUtils {
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			byte[] p = content.getBytes(StandardCharsets.UTF_8);
 			byte[] result = cipher.doFinal(p);
-			return encoder.encode(result);
+			return ByteUtils.toString(encoder.encode(result));
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
@@ -80,7 +79,7 @@ public final class EncryptionUtils {
 		try {
 			Cipher cipher = Cipher.getInstance("AES");
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
-			byte[] c = decoder.decodeBuffer(content);
+			byte[] c = decoder.decode(content);
 			byte[] result = cipher.doFinal(c);
 			return new String(result, Charset.forName(StandardCharsets.UTF_8.name()));
 		}

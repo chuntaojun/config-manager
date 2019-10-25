@@ -17,7 +17,6 @@
 package com.lessspring.org.service.config.impl;
 
 import java.util.Objects;
-import java.util.Set;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
@@ -26,6 +25,7 @@ import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.GsonUtils;
@@ -36,6 +36,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
+ * With the persistence of the processor cache function, for a read operation, to
+ * intercept, read the file cache, if the file cache does not exist, is for the dump file
+ * cache operation
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
@@ -56,52 +60,48 @@ public class CachePersistentHandler implements PersistentHandler {
 	public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
 		final CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
 				request.getGroupId(), request.getDataId());
-		final int lockResult = ConfigCacheItemManager.tryReadLock(cacheItem);
-		assert (lockResult != 0);
-		if (lockResult < 0) {
-			log.warn("[dump-error] read lock failed. {}", cacheItem.getKey());
-			return null;
-		}
-		ConfigInfo configInfo;
-		try {
-			String s = configCacheItemManager.readCacheFromDisk(namespaceId,
-					request.getGroupId(), request.getDataId());
-			// Directly read cache did not read to the configuration file,
-			// read the database directly
-			if (StringUtils.isEmpty(s)) {
-				ConfigInfo infoDB = persistentHandler.readConfigContent(namespaceId,
-						request);
-				// After they perform query operations dto objects attached to the
-				// attributes
-				// Can't change the order
-				ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
-				if (Objects.isNull(dto)) {
-					return infoDB;
+		final ConfigInfo[] configInfo = new ConfigInfo[] { null };
+		cacheItem.executeReadWork(new ReadWork() {
+			@Override
+			public void job() {
+				String s = configCacheItemManager.readCacheFromDisk(namespaceId,
+						request.getGroupId(), request.getDataId());
+				// Directly read cache did not read to the configuration file,
+				// read the database directly
+				if (StringUtils.isEmpty(s)) {
+					ConfigInfo infoDB = persistentHandler.readConfigContent(namespaceId,
+							request);
+					// After they perform query operations dto objects attached to the
+					// attributes
+					// Can't change the order
+					ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
+					if (Objects.isNull(dto)) {
+						configInfo[0] = infoDB;
+					}
+					if (dto instanceof ConfigBetaInfoDTO) {
+						configCacheItemManager.dumpConfigBeta(namespaceId,
+								(ConfigBetaInfoDTO) dto);
+					}
+					else {
+						configCacheItemManager.dumpConfig(namespaceId, dto);
+					}
+					configInfo[0] = infoDB;
 				}
-				if (dto instanceof ConfigBetaInfoDTO) {
-					configCacheItemManager.dumpConfigBeta(namespaceId,
-							(ConfigBetaInfoDTO) dto);
+				configInfo[0] = GsonUtils.toObj(s, ConfigInfo.class);
+				if (cacheItem.isBeta() && !cacheItem
+						.canRead((String) request.getAttribute("clientIp"))) {
+					configInfo[0] = null;
 				}
-				else {
-					configCacheItemManager.dumpConfig(namespaceId, dto);
-				}
-				return infoDB;
+				configInfo[0].setEncryption("");
 			}
-			configInfo = GsonUtils.toObj(s, ConfigInfo.class);
-			if (cacheItem.isBeta()) {
-				Set<String> clientIps = cacheItem.getBetaClientIps();
-				if (!clientIps.isEmpty() && !clientIps
-						.contains((String) request.getAttribute("clientIp"))) {
-					return null;
-				}
+
+			@Override
+			public void onError(Exception exception) {
+					configInfo[0] = null;
 			}
-			configInfo.setEncryption("");
-		}
-		finally {
-			ConfigCacheItemManager.releaseReadLock(cacheItem);
-		}
+		});
 		request.getAttributes().clear();
-		return configInfo;
+		return configInfo[0];
 	}
 
 	@Override

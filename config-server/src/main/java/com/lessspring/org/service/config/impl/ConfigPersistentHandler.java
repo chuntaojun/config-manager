@@ -37,7 +37,7 @@ import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.service.publish.WatchClientManager;
-import com.lessspring.org.utils.ByteUtils;
+import com.lessspring.org.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.PropertiesEnum;

@@ -36,13 +36,15 @@ public class Configuration {
 	private String cachePath = Paths
 			.get(System.getProperty("user.home"), "config_manager_client").toString();
 
-	private String clientId;
+	private volatile String clientId;
 
 	private String username;
 
 	private String password;
 
 	private String authToken;
+
+	private boolean localPref = false;
 
 	public static Builder builder() {
 		return new Builder();
@@ -56,6 +58,7 @@ public class Configuration {
 		private String username;
 		private String password;
 		private String authToken;
+		private boolean localPref = false;
 
 		private Builder() {
 		}
@@ -95,6 +98,11 @@ public class Configuration {
 			return this;
 		}
 
+		public Builder localPref(boolean localPref) {
+			this.localPref = localPref;
+			return this;
+		}
+
 		public Configuration build() {
 			Configuration configuration = new Configuration();
 			configuration.setNamespaceId(namespaceId);
@@ -104,6 +112,7 @@ public class Configuration {
 			configuration.setUsername(username);
 			configuration.setPassword(password);
 			configuration.setAuthToken(authToken);
+			configuration.setLocalPref(localPref);
 			return configuration;
 		}
 	}
