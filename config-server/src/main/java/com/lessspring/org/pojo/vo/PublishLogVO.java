@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,10 @@ import java.util.Map;
 public class PublishLogVO {
 
     private String clientIp;
-    private List<Map<String, String>> recordLog;
+    private List<Map<String, String>> recordLog = new ArrayList<>();
+
+    public void addRecord(Map<String, String> record) {
+        recordLog.add(record);
+    }
 
 }

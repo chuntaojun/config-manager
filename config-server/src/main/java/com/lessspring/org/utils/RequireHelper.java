@@ -14,19 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils.vo;
+package com.lessspring.org.utils;
 
-import com.lessspring.org.pojo.vo.PublishLogVO;
+import com.lessspring.org.exception.ValidationException;
+
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class PublishLogVOUtils {
+public class RequireHelper {
 
-    public static PublishLogVO readFromString(String s) {
-
+    public static void requireEquals(int a, int b, String msg) {
+        if (a != b) {
+            throw new ValidationException(msg);
+        }
     }
 
+    public static void requireNotNull(Object a, String msg) {
+        if (Objects.isNull(a)) {
+            throw new ValidationException(msg);
+        }
+    }
 
 }
