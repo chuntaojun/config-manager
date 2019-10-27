@@ -16,8 +16,6 @@
  */
 package com.lessspring.org.utils;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
@@ -35,12 +33,12 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class SchedulerUtils {
 
-	private static final int CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
-	private static final int MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() << 2;
+	private static final int CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors() << 2;
+	private static final int MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() << 3;
 	private static final long KEEP_ALIVE_TIME = 60;
 	private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
-	private static ThreadFactory dbThreadFactory = new ThreadFactory() {
+	private static ThreadFactory threadFactory = new ThreadFactory() {
 		private final AtomicInteger nextId = new AtomicInteger(1);
 
 		@Override
@@ -57,6 +55,6 @@ public class SchedulerUtils {
 
 	public static final ThreadPoolExecutor WEB_HANDLER = new ThreadPoolExecutor(CORE_POOL_SIZE,
 			MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT, new LinkedBlockingQueue<>(),
-			dbThreadFactory, rejectedExecutionHandler);
+            threadFactory, rejectedExecutionHandler);
 
 }

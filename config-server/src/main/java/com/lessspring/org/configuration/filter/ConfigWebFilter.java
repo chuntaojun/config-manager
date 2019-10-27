@@ -107,6 +107,7 @@ public class ConfigWebFilter implements WebFilter {
 			return chain.filter(exchange);
 		});
 		try {
+			// Handling requests with asynchronous tasks
 			return future.get(5000, TimeUnit.MILLISECONDS);
 		}
 		catch (InterruptedException | ExecutionException | TimeoutException e) {

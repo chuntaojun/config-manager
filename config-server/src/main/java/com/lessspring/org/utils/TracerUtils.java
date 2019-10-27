@@ -16,10 +16,14 @@
  */
 package com.lessspring.org.utils;
 
-import java.io.FileInputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,8 +31,10 @@ import com.lessspring.org.ByteUtils;
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.PathUtils;
 import com.lessspring.org.pojo.event.PublishLogEvent;
+import com.lessspring.org.pojo.vo.PublishLogVO;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Notify the tracker
@@ -41,10 +47,20 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 	private final AtomicLong id = new AtomicLong(0);
 	private final String tracerName = "config-manager-tracer-";
 	private final String path = "watch-publish-tracer";
-	private final String title = "id|namespace|groupId|dataId|clientIp|publishTime";
-	private final String layout = "%s|%s|%s|%s|%s|%s";
-	private final AtomicInteger countReuseAble = new AtomicInteger(10_000);
+	private final String title = "id,namespace,groupId,dataId,clientIp,publishTime";
+	private final String layout = "%s,%s,%s,%s,%s,%s";
+	private final AtomicInteger countReuseAble = new AtomicInteger(100_000);
 	private FileChannel fileChannel;
+	private final ScheduledExecutorService executorService = Executors
+			.newSingleThreadScheduledExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(@NotNull Runnable r) {
+					Thread thread = new Thread(r,
+							"com.lessspring.org.config-manager.tracer");
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
 
 	private static final TracerUtils SINGLE_TON = new TracerUtils();
 
@@ -53,7 +69,7 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 	}
 
 	private Disruptor<PublishLogEvent> disruptor = DisruptorFactory
-			.build(PublishLogEvent::new, "com.lessspring.org.config-manager.publishLog");
+			.build(PublishLogEvent::new, "PublishLog-Disruptor");
 
 	private TracerUtils() {
 	}
@@ -66,11 +82,15 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 	@Override
 	public void onEvent(PublishLogEvent event) throws Exception {
 		if (countReuseAble.get() == 0) {
+			countReuseAble.lazySet(100_000);
 			id.getAndIncrement();
 			fileChannel.close();
 			fileChannel = null;
+			// 自动删除老旧文件
+			executorService.schedule(this::autoDeleteOldFile, 3000,
+					TimeUnit.MILLISECONDS);
 		}
-		String fileName = tracerName + id.get();
+		String fileName = tracerName + id.get() + ".csv";
 		if (Objects.isNull(fileChannel)) {
 			fileChannel = new FileInputStream(
 					DiskUtils.openFile(PathUtils.finalPath(path), fileName)).getChannel();
@@ -81,6 +101,28 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 				event.getClientIp(), event.getPublishTime());
 		fileChannel.write(ByteBuffer.wrap(ByteUtils.toBytes(logRecord)));
 		countReuseAble.decrementAndGet();
+	}
+
+	public List<PublishLogVO> analyzePublishLog() {
+        String fileName = tracerName + id.get() + ".csv";
+        File file = DiskUtils.openFile(PathUtils.finalPath(path), fileName);
+        List<PublishLogVO> result = new LinkedList<>();
+        Map<String, PublishLogVO> tmpRecord = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            String line = "";
+            while((line = reader.readLine()) != null) {
+                String[] infos = line.split(",");
+
+            }
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
+    }
+
+	private void autoDeleteOldFile() {
+		int lastDeleteFileId = (int) Math.max(0, id.get() - 1);
+		String fileName = tracerName + lastDeleteFileId + ".csv";
+		DiskUtils.deleteFile(PathUtils.finalPath(path), fileName);
 	}
 
 }
