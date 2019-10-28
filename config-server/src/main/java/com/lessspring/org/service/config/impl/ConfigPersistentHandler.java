@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
@@ -33,12 +34,14 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
+import com.lessspring.org.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.service.publish.WatchClientManager;
 import com.lessspring.org.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
+import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lmax.disruptor.WorkHandler;
@@ -66,6 +69,9 @@ public class ConfigPersistentHandler
 
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
+
+	@Resource
+	private ConfigInfoHistoryMapper historyMapper;
 
 	public ConfigPersistentHandler(WatchClientManager watchClientManager) {
 		disruptorHolder = DisruptorFactory.build(NotifyEvent::new,
@@ -145,15 +151,20 @@ public class ConfigPersistentHandler
 			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
-					.clientIps(request.getClientIps())
-					.lastModifyTime(System.currentTimeMillis()).build();
+					.clientIps(request.getClientIps()).build();
 			affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
 		}
 		else {
+			final QueryConfigInfo queryConfigInfo = QueryConfigInfo.builder()
+					.namespaceId(namespaceId).groupId(request.getGroupId())
+					.dataId(request.getDataId()).build();
+			ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
+			ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
+			DBUtils.changeConfigInfo2History(old, history);
+			historyMapper.save(history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
-					.content(save).type(request.getType())
-					.lastModifyTime(System.currentTimeMillis()).build();
+					.content(save).type(request.getType()).build();
 			affect = configInfoMapper.updateConfigInfo(infoDTO);
 		}
 		log.debug("modify config-success, affect rows is : {}", affect);
@@ -192,7 +203,7 @@ public class ConfigPersistentHandler
 					(target, sequence1) -> NotifyEvent.copy(sequence1, source, target));
 		}
 		catch (Exception e) {
-			log.error("notify ConfigChangeEvent has some error : {}", e);
+			log.error("notify ConfigChangeEvent has some error : {0}", e);
 		}
 	}
 }

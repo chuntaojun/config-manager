@@ -14,29 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.pojo.vo;
 
-import com.lessspring.org.db.dto.ConfigInfoDTO;
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class DBUtils {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PublishLogVO {
 
-    public static void changeConfigInfo2History(ConfigInfoDTO dto, ConfigInfoHistoryDTO historyDTO) {
-        historyDTO.setConfigInfoId(dto.getId());
-        historyDTO.setNamespaceId(dto.getNamespaceId());
-        historyDTO.setGroupId(dto.getGroupId());
-        historyDTO.setDataId(dto.getDataId());
-        historyDTO.setContent(dto.getContent());
-        historyDTO.setFile(dto.getFile());
-        historyDTO.setFileSource(dto.getFileSource());
-        historyDTO.setLastModifyTime(System.currentTimeMillis());
-        historyDTO.setCreateTime(dto.getCreateTime());
-        historyDTO.setType(dto.getType());
-        historyDTO.setEncryption(dto.getEncryption());
+    private String clientIp;
+    private List<Map<String, String>> recordLog = new ArrayList<>();
+
+    public void addRecord(Map<String, String> record) {
+        recordLog.add(record);
     }
 
 }

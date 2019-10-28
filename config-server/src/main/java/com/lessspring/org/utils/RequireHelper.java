@@ -16,27 +16,26 @@
  */
 package com.lessspring.org.utils;
 
-import com.lessspring.org.db.dto.ConfigInfoDTO;
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
+import com.lessspring.org.exception.ValidationException;
+
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class DBUtils {
+public class RequireHelper {
 
-    public static void changeConfigInfo2History(ConfigInfoDTO dto, ConfigInfoHistoryDTO historyDTO) {
-        historyDTO.setConfigInfoId(dto.getId());
-        historyDTO.setNamespaceId(dto.getNamespaceId());
-        historyDTO.setGroupId(dto.getGroupId());
-        historyDTO.setDataId(dto.getDataId());
-        historyDTO.setContent(dto.getContent());
-        historyDTO.setFile(dto.getFile());
-        historyDTO.setFileSource(dto.getFileSource());
-        historyDTO.setLastModifyTime(System.currentTimeMillis());
-        historyDTO.setCreateTime(dto.getCreateTime());
-        historyDTO.setType(dto.getType());
-        historyDTO.setEncryption(dto.getEncryption());
+    public static void requireEquals(int a, int b, String msg) {
+        if (a != b) {
+            throw new ValidationException(msg);
+        }
+    }
+
+    public static void requireNotNull(Object a, String msg) {
+        if (Objects.isNull(a)) {
+            throw new ValidationException(msg);
+        }
     }
 
 }

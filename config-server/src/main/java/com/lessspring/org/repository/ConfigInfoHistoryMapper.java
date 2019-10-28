@@ -14,29 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.repository;
 
-import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class DBUtils {
+@Mapper
+public interface ConfigInfoHistoryMapper {
 
-    public static void changeConfigInfo2History(ConfigInfoDTO dto, ConfigInfoHistoryDTO historyDTO) {
-        historyDTO.setConfigInfoId(dto.getId());
-        historyDTO.setNamespaceId(dto.getNamespaceId());
-        historyDTO.setGroupId(dto.getGroupId());
-        historyDTO.setDataId(dto.getDataId());
-        historyDTO.setContent(dto.getContent());
-        historyDTO.setFile(dto.getFile());
-        historyDTO.setFileSource(dto.getFileSource());
-        historyDTO.setLastModifyTime(System.currentTimeMillis());
-        historyDTO.setCreateTime(dto.getCreateTime());
-        historyDTO.setType(dto.getType());
-        historyDTO.setEncryption(dto.getEncryption());
-    }
+    /**
+     * save {@link ConfigInfoHistoryDTO} to db
+     *
+     * @param historyDTO {@link ConfigInfoHistoryDTO}
+     * @return affect row
+     */
+    int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
+
+    /**
+     * batch delete history config-info
+     *
+     * @param ids
+     * @return
+     */
+    int batchDelete(@Param(value = "ids") List<Long> ids);
+
+    /**
+     * find config-info-history min and max id
+     *
+     * @return min and max id
+     */
+    List<Long> findMinAndMaxId();
 
 }

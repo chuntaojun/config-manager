@@ -16,10 +16,14 @@
  */
 package com.lessspring.org.utils;
 
-import java.io.FileInputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,8 +31,10 @@ import com.lessspring.org.ByteUtils;
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.PathUtils;
 import com.lessspring.org.pojo.event.PublishLogEvent;
+import com.lessspring.org.pojo.vo.PublishLogVO;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Notify the tracker
@@ -38,13 +44,21 @@ import com.lmax.disruptor.dsl.Disruptor;
  */
 public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 
-	private final AtomicLong id = new AtomicLong(0);
+	private long id = 0;
 	private final String tracerName = "config-manager-tracer-";
 	private final String path = "watch-publish-tracer";
-	private final String title = "id|namespace|groupId|dataId|clientIp|publishTime";
-	private final String layout = "%s|%s|%s|%s|%s|%s";
-	private final AtomicInteger countReuseAble = new AtomicInteger(10_000);
+    private int countReuseAble = 100_000;
 	private FileChannel fileChannel;
+	private final ScheduledExecutorService executorService = Executors
+			.newSingleThreadScheduledExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(@NotNull Runnable r) {
+					Thread thread = new Thread(r,
+							"com.lessspring.org.config-manager.tracer");
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
 
 	private static final TracerUtils SINGLE_TON = new TracerUtils();
 
@@ -53,7 +67,7 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 	}
 
 	private Disruptor<PublishLogEvent> disruptor = DisruptorFactory
-			.build(PublishLogEvent::new, "com.lessspring.org.config-manager.publishLog");
+			.build(PublishLogEvent::new, "PublishLog-Disruptor");
 
 	private TracerUtils() {
 	}
@@ -61,26 +75,64 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 	public void publishPublishEvent(PublishLogEvent source) {
 		disruptor.publishEvent(
 				(target, sequence) -> PublishLogEvent.copy(sequence, source, target));
+		disruptor.handleEventsWithWorkerPool(this);
 	}
 
 	@Override
 	public void onEvent(PublishLogEvent event) throws Exception {
-		if (countReuseAble.get() == 0) {
-			id.getAndIncrement();
+		if (countReuseAble == 0) {
+			countReuseAble = 100_000;
+			id ++;
 			fileChannel.close();
 			fileChannel = null;
+			// 自动删除老旧文件
+			executorService.submit(this::autoDeleteOldFile);
 		}
-		String fileName = tracerName + id.get();
+		String fileName = tracerName + id + ".csv";
 		if (Objects.isNull(fileChannel)) {
 			fileChannel = new FileInputStream(
 					DiskUtils.openFile(PathUtils.finalPath(path), fileName)).getChannel();
-			fileChannel.write(ByteBuffer.wrap(ByteUtils.toBytes(title)));
+            String title = "id,namespace,groupId,dataId,clientIp,publishTime";
+            fileChannel.write(ByteBuffer.wrap(ByteUtils.toBytes(title)));
 		}
-		final String logRecord = String.format(layout, event.getSequence(),
+        String layout = "%s,%s,%s,%s,%s,%s";
+        final String logRecord = String.format(layout, event.getSequence(),
 				event.getNamespaceId(), event.getGroupId(), event.getDataId(),
 				event.getClientIp(), event.getPublishTime());
 		fileChannel.write(ByteBuffer.wrap(ByteUtils.toBytes(logRecord)));
-		countReuseAble.decrementAndGet();
+		countReuseAble --;
+	}
+
+	public Map<String, PublishLogVO> analyzePublishLog() {
+        String fileName = tracerName + id + ".csv";
+        File file = DiskUtils.openFile(PathUtils.finalPath(path), fileName);
+        Map<String, PublishLogVO> tmpRecord = new LinkedHashMap<>(32);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            String line = "";
+            while((line = reader.readLine()) != null) {
+                String[] infos = line.split(",");
+                RequireHelper.requireNotNull(infos, "This line is null");
+                RequireHelper.requireEquals(infos.length, 5, "This publish record is illegal");
+                final String clientIp = infos[4];
+                tmpRecord.computeIfAbsent(clientIp, s -> new PublishLogVO());
+                PublishLogVO logVO = tmpRecord.get(clientIp);
+                Map<String, String> attachment = new LinkedHashMap<>();
+                attachment.put("namespaceId", infos[1]);
+                attachment.put("groupId", infos[2]);
+                attachment.put("dataId", infos[3]);
+                attachment.put("time", infos[5]);
+                logVO.addRecord(attachment);
+            }
+            return tmpRecord;
+        } catch (IOException e) {
+            return Collections.emptyMap();
+        }
+    }
+
+	private void autoDeleteOldFile() {
+		int lastDeleteFileId = (int) Math.max(0, id - 1);
+		String fileName = tracerName + lastDeleteFileId + ".csv";
+		DiskUtils.deleteFile(PathUtils.finalPath(path), fileName);
 	}
 
 }

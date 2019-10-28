@@ -41,13 +41,13 @@ public class ConfigInfoDTO {
 	private String type;
 	private String encryption;
 	private Long createTime;
-	private Long lastModifyTime;
 
 	public static ConfigInfoDTOBuilder builder() {
 		return new ConfigInfoDTOBuilder();
 	}
 
 	public static final class ConfigInfoDTOBuilder {
+		private Long id;
 		private String namespaceId;
 		private String groupId;
 		private String dataId;
@@ -57,13 +57,13 @@ public class ConfigInfoDTO {
 		private String type;
 		private String encryption;
 		private Long createTime;
-		private Long lastModifyTime;
 
 		private ConfigInfoDTOBuilder() {
 		}
 
-		public static ConfigInfoDTOBuilder aConfigInfoDTO() {
-			return new ConfigInfoDTOBuilder();
+		public ConfigInfoDTOBuilder id(Long id) {
+			this.id = id;
+			return this;
 		}
 
 		public ConfigInfoDTOBuilder namespaceId(String namespaceId) {
@@ -111,13 +111,9 @@ public class ConfigInfoDTO {
 			return this;
 		}
 
-		public ConfigInfoDTOBuilder lastModifyTime(Long lastModifyTime) {
-			this.lastModifyTime = lastModifyTime;
-			return this;
-		}
-
 		public ConfigInfoDTO build() {
 			ConfigInfoDTO configInfoDTO = new ConfigInfoDTO();
+			configInfoDTO.setId(id);
 			configInfoDTO.setNamespaceId(namespaceId);
 			configInfoDTO.setGroupId(groupId);
 			configInfoDTO.setDataId(dataId);
@@ -127,7 +123,6 @@ public class ConfigInfoDTO {
 			configInfoDTO.setType(type);
 			configInfoDTO.setEncryption(encryption);
 			configInfoDTO.setCreateTime(createTime);
-			configInfoDTO.setLastModifyTime(lastModifyTime);
 			return configInfoDTO;
 		}
 	}
