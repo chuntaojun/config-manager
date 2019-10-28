@@ -16,7 +16,7 @@
  */
 package com.lessspring.org.utils;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,8 +33,9 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class SchedulerUtils {
 
-	private static final int CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors() << 2;
-	private static final int MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() << 3;
+	private static final int CORE_POOL_SIZE = Runtime.getRuntime()
+			.availableProcessors() << 2;
+	private static final int MAX_POOL_SIZE = 512;
 	private static final long KEEP_ALIVE_TIME = 60;
 	private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
@@ -53,8 +54,9 @@ public class SchedulerUtils {
 			executor) -> log.error("{} web custom thread task rejection {}", r.toString(),
 					executor.toString());
 
-	public static final ThreadPoolExecutor WEB_HANDLER = new ThreadPoolExecutor(CORE_POOL_SIZE,
-			MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT, new LinkedBlockingQueue<>(),
-            threadFactory, rejectedExecutionHandler);
+	public static final ThreadPoolExecutor WEB_HANDLER = new ThreadPoolExecutor(
+			CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT,
+			new ArrayBlockingQueue<Runnable>(1024), threadFactory,
+			rejectedExecutionHandler);
 
 }

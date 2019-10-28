@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.repository;
 
+import java.util.List;
+
 import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -29,27 +29,27 @@ import java.util.List;
 @Mapper
 public interface ConfigInfoHistoryMapper {
 
-    /**
-     * save {@link ConfigInfoHistoryDTO} to db
-     *
-     * @param historyDTO {@link ConfigInfoHistoryDTO}
-     * @return affect row
-     */
-    int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
+	/**
+	 * save {@link ConfigInfoHistoryDTO} to db
+	 *
+	 * @param historyDTO {@link ConfigInfoHistoryDTO}
+	 * @return affect row
+	 */
+	int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
 
-    /**
-     * batch delete history config-info
-     *
-     * @param ids
-     * @return
-     */
-    int batchDelete(@Param(value = "ids") List<Long> ids);
+	/**
+	 * batch delete history config-info
+	 *
+	 * @param ids
+	 * @return
+	 */
+	int batchDelete(@Param(value = "ids") List<Long> ids);
 
-    /**
-     * find config-info-history min and max id
-     *
-     * @return min and max id
-     */
-    List<Long> findMinAndMaxId();
+	/**
+	 * find config-info-history min and max id
+	 *
+	 * @return min and max id
+	 */
+	List<Long> findMinAndMaxId();
 
 }

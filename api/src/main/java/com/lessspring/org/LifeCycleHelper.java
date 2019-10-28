@@ -36,9 +36,10 @@ public final class LifeCycleHelper {
 		}
 	}
 
-	public static void registerShutdownHook(final LifeCycle lifeCycle, final String name) {
-		Runtime.getRuntime().addShutdownHook(
-				new Thread(() -> invokeDestroy(lifeCycle), name));
+	public static void registerShutdownHook(final LifeCycle lifeCycle,
+			final String name) {
+		Runtime.getRuntime()
+				.addShutdownHook(new Thread(() -> invokeDestroy(lifeCycle), name));
 	}
 
 }

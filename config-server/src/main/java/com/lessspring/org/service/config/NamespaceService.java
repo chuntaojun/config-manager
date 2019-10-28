@@ -53,6 +53,14 @@ public interface NamespaceService {
 	ResponseData<?> removeNamespace(NamespaceRequest request);
 
 	/**
+	 * create access namespaceId token
+	 * 
+	 * @param request {@link NamespaceRequest}
+	 * @return operation label
+	 */
+	ResponseData<?> createNamespaceAuth(NamespaceRequest request);
+
+	/**
 	 * query all namespaces
 	 *
 	 * @return {@link List< NamespaceVO >} all namespace

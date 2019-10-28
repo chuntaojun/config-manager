@@ -25,18 +25,19 @@ import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
  */
 public final class DBUtils {
 
-    public static void changeConfigInfo2History(ConfigInfoDTO dto, ConfigInfoHistoryDTO historyDTO) {
-        historyDTO.setConfigInfoId(dto.getId());
-        historyDTO.setNamespaceId(dto.getNamespaceId());
-        historyDTO.setGroupId(dto.getGroupId());
-        historyDTO.setDataId(dto.getDataId());
-        historyDTO.setContent(dto.getContent());
-        historyDTO.setFile(dto.getFile());
-        historyDTO.setFileSource(dto.getFileSource());
-        historyDTO.setLastModifyTime(System.currentTimeMillis());
-        historyDTO.setCreateTime(dto.getCreateTime());
-        historyDTO.setType(dto.getType());
-        historyDTO.setEncryption(dto.getEncryption());
-    }
+	public static void changeConfigInfo2History(ConfigInfoDTO dto,
+			ConfigInfoHistoryDTO historyDTO) {
+		historyDTO.setConfigInfoId(dto.getId());
+		historyDTO.setNamespaceId(dto.getNamespaceId());
+		historyDTO.setGroupId(dto.getGroupId());
+		historyDTO.setDataId(dto.getDataId());
+		historyDTO.setContent(dto.getContent());
+		historyDTO.setFile(dto.getFile());
+		historyDTO.setFileSource(dto.getFileSource());
+		historyDTO.setLastModifyTime(System.currentTimeMillis());
+		historyDTO.setCreateTime(dto.getCreateTime());
+		historyDTO.setType(dto.getType());
+		historyDTO.setEncryption(dto.getEncryption());
+	}
 
 }

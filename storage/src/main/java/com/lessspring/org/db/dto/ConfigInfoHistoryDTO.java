@@ -31,98 +31,106 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 
-    public static final String NAME = "ConfigInfoHistoryDTO";
-    private Long configInfoId;
+	public static final String NAME = "ConfigInfoHistoryDTO";
+	private Long configInfoId;
+	private Long lastModifyTime;
 
-    public static ConfigInfoHistoryDTOBuilder sbuilder() {
-        return new ConfigInfoHistoryDTOBuilder();
-    }
+	public static ConfigInfoHistoryDTOBuilder sbuilder() {
+		return new ConfigInfoHistoryDTOBuilder();
+	}
 
-    public static final class ConfigInfoHistoryDTOBuilder {
-        private Long id;
-        private String namespaceId;
-        private String groupId;
-        private Long configInfoId;
-        private String dataId;
-        private Boolean file;
-        private byte[] fileSource;
-        private byte[] content;
-        private String type;
-        private String encryption;
-        private Long createTime;
+	public static final class ConfigInfoHistoryDTOBuilder {
+		private Long id;
+		private String namespaceId;
+		private String groupId;
+		private Long configInfoId;
+		private String dataId;
+		private Boolean file;
+		private byte[] fileSource;
+		private byte[] content;
+		private String type;
+		private String encryption;
+		private Long createTime;
+		private Long lastModifyTime;
 
-        private ConfigInfoHistoryDTOBuilder() {
-        }
+		private ConfigInfoHistoryDTOBuilder() {
+		}
 
-        public ConfigInfoHistoryDTOBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder id(Long id) {
+			this.id = id;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder namespaceId(String namespaceId) {
-            this.namespaceId = namespaceId;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder namespaceId(String namespaceId) {
+			this.namespaceId = namespaceId;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder groupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder groupId(String groupId) {
+			this.groupId = groupId;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder configInfoId(Long configInfoId) {
-            this.configInfoId = configInfoId;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder configInfoId(Long configInfoId) {
+			this.configInfoId = configInfoId;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder dataId(String dataId) {
-            this.dataId = dataId;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder dataId(String dataId) {
+			this.dataId = dataId;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder file(Boolean file) {
-            this.file = file;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder file(Boolean file) {
+			this.file = file;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder fileSource(byte[] fileSource) {
-            this.fileSource = fileSource;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder fileSource(byte[] fileSource) {
+			this.fileSource = fileSource;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder content(byte[] content) {
-            this.content = content;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder content(byte[] content) {
+			this.content = content;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder type(String type) {
-            this.type = type;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder type(String type) {
+			this.type = type;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder encryption(String encryption) {
-            this.encryption = encryption;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder encryption(String encryption) {
+			this.encryption = encryption;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTOBuilder createTime(Long createTime) {
-            this.createTime = createTime;
-            return this;
-        }
+		public ConfigInfoHistoryDTOBuilder createTime(Long createTime) {
+			this.createTime = createTime;
+			return this;
+		}
 
-        public ConfigInfoHistoryDTO build() {
-            ConfigInfoHistoryDTO configInfoHistoryDTO = new ConfigInfoHistoryDTO();
-            configInfoHistoryDTO.setId(id);
-            configInfoHistoryDTO.setNamespaceId(namespaceId);
-            configInfoHistoryDTO.setGroupId(groupId);
-            configInfoHistoryDTO.setConfigInfoId(configInfoId);
-            configInfoHistoryDTO.setDataId(dataId);
-            configInfoHistoryDTO.setFile(file);
-            configInfoHistoryDTO.setFileSource(fileSource);
-            configInfoHistoryDTO.setContent(content);
-            configInfoHistoryDTO.setType(type);
-            configInfoHistoryDTO.setEncryption(encryption);
-            configInfoHistoryDTO.setCreateTime(createTime);
-            return configInfoHistoryDTO;
-        }
-    }
+		public ConfigInfoHistoryDTOBuilder lastModifyTime(Long lastModifyTime) {
+			this.lastModifyTime = lastModifyTime;
+			return this;
+		}
+
+		public ConfigInfoHistoryDTO build() {
+			ConfigInfoHistoryDTO configInfoHistoryDTO = new ConfigInfoHistoryDTO();
+			configInfoHistoryDTO.setId(id);
+			configInfoHistoryDTO.setNamespaceId(namespaceId);
+			configInfoHistoryDTO.setGroupId(groupId);
+			configInfoHistoryDTO.setConfigInfoId(configInfoId);
+			configInfoHistoryDTO.setDataId(dataId);
+			configInfoHistoryDTO.setFile(file);
+			configInfoHistoryDTO.setFileSource(fileSource);
+			configInfoHistoryDTO.setContent(content);
+			configInfoHistoryDTO.setType(type);
+			configInfoHistoryDTO.setEncryption(encryption);
+			configInfoHistoryDTO.setCreateTime(createTime);
+			configInfoHistoryDTO.setLastModifyTime(lastModifyTime);
+			return configInfoHistoryDTO;
+		}
+	}
 }

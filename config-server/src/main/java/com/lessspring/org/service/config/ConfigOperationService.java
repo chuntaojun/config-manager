@@ -40,7 +40,6 @@ import com.lessspring.org.pojo.request.PublishConfigRequest4;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
-import com.lessspring.org.raft.utils.OperationEnum;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.config.impl.ConfigPersistentHandler;
@@ -63,6 +62,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConfigOperationService {
+
+	private final String createConfig = "CREATE_CONFIG";
+	private final String modifyConfig = "MODIFY_CONFIG";
+	private final String deleteConfig = "DELETE_CONFIG";
 
 	private final NamespaceService namespaceService;
 	private final Disruptor<ConfigChangeEvent> disruptorHolder;
@@ -90,11 +93,11 @@ public class ConfigOperationService {
 	@PostConstruct
 	public void init() {
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, publishConsumer(),
-				OperationEnum.PUBLISH);
+				createConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, modifyConsumer(),
-				OperationEnum.MODIFY);
+				modifyConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, deleteConsumer(),
-				OperationEnum.DELETE);
+				deleteConfig);
 		clusterManager.init();
 		failCallback = throwable -> null;
 	}
@@ -121,7 +124,7 @@ public class ConfigOperationService {
 				request.getDataId());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				PublishConfigRequest4.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.PUBLISH);
+		datum.setOperation(createConfig);
 		return commit(datum);
 	}
 
@@ -133,7 +136,7 @@ public class ConfigOperationService {
 				request.getDataId());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				PublishConfigRequest4.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.MODIFY);
+		datum.setOperation(modifyConfig);
 		return commit(datum);
 	}
 
@@ -144,7 +147,7 @@ public class ConfigOperationService {
 				request.getDataId());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				DeleteConfigRequest4.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.DELETE);
+		datum.setOperation(deleteConfig);
 		return commit(datum);
 	}
 

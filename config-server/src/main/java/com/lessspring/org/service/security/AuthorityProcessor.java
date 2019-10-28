@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.security;
 
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 
 /**
@@ -32,5 +33,13 @@ public interface AuthorityProcessor {
 	 * @return has auth
 	 */
 	boolean hasAuth(Privilege privilege, String namespaceId);
+
+	/**
+	 * create namespace auth token
+	 *
+	 * @param namespaceId namespace-id
+	 * @return create result
+	 */
+	ResponseData<?> createAuth(String namespaceId);
 
 }

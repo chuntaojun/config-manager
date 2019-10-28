@@ -16,9 +16,9 @@
  */
 package com.lessspring.org.utils;
 
-import com.lessspring.org.exception.ValidationException;
-
 import java.util.Objects;
+
+import com.lessspring.org.exception.ValidationException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -26,16 +26,16 @@ import java.util.Objects;
  */
 public class RequireHelper {
 
-    public static void requireEquals(int a, int b, String msg) {
-        if (a != b) {
-            throw new ValidationException(msg);
-        }
-    }
+	public static void requireEquals(int a, int b, String msg) {
+		if (a != b) {
+			throw new ValidationException(msg);
+		}
+	}
 
-    public static void requireNotNull(Object a, String msg) {
-        if (Objects.isNull(a)) {
-            throw new ValidationException(msg);
-        }
-    }
+	public static void requireNotNull(Object a, String msg) {
+		if (Objects.isNull(a)) {
+			throw new ValidationException(msg);
+		}
+	}
 
 }

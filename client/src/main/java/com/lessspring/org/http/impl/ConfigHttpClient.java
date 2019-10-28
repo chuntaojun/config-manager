@@ -75,7 +75,8 @@ public class ConfigHttpClient implements HttpClient {
 
 	private AtomicReference<String> clusterIp = new AtomicReference<>();
 
-	public ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder, Configuration configuration) {
+	public ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder,
+			Configuration configuration) {
 		this.choose = choose;
 		this.authHolder = authHolder;
 		this.configuration = configuration;

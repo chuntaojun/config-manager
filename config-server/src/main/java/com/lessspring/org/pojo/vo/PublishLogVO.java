@@ -16,14 +16,14 @@
  */
 package com.lessspring.org.pojo.vo;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -35,11 +35,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class PublishLogVO {
 
-    private String clientIp;
-    private List<Map<String, String>> recordLog = new ArrayList<>();
+	private String clientIp;
+	private List<Map<String, String>> recordLog = new ArrayList<>();
 
-    public void addRecord(Map<String, String> record) {
-        recordLog.add(record);
-    }
+	public void addRecord(Map<String, String> record) {
+		recordLog.add(record);
+	}
 
 }

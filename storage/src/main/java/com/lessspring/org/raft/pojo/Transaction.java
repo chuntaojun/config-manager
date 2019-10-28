@@ -16,8 +16,6 @@
  */
 package com.lessspring.org.raft.pojo;
 
-import com.lessspring.org.raft.utils.OperationEnum;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -25,11 +23,11 @@ import com.lessspring.org.raft.utils.OperationEnum;
 public class Transaction {
 
 	private final String key;
-	private final OperationEnum operation;
+	private final String operation;
 	private final byte[] data;
 	private final String bz;
 
-	public Transaction(String bz, String key, byte[] data, OperationEnum operation) {
+	public Transaction(String bz, String key, byte[] data, String operation) {
 		this.bz = bz;
 		this.key = key;
 		this.operation = operation;
@@ -40,7 +38,7 @@ public class Transaction {
 		return data;
 	}
 
-	public OperationEnum getOperation() {
+	public String getOperation() {
 		return operation;
 	}
 

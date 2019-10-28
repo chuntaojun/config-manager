@@ -34,5 +34,6 @@ public class NamespaceDTO {
 	private Long id;
 	private String namespace;
 	private String namespaceId;
+	private String authToken;
 
 }

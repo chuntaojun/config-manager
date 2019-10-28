@@ -45,7 +45,11 @@ public class TpsManager {
 
 	public synchronized void registerLimiter(String key,
 			Supplier<LimitRuleEntry> supplier) {
-		limiterManager.computeIfAbsent(key, s -> supplier.get());
+		LimitRuleEntry entry = supplier.get();
+		if (entry == null) {
+			return;
+		}
+		limiterManager.putIfAbsent(key, entry);
 	}
 
 	public static class LimitRuleEntry {

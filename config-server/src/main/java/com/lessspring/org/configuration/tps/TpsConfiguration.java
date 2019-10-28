@@ -17,6 +17,8 @@
 package com.lessspring.org.configuration.tps;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import com.google.common.util.concurrent.RateLimiter;
@@ -26,7 +28,7 @@ import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +42,9 @@ public class TpsConfiguration {
 
 	private final TpsManager tpsManager;
 
+	@Autowired
+	private TpsSetting tpsSetting;
+
 	public TpsConfiguration(TpsManager tpsManager) {
 		this.tpsManager = tpsManager;
 	}
@@ -49,11 +54,20 @@ public class TpsConfiguration {
 		return new TpsAnnotationProcessor();
 	}
 
+	@Bean
+	public TpsSetting tpsSetting() {
+		return new TpsSetting();
+	}
+
 	private class TpsAnnotationProcessor implements BeanPostProcessor {
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName)
 				throws BeansException {
+			Map<String, Integer> customer = new HashMap<>(8);
+			for (TpsSetting.TpsResource resource : tpsSetting.getResources()) {
+				customer.put(resource.getResourceName(), resource.getQps());
+			}
 			Class<?> cls = bean.getClass();
 			if (cls.isAnnotationPresent(OpenTpsLimit.class)) {
 				Method[] methods = cls.getMethods();
@@ -61,8 +75,12 @@ public class TpsConfiguration {
 					LimitRule rule = method.getAnnotation(LimitRule.class);
 					if (rule != null) {
 						Supplier<TpsManager.LimitRuleEntry> limiterSupplier = () -> {
-							RateLimiter limiter = RateLimiter
-									.create(rule.qps());
+							Integer customerQps = customer.get(rule.resource());
+							if (customerQps != null && customerQps == -1) {
+								return null;
+							}
+							RateLimiter limiter = RateLimiter.create(
+									customerQps == null ? rule.qps() : customerQps);
 							Class<? extends FailStrategy> failStrategy = rule
 									.failStrategy();
 							try {

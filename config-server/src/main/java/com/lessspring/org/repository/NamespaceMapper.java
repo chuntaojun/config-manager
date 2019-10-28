@@ -62,6 +62,16 @@ public interface NamespaceMapper {
 	int removeNamespace(@Param(value = "namespace") String namespace);
 
 	/**
+	 * save access namespace token
+	 *
+	 * @param name namespace name
+	 * @param token auth token
+	 * @return affect row
+	 */
+	int saveNamespaceAuthToken(@Param(value = "name") String name,
+			@Param(value = "token") String token);
+
+	/**
 	 * query all namespaces
 	 *
 	 * @return {@link List<String>}

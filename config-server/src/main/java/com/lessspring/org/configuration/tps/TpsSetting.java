@@ -14,63 +14,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft.pojo;
+package com.lessspring.org.configuration.tps;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class Datum {
+@ConfigurationProperties(prefix = "com.lessspring.org.config-manager.tps")
+public class TpsSetting {
 
-	private String key;
-	private byte[] value;
-	private String className;
-	private String operation;
-	private String bz;
+	private List<TpsResource> resources = new ArrayList<>();
 
-	public Datum(String key, byte[] value, String className) {
-		this.key = key;
-		this.value = value;
-		this.className = className;
+	public List<TpsResource> getResources() {
+		return resources;
 	}
 
-	public String getKey() {
-		return key;
+	public void setResources(List<TpsResource> resources) {
+		this.resources = resources;
 	}
 
-	public byte[] getValue() {
-		return value;
+	public static class TpsResource {
+
+		private String resourceName;
+		private Integer qps;
+
+		public String getResourceName() {
+			return resourceName;
+		}
+
+		public void setResourceName(String resourceName) {
+			this.resourceName = resourceName;
+		}
+
+		public Integer getQps() {
+			return qps;
+		}
+
+		public void setQps(Integer qps) {
+			this.qps = qps;
+		}
 	}
 
-	public String getClassName() {
-		return className;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	public void setValue(byte[] value) {
-		this.value = value;
-	}
-
-	public void setClassName(String className) {
-		this.className = className;
-	}
-
-	public String getOperation() {
-		return operation;
-	}
-
-	public void setOperation(String operation) {
-		this.operation = operation;
-	}
-
-	public String getBz() {
-		return bz;
-	}
-
-	public void setBz(String bz) {
-		this.bz = bz;
-	}
 }
