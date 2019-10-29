@@ -14,42 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.repository;
-
-import java.util.List;
-
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+package com.lessspring.org.raft;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Mapper
-public interface ConfigInfoHistoryMapper {
+public interface LeaderStatusListener {
 
 	/**
-	 * save {@link ConfigInfoHistoryDTO} to db
+	 * when leader start, call back this func
 	 *
-	 * @param historyDTO {@link ConfigInfoHistoryDTO}
-	 * @return affect row
+	 * @param leaderIp leader ip
+	 * @param term now raft group term
 	 */
-	int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
+	void onLeaderStart(String leaderIp, long term);
 
 	/**
-	 * batch delete history config-info
+	 * when leader stop, call back this func
 	 *
-	 * @param ids config-history-id
-	 * @return affect rows
+	 * @param leaderIp leader ip
+	 * @param term pre raft group term
 	 */
-	int batchDelete(@Param(value = "ids") List<Long> ids);
-
-	/**
-	 * find config-info-history min and max id
-	 *
-	 * @return min and max id
-	 */
-	List<Long> findMinAndMaxId();
+	void onLeaderStop(String leaderIp, long term);
 
 }

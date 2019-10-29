@@ -42,6 +42,7 @@ import com.google.protobuf.Message;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.ThreadPoolHelper;
 import com.lessspring.org.raft.conf.RaftServerOptions;
+import com.lessspring.org.raft.machine.ConfigStateMachineAdapter;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -69,7 +70,7 @@ class RaftServer implements LifeCycle {
 	private final AtomicBoolean inited = new AtomicBoolean(false);
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-	public RaftServer(RaftServerOptions raftServerOptions) {
+	RaftServer(RaftServerOptions raftServerOptions) {
 		this.raftServerOptions = raftServerOptions;
 	}
 
@@ -125,39 +126,38 @@ class RaftServer implements LifeCycle {
 				TimeUnit.MINUTES);
 	}
 
-	public RaftGroupService getRaftGroupService() {
-		return raftGroupService;
-	}
-
 	public Node getNode() {
 		return node;
-	}
-
-	public RpcServer getRpcServer() {
-		return rpcServer;
 	}
 
 	BoltCliClientService getCliClientService() {
 		return cliClientService;
 	}
 
-	public void registerTransactionCommitCallback(
-			TransactionCommitCallback commitCallback) {
+	void initTransactionIdManager(TransactionIdManager manager) {
+		csm.setTransactionIdManager(manager);
+	}
+
+	void registerAsyncUserProcessor(BaseAsyncUserProcessor processor) {
+		rpcServer.registerUserProcessor(processor);
+	}
+
+	void registerTransactionCommitCallback(TransactionCommitCallback commitCallback) {
 		csm.registerTransactionCommitCallback(commitCallback);
 	}
 
-	public void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
+	void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
 		csm.registerSnapshotManager(snapshotOperate);
 	}
 
-	public void addNode(ServerNode serverNode) {
+	void addNode(ServerNode serverNode) {
 		PeerId leader = leaderNode();
 		final CliRequests.AddPeerRequest.Builder rb = CliRequests.AddPeerRequest
 				.newBuilder();
 		rb.setGroupId(raftGroupId);
 		rb.setPeerId(PeerId.parsePeer(serverNode.getKey()).toString());
 		cliClientService.addPeer(leader.getEndpoint(), rb.build(),
-				new RpcResponseClosure<CliRequests.AddPeerResponse>() {
+				new RpcResponseClosure<>() {
 					@Override
 					public void setResponse(CliRequests.AddPeerResponse resp) {
 					}
@@ -172,14 +172,14 @@ class RaftServer implements LifeCycle {
 
 	}
 
-	public void removeNode(ServerNode serverNode) {
+	void removeNode(ServerNode serverNode) {
 		PeerId leader = leaderNode();
 		final CliRequests.RemovePeerRequest.Builder rb = CliRequests.RemovePeerRequest
 				.newBuilder();
 		rb.setGroupId(raftGroupId);
 		rb.setPeerId(PeerId.parsePeer(serverNode.getKey()).toString());
 		cliClientService.removePeer(leader.getEndpoint(), rb.build(),
-				new RpcResponseClosure<CliRequests.RemovePeerResponse>() {
+				new RpcResponseClosure<>() {
 					@Override
 					public void setResponse(CliRequests.RemovePeerResponse resp) {
 					}
@@ -224,7 +224,7 @@ class RaftServer implements LifeCycle {
 	}
 
 	boolean isLeader() {
-		return getNode().isLeader();
+		return csm.isLeader();
 	}
 
 	private void refresh() {
@@ -234,6 +234,7 @@ class RaftServer implements LifeCycle {
 					.refreshLeader(cliClientService, raftGroupId, timeoutMs).isOk()) {
 				log.warn("refresh raft node info failed");
 			}
+			nodeManager.batchUpdate(node.listAlivePeers(), node.getLeaderId());
 		}
 		catch (InterruptedException | TimeoutException e) {
 			log.error("refresh raft node info failed, error is : {}", e.getMessage());
@@ -261,8 +262,9 @@ class RaftServer implements LifeCycle {
 				com.alipay.sofa.jraft.NodeManager.getInstance()
 						.addAddress(peerId.getEndpoint());
 			});
-		}
 
+			this.csm.registerLeaderStatusListener(nodeManager);
+		}
 	}
 
 	@Override

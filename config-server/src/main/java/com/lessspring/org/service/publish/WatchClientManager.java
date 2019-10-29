@@ -33,6 +33,7 @@ import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.event.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.SystemEnv;
 import com.lessspring.org.utils.TracerUtils;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 public class WatchClientManager implements WorkHandler<NotifyEvent> {
 
 	private final long parallelThreshold = 100;
+
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	private final TracerUtils tracer = TracerUtils.getSingleton();
 

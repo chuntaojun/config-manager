@@ -14,42 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.repository;
+package com.lessspring.org.configuration;
 
-import java.util.List;
+import com.lessspring.org.utils.SystemEnv;
 
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+import com.lessspring.org.utils.WaitFinish;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Mapper
-public interface ConfigInfoHistoryMapper {
+@WaitFinish
+public class ConfigEnvironmentProcessor implements EnvironmentPostProcessor {
 
-	/**
-	 * save {@link ConfigInfoHistoryDTO} to db
-	 *
-	 * @param historyDTO {@link ConfigInfoHistoryDTO}
-	 * @return affect row
-	 */
-	int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
-	/**
-	 * batch delete history config-info
-	 *
-	 * @param ids config-history-id
-	 * @return affect rows
-	 */
-	int batchDelete(@Param(value = "ids") List<Long> ids);
+	private final String standaloneKey = "com.lessspring.org.config-manager.server.mode";
 
-	/**
-	 * find config-info-history min and max id
-	 *
-	 * @return min and max id
-	 */
-	List<Long> findMinAndMaxId();
-
+	@Override
+	public void postProcessEnvironment(ConfigurableEnvironment environment,
+			SpringApplication application) {
+		boolean standalone = environment.getProperty(standaloneKey, Boolean.class, true);
+		systemEnv.setStandalone(standalone);
+	}
 }

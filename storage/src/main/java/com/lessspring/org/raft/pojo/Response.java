@@ -14,42 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.repository;
+package com.lessspring.org.raft.pojo;
 
-import java.util.List;
-
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Mapper
-public interface ConfigInfoHistoryMapper {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Response {
 
-	/**
-	 * save {@link ConfigInfoHistoryDTO} to db
-	 *
-	 * @param historyDTO {@link ConfigInfoHistoryDTO}
-	 * @return affect row
-	 */
-	int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
-
-	/**
-	 * batch delete history config-info
-	 *
-	 * @param ids config-history-id
-	 * @return affect rows
-	 */
-	int batchDelete(@Param(value = "ids") List<Long> ids);
-
-	/**
-	 * find config-info-history min and max id
-	 *
-	 * @return min and max id
-	 */
-	List<Long> findMinAndMaxId();
+	private boolean success;
+	private String errMsg;
 
 }

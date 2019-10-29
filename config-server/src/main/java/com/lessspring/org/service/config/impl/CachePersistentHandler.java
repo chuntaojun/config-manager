@@ -29,6 +29,7 @@ import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,6 +47,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component(value = "cachePersistentHandler")
 public class CachePersistentHandler implements PersistentHandler {
+
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	private final ConfigCacheItemManager configCacheItemManager;
 	private final PersistentHandler persistentHandler;
@@ -101,7 +104,7 @@ public class CachePersistentHandler implements PersistentHandler {
 			@Override
 			public void onError(Exception exception) {
 				configInfo[0] = null;
-				log.error("Has some error : {}", exception);
+				log.error("Has some error : {0}", exception);
 			}
 		});
 		request.getAttributes().clear();

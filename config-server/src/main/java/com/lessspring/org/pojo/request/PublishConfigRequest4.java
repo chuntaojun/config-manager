@@ -45,7 +45,7 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
 		return attribute;
 	}
 
-	public void setAttribute(Map<String, Object> attribute) {
+	public void setAttributes(Map<String, Object> attribute) {
 		this.attribute = attribute;
 	}
 
@@ -135,7 +135,7 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
 			publishConfigRequest4.setDataId(dataId);
 			publishConfigRequest4.setGroupId(groupId);
 			publishConfigRequest4.setBeta(beta);
-			publishConfigRequest4.setAttribute(attribute);
+			publishConfigRequest4.setAttributes(attribute);
 			publishConfigRequest4.setClientIps(clientIps);
 			publishConfigRequest4.setContent(content);
 			publishConfigRequest4.setType(type);

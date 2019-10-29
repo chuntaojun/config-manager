@@ -60,12 +60,12 @@ public class RaftServerOptions {
 			return this;
 		}
 
-		public RaftServerOptionsBuilder electionTimeoutMs(int electionTimeoutMs) {
+		public RaftServerOptionsBuilder electionTimeoutMs(Integer electionTimeoutMs) {
 			this.electionTimeoutMs = electionTimeoutMs;
 			return this;
 		}
 
-		public RaftServerOptionsBuilder snapshotIntervalSecs(int snapshotIntervalSecs) {
+		public RaftServerOptionsBuilder snapshotIntervalSecs(Integer snapshotIntervalSecs) {
 			this.snapshotIntervalSecs = snapshotIntervalSecs;
 			return this;
 		}

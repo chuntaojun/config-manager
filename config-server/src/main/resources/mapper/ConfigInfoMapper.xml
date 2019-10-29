@@ -11,9 +11,8 @@
         <result column="content" property="content"/>
         <result column="config_type" property="type"/>
         <result column="" property="createTime"/>
-        <result column="" property="encryption"/>
+        <result column="encryption" property="encryption"/>
         <result column="" property="fileSource"/>
-        <result column="" property="lastModifyTime"/>
     </resultMap>
 
     <resultMap type="com.lessspring.org.db.dto.ConfigBetaInfoDTO" id="ConfigBetaInfoDTO">
@@ -24,25 +23,36 @@
         <result column="content" property="content"/>
         <result column="config_type" property="type"/>
         <result column="" property="createTime"/>
-        <result column="" property="encryption"/>
+        <result column="encryption" property="encryption"/>
         <result column="" property="fileSource"/>
-        <result column="" property="lastModifyTime"/>
         <result column="" property="clientIps"/>
     </resultMap>
 
     <!--  save config-infog  -->
     <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
-        INSERT INTO config_info(data_id, group_id, namespace_id, content, config_type)
-        VALUES (#{dto.dataId},
-                #{dto.groupId},
-                #{dto.namespaceId},
-                #{dto.content},
-                #{dto.type});
+        INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type)
+        VALUES (
+        #{dto.id},
+        #{dto.dataId},
+        #{dto.groupId},
+        #{dto.namespaceId},
+        #{dto.content},
+        #{dto.type});
     </insert>
 
     <!--  save config-info-beta  -->
-    <insert id="saveConfigBetaInfo"></insert>
+    <insert id="saveConfigBetaInfo">
+        INSERT INTO config_info_beta(id, data_id, group_id, namespace_id, content,
+        config_type)
+        VALUES (
+        #{dto.id},
+        #{dto.dataId},
+        #{dto.groupId},
+        #{dto.namespaceId},
+        #{dto.content},
+        #{dto.type});
+    </insert>
 
     <!--  update config-info  -->
     <update id="updateConfigInfo"></update>
@@ -59,8 +69,8 @@
         SELECT content
         FROM config_info
         WHERE namespace_id = #{query.namespaceId}
-          and group_id = #{query.groupId}
-          and data_id = #{query.dataId}
+        and group_id = #{query.groupId}
+        and data_id = #{query.dataId}
     </select>
 
     <!--  find config by QueryConfigInfo  -->
@@ -70,8 +80,8 @@
         SELECT *
         FROM config_info
         WHERE namespace_id = #{query.namespaceId}
-          and group_id like CONCAT('%', #{query.groupId}, '%')
-          and data_id like CONCAT('%', #{query.dataId}, '%')
+        and group_id like CONCAT('%', #{query.groupId}, '%')
+        and data_id like CONCAT('%', #{query.dataId}, '%')
     </select>
 
     <!--  find min and max id from config-info  -->
@@ -109,8 +119,8 @@
         SELECT *
         FROM config_info_beta
         WHERE namespace_id = #{query.namespaceId}
-          and group_id like CONCAT('%', #{query.groupId}, '%')
-          and data_id like CONCAT('%', #{query.dataId}, '%')
+        and group_id like CONCAT('%', #{query.groupId}, '%')
+        and data_id like CONCAT('%', #{query.dataId}, '%')
     </select>
 
 </mapper>

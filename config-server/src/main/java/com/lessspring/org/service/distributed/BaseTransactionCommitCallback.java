@@ -53,7 +53,7 @@ public abstract class BaseTransactionCommitCallback implements TransactionCommit
 			consumer.accept(transaction);
 		}
 		catch (Throwable e) {
-			log.info("error : {}", e);
+			log.info("error : {0}", e);
 			TransactionException exception = new TransactionException(e);
 			if (e instanceof BaseException) {
 				exception.setErrorCode(((BaseException) e).code());

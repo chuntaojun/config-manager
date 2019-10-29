@@ -16,21 +16,20 @@
  */
 package com.lessspring.org.raft;
 
-import com.lessspring.org.db.store.RDBStore;
-import lombok.extern.slf4j.Slf4j;
+import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
+import com.lessspring.org.raft.pojo.Datum;
 
 /**
+ * Used for processing a request from the followers
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class RegionRecordService {
+public abstract class BaseAsyncUserProcessor<T extends Datum>
+		extends AsyncUserProcessor<T> {
 
-	private final RegionEngine regionEngine;
-	private final RDBStore rdbStore;
+	ClusterServer clusterServer;
 
-	public RegionRecordService(RegionEngine regionEngine, RDBStore rdbStore) {
-		this.regionEngine = regionEngine;
-		this.rdbStore = rdbStore;
-	}
+	public abstract void initCluster(ClusterServer clusterServer);
+
 }

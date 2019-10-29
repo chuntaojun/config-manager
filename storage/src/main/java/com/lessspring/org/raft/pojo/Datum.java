@@ -16,12 +16,16 @@
  */
 package com.lessspring.org.raft.pojo;
 
+import lombok.ToString;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@ToString
 public class Datum {
 
+	private long id;
 	private String key;
 	private byte[] value;
 	private String className;
@@ -32,6 +36,14 @@ public class Datum {
 		this.key = key;
 		this.value = value;
 		this.className = className;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public String getKey() {

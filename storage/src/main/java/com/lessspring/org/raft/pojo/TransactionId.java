@@ -14,42 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.repository;
-
-import java.util.List;
-
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+package com.lessspring.org.raft.pojo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Mapper
-public interface ConfigInfoHistoryMapper {
+public class TransactionId {
 
-	/**
-	 * save {@link ConfigInfoHistoryDTO} to db
-	 *
-	 * @param historyDTO {@link ConfigInfoHistoryDTO}
-	 * @return affect row
-	 */
-	int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
+	private final String bz;
+	private Long id;
 
-	/**
-	 * batch delete history config-info
-	 *
-	 * @param ids config-history-id
-	 * @return affect rows
-	 */
-	int batchDelete(@Param(value = "ids") List<Long> ids);
+	public TransactionId(String bz) {
+		this.bz = bz;
+	}
 
-	/**
-	 * find config-info-history min and max id
-	 *
-	 * @return min and max id
-	 */
-	List<Long> findMinAndMaxId();
+	public String getBz() {
+		return bz;
+	}
 
+	public synchronized Long increaseAndObtain() {
+		id += 1;
+		return id;
+	}
+
+	public synchronized Long obtainAndIncrease() {
+		Long tmp = id;
+		id += 1;
+		return tmp;
+	}
+
+	public synchronized void setId(Long id) {
+		this.id = id;
+	}
 }

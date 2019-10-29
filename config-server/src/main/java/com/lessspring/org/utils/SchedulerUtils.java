@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.lessspring.org.BaseRejectedExecutionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,9 +51,16 @@ public class SchedulerUtils {
 		}
 	};
 
-	private static RejectedExecutionHandler rejectedExecutionHandler = (r,
-			executor) -> log.error("{} web custom thread task rejection {}", r.toString(),
+	private static RejectedExecutionHandler rejectedExecutionHandler = new BaseRejectedExecutionHandler(
+			"com.lessspring.org.config-manager.webHandler", true,
+			"com.lessspring.org.config-manager.webHandler") {
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			dumpJvmInfoIfNeeded();
+			log.error("{} web custom thread task rejection {}", r.toString(),
 					executor.toString());
+		}
+	};
 
 	public static final ThreadPoolExecutor WEB_HANDLER = new ThreadPoolExecutor(
 			CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT,

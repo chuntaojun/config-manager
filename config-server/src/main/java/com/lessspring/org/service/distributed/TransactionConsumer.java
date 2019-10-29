@@ -33,6 +33,11 @@ public interface TransactionConsumer<T> {
 	void accept(T t) throws Throwable;
 
 	/**
+	 * roll back
+	 */
+	default void rollBack() {}
+
+	/**
 	 * Abnormal transaction callback handler
 	 *
 	 * @param te {@link TransactionException}

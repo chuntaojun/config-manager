@@ -14,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft.conf;
+package com.lessspring.org.db.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -25,10 +27,14 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class RegionEngineOptions {
+@NoArgsConstructor
+@AllArgsConstructor
+public class SmallConfigHistoryDTO {
 
-	private String groupId;
-	private String raftDataPath;
-	private String serverAddr;
+	public static final String NAME = "ConfigInfoHistoryDTO";
+
+	private Long id;
+	private Long configInfoId;
+	private Long lastModifyTime;
 
 }

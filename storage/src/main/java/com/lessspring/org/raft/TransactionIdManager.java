@@ -16,9 +16,34 @@
  */
 package com.lessspring.org.raft;
 
+import com.lessspring.org.raft.pojo.TransactionId;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class Region {
+public interface TransactionIdManager {
+
+	/**
+	 * query {@link TransactionId} by bz
+	 *
+	 * @param bz bussiness
+	 * @return {@link TransactionId}
+	 */
+	TransactionId query(String bz);
+
+	/**
+	 * register {@link TransactionId}
+	 * 
+	 * @param transactionId {@link TransactionId}
+	 */
+	void register(TransactionId transactionId);
+
+	/**
+	 * deregister {@link TransactionId}
+	 * 
+	 * @param transactionId {@link TransactionId}
+	 */
+	void deregister(TransactionId transactionId);
+
 }

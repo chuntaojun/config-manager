@@ -14,33 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft.conf;
+package com.lessspring.org.utils;
 
-import java.util.Collections;
-import java.util.List;
-
-import com.lessspring.org.raft.Region;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class StoreEngineOptions {
-
-	private String cacheDir;
-	private String dbUsername;
-	private String dbPassword;
-	private int maxPoolSize = 10;
-	private String raftDataPath;
-	private List<Region> regionList = Collections.emptyList();
-	private List<RegionEngineOptions> rOptList = Collections.emptyList();
-
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.SOURCE)
+@Documented
+public @interface WaitFinish {
 }

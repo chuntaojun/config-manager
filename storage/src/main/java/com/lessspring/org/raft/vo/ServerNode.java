@@ -19,21 +19,23 @@ package com.lessspring.org.raft.vo;
 import java.util.Objects;
 
 import com.lessspring.org.raft.utils.ServerStatus;
-import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Builder
+@Data
+@NoArgsConstructor
 public class ServerNode {
 
 	private String nodeIp;
 	private int port;
-	private String role;
+	private String role = "Candidate";
 	private String key = "";
-	private ServerStatus serverStatus = ServerStatus.ONLY_READ;
+	private ServerStatus serverStatus = ServerStatus.HEALTH;
 
 	public String getKey() {
 		if (StringUtils.isEmpty(key)) {
@@ -90,5 +92,48 @@ public class ServerNode {
 	@Override
 	public int hashCode() {
 		return Objects.hash(nodeIp, port, key);
+	}
+
+	public static ServerNodeBuilder builder() {
+		return new ServerNodeBuilder();
+	}
+
+	public static final class ServerNodeBuilder {
+		private String nodeIp;
+		private int port;
+		private String role;
+		private ServerStatus serverStatus = ServerStatus.HEALTH;
+
+		private ServerNodeBuilder() {
+		}
+
+		public ServerNodeBuilder nodeIp(String nodeIp) {
+			this.nodeIp = nodeIp;
+			return this;
+		}
+
+		public ServerNodeBuilder port(int port) {
+			this.port = port;
+			return this;
+		}
+
+		public ServerNodeBuilder role(String role) {
+			this.role = role;
+			return this;
+		}
+
+		public ServerNodeBuilder serverStatus(ServerStatus serverStatus) {
+			this.serverStatus = serverStatus;
+			return this;
+		}
+
+		public ServerNode build() {
+			ServerNode serverNode = new ServerNode();
+			serverNode.setNodeIp(nodeIp);
+			serverNode.setPort(port);
+			serverNode.setRole(role);
+			serverNode.setServerStatus(serverStatus);
+			return serverNode;
+		}
 	}
 }

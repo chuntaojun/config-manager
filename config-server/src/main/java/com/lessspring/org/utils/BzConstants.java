@@ -14,29 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
-
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
+package com.lessspring.org.utils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
+public final class BzConstants {
 
-	/**
-	 * Register the transaction callback interface
-	 *
-	 * @param commitCallback {@link TransactionCommitCallback}
-	 */
-	public abstract void registerTransactionCommitCallback(
-			TransactionCommitCallback commitCallback);
+	public static final String CONFIG_INFO = "@@CONFIG_INFO@@";
 
-	/**
-	 * Register the snapshot operator
-	 *
-	 * @param snapshotOperate {@link SnapshotOperate}
-	 */
-	public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
+	public static final String CONFIG_INFO_BETA = "@@CONFIG_INFO_BETA@@";
+
+	public static final String CONFIG_INFO_HISTORY = "@@CONFIG_INFO_HISTORY@@";
 
 }

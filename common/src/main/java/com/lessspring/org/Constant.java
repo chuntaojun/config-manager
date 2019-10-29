@@ -14,42 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.repository;
+package com.lessspring.org;
 
-import java.util.List;
-
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+import java.util.Formatter;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Mapper
-public interface ConfigInfoHistoryMapper {
+public class Constant {
 
-	/**
-	 * save {@link ConfigInfoHistoryDTO} to db
-	 *
-	 * @param historyDTO {@link ConfigInfoHistoryDTO}
-	 * @return affect row
-	 */
-	int save(@Param("dto") ConfigInfoHistoryDTO historyDTO);
+	public static final String NEWLINE;
 
-	/**
-	 * batch delete history config-info
-	 *
-	 * @param ids config-history-id
-	 * @return affect rows
-	 */
-	int batchDelete(@Param(value = "ids") List<Long> ids);
-
-	/**
-	 * find config-info-history min and max id
-	 *
-	 * @return min and max id
-	 */
-	List<Long> findMinAndMaxId();
-
+	static {
+		String newLine;
+		try {
+			newLine = new Formatter().format("%n").toString();
+		}
+		catch (Exception e) {
+			newLine = "\n";
+		}
+		NEWLINE = newLine;
+	}
 }

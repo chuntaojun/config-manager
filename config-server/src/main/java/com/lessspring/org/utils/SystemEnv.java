@@ -14,49 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.db.store.RDBStore;
+package com.lessspring.org.utils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class StoreEngine implements LifeCycle {
+public final class SystemEnv {
 
-	private final ConcurrentHashMap<Long, RegionEngine> regionEngineTable = new ConcurrentHashMap<>(
-			8);
-	private Long storeId;
-	private ClusterServer clusterServer;
-	private RDBStore rdbStore;
-	private final AtomicBoolean inited = new AtomicBoolean(false);
-	private final AtomicBoolean destroyed = new AtomicBoolean(false);
+	private static final SystemEnv INSTANCE = new SystemEnv();
 
-	@Override
-	public void init() {
-		if (inited.compareAndSet(false, true)) {
-
-		}
+	private SystemEnv() {
 	}
 
-	@Override
-	public void destroy() {
-		if (isInited() && destroyed.compareAndSet(false, true)) {
+	private boolean standalone = true;
 
-		}
+	public static SystemEnv getSingleton() {
+		return INSTANCE;
 	}
 
-	@Override
-	public boolean isInited() {
-		return inited.get();
+	public boolean isStandalone() {
+		return standalone;
 	}
 
-	@Override
-	public boolean isDestroyed() {
-		return destroyed.get();
+	public void setStandalone(boolean standalone) {
+		this.standalone = standalone;
 	}
 }

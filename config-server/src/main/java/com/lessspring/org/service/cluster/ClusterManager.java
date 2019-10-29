@@ -17,6 +17,7 @@
 package com.lessspring.org.service.cluster;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -32,9 +33,11 @@ import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.SnapshotOperate;
+import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.service.config.ConfigTransactionIdManager;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.utils.PathConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,7 @@ import org.springframework.beans.factory.annotation.Value;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@SuppressWarnings("all")
 @Slf4j
 public class ClusterManager {
 
@@ -65,6 +69,7 @@ public class ClusterManager {
 	private final SnapshotOperate snapshotOperate;
 	private final List<BaseTransactionCommitCallback> commitCallbacks;
 	private final AtomicBoolean initialize = new AtomicBoolean(false);
+	private final TransactionIdManager transactionIdManager = new ConfigTransactionIdManager();
 
 	public ClusterManager(List<BaseTransactionCommitCallback> commitCallbacks,
 			SnapshotOperate snapshotOperate) {
@@ -77,13 +82,16 @@ public class ClusterManager {
 			final String raftCacheDir = Paths
 					.get(pathConstants.getParentPath(), "raft-data").toString();
 			final RaftServerOptions configuration = RaftServerOptions.builder()
-					.cacheDir(raftCacheDir).electionTimeoutMs(electionTimeoutMs)
-					.snapshotIntervalSecs(snapshotIntervalSecs).build();
+					.cacheDir(raftCacheDir)
+					.electionTimeoutMs(electionTimeoutMs)
+					.snapshotIntervalSecs(snapshotIntervalSecs)
+					.build();
 			clusterServer = new ClusterServer(configuration);
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);
 			}
 			clusterServer.registerSnapshotOperator(snapshotOperate);
+			clusterServer.initTransactionIdManger(transactionIdManager);
 			clusterServer.init();
 			eventBus.register(this);
 			eventBus.register(clusterServer);
@@ -92,6 +100,14 @@ public class ClusterManager {
 
 	public void destroy() {
 		clusterServer.destroy();
+	}
+
+	public boolean isLeader() {
+		return clusterServer.isLeader();
+	}
+
+	public TransactionIdManager getTransactionIdManager() {
+		return transactionIdManager;
 	}
 
 	public Mono<?> nodeAdd(NodeChangeRequest request) {
@@ -112,8 +128,7 @@ public class ClusterManager {
 	}
 
 	public ResponseData<List<ServerNode>> listNodes() {
-		List<ServerNode> nodes = nodeManager.stream().map(Map.Entry::getValue)
-				.collect(Collectors.toList());
+		List<ServerNode> nodes = new ArrayList<>(nodeManager.serverNodes());
 		return ResponseData.builder().withCode(200).withData(nodes).build();
 	}
 

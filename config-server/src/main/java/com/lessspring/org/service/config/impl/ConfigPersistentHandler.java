@@ -26,7 +26,6 @@ import javax.annotation.Resource;
 import com.lessspring.org.ByteUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
@@ -41,9 +40,9 @@ import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.service.publish.WatchClientManager;
 import com.lessspring.org.utils.ConfigRequestUtils;
-import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.PropertiesEnum;
+import com.lessspring.org.utils.SystemEnv;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +50,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -73,6 +74,11 @@ public class ConfigPersistentHandler
 	@Resource
 	private ConfigInfoHistoryMapper historyMapper;
 
+	@Resource
+	private TransactionTemplate transactionTemplate;
+
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
+
 	public ConfigPersistentHandler(WatchClientManager watchClientManager) {
 		disruptorHolder = DisruptorFactory.build(NotifyEvent::new,
 				"Notify-Event-Disruptor");
@@ -85,6 +91,7 @@ public class ConfigPersistentHandler
 		disruptorHolder.shutdown();
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
 		final String dataId = request.getDataId();
@@ -119,35 +126,35 @@ public class ConfigPersistentHandler
 	@Override
 	public boolean saveConfigInfo(String namespaceId, PublishConfigRequest request) {
 		int affect = -1;
-		long id = -1;
 		byte[] save = ConfigRequestUtils.getByte(request);
+		final long id = request.getAttribute("id");
 		if (request.isBeta()) {
-			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder()
+			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder().id(id)
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
 					.clientIps(request.getClientIps())
 					.createTime(System.currentTimeMillis()).build();
 			affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
-			id = infoDTO.getId();
 		}
 		else {
-			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
-					.groupId(request.getGroupId()).dataId(request.getDataId())
-					.content(save).type(request.getType())
+			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().id(id)
+					.namespaceId(namespaceId).groupId(request.getGroupId())
+					.dataId(request.getDataId()).content(save).type(request.getType())
 					.createTime(System.currentTimeMillis()).build();
 			affect = configInfoMapper.saveConfigInfo(infoDTO);
-			id = infoDTO.getId();
 		}
 		log.debug("save config-success, affect rows is : {}, primary key is : {}", affect,
 				id);
 		return true;
 	}
 
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
 		int affect = -1;
 		byte[] save = ConfigRequestUtils.getByte(request);
 		if (request.isBeta()) {
+			// The smallest atomic operation, no need for transaction rollback operation
 			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
@@ -155,13 +162,15 @@ public class ConfigPersistentHandler
 			affect = configInfoMapper.updateConfigBetaInfo(infoDTO);
 		}
 		else {
+			// General configuration when the update, will automatically save the
+			// configuration record history
 			final QueryConfigInfo queryConfigInfo = QueryConfigInfo.builder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).build();
-			ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
-			ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
-			DBUtils.changeConfigInfo2History(old, history);
-			historyMapper.save(history);
+			// ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
+			// ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
+			// DBUtils.changeConfigInfo2History(old, history);
+			// historyMapper.save(history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
 					.content(save).type(request.getType()).build();
