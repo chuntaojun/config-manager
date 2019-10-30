@@ -16,10 +16,8 @@
  */
 package com.lessspring.org.service.config.impl;
 
-import java.util.Set;
+import java.util.Objects;
 
-import com.lessspring.org.DiskUtils;
-import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -27,9 +25,11 @@ import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,12 +37,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
+ * With the persistence of the processor cache function, for a read operation, to
+ * intercept, read the file cache, if the file cache does not exist, is for the dump file
+ * cache operation
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
 @Component(value = "cachePersistentHandler")
 public class CachePersistentHandler implements PersistentHandler {
+
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	private final ConfigCacheItemManager configCacheItemManager;
 	private final PersistentHandler persistentHandler;
@@ -57,49 +63,52 @@ public class CachePersistentHandler implements PersistentHandler {
 	public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
 		final CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
 				request.getGroupId(), request.getDataId());
-		final int lockResult = ConfigCacheItemManager.tryReadLock(cacheItem);
-		assert (lockResult != 0);
-		if (lockResult < 0) {
-			log.warn("[dump-error] read lock failed. {}", cacheItem.getKey());
-			return null;
-		}
-		ConfigInfo configInfo;
-		try {
-			String s = DiskUtils.readFile(namespaceId,
-					NameUtils.buildName(request.getGroupId(), request.getDataId()));
-			// Directly read cache did not read to the configuration file,
-			// read the database directly
-			if (StringUtils.isEmpty(s)) {
-				ConfigInfo infoDB = persistentHandler.readConfigContent(namespaceId,
-						request);
-				// After they perform query operations dto objects attached to the
-				// attributes
-				// Can't change the order
-				ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
-				if (dto instanceof ConfigBetaInfoDTO) {
-					configCacheItemManager.dumpConfigBeta(namespaceId,
-							(ConfigBetaInfoDTO) dto);
+		final ConfigInfo[] configInfo = new ConfigInfo[] { null };
+		cacheItem.executeReadWork(new ReadWork() {
+			@Override
+			public void job() {
+				String s = configCacheItemManager.readCacheFromDisk(namespaceId,
+						request.getGroupId(), request.getDataId());
+				// Directly read cache did not read to the configuration file,
+				// read the database directly
+				if (StringUtils.isEmpty(s)) {
+					ConfigInfo infoDB = persistentHandler.readConfigContent(namespaceId,
+							request);
+					// After they perform query operations dto objects attached to the
+					// attributes
+					// Can't change the order
+					ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
+					if (Objects.isNull(dto)) {
+						configInfo[0] = infoDB;
+					}
+					if (dto instanceof ConfigBetaInfoDTO) {
+						configCacheItemManager.dumpConfigBeta(namespaceId,
+								(ConfigBetaInfoDTO) dto);
+					}
+					else {
+						configCacheItemManager.dumpConfig(namespaceId, dto);
+					}
+					configInfo[0] = infoDB;
 				}
 				else {
-					configCacheItemManager.dumpConfig(namespaceId, dto);
+					configInfo[0] = GsonUtils.toObj(s, ConfigInfo.class);
 				}
-				return infoDB;
-			}
-			configInfo = GsonUtils.toObj(s, ConfigInfo.class);
-			if (cacheItem.isBeta()) {
-				Set<String> clientIps = cacheItem.getBetaClientIps();
-				if (!clientIps.isEmpty() && !clientIps
-						.contains((String) request.getAttribute("clientIp"))) {
-					return null;
+				configInfo[0].setEncryption("");
+				if (cacheItem.isBeta() && !cacheItem
+						.canRead((String) request.getAttribute("clientIp"))) {
+					configInfo[0] = null;
 				}
+				log.debug("config-info : {}", configInfo[0]);
 			}
-			configInfo.setEncryption("");
-		}
-		finally {
-			ConfigCacheItemManager.releaseReadLock(cacheItem);
-		}
+
+			@Override
+			public void onError(Exception exception) {
+				configInfo[0] = null;
+				log.error("Has some error : {0}", exception);
+			}
+		});
 		request.getAttributes().clear();
-		return configInfo;
+		return configInfo[0];
 	}
 
 	@Override

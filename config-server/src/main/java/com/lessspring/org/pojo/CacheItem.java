@@ -16,8 +16,12 @@
  */
 package com.lessspring.org.pojo;
 
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.lessspring.org.NameUtils;
 
@@ -48,7 +52,9 @@ public class CacheItem {
 
 	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 
-	private final ReadWriteLock lock = new ReadWriteLock();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
 	public CacheItem(String namespaceId, String groupId, String dataId, boolean file) {
 		this.namespaceId = namespaceId;
@@ -99,6 +105,12 @@ public class CacheItem {
 	}
 
 	public void setBetaClientIps(Set<String> betaClientIps) {
+		for (String clientIp : betaClientIps) {
+			if (Objects.equals("0.0.0.0:0", clientIp)) {
+				this.betaClientIps = Collections.emptySet();
+				return;
+			}
+		}
 		this.betaClientIps = betaClientIps;
 	}
 
@@ -106,66 +118,45 @@ public class CacheItem {
 		return key;
 	}
 
-	public boolean tryReadLock() {
-		return lock.tryReadLock();
+	public boolean canRead(String clientIp) {
+		return betaClientIps.isEmpty() || !betaClientIps.contains(clientIp);
 	}
 
-	public void releaseReadLock() {
-		lock.releaseReadLock();
-	}
-
-	public boolean tryWriteLock() {
-		return lock.tryWriteLock();
-	}
-
-	public void releaseWriteLock() {
-		lock.releaseWriteLock();
-	}
-
-	private static class ReadWriteLock {
-
-		synchronized boolean tryReadLock() {
-			if (isWriteLocked()) {
-				return false;
-			}
-			else {
-				status++;
-				return true;
+	public void executeReadWork(ReadWork readWork) {
+		try {
+			if (readLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
+				try {
+					readWork.job();
+				}
+				catch (Exception e) {
+					readWork.onError(e);
+				}
+				finally {
+					readLock.unlock();
+				}
 			}
 		}
+		catch (InterruptedException ignore) {
 
-		synchronized void releaseReadLock() {
-			status--;
 		}
-
-		synchronized boolean tryWriteLock() {
-			if (!isFree()) {
-				return false;
-			}
-			else {
-				status = -1;
-				return true;
-			}
-		}
-
-		synchronized void releaseWriteLock() {
-			status = 0;
-		}
-
-		private boolean isWriteLocked() {
-			return status < 0;
-		}
-
-		private boolean isFree() {
-			return status == 0;
-		}
-
-		/**
-		 * Zero indicates no lock; Negative and write locks; Positive said read lock,
-		 * number of numerical said read lock.
-		 */
-		private int status = 0;
-
 	}
 
+	public void executeWriteWork(WriteWork writeWork) {
+		try {
+			if (writeLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
+				try {
+					writeWork.job();
+				}
+				catch (Exception e) {
+					writeWork.onError(e);
+				}
+				finally {
+					writeLock.unlock();
+				}
+			}
+		}
+		catch (InterruptedException ignore) {
+
+		}
+	}
 }

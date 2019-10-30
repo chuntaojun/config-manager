@@ -49,7 +49,6 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 		private String type;
 		private String encryption;
 		private Long createTime;
-		private Long lastModifyTime;
 
 		private ConfigBetaInfoDTOBuilder() {
 		}
@@ -109,11 +108,6 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			return this;
 		}
 
-		public ConfigBetaInfoDTOBuilder lastModifyTime(Long lastModifyTime) {
-			this.lastModifyTime = lastModifyTime;
-			return this;
-		}
-
 		public ConfigBetaInfoDTO build() {
 			ConfigBetaInfoDTO configBetaInfoDTO = new ConfigBetaInfoDTO();
 			configBetaInfoDTO.setClientIps(clientIps);
@@ -127,7 +121,6 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			configBetaInfoDTO.setType(type);
 			configBetaInfoDTO.setEncryption(encryption);
 			configBetaInfoDTO.setCreateTime(createTime);
-			configBetaInfoDTO.setLastModifyTime(lastModifyTime);
 			return configBetaInfoDTO;
 		}
 	}

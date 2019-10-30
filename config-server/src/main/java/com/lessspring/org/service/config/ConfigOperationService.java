@@ -27,6 +27,7 @@ import javax.annotation.PreDestroy;
 
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.exception.NotThisResourceException;
+import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -36,15 +37,17 @@ import com.lessspring.org.pojo.event.ConfigChangeEvent;
 import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
-import com.lessspring.org.raft.OperationEnum;
-import com.lessspring.org.raft.Transaction;
-import com.lessspring.org.raft.TransactionException;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.TransactionIdManager;
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Datum;
+import com.lessspring.org.raft.pojo.Transaction;
+import com.lessspring.org.raft.pojo.TransactionId;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.config.impl.ConfigPersistentHandler;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
+import com.lessspring.org.utils.BzConstants;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
@@ -62,6 +65,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConfigOperationService {
+
+	private final String createConfig = "CREATE_CONFIG";
+	private final String modifyConfig = "MODIFY_CONFIG";
+	private final String deleteConfig = "DELETE_CONFIG";
 
 	private final NamespaceService namespaceService;
 	private final Disruptor<ConfigChangeEvent> disruptorHolder;
@@ -88,12 +95,16 @@ public class ConfigOperationService {
 
 	@PostConstruct
 	public void init() {
+		TransactionIdManager manager = clusterManager.getTransactionIdManager();
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY));
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, publishConsumer(),
-				OperationEnum.PUBLISH);
+				createConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, modifyConsumer(),
-				OperationEnum.MODIFY);
+				modifyConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, deleteConsumer(),
-				OperationEnum.DELETE);
+				deleteConfig);
 		clusterManager.init();
 		failCallback = throwable -> null;
 	}
@@ -101,45 +112,73 @@ public class ConfigOperationService {
 	@PreDestroy
 	public void shutdown() {
 		disruptorHolder.shutdown();
+		clusterManager.destroy();
 	}
 
 	public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request) {
-		return ResponseData
-				.success(persistentHandler.readConfigContent(namespaceId, request));
+		ConfigInfo info = persistentHandler.readConfigContent(namespaceId, request);
+		if (Objects.isNull(info)) {
+			throw new NotThisResourceException("Config-Info data not found");
+		}
+		return ResponseData.success(info);
 	}
 
 	public ResponseData<?> publishConfig(String namespaceId,
 			PublishConfigRequest request) {
 		PublishConfigRequest4 request4 = PublishConfigRequest4.copy(namespaceId, request);
-		String key = TransactionUtils.buildTransactionKey(
-				PropertiesEnum.InterestKey.CONFIG_DATA, namespaceId, request.getGroupId(),
-				request.getDataId());
+		String key;
+		if (request.isBeta()) {
+			key = TransactionUtils.buildTransactionKey(
+					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_BETA,
+					namespaceId, request.getGroupId(), request.getDataId());
+		}
+		else {
+			key = TransactionUtils.buildTransactionKey(
+					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO,
+					namespaceId, request.getGroupId(), request.getDataId());
+		}
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				PublishConfigRequest4.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.PUBLISH);
+		datum.setOperation(createConfig);
 		return commit(datum);
 	}
 
 	public ResponseData<?> modifyConfig(String namespaceId,
 			PublishConfigRequest request) {
 		PublishConfigRequest4 request4 = PublishConfigRequest4.copy(namespaceId, request);
-		String key = TransactionUtils.buildTransactionKey(
-				PropertiesEnum.InterestKey.CONFIG_DATA, namespaceId, request.getGroupId(),
-				request.getDataId());
+		String key;
+		if (request.isBeta()) {
+			key = TransactionUtils.buildTransactionKey(
+					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_BETA,
+					namespaceId, request.getGroupId(), request.getDataId());
+		}
+		else {
+			key = TransactionUtils.buildTransactionKey(
+					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO,
+					namespaceId, request.getGroupId(), request.getDataId());
+		}
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				PublishConfigRequest4.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.MODIFY);
+		datum.setOperation(modifyConfig);
 		return commit(datum);
 	}
 
 	public ResponseData<?> removeConfig(String namespaceId, DeleteConfigRequest request) {
 		DeleteConfigRequest4 request4 = DeleteConfigRequest4.copy(namespaceId, request);
-		String key = TransactionUtils.buildTransactionKey(
-				PropertiesEnum.InterestKey.CONFIG_DATA, namespaceId, request.getGroupId(),
-				request.getDataId());
+		String key;
+		if (request.isBeta()) {
+			key = TransactionUtils.buildTransactionKey(
+					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_BETA,
+					namespaceId, request.getGroupId(), request.getDataId());
+		}
+		else {
+			key = TransactionUtils.buildTransactionKey(
+					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO,
+					namespaceId, request.getGroupId(), request.getDataId());
+		}
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				DeleteConfigRequest4.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.DELETE);
+		datum.setOperation(deleteConfig);
 		return commit(datum);
 	}
 
@@ -162,14 +201,15 @@ public class ConfigOperationService {
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {
-			return future.get(10_000L, TimeUnit.MILLISECONDS);
+			ResponseData<Boolean> data = future.get(10_000L, TimeUnit.MILLISECONDS);
+			return data;
 		}
 		catch (InterruptedException | ExecutionException | TimeoutException e) {
 			return ResponseData.fail(e);
 		}
 	}
 
-	public TransactionConsumer<Transaction> publishConsumer() {
+	private TransactionConsumer<Transaction> publishConsumer() {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
@@ -181,6 +221,7 @@ public class ConfigOperationService {
 					namespaceService.createNamespace(
 							NamespaceRequest.builder().namespace(namespace).build());
 				}
+				request4.setAttribute("id", transaction.getId());
 				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(),
 						request4)) {
 					ConfigChangeEvent event = ConfigOperationService.this
@@ -198,7 +239,7 @@ public class ConfigOperationService {
 		};
 	}
 
-	public TransactionConsumer<Transaction> modifyConsumer() {
+	private TransactionConsumer<Transaction> modifyConsumer() {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
@@ -226,7 +267,7 @@ public class ConfigOperationService {
 		};
 	}
 
-	public TransactionConsumer<Transaction> deleteConsumer() {
+	private TransactionConsumer<Transaction> deleteConsumer() {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {

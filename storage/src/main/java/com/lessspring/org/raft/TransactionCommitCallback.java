@@ -16,6 +16,9 @@
  */
 package com.lessspring.org.raft;
 
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Transaction;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1

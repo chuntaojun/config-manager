@@ -17,19 +17,23 @@
 package com.lessspring.org.raft;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import com.alipay.sofa.jraft.entity.PeerId;
 import com.lessspring.org.raft.vo.ServerNode;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class NodeManager {
+public class NodeManager implements LeaderStatusListener {
 
 	private ServerNode self = null;
 
@@ -55,22 +59,38 @@ public class NodeManager {
 		this.self = self;
 	}
 
-	public void nodeJoin(ServerNode node) {
+	public synchronized void nodeJoin(ServerNode node) {
 		nodeMap.putIfAbsent(node.getKey(), node);
 		notifyListener();
 	}
 
-	public void nodeLeave(ServerNode node) {
+	public synchronized void nodeLeave(ServerNode node) {
 		nodeMap.remove(node.getKey());
 		notifyListener();
 	}
 
-	public Stream<Map.Entry<String, ServerNode>> stream() {
-		return nodeMap.entrySet().stream();
+	synchronized void batchUpdate(List<PeerId> peerIds, PeerId leader) {
+		nodeMap.clear();
+		peerIds.forEach(peerId -> {
+			ServerNode serverNode = ServerNode.builder().nodeIp(peerId.getIp())
+					.port(peerId.getPort()).build();
+			if (Objects.equals(leader.checksum(), peerId.checksum())) {
+				serverNode.setRole("Leader");
+			}
+			else {
+				serverNode.setRole("Follower");
+			}
+			nodeMap.put(serverNode.getKey(), serverNode);
+		});
+		notifyListener();
 	}
 
-	public Collection<ServerNode> serverNodes() {
-		return nodeMap.values();
+	public Stream<Map.Entry<String, ServerNode>> stream() {
+		return new HashMap<>(nodeMap).entrySet().stream();
+	}
+
+	public synchronized Collection<ServerNode> serverNodes() {
+		return new HashMap(nodeMap).values();
 	}
 
 	private void notifyListener() {
@@ -80,4 +100,27 @@ public class NodeManager {
 		}
 	}
 
+	@Override
+	public void onLeaderStart(String leaderIp, long term) {
+		nodeMap.forEach((s, serverNode) -> {
+			if (Objects.equals(leaderIp, serverNode.getKey())) {
+				serverNode.setRole("Leader");
+			}
+			else {
+				serverNode.setRole("Follower");
+			}
+		});
+	}
+
+	@Override
+	public void onLeaderStop(String leaderIp, long term) {
+		nodeMap.forEach((s, serverNode) -> {
+			if (Objects.equals(leaderIp, serverNode.getKey())) {
+				serverNode.setRole("Leader");
+			}
+			else {
+				serverNode.setRole("Follower");
+			}
+		});
+	}
 }

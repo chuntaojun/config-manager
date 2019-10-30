@@ -26,6 +26,10 @@ public class DumpTask4Period extends DumpTask {
 
 	private Duration period;
 
+	public DumpTask4Period(boolean async) {
+		super(async);
+	}
+
 	public Duration getPeriod() {
 		return period;
 	}

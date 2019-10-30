@@ -76,6 +76,16 @@ public class ClusterNodeWatch extends Observable implements LifeCycle {
 		executor.shutdown();
 	}
 
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
+
 	private void refreshCluster() {
 		long delay = TimeUnit.SECONDS.toMillis(30);
 		Retry<Boolean> retry = new Retry<Boolean>() {

@@ -21,6 +21,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.repository.NamespacePermissionsMapper;
 import com.lessspring.org.service.security.AuthorityProcessor;
@@ -48,5 +49,10 @@ public class AuthorityProcessorImpl implements AuthorityProcessor {
 		namespaceIds = new HashSet<>(
 				permissionsMapper.findNamespaceIdByUserId(privilege.getUserId()));
 		return namespaceIds.contains(namespaceId);
+	}
+
+	@Override
+	public ResponseData<?> createAuth(String namespaceId) {
+		return null;
 	}
 }

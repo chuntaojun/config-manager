@@ -22,8 +22,7 @@ package com.lessspring.org.service.dump.task;
  */
 public class DumpTask4Beta extends DumpTask {
 
-	public DumpTask4Beta(Long[] ids) {
-		super();
-		setIds(ids);
+	public DumpTask4Beta(Long[] ids, boolean async) {
+		super(async, ids);
 	}
 }

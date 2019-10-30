@@ -17,6 +17,7 @@
 package com.lessspring.org;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,7 +29,8 @@ public final class PathUtils {
 
 	private static volatile boolean initialized = false;
 
-	private static String FATHER_ROAD_KING = System.getProperty("user.home");
+	private static String FATHER_ROAD_KING = Paths
+			.get(System.getProperty("user.home"), "config-manager").toString();
 
 	public static void init(String path) {
 		if (!initialized) {
@@ -43,11 +45,20 @@ public final class PathUtils {
 		}
 	}
 
-	public static String finalPath(String subPath) {
-		if (subPath.startsWith(File.separator)) {
-			subPath = subPath.substring(1);
+	public static String getFatherRoadKing() {
+		return FATHER_ROAD_KING;
+	}
+
+	public static String finalPath(String... subPaths) {
+		StringBuilder pathb = new StringBuilder();
+		pathb.append(FATHER_ROAD_KING);
+		for (String subPath : subPaths) {
+			if (subPath.startsWith(File.separator)) {
+				subPath = subPath.substring(1);
+			}
+			pathb.append(File.separator).append(subPath);
 		}
-		return FATHER_ROAD_KING + File.separator + subPath;
+		return pathb.toString();
 	}
 
 	public static String join(Object... objects) {

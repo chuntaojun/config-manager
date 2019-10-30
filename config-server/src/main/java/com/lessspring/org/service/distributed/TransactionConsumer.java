@@ -16,7 +16,7 @@
  */
 package com.lessspring.org.service.distributed;
 
-import com.lessspring.org.raft.TransactionException;
+import com.lessspring.org.raft.exception.TransactionException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -31,6 +31,11 @@ public interface TransactionConsumer<T> {
 	 * @throws Throwable exception
 	 */
 	void accept(T t) throws Throwable;
+
+	/**
+	 * roll back
+	 */
+	default void rollBack() {}
 
 	/**
 	 * Abnormal transaction callback handler

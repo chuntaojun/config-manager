@@ -20,23 +20,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.lessspring.org.exception.BaseException;
-import com.lessspring.org.raft.OperationEnum;
-import com.lessspring.org.raft.Transaction;
 import com.lessspring.org.raft.TransactionCommitCallback;
-import com.lessspring.org.raft.TransactionException;
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.utils.PropertiesEnum;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public abstract class BaseTransactionCommitCallback implements TransactionCommitCallback {
 
-	private final HashMap<PropertiesEnum.Bz, Map<OperationEnum, TransactionConsumer<Transaction>>> consumerMap = new HashMap<>(
+	private final HashMap<PropertiesEnum.Bz, Map<String, TransactionConsumer<Transaction>>> consumerMap = new HashMap<>(
 			4);
 
 	public void registerConsumer(PropertiesEnum.Bz bz,
-			TransactionConsumer<Transaction> consumer, OperationEnum operation) {
+			TransactionConsumer<Transaction> consumer, String operation) {
 		synchronized (this) {
 			consumerMap.computeIfAbsent(bz, b -> new HashMap<>(4));
 			consumerMap.get(bz).put(operation, consumer);
@@ -52,6 +53,7 @@ public abstract class BaseTransactionCommitCallback implements TransactionCommit
 			consumer.accept(transaction);
 		}
 		catch (Throwable e) {
+			log.info("error : {0}", e);
 			TransactionException exception = new TransactionException(e);
 			if (e instanceof BaseException) {
 				exception.setErrorCode(((BaseException) e).code());

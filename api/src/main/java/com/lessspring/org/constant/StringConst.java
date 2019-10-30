@@ -23,6 +23,8 @@ public class StringConst {
 
 	public static final String API_V1 = "/api/v1/";
 
+	public static final String CLIENT_ID_NAME = "config-manager-clientId";
+
 	public static final String TOKEN_HEADER_NAME = "config-manager-token";
 
 	// Need to be configured for regular matching encrypted string

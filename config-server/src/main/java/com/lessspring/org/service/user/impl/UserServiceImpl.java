@@ -25,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import com.lessspring.org.EncryptionUtils;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.exception.NoSuchRoleException;
 import com.lessspring.org.exception.NotThisResourceException;
@@ -32,17 +33,15 @@ import com.lessspring.org.exception.ValidationException;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.UserRequest;
 import com.lessspring.org.pojo.vo.UserVO;
-import com.lessspring.org.raft.OperationEnum;
-import com.lessspring.org.raft.Transaction;
-import com.lessspring.org.raft.TransactionException;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Datum;
+import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.repository.UserMapper;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.service.user.UserService;
-import com.lessspring.org.utils.EncryptionUtils;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
@@ -58,6 +57,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service(value = "userService")
 public class UserServiceImpl implements UserService {
+
+	private final String createUser = "CREATE_USER";
+	private final String modifyUser = "MODIFY_USER";
+	private final String deleteUser = "DELETE_USER";
 
 	private final BaseTransactionCommitCallback commitCallback;
 	private final ClusterManager clusterManager;
@@ -76,11 +79,11 @@ public class UserServiceImpl implements UserService {
 	@PostConstruct
 	public void init() {
 		commitCallback.registerConsumer(PropertiesEnum.Bz.USER, createUserConsumer(),
-				OperationEnum.PUBLISH);
+				createUser);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.USER, modifyUserConsumer(),
-				OperationEnum.MODIFY);
+				modifyUser);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.USER, removeUserConsumer(),
-				OperationEnum.DELETE);
+				deleteUser);
 		failCallback = throwable -> null;
 	}
 
@@ -90,7 +93,7 @@ public class UserServiceImpl implements UserService {
 				PropertiesEnum.InterestKey.USER_DATA, request.getUsername());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				UserRequest.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.PUBLISH);
+		datum.setOperation(createUser);
 		return commit(datum);
 	}
 
@@ -100,7 +103,7 @@ public class UserServiceImpl implements UserService {
 				PropertiesEnum.InterestKey.USER_DATA, request.getUsername());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				UserRequest.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.MODIFY);
+		datum.setOperation(modifyUser);
 		return commit(datum);
 	}
 
@@ -110,7 +113,7 @@ public class UserServiceImpl implements UserService {
 				PropertiesEnum.InterestKey.USER_DATA, request.getUsername());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				UserRequest.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.DELETE);
+		datum.setOperation(deleteUser);
 		return commit(datum);
 	}
 

@@ -82,4 +82,14 @@ public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 	public void destroy() {
 		this.executor.shutdown();
 	}
+
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
 }

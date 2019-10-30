@@ -27,6 +27,20 @@ import com.lessspring.org.model.dto.ConfigInfo;
 public interface ConfigService extends LifeCycle {
 
 	/**
+	 * modify client-id
+	 * 
+	 * @param clientId client-id
+	 */
+	void setClientId(String clientId);
+
+	/**
+	 * get client id
+	 * 
+	 * @return client-id
+	 */
+	String getClientId();
+
+	/**
 	 * get config by groupId and dataId
 	 *
 	 * @param groupId groupId

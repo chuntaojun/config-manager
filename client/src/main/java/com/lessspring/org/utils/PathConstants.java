@@ -22,6 +22,8 @@ package com.lessspring.org.utils;
  */
 public final class PathConstants {
 
+	public static final String FILE_LOCAL_PREF_PATH = "config_file_local";
+
 	public static final String FILE_CACHE_PATH = "config_file_snapshot";
 
 }

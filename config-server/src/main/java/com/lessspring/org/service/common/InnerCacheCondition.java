@@ -31,7 +31,7 @@ public class InnerCacheCondition implements Condition {
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		String val = context.getEnvironment()
-				.getProperty("com.lessspring.org.config-manager.cache.type");
-		return Objects.isNull(val) || Objects.equals(val, "inner");
+				.getProperty("com.lessspring.org.config-manager.cache.type", "inner");
+		return Objects.equals(val, "inner");
 	}
 }

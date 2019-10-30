@@ -20,6 +20,8 @@ import com.lessspring.org.model.vo.ResponseData;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -31,10 +33,13 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  */
 public final class RenderUtils {
 
+	@SuppressWarnings("unchecked")
 	public static Mono<ServerResponse> render(Mono<?> dataMono) {
 		return ok().header("Access-Control-Allow-Origin", "*")
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.cacheControl(CacheControl.noCache())
 				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
-				.subscribeOn(Schedulers.elastic());
+				.subscribeOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
 	}
 
 }

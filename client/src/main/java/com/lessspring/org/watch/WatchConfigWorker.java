@@ -28,12 +28,15 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
+import com.lessspring.org.LifeCycleHelper;
 import com.lessspring.org.NameUtils;
+import com.lessspring.org.ThreadPoolHelper;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
@@ -53,6 +56,8 @@ import org.jetbrains.annotations.NotNull;
  * @since 0.0.1
  */
 public class WatchConfigWorker implements LifeCycle {
+
+	private static Logger logger = Logger.getAnonymousLogger();
 
 	private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
 			Runtime.getRuntime().availableProcessors(), new ThreadFactory() {
@@ -137,8 +142,18 @@ public class WatchConfigWorker implements LifeCycle {
 		receiver.cancle();
 		receiver = null;
 		configManager = null;
-		httpClient.destroy();
-		executor.shutdown();
+		LifeCycleHelper.invokeDestroy(httpClient);
+		ThreadPoolHelper.invokeShutdown(executor);
+	}
+
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
 	}
 
 	// When your listener list changes, to build a monitoring events and
@@ -153,7 +168,7 @@ public class WatchConfigWorker implements LifeCycle {
 	}
 
 	private void onError(Throwable throwable) {
-		throwable.printStackTrace();
+		logger.warning(throwable.getMessage());
 	}
 
 	private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {

@@ -16,16 +16,22 @@
  */
 package com.lessspring.org.tps;
 
+import com.lessspring.org.exception.TpsLimitException;
 import com.lessspring.org.model.vo.ResponseData;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public class ConfigFailStrategy extends FailStrategy {
 
 	@Override
 	public ResponseData<?> onLimit() {
-		return ResponseData.fail();
+		log.warn(
+				"Current resource access beyond limit, request access restriction model");
+		return ResponseData.fail(new TpsLimitException(
+				"Current resource access beyond limit, request access restriction model"));
 	}
 }

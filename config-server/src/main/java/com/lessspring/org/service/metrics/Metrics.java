@@ -56,4 +56,14 @@ public final class Metrics implements LifeCycle {
 	public void destroy() {
 
 	}
+
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
 }

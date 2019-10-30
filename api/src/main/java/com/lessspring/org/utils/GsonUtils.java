@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -28,24 +29,22 @@ import com.google.gson.Gson;
  */
 public final class GsonUtils {
 
-	private static final Gson GSON = new Gson();
+	private static final Gson GSON = new GsonBuilder().setLenient().create();
 
 	public static String toJson(Object obj) {
 		return GSON.toJson(obj);
 	}
 
 	public static byte[] toJsonBytes(Object obj) {
-		return GSON.toJson(obj).getBytes(StandardCharsets.UTF_8);
+		return ByteUtils.toBytes(GSON.toJson(obj));
 	}
 
 	public static <T> T toObj(byte[] json, Class<T> cls) {
-		return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())),
-				cls);
+		return toObj(StringUtils.newString4UTF8(json), cls);
 	}
 
 	public static <T> T toObj(byte[] json, Type cls) {
-		return toObj(new String(json, Charset.forName(StandardCharsets.UTF_8.name())),
-				cls);
+		return toObj(StringUtils.newString4UTF8(json), cls);
 	}
 
 	public static <T> T toObj(String json, Class<T> cls) {

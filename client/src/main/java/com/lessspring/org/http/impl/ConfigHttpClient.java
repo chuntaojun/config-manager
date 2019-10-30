@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.gson.reflect.TypeToken;
+import com.lessspring.org.Configuration;
 import com.lessspring.org.auth.AuthHolder;
 import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.constant.StringConst;
@@ -70,11 +71,15 @@ public class ConfigHttpClient implements HttpClient {
 
 	private final AuthHolder authHolder;
 
+	private final Configuration configuration;
+
 	private AtomicReference<String> clusterIp = new AtomicReference<>();
 
-	public ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder) {
+	public ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder,
+			Configuration configuration) {
 		this.choose = choose;
 		this.authHolder = authHolder;
+		this.configuration = configuration;
 	}
 
 	@Override
@@ -241,6 +246,16 @@ public class ConfigHttpClient implements HttpClient {
 		ServerSentEventListener.clean();
 	}
 
+	@Override
+	public boolean isInited() {
+		return false;
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return false;
+	}
+
 	private <T> ResponseData<T> execute(Call call, TypeToken<ResponseData<T>> token)
 			throws IOException {
 		ResponseData<T> data;
@@ -299,6 +314,7 @@ public class ConfigHttpClient implements HttpClient {
 			Map.Entry<String, String> entry = iterator.next();
 			builder.addHeader(entry.getKey(), entry.getValue());
 		}
+		builder.addHeader(StringConst.CLIENT_ID_NAME, configuration.getClientId());
 		builder.addHeader(StringConst.TOKEN_HEADER_NAME, authHolder.getToken());
 	}
 

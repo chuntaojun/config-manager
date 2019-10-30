@@ -35,8 +35,18 @@ public class TpsManager {
 
 	private final Map<String, LimitRuleEntry> limiterManager = new HashMap<>(8);
 
+	private final DefaultLimitRuleEntry defaultLimitRuleEntry = new DefaultLimitRuleEntry();
+
+	/**
+	 * According to the resource name query current-limiting strategy, ensure that won't
+	 * return null, if there is no current limiting measures of the resources, the default
+	 * take unlimited stream strategy
+	 * 
+	 * @param key resource-name
+	 * @return {@link LimitRuleEntry}
+	 */
 	public LimitRuleEntry query(String key) {
-		return limiterManager.get(key);
+		return limiterManager.getOrDefault(key, defaultLimitRuleEntry);
 	}
 
 	public Map<String, LimitRuleEntry> getLimiterManager() {
@@ -45,7 +55,11 @@ public class TpsManager {
 
 	public synchronized void registerLimiter(String key,
 			Supplier<LimitRuleEntry> supplier) {
-		limiterManager.computeIfAbsent(key, s -> supplier.get());
+		LimitRuleEntry entry = supplier.get();
+		if (entry == null) {
+			return;
+		}
+		limiterManager.putIfAbsent(key, entry);
 	}
 
 	public static class LimitRuleEntry {
@@ -74,6 +88,14 @@ public class TpsManager {
 			return rateLimiter.tryAcquire() ? null
 					: (strategy == null ? ResponseData.fail(Code.SERVER_BUSY)
 							: strategy.onLimit());
+		}
+	}
+
+	public static class DefaultLimitRuleEntry extends LimitRuleEntry {
+
+		@Override
+		public ResponseData<?> tryAcquire() {
+			return null;
 		}
 	}
 

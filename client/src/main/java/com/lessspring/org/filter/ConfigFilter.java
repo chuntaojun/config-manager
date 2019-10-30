@@ -16,17 +16,14 @@
  */
 package com.lessspring.org.filter;
 
+import com.lessspring.org.Priority;
 import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface ConfigFilter {
-
-	public static final int HIGH_PRIORITY = Integer.MIN_VALUE;
-
-	public static final int Low_PRIORITY = Integer.MAX_VALUE;
+public interface ConfigFilter extends Priority {
 
 	/**
 	 * this filter name
@@ -41,12 +38,5 @@ public interface ConfigFilter {
 	 * @param configInfo {@link ConfigInfo}
 	 */
 	void filter(ConfigInfo configInfo);
-
-	/**
-	 * this filter priority
-	 *
-	 * @return int
-	 */
-	int priority();
 
 }

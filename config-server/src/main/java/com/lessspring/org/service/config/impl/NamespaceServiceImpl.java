@@ -36,16 +36,16 @@ import com.lessspring.org.db.dto.NamespaceDTO;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.pojo.vo.NamespaceVO;
-import com.lessspring.org.raft.OperationEnum;
-import com.lessspring.org.raft.Transaction;
-import com.lessspring.org.raft.TransactionException;
-import com.lessspring.org.raft.dto.Datum;
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Datum;
+import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.repository.NamespaceMapper;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.config.NamespaceService;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
+import com.lessspring.org.service.security.AuthorityProcessor;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.IDUtils;
 import com.lessspring.org.utils.PropertiesEnum;
@@ -66,25 +66,32 @@ public class NamespaceServiceImpl implements NamespaceService {
 
 	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
 
+	private final String createNamespace = "CREATE_NAMESPACE";
+	private final String modifyNamespace = "MODIFY_NAMESPACE";
+	private final String deleteNamespace = "DELETE_NAMESPACE";
+	private final String createAuth4Namespace = "CREATA_AUTH_NAMESPACE";
+
 	@Resource
 	private NamespaceMapper namespaceMapper;
 
 	private final BaseTransactionCommitCallback commitCallback;
 	private final ClusterManager clusterManager;
+	private final AuthorityProcessor authorityProcessor;
 	private FailCallback failCallback;
 
 	public NamespaceServiceImpl(
 			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
-			ClusterManager clusterManager) {
+			ClusterManager clusterManager, AuthorityProcessor authorityProcessor) {
 		this.commitCallback = commitCallback;
 		this.clusterManager = clusterManager;
+		this.authorityProcessor = authorityProcessor;
 	}
 
 	@PostConstruct
 	public void init() {
 		namespaceCache = CacheBuilder.newBuilder()
 				.expireAfterWrite(Duration.ofMinutes(15)).maximumSize(65535)
-				.build(new CacheLoader<String, Optional<NamespaceDTO>>() {
+				.build(new CacheLoader<>() {
 					@Override
 					public Optional<NamespaceDTO> load(String key) throws Exception {
 						return Optional
@@ -92,9 +99,11 @@ public class NamespaceServiceImpl implements NamespaceService {
 					}
 				});
 		commitCallback.registerConsumer(PropertiesEnum.Bz.NAMESPACE,
-				createNamespaceConsumer(), OperationEnum.PUBLISH);
+				createNamespaceConsumer(), createNamespace);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.NAMESPACE,
-				removeNamespaceConsumer(), OperationEnum.DELETE);
+				removeNamespaceConsumer(), deleteNamespace);
+		commitCallback.registerConsumer(PropertiesEnum.Bz.NAMESPACE,
+				createAuth4NamespaceConsumer(), createAuth4Namespace);
 		failCallback = throwable -> null;
 	}
 
@@ -112,7 +121,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 				PropertiesEnum.InterestKey.CONFIG_DATA, request.getNamespace());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				NamespaceRequest.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.PUBLISH);
+		datum.setOperation(createNamespace);
 		return ResponseData.success();
 	}
 
@@ -122,7 +131,17 @@ public class NamespaceServiceImpl implements NamespaceService {
 				PropertiesEnum.InterestKey.CONFIG_DATA, request.getNamespace());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				NamespaceRequest.CLASS_NAME);
-		datum.setOperationEnum(OperationEnum.DELETE);
+		datum.setOperation(deleteNamespace);
+		return commit(datum);
+	}
+
+	@Override
+	public ResponseData<?> createNamespaceAuth(NamespaceRequest request) {
+		String key = TransactionUtils.buildTransactionKey(
+				PropertiesEnum.InterestKey.CONFIG_DATA, request.getNamespace());
+		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
+				NamespaceRequest.CLASS_NAME);
+		datum.setOperation(createAuth4Namespace);
 		return commit(datum);
 	}
 
@@ -166,6 +185,21 @@ public class NamespaceServiceImpl implements NamespaceService {
 						NamespaceRequest.class);
 				namespaceCache.invalidate(request.getNamespace());
 				namespaceMapper.removeNamespace(request.getNamespace());
+			}
+
+			@Override
+			public void onError(TransactionException te) {
+
+			}
+		};
+	}
+
+	private TransactionConsumer<Transaction> createAuth4NamespaceConsumer() {
+		return new TransactionConsumer<Transaction>() {
+			@Override
+			public void accept(Transaction transaction) throws Throwable {
+				NamespaceRequest request = GsonUtils.toObj(transaction.getData(),
+						NamespaceRequest.class);
 			}
 
 			@Override

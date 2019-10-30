@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SecurityJwtConfiguration {
 
-	@Value("${com.lessspring.org.security.jwt.secret}")
+	@Value("${com.lessspring.org.config-manager.security.jwt.secret}")
 	private String jwtSecret;
 
 	@Bean(value = "JwtTokenAlgorithm")

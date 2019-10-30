@@ -21,18 +21,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import com.lessspring.org.utils.ByteUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -73,17 +76,47 @@ public final class DiskUtils {
 		return null;
 	}
 
+	public static String readFile(InputStream is) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+			StringBuilder textBuilder = new StringBuilder();
+			String lineTxt = null;
+			while ((lineTxt = reader.readLine()) != null) {
+				textBuilder.append(lineTxt);
+			}
+			return textBuilder.toString();
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
+
+	public static String readFile(File file) {
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(new FileInputStream(file)))) {
+			StringBuilder textBuilder = new StringBuilder();
+			String lineTxt = null;
+			while ((lineTxt = reader.readLine()) != null) {
+				textBuilder.append(lineTxt);
+			}
+			return textBuilder.toString();
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
+
 	public static byte[] readFileBytes(String path, String fileName) {
 		String finalPath = PathUtils.finalPath(path);
 		File file = openFile(finalPath, fileName);
 		if (file.exists()) {
-			try (FileInputStream reader = new FileInputStream(file)) {
-				FileChannel channel = reader.getChannel();
-				ByteBuffer byteBuffer = ByteBuffer.allocate((int) channel.size());
-				while ((channel.read(byteBuffer)) > 0) {
-					// do nothing
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(new FileInputStream(file)))) {
+				StringBuilder textBuilder = new StringBuilder();
+				String lineTxt = null;
+				while ((lineTxt = reader.readLine()) != null) {
+					textBuilder.append(lineTxt);
 				}
-				return byteBuffer.array();
+				return ByteUtils.toBytes(textBuilder.toString());
 			}
 			catch (IOException e) {
 				return null;
@@ -105,7 +138,7 @@ public final class DiskUtils {
 				if (NO_SPACE_CN.equals(errMsg) || NO_SPACE_EN.equals(errMsg)
 						|| errMsg.contains(DISK_QUATA_CN)
 						|| errMsg.contains(DISK_QUATA_EN)) {
-					logger.info("磁盘满，自杀退出");
+					logger.warning("磁盘满，自杀退出");
 					System.exit(0);
 				}
 			}
@@ -132,12 +165,11 @@ public final class DiskUtils {
 		}
 	}
 
-	private static File openFile(String path, String fileName) {
+	public static File openFile(String path, String fileName) {
 		return openFile(path, fileName, false);
 	}
 
-	private static File openFile(String path, String fileName, boolean rewrite) {
-		System.out.println("File Path : " + path);
+	public static File openFile(String path, String fileName, boolean rewrite) {
 		File directory = new File(path);
 		if (!directory.exists()) {
 			boolean mkdirs = directory.mkdirs();
@@ -164,21 +196,23 @@ public final class DiskUtils {
 	}
 
 	public static void compressDirectoryToZipFile(final String rootDir,
-			final String sourceDir, final ZipOutputStream zos) throws IOException {
+			final String sourceDir, final ZipOutputStream zos,
+			final WritableByteChannel channel) throws IOException {
 		final String dir = Paths.get(rootDir, sourceDir).toString();
 		final File[] files = new File(dir).listFiles();
 		assert files != null;
 		for (final File file : files) {
 			if (file.isDirectory()) {
 				compressDirectoryToZipFile(rootDir,
-						Paths.get(sourceDir, file.getName()).toString(), zos);
+						Paths.get(sourceDir, file.getName()).toString(), zos, channel);
 			}
 			else {
 				zos.putNextEntry(
 						new ZipEntry(Paths.get(sourceDir, file.getName()).toString()));
 				try (final FileInputStream in = new FileInputStream(
 						Paths.get(rootDir, sourceDir, file.getName()).toString())) {
-					IOUtils.copy(in, zos);
+					FileChannel fileChannel = in.getChannel();
+					fileChannel.transferTo(0, fileChannel.size(), channel);
 				}
 			}
 		}
@@ -188,13 +222,15 @@ public final class DiskUtils {
 			throws IOException {
 		try (final ZipInputStream zis = new ZipInputStream(
 				new FileInputStream(sourceFile))) {
+			ReadableByteChannel channel = Channels.newChannel(zis);
 			ZipEntry zipEntry = zis.getNextEntry();
 			while (zipEntry != null) {
 				final String fileName = zipEntry.getName();
 				final File entryFile = new File(outputDir + File.separator + fileName);
 				FileUtils.forceMkdir(entryFile.getParentFile());
 				try (final FileOutputStream fos = new FileOutputStream(entryFile)) {
-					IOUtils.copy(zis, fos);
+					FileChannel fileChannel = fos.getChannel();
+					fileChannel.transferFrom(channel, 0, zipEntry.getSize());
 				}
 				zipEntry = zis.getNextEntry();
 			}

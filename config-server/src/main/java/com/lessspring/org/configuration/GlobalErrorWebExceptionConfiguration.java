@@ -22,9 +22,9 @@ import javax.annotation.PostConstruct;
 
 import com.lessspring.org.exception.BaseException;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.utils.RenderUtils;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
@@ -34,7 +34,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -94,10 +93,7 @@ public class GlobalErrorWebExceptionConfiguration {
 						.withErrMsg("Inner Error").withData(errorMap.get("trace"))
 						.build());
 			}
-			return ServerResponse.ok()
-					.body(BodyInserters.fromPublisher(
-							errMono.publishOn(Schedulers.elastic()), ResponseData.class))
-					.subscribeOn(Schedulers.elastic());
+			return RenderUtils.render(errMono);
 		}
 
 	}

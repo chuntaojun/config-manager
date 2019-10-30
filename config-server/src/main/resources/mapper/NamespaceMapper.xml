@@ -7,13 +7,20 @@
         <id column="id" property="id"/>
         <result column="namespace_name" property="namespace"/>
         <result column="namespace_id" property="namespaceId"/>
+        <result column="auth_token" property="authToken"/>
     </resultMap>
 
     <!--  save namespace  -->
     <insert id="saveNamespace" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.NamespaceDTO">
-        INSERT INTO namespace(namespace_name, namespace_id) VALUE (#{dto.namespace}, #{dto.namespaceId});
+        INSERT INTO namespace(namespace_name, namespace_id) VALUE (#{dto.namespace},
+        #{dto.namespaceId});
     </insert>
+
+    <!--  save access namespace token  -->
+    <update id="saveNamespaceAuthToken">
+        UPDATE namespace SET auth_token = #{token} WHERE namespace_name = #{name}
+    </update>
 
     <!--  remove namespace  -->
     <delete id="removeNamespace">
@@ -40,6 +47,6 @@
             resultMap="NamespaceDTO">
         SELECT *
         FROM namespace
-        WHERE namesapce_name = #{name};
+        WHERE namespace_name = #{name};
     </select>
 </mapper>
