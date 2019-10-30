@@ -49,11 +49,16 @@ public final class PathUtils {
 		return FATHER_ROAD_KING;
 	}
 
-	public static String finalPath(String subPath) {
-		if (subPath.startsWith(File.separator)) {
-			subPath = subPath.substring(1);
+	public static String finalPath(String... subPaths) {
+		StringBuilder pathb = new StringBuilder();
+		pathb.append(FATHER_ROAD_KING);
+		for (String subPath : subPaths) {
+			if (subPath.startsWith(File.separator)) {
+				subPath = subPath.substring(1);
+			}
+			pathb.append(File.separator).append(subPath);
 		}
-		return FATHER_ROAD_KING + File.separator + subPath;
+		return pathb.toString();
 	}
 
 	public static String join(Object... objects) {

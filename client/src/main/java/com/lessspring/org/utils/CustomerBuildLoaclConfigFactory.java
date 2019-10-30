@@ -16,43 +16,21 @@
  */
 package com.lessspring.org.utils;
 
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
+ * For the use of the user, to a local configuration file readable format
+ * 
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class GsonUtils {
+public final class CustomerBuildLoaclConfigFactory {
 
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
-
-	public static String toJson(Object obj) {
-		return GSON.toJson(obj);
-	}
-
-	public static byte[] toJsonBytes(Object obj) {
-		return ByteUtils.toBytes(GSON.toJson(obj));
-	}
-
-	public static <T> T toObj(byte[] json, Class<T> cls) {
-		return toObj(StringUtils.newString4UTF8(json), cls);
-	}
-
-	public static <T> T toObj(byte[] json, Type cls) {
-		return toObj(StringUtils.newString4UTF8(json), cls);
-	}
-
-	public static <T> T toObj(String json, Class<T> cls) {
-		return GSON.fromJson(json, cls);
-	}
-
-	public static <T> T toObj(String json, Type cls) {
-		return GSON.fromJson(json, cls);
+	public static byte[] toLocalConfigStyle(String groupId, String dataId, String content,
+			String type, byte[] fileSource) {
+		final ConfigInfo configInfo = ConfigInfo.builder().groupId(groupId).dataId(dataId)
+				.content(content).type(type).file(fileSource).build();
+		return GsonUtils.toJsonBytes(configInfo);
 	}
 
 }

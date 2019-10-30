@@ -16,6 +16,8 @@
  */
 package com.lessspring.org;
 
+import com.lessspring.org.utils.ByteUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;

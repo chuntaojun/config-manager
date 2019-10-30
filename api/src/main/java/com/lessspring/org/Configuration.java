@@ -44,6 +44,8 @@ public class Configuration {
 
 	private String authToken;
 
+	private boolean openHttps = false;
+
 	private boolean localPref = false;
 
 	public static Builder builder() {
@@ -58,6 +60,7 @@ public class Configuration {
 		private String username;
 		private String password;
 		private String authToken;
+		private boolean openHttps = false;
 		private boolean localPref = false;
 
 		private Builder() {
@@ -98,6 +101,11 @@ public class Configuration {
 			return this;
 		}
 
+		public Builder openHttps(boolean openHttps) {
+			this.openHttps = openHttps;
+			return this;
+		}
+
 		public Builder localPref(boolean localPref) {
 			this.localPref = localPref;
 			return this;
@@ -112,6 +120,7 @@ public class Configuration {
 			configuration.setUsername(username);
 			configuration.setPassword(password);
 			configuration.setAuthToken(authToken);
+			configuration.setOpenHttps(openHttps);
 			configuration.setLocalPref(localPref);
 			return configuration;
 		}

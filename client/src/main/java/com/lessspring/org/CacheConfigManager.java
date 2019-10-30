@@ -69,28 +69,27 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	ConfigInfo query(String groupId, String dataId, String token) {
-		if (localPref) {
-			ConfigInfo local = localPref(groupId, dataId);
-			if (Objects.nonNull(local)) {
-				return local;
-			}
-		}
-		final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
-				.addParam("groupId", groupId).addParam("dataId", dataId);
-		ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG,
-				Header.EMPTY, query, new TypeToken<ResponseData<ConfigInfo>>() {
-				});
 		ConfigInfo result = null;
-		if (response.ok()) {
-			ConfigInfo configInfo = response.getData();
-			snapshotSave(groupId, dataId, configInfo);
-			result = configInfo;
+		if (localPref) {
+			result = localPreference(groupId, dataId);
 		}
-		else {
-			// Disaster measures
-			ConfigInfo local = snapshotLoad(groupId, dataId);
-			if (Objects.nonNull(local)) {
-				result = local;
+		if (result == null) {
+			final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
+					.addParam("groupId", groupId).addParam("dataId", dataId);
+			ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG,
+					Header.EMPTY, query, new TypeToken<ResponseData<ConfigInfo>>() {
+					});
+			if (response.ok()) {
+				ConfigInfo configInfo = response.getData();
+				snapshotSave(groupId, dataId, configInfo);
+				result = configInfo;
+			}
+			else {
+				// Disaster measures
+				ConfigInfo local = snapshotLoad(groupId, dataId);
+				if (Objects.nonNull(local)) {
+					result = local;
+				}
 			}
 		}
 		// Configure the decryption
@@ -117,10 +116,11 @@ public class CacheConfigManager implements LifeCycle {
 				});
 	}
 
-	private ConfigInfo localPref(String groupId, String dataId) {
-		final String fileName = NameUtils.buildName(PathConstants.FILE_LOCAL_PREF_PATH,
-				groupId, dataId);
-		final byte[] content = DiskUtils.readFileBytes(namespaceId, fileName);
+	private ConfigInfo localPreference(String groupId, String dataId) {
+		final String parenPath = PathUtils.finalPath(PathConstants.FILE_LOCAL_PREF_PATH,
+				namespaceId);
+		final String fileName = NameUtils.buildName(groupId, dataId);
+		final byte[] content = DiskUtils.readFileBytes(parenPath, fileName);
 		if (Objects.nonNull(content) && content.length > 0) {
 			return serializer.deserialize(content, ConfigInfo.class);
 		}
@@ -128,9 +128,10 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	private ConfigInfo snapshotLoad(String groupId, String dataId) {
-		final String fileName = NameUtils.buildName(PathConstants.FILE_CACHE_PATH,
-				groupId, dataId);
-		final byte[] content = DiskUtils.readFileBytes(namespaceId, fileName);
+		final String parenPath = PathUtils.finalPath(PathConstants.FILE_CACHE_PATH,
+				namespaceId);
+		final String fileName = NameUtils.buildName(groupId, dataId);
+		final byte[] content = DiskUtils.readFileBytes(parenPath, fileName);
 		if (Objects.nonNull(content) && content.length > 0) {
 			return serializer.deserialize(content, ConfigInfo.class);
 		}
@@ -138,9 +139,10 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	private void snapshotSave(String groupId, String dataId, ConfigInfo configInfo) {
-		final String fileName = NameUtils.buildName(PathConstants.FILE_CACHE_PATH,
-				groupId, dataId);
-		DiskUtils.writeFile(namespaceId, fileName, GsonUtils.toJsonBytes(configInfo));
+		final String parenPath = PathUtils.finalPath(PathConstants.FILE_CACHE_PATH,
+				namespaceId);
+		final String fileName = NameUtils.buildName(groupId, dataId);
+		DiskUtils.writeFile(parenPath, fileName, GsonUtils.toJsonBytes(configInfo));
 	}
 
 	@Override

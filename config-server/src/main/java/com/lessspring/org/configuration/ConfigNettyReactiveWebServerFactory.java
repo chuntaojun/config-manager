@@ -14,45 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.configuration;
 
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
+import org.springframework.boot.web.server.Http2;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class GsonUtils {
+@Configuration
+public class ConfigNettyReactiveWebServerFactory {
 
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
-
-	public static String toJson(Object obj) {
-		return GSON.toJson(obj);
+	@Bean
+	public NettyReactiveWebServerFactory nettyReactiveWebServerFactory() {
+		return new NettyReactiveWebServerFactory() {
+			@Override
+			public void setHttp2(Http2 http2) {
+				http2.setEnabled(true);
+			}
+		};
 	}
-
-	public static byte[] toJsonBytes(Object obj) {
-		return ByteUtils.toBytes(GSON.toJson(obj));
-	}
-
-	public static <T> T toObj(byte[] json, Class<T> cls) {
-		return toObj(StringUtils.newString4UTF8(json), cls);
-	}
-
-	public static <T> T toObj(byte[] json, Type cls) {
-		return toObj(StringUtils.newString4UTF8(json), cls);
-	}
-
-	public static <T> T toObj(String json, Class<T> cls) {
-		return GSON.fromJson(json, cls);
-	}
-
-	public static <T> T toObj(String json, Type cls) {
-		return GSON.fromJson(json, cls);
-	}
-
 }

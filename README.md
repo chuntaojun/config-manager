@@ -30,6 +30,16 @@
 
 #### 使用说明
 
+##### 项目相关文件路径说明
+
+> config-manager-client
+
+
+
+> config-manager-server
+
+
+
 ##### 项目使用端口
 
 > server-port=2959 config-manager-server的监听端口

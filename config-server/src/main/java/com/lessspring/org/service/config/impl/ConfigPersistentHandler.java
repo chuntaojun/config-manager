@@ -23,7 +23,7 @@ import java.util.Objects;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
-import com.lessspring.org.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
