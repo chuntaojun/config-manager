@@ -69,4 +69,9 @@ public class EncryptionPersistentHandler implements PersistentHandler {
 	public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
 		return persistentHandler.removeConfigInfo(namespaceId, request);
 	}
+
+	@Override
+	public int priority() {
+		return HIGH_PRIORITY;
+	}
 }

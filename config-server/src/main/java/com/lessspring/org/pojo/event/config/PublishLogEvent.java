@@ -14,28 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.pojo.event.config;
 
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ThreadPoolHelper {
+@Data
+@Builder
+@AllArgsConstructor
+public class PublishLogEvent {
 
-	public static void invokeShutdown(ThreadPoolExecutor executor) {
-		if (Objects.nonNull(executor)) {
-			executor.shutdown();
-		}
-	}
+	public static final String TYPE = "PublishLogEvent";
 
-	public static void invokeShutdown(ExecutorService executor) {
-		if (Objects.nonNull(executor)) {
-			executor.shutdown();
-		}
+	private long sequence;
+	private String namespaceId;
+	private String dataId;
+	private String groupId;
+	private String clientIp;
+	private long publishTime;
+
+	public PublishLogEvent() {
 	}
 
 }

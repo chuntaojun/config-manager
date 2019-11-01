@@ -14,31 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.exception;
 
-import com.lessspring.org.model.vo.ResponseData;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import com.lessspring.org.constant.Code;
+import com.lessspring.org.exception.BaseException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class RenderUtils {
+public class UserNotFoundException extends BaseException {
 
-	@SuppressWarnings("unchecked")
-	public static Mono<ServerResponse> render(Mono<?> dataMono) {
-		return ok().header("Access-Control-Allow-Origin", "*")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
+	@Override
+	public Code code() {
+		return Code.USER_NOT_FOUNT;
 	}
 
+	public UserNotFoundException() {
+		super();
+	}
+
+	public UserNotFoundException(String message) {
+		super(message);
+	}
+
+	public UserNotFoundException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public UserNotFoundException(Throwable cause) {
+		super(cause);
+	}
+
+	protected UserNotFoundException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

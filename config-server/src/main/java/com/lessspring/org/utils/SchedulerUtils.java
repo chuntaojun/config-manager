@@ -21,35 +21,30 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import com.lessspring.org.BaseRejectedExecutionHandler;
+import com.lessspring.org.executor.BaseRejectedExecutionHandler;
+import com.lessspring.org.executor.BaseThreadPoolExecutor;
+import com.lessspring.org.executor.NameThreadFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
+@Component
 public class SchedulerUtils {
 
-	private static final int CORE_POOL_SIZE = Runtime.getRuntime()
-			.availableProcessors() << 2;
-	private static final int MAX_POOL_SIZE = 512;
+	private static final int CORE_POOL_SIZE = 512;
+	private static final int MAX_POOL_SIZE = 1024;
 	private static final long KEEP_ALIVE_TIME = 60;
 	private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
-	private static ThreadFactory threadFactory = new ThreadFactory() {
-		private final AtomicInteger nextId = new AtomicInteger(1);
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
-		@Override
-		public Thread newThread(@NotNull Runnable r) {
-			String prefix = "com.lessspring.org.config-manager.webHandler";
-			String name = prefix + nextId.getAndDecrement();
-			return new Thread(r, name);
-		}
-	};
+	private static ThreadFactory threadFactory = new NameThreadFactory(
+			"com.lessspring.org.config-manager.webHandler-");
 
 	private static RejectedExecutionHandler rejectedExecutionHandler = new BaseRejectedExecutionHandler(
 			"com.lessspring.org.config-manager.webHandler", true,
@@ -62,9 +57,15 @@ public class SchedulerUtils {
 		}
 	};
 
-	public static final ThreadPoolExecutor WEB_HANDLER = new ThreadPoolExecutor(
-			CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT,
-			new ArrayBlockingQueue<Runnable>(1024), threadFactory,
-			rejectedExecutionHandler);
+	public final ThreadPoolExecutor WEB_HANDLER = newThreadPoolExecutor();
+
+	private ThreadPoolExecutor newThreadPoolExecutor() {
+		BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(CORE_POOL_SIZE,
+				MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT, new ArrayBlockingQueue<Runnable>(8),
+				threadFactory, rejectedExecutionHandler);
+		executor.allowCoreThreadTimeOut(true);
+		executor.setOpenWorkCostDisplay(systemEnv.isOpenWorkCostDisplay());
+		return executor;
+	}
 
 }

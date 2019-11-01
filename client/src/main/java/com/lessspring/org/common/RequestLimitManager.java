@@ -14,31 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.common;
 
-import com.lessspring.org.model.vo.ResponseData;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import com.google.common.util.concurrent.RateLimiter;
+import com.lessspring.org.LifeCycle;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class RenderUtils {
+public class RequestLimitManager implements LifeCycle {
 
-	@SuppressWarnings("unchecked")
-	public static Mono<ServerResponse> render(Mono<?> dataMono) {
-		return ok().header("Access-Control-Allow-Origin", "*")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
+	private Map<String, RateLimiter> limiterMap;
+
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
+
+	@Override
+	public void init() {
+		if (inited.compareAndSet(false, true)) {
+			limiterMap = new ConcurrentHashMap<>(16);
+		}
 	}
 
+	@Override
+	public void destroy() {
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+			limiterMap.clear();
+		}
+	}
+
+	@Override
+	public boolean isInited() {
+		return inited.get();
+	}
+
+	@Override
+	public boolean isDestroyed() {
+		return destroyed.get();
+	}
 }

@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.executor;
 
+import com.lessspring.org.jvm.JvmUtils;
+import com.lessspring.org.PathUtils;
 import com.lessspring.org.utils.ByteUtils;
 
 import java.io.File;

@@ -22,22 +22,120 @@ package com.lessspring.org.utils;
  */
 public final class SystemEnv {
 
+	public static final String EMAIL_HOST = "com.lessspring.org.config-manager.email.host";
+	public static final String EMAIL_USERNAME = "com.lessspring.org.config-manager.email.username";
+	public static final String EMAIL_PASSWORD = "com.lessspring.org.config-manager.email.password";
+	public static final String EMAIL_SMTP_AUTH = "com.lessspring.org.config-manager.email.smtp.auth";
+	public static final String EMAIL_SMTP_STARTTLS_ENABLE = "com.lessspring.org.config-manager.starttls.enable";
+	public static final String EMAIL_SMTP_STARTTLS_EQUIRED = "com.lessspring.org.config-manager.email.starttls.required";
+
 	private static final SystemEnv INSTANCE = new SystemEnv();
+
+	private boolean inited = false;
 
 	private SystemEnv() {
 	}
 
-	private boolean standalone = true;
+	private boolean dumpToFile = true;
+
+	private boolean openWorkCostDisplay = false;
+
+	private String emailHost;
+
+	private String emailName;
+
+	private String emailPwd;
+
+	private String emailSmtpAuth;
+
+	private String emailSmtpStarttlsEnable;
+
+	private String emailSmtpStarttlsEequired;
 
 	public static SystemEnv getSingleton() {
 		return INSTANCE;
 	}
 
-	public boolean isStandalone() {
-		return standalone;
+	public boolean isDumpToFile() {
+		needFinishInited();
+		return dumpToFile;
 	}
 
-	public void setStandalone(boolean standalone) {
-		this.standalone = standalone;
+	public void setDumpToFile(boolean dumpToFile) {
+		this.dumpToFile = dumpToFile;
+	}
+
+	public boolean isOpenWorkCostDisplay() {
+		needFinishInited();
+		return openWorkCostDisplay;
+	}
+
+	public void setOpenWorkCostDisplay(boolean openWorkCostDisplay) {
+		this.openWorkCostDisplay = openWorkCostDisplay;
+	}
+
+	public String getEmailHost() {
+		needFinishInited();
+		return emailHost;
+	}
+
+	public void setEmailHost(String emailHost) {
+		this.emailHost = emailHost;
+	}
+
+	public String getEmailName() {
+		needFinishInited();
+		return emailName;
+	}
+
+	public void setEmailName(String emailName) {
+		this.emailName = emailName;
+	}
+
+	public String getEmailPwd() {
+		needFinishInited();
+		return emailPwd;
+	}
+
+	public void setEmailPwd(String emailPwd) {
+		this.emailPwd = emailPwd;
+	}
+
+	public String getEmailSmtpAuth() {
+		needFinishInited();
+		return emailSmtpAuth;
+	}
+
+	public void setEmailSmtpAuth(String emailSmtpAuth) {
+		this.emailSmtpAuth = emailSmtpAuth;
+	}
+
+	public String getEmailSmtpStarttlsEnable() {
+		needFinishInited();
+		return emailSmtpStarttlsEnable;
+	}
+
+	public void setEmailSmtpStarttlsEnable(String emailSmtpStarttlsEnable) {
+		this.emailSmtpStarttlsEnable = emailSmtpStarttlsEnable;
+	}
+
+	public String getEmailSmtpStarttlsEequired() {
+		needFinishInited();
+		return emailSmtpStarttlsEequired;
+	}
+
+	public void setEmailSmtpStarttlsEequired(String emailSmtpStarttlsEequired) {
+		this.emailSmtpStarttlsEequired = emailSmtpStarttlsEequired;
+	}
+
+	public void finishInit() {
+		inited = true;
+	}
+
+	private void needFinishInited() {
+		if (!inited) {
+			throw new IllegalStateException(
+					"Initialize the unfinished system parameters");
+		}
 	}
 }

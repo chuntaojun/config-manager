@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.param.Body;
@@ -41,12 +42,7 @@ import com.lessspring.org.model.vo.ResponseData;
 public class LoginHandler implements Observer, LifeCycle {
 
 	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
-			1, r -> {
-				Thread thread = new Thread(r);
-				thread.setDaemon(true);
-				thread.setName("com.lessspring.org.config-manager.client.auth");
-				return thread;
-			});
+			1, new NameThreadFactory("com.lessspring.org.config-manager.client.auth"));
 
 	private final HttpClient httpClient;
 	private final AuthHolder authHolder;

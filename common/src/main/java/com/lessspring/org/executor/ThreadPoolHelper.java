@@ -14,31 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.executor;
 
-import com.lessspring.org.model.vo.ResponseData;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class RenderUtils {
+public class ThreadPoolHelper {
 
-	@SuppressWarnings("unchecked")
-	public static Mono<ServerResponse> render(Mono<?> dataMono) {
-		return ok().header("Access-Control-Allow-Origin", "*")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
+	public static void invokeShutdown(ThreadPoolExecutor executor) {
+		if (Objects.nonNull(executor)) {
+			executor.shutdown();
+		}
+	}
+
+	public static void invokeShutdown(ExecutorService executor) {
+		if (Objects.nonNull(executor)) {
+			executor.shutdown();
+		}
 	}
 
 }

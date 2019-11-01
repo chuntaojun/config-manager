@@ -28,7 +28,7 @@ public final class ConfigServiceFactory {
 		ConfigService configService = new ClientConfigService(configuration);
 		LifeCycleHelper.invokeInit(configService);
 		LifeCycleHelper.registerShutdownHook(configService,
-				"config-manager.client.ShutdownHook");
+				"com.lessspring.org.config-manager.client.ShutdownHook");
 		return configService;
 	}
 

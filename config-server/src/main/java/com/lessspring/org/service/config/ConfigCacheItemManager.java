@@ -35,7 +35,7 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.WriteWork;
-import com.lessspring.org.pojo.event.ConfigChangeEvent;
+import com.lessspring.org.pojo.event.config.ConfigChangeEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +93,9 @@ public class ConfigCacheItemManager {
 				.configType(configInfoDTO.getType()).build();
 		registerConfigCacheItem(namespaceId, event);
 		updateContent(namespaceId, event);
+
+		// help gc
+		event = null;
 	}
 
 	public void dumpConfigBeta(final String namespaceId,
@@ -109,6 +112,9 @@ public class ConfigCacheItemManager {
 				.build();
 		registerConfigCacheItem(namespaceId, event);
 		updateContent(namespaceId, event);
+
+		// help gc
+		event = null;
 	}
 
 	public void registerConfigCacheItem(final String namespaceId,

@@ -27,8 +27,10 @@ import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.utils.ReactiveWebUtils;
 import com.lessspring.org.utils.RenderUtils;
+import com.lessspring.org.utils.SchedulerUtils;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -55,6 +57,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	public Mono<ServerResponse> publishConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
+				.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER))
 				.map(publishRequest -> operationService.publishConfig(namespaceId,
 						publishRequest))
 				.map(Mono::just).flatMap(RenderUtils::render);
@@ -67,6 +70,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	public Mono<ServerResponse> modifyConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
+				.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER))
 				.map(publishRequest -> operationService.modifyConfig(namespaceId,
 						publishRequest))
 				.map(Mono::just).flatMap(RenderUtils::render);
@@ -87,6 +91,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		queryRequest.setAttribute("clientIp", clientIp);
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.queryConfig(namespaceId, queryRequest));
+		mono = mono.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
 		return RenderUtils.render(mono);
 	}
 
@@ -104,6 +109,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.beta(isBeta).groupId(groupId).dataId(dataId).build();
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.removeConfig(namespaceId, deleteRequest));
+		mono = mono.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
 		return RenderUtils.render(mono);
 	}
 }

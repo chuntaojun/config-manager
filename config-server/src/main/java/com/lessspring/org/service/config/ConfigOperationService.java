@@ -33,7 +33,10 @@ import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.pojo.event.ConfigChangeEvent;
+import com.lessspring.org.pojo.event.config.ConfigChangeEvent;
+import com.lessspring.org.pojo.event.config.ConfigChangeEventHandler;
+import com.lessspring.org.pojo.event.config.NotifyEvent;
+import com.lessspring.org.pojo.event.config.NotifyEventHandler;
 import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
@@ -44,14 +47,15 @@ import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.pojo.TransactionId;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
-import com.lessspring.org.service.config.impl.ConfigPersistentHandler;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
+import com.lessspring.org.service.publish.WatchClientManager;
 import com.lessspring.org.utils.BzConstants;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
+import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,33 +68,40 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConfigOperationService {
+public class ConfigOperationService implements WorkHandler<ConfigChangeEventHandler> {
 
 	private final String createConfig = "CREATE_CONFIG";
 	private final String modifyConfig = "MODIFY_CONFIG";
 	private final String deleteConfig = "DELETE_CONFIG";
 
 	private final NamespaceService namespaceService;
-	private final Disruptor<ConfigChangeEvent> disruptorHolder;
+	private final Disruptor<ConfigChangeEventHandler> changeEventDisruptor;
+	private final Disruptor<NotifyEventHandler> notifyEventDisruptor;
 	private final PersistentHandler persistentHandler;
 	private final BaseTransactionCommitCallback commitCallback;
 	private final ClusterManager clusterManager;
 	private FailCallback failCallback;
+	private ConfigCacheItemManager configCacheItemManager;
 
 	public ConfigOperationService(
 			@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
-			ConfigPersistentHandler configPersistentHandler,
 			NamespaceService namespaceService,
 			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
-			ClusterManager clusterManager) {
+			ClusterManager clusterManager, WatchClientManager watchClientManager,
+			ConfigCacheItemManager configCacheItemManager) {
 		this.persistentHandler = persistentHandler;
 		this.namespaceService = namespaceService;
 		this.clusterManager = clusterManager;
 		this.commitCallback = commitCallback;
-		disruptorHolder = DisruptorFactory.build(ConfigChangeEvent::new,
-				"Config-Change-Event-Disruptor");
-		disruptorHolder.handleEventsWithWorkerPool(configPersistentHandler);
-		disruptorHolder.start();
+		this.configCacheItemManager = configCacheItemManager;
+		changeEventDisruptor = DisruptorFactory.build(ConfigChangeEventHandler::new,
+				ConfigChangeEvent.class);
+		changeEventDisruptor.handleEventsWithWorkerPool(this);
+		changeEventDisruptor.start();
+		notifyEventDisruptor = DisruptorFactory.build(NotifyEventHandler::new,
+				NotifyEvent.class);
+		notifyEventDisruptor.handleEventsWithWorkerPool(watchClientManager);
+		notifyEventDisruptor.start();
 	}
 
 	@PostConstruct
@@ -111,7 +122,7 @@ public class ConfigOperationService {
 
 	@PreDestroy
 	public void shutdown() {
-		disruptorHolder.shutdown();
+		changeEventDisruptor.shutdown();
 		clusterManager.destroy();
 	}
 
@@ -183,8 +194,11 @@ public class ConfigOperationService {
 	}
 
 	private void publishEvent(ConfigChangeEvent source) {
-		disruptorHolder.publishEvent(
-				(target, sequence) -> ConfigChangeEvent.copy(sequence, source, target));
+		changeEventDisruptor.publishEvent((target, sequence) -> {
+			source.setSequence(sequence);
+			target.rest();
+			target.setEvent(source);
+		});
 	}
 
 	private ConfigChangeEvent buildConfigChangeEvent(String namespaceId,
@@ -287,6 +301,35 @@ public class ConfigOperationService {
 			}
 		};
 
+	}
+
+	@Override
+	public void onEvent(ConfigChangeEventHandler eventHandler) throws Exception {
+		try {
+			ConfigChangeEvent event = eventHandler.getEvent();
+			if (EventType.PUBLISH.compareTo(event.getEventType()) == 0) {
+				configCacheItemManager.registerConfigCacheItem(event.getNamespaceId(),
+						event);
+			}
+			if (EventType.DELETE.compareTo(event.getEventType()) == 0) {
+				configCacheItemManager.deregisterConfigCacheItem(event.getNamespaceId(),
+						event);
+				return;
+			}
+			configCacheItemManager.updateContent(event.getNamespaceId(), event);
+			NotifyEvent source = NotifyEvent.builder().namespaceId(event.getNamespaceId())
+					.groupId(event.getGroupId()).dataId(event.getDataId())
+					.eventType(event.getEventType()).entryption(event.getEncryption())
+					.build();
+			notifyEventDisruptor.publishEvent((target, sequence) -> {
+				source.setSequence(sequence);
+				target.rest();
+				target.setEvent(source);
+			});
+		}
+		catch (Exception e) {
+			log.error("notify ConfigChangeEvent has some error : {0}", e);
+		}
 	}
 
 }

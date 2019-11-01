@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event;
+package com.lessspring.org.pojo.event.config;
 
 import com.lessspring.org.event.EventType;
 

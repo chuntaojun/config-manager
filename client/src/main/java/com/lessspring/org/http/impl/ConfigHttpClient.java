@@ -59,7 +59,7 @@ import static com.lessspring.org.http.param.MediaType.APPLICATION_JSON_UTF8_VALU
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ConfigHttpClient implements HttpClient {
+class ConfigHttpClient implements HttpClient {
 
 	private OkHttpClient client;
 
@@ -75,7 +75,7 @@ public class ConfigHttpClient implements HttpClient {
 
 	private AtomicReference<String> clusterIp = new AtomicReference<>();
 
-	public ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder,
+	ConfigHttpClient(ClusterChoose choose, AuthHolder authHolder,
 			Configuration configuration) {
 		this.choose = choose;
 		this.authHolder = authHolder;

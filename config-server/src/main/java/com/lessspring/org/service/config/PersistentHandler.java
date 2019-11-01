@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.config;
 
+import com.lessspring.org.Priority;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
@@ -25,7 +26,7 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface PersistentHandler {
+public interface PersistentHandler extends Priority {
 
 	/**
 	 * read config-info

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event;
+package com.lessspring.org.pojo.event.config;
 
 import com.lessspring.org.event.EventType;
 
@@ -57,23 +57,6 @@ public class ConfigChangeEvent extends BaseEvent {
 	@Override
 	public String label() {
 		return TYPE;
-	}
-
-	public static void copy(long sequence, ConfigChangeEvent source,
-			ConfigChangeEvent target) {
-		target.setSequence(sequence);
-		target.setNamespaceId(source.getNamespaceId());
-		target.setGroupId(source.getGroupId());
-		target.setDataId(source.getDataId());
-		target.setSource(source.getSource());
-		target.setContent(source.getContent());
-		target.setEventType(source.getEventType());
-		target.setConfigType(source.getConfigType());
-		target.setEncryption(source.getEncryption());
-		target.setFileSource(source.getFileSource());
-		target.setFile(source.isFile());
-		target.setClientIps(source.getClientIps());
-		target.setBeta(source.isBeta());
 	}
 
 	public static Builder builder() {

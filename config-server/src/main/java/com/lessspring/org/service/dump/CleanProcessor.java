@@ -19,10 +19,8 @@ package com.lessspring.org.service.dump;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 
@@ -36,10 +34,10 @@ import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RequireHelper;
 import com.lessspring.org.utils.WaitFinish;
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,18 +71,8 @@ public class CleanProcessor {
 		failCallback = throwable -> null;
 
 		scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4,
-				new ThreadFactory() {
-					AtomicInteger id = new AtomicInteger(0);
-
-					@Override
-					public Thread newThread(@NotNull Runnable r) {
-						Thread thread = new Thread(r,
-								"com.lessspring.org.config-manager.config.history.cleaner-"
-										+ id.getAndIncrement());
-						thread.setDaemon(true);
-						return thread;
-					}
-				});
+				new NameThreadFactory(
+						"com.lessspring.org.config-manager.config.history.cleaner-"));
 		scheduledThreadPoolExecutor.allowCoreThreadTimeOut(true);
 		scheduledThreadPoolExecutor.setKeepAliveTime(60, TimeUnit.SECONDS);
 	}

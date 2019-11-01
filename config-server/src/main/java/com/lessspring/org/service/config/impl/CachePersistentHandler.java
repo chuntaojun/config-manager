@@ -61,6 +61,9 @@ public class CachePersistentHandler implements PersistentHandler {
 
 	@Override
 	public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
+		if (!systemEnv.isDumpToFile()) {
+			return persistentHandler.readConfigContent(namespaceId, request);
+		}
 		final CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
 				request.getGroupId(), request.getDataId());
 		final ConfigInfo[] configInfo = new ConfigInfo[] { null };
@@ -93,12 +96,14 @@ public class CachePersistentHandler implements PersistentHandler {
 				else {
 					configInfo[0] = GsonUtils.toObj(s, ConfigInfo.class);
 				}
-				configInfo[0].setEncryption("");
-				if (cacheItem.isBeta() && !cacheItem
-						.canRead((String) request.getAttribute("clientIp"))) {
-					configInfo[0] = null;
+				if (configInfo[0] != null) {
+					configInfo[0].setEncryption("");
+					if (cacheItem.isBeta() && !cacheItem
+							.canRead((String) request.getAttribute("clientIp"))) {
+						configInfo[0] = null;
+					}
+					log.debug("config-info : {}", configInfo[0]);
 				}
-				log.debug("config-info : {}", configInfo[0]);
 			}
 
 			@Override
@@ -124,5 +129,10 @@ public class CachePersistentHandler implements PersistentHandler {
 	@Override
 	public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
 		return persistentHandler.removeConfigInfo(namespaceId, request);
+	}
+
+	@Override
+	public int priority() {
+		return HIGH_PRIORITY / 2;
 	}
 }

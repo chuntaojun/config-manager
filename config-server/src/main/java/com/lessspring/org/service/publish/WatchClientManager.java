@@ -29,8 +29,9 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.ReadWork;
-import com.lessspring.org.pojo.event.NotifyEvent;
-import com.lessspring.org.pojo.event.PublishLogEvent;
+import com.lessspring.org.pojo.event.config.NotifyEvent;
+import com.lessspring.org.pojo.event.config.NotifyEventHandler;
+import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
@@ -51,7 +52,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
  */
 @Slf4j
 @Component
-public class WatchClientManager implements WorkHandler<NotifyEvent> {
+public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 
 	private final long parallelThreshold = 100;
 
@@ -159,7 +160,8 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 	// TODO Push the trajectory logging
 
 	@Override
-	public void onEvent(NotifyEvent event) throws Exception {
+	public void onEvent(NotifyEventHandler eventHandler) throws Exception {
+		NotifyEvent event = eventHandler.getEvent();
 		final CacheItem cacheItem = cacheItemManager.queryCacheItem(
 				event.getNamespaceId(), event.getGroupId(), event.getDataId());
 		final String configInfoJson = cacheItemManager.readCacheFromDisk(

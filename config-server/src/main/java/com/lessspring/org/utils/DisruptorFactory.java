@@ -31,14 +31,15 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class DisruptorFactory {
 
-	public static <T> Disruptor<T> build(EventFactory<T> factory, String name) {
-		int ringBufferSize = 1024 * 1024;
+	public static <T> Disruptor<T> build(EventFactory<T> factory, Class name) {
+		int ringBufferSize = 1024;
 		return new Disruptor<>(factory, ringBufferSize, new ThreadFactory() {
+
 			private final AtomicInteger nextId = new AtomicInteger(1);
 
 			@Override
 			public Thread newThread(@NotNull Runnable r) {
-				String namePrefix = name + "-";
+				String namePrefix = name.getSimpleName() + "-Disruptor" + "-";
 				String name1 = namePrefix + nextId.getAndDecrement();
 				return new Thread(r, name1);
 			}

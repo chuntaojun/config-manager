@@ -45,6 +45,7 @@ import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.utils.ServerStatus;
 import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.executor.NameThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -80,12 +81,8 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 
 	@PostConstruct
 	public void init() {
-		executor = Executors.newFixedThreadPool(1, r -> {
-			Thread thread = new Thread(r);
-			thread.setName("com.lessspring.org.Raft.doSnapshot");
-			thread.setDaemon(true);
-			return thread;
-		});
+		executor = Executors.newFixedThreadPool(1,
+				new NameThreadFactory("com.lessspring.org.Raft.doSnapshot"));
 	}
 
 	@Override

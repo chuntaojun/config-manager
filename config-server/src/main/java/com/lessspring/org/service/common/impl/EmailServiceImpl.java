@@ -14,31 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.service.common.impl;
 
 import javax.annotation.PostConstruct;
 
-import io.prometheus.client.hotspot.DefaultExports;
-import lombok.extern.slf4j.Slf4j;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.lessspring.org.pojo.event.email.BaseEmailEvent;
+import com.lessspring.org.pojo.event.email.ErrorEmailEvent;
+import com.lessspring.org.pojo.event.email.WarnEmailEvent;
+import com.lessspring.org.service.common.EmailService;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-@SpringBootApplication
-public class ConfigApplication {
+@Component
+public class EmailServiceImpl implements EmailService {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ConfigApplication.class, args);
-	}
+	private EventBus eventBus;
 
 	@PostConstruct
 	public void init() {
-		DefaultExports.initialize();
+		eventBus = new EventBus("com.lessspring.org.config-manager.emailBus");
+		eventBus.register(this);
 	}
 
+	@Override
+	public void publishEmailEvent(BaseEmailEvent baseEmailEvent) {
+		eventBus.post(baseEmailEvent);
+	}
+
+	@Subscribe
+	public void onWarnEvent(WarnEmailEvent event) throws Exception {
+
+	}
+
+	@Subscribe
+	public void onErrorEvent(ErrorEmailEvent event) throws Exception {
+
+	}
 }

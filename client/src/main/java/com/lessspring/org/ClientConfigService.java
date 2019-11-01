@@ -25,7 +25,7 @@ import com.lessspring.org.cluster.ClusterNodeWatch;
 import com.lessspring.org.config.ConfigService;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
-import com.lessspring.org.http.impl.ConfigHttpClient;
+import com.lessspring.org.http.impl.MetricsHttpClient;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
@@ -61,7 +61,7 @@ final class ClientConfigService implements ConfigService {
 			// Build a cluster node selector
 			ClusterChoose choose = new ClusterChoose();
 
-			httpClient = new ConfigHttpClient(choose, authHolder, configuration);
+			httpClient = new MetricsHttpClient(choose, authHolder, configuration);
 			loginHandler = new LoginHandler(httpClient, authHolder, configuration);
 			clusterNodeWatch = new ClusterNodeWatch(httpClient, configuration);
 			clusterNodeWatch.register(choose);
