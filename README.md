@@ -56,7 +56,7 @@
 
 > Config-Manager-Server 端参数信息
 
-##### application.properties
+###### application.properties
 
 ```properties
 # config-manager-server 运行模式，单机——standalone，集群——cluster，默认以单机模式启动
@@ -97,7 +97,7 @@ com.lessspring.org.config-manager.starttls.enable=
 com.lessspring.org.config-manager.email.starttls.required=
 ```
 
-##### cluster.properties
+###### cluster.properties
 
 ```properties
 # 本机的ip index 序号
@@ -107,6 +107,13 @@ cluster.server.node.ip.{num}=127.0.0.1
 # 机器 num 的 port 信息
 cluster.server.node.port.{num}=2959
 ```
+
+##### key 的构建说明
+
+> config-manager-client
+
+
+> config-manager-server
 
 
 

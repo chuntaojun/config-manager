@@ -23,11 +23,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -50,6 +54,9 @@ public final class DiskUtils {
 	private final static String DISK_QUATA_CN = "超出磁盘限额";
 	private final static String DISK_QUATA_EN = "Disk quota exceeded";
 
+	private static final Charset charset = StandardCharsets.UTF_8;
+	private static final CharsetDecoder decoder = charset.newDecoder();
+
 	// Just for test
 
 	public static Logger getLogger() {
@@ -60,18 +67,7 @@ public final class DiskUtils {
 		String finalPath = PathUtils.finalPath(path);
 		File file = openFile(finalPath, fileName);
 		if (file.exists()) {
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(new FileInputStream(file)))) {
-				StringBuilder textBuilder = new StringBuilder();
-				String lineTxt = null;
-				while ((lineTxt = reader.readLine()) != null) {
-					textBuilder.append(lineTxt);
-				}
-				return textBuilder.toString();
-			}
-			catch (IOException e) {
-				return null;
-			}
+			return readFile(file);
 		}
 		return null;
 	}
@@ -91,14 +87,21 @@ public final class DiskUtils {
 	}
 
 	public static String readFile(File file) {
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(file)))) {
-			StringBuilder textBuilder = new StringBuilder();
-			String lineTxt = null;
-			while ((lineTxt = reader.readLine()) != null) {
-				textBuilder.append(lineTxt);
+		try (FileChannel fileChannel = new FileInputStream(file).getChannel()) {
+			StringBuilder text = new StringBuilder();
+			ByteBuffer buffer = ByteBuffer.allocate(4096);
+			CharBuffer charBuffer = CharBuffer.allocate(4096);
+			while (fileChannel.read(buffer) != -1) {
+				buffer.flip();
+				decoder.decode(buffer, charBuffer, false);
+				charBuffer.flip();
+				while (charBuffer.hasRemaining()) {
+					text.append(charBuffer.get());
+				}
+				buffer.clear();
+				charBuffer.clear();
 			}
-			return textBuilder.toString();
+			return text.toString();
 		}
 		catch (IOException e) {
 			return null;
@@ -109,17 +112,9 @@ public final class DiskUtils {
 		String finalPath = PathUtils.finalPath(path);
 		File file = openFile(finalPath, fileName);
 		if (file.exists()) {
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(new FileInputStream(file)))) {
-				StringBuilder textBuilder = new StringBuilder();
-				String lineTxt = null;
-				while ((lineTxt = reader.readLine()) != null) {
-					textBuilder.append(lineTxt);
-				}
-				return ByteUtils.toBytes(textBuilder.toString());
-			}
-			catch (IOException e) {
-				return null;
+			String result = readFile(file);
+			if (result != null) {
+				return ByteUtils.toBytes(result);
 			}
 		}
 		return null;
@@ -128,8 +123,13 @@ public final class DiskUtils {
 	public static boolean writeFile(String path, String fileName, byte[] content) {
 		String finalPath = PathUtils.finalPath(path);
 		File file = openFile(finalPath, fileName, true);
-		try (OutputStream writer = new FileOutputStream(file)) {
-			writer.write(content);
+		try (FileChannel fileChannel = new FileOutputStream(file).getChannel()) {
+			ByteBuffer buffer = ByteBuffer.allocate(content.length);
+			buffer.flip();
+			while (buffer.hasRemaining()) {
+				fileChannel.write(buffer);
+			}
+			buffer.clear();
 			return true;
 		}
 		catch (IOException ioe) {
