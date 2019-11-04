@@ -27,6 +27,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.lessspring.org.service.common.CacheOperation;
+import com.lessspring.org.executor.NameThreadFactory;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -36,11 +37,7 @@ public class InnerCacheOperation implements CacheOperation {
 
 	private final InnerCache<String, Object> cache = new InnerCache<String, Object>();
 	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
-			1, r -> {
-				Thread thread = new Thread(r, "com.lessspring.org.cache.clean-Worker");
-				thread.setDaemon(true);
-				return thread;
-			});
+			1, new NameThreadFactory("com.lessspring.org.cache.clean-Worker"));
 
 	@PostConstruct
 	public void init() {

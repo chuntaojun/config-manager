@@ -20,12 +20,16 @@ import java.util.Objects;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.ReadWork;
+import com.lessspring.org.pojo.WriteWork;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
+import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.GsonUtils;
@@ -61,6 +65,9 @@ public class CachePersistentHandler implements PersistentHandler {
 
 	@Override
 	public ConfigInfo readConfigContent(String namespaceId, BaseConfigRequest request) {
+		if (!systemEnv.isDumpToFile()) {
+			return persistentHandler.readConfigContent(namespaceId, request);
+		}
 		final CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
 				request.getGroupId(), request.getDataId());
 		final ConfigInfo[] configInfo = new ConfigInfo[] { null };
@@ -93,12 +100,14 @@ public class CachePersistentHandler implements PersistentHandler {
 				else {
 					configInfo[0] = GsonUtils.toObj(s, ConfigInfo.class);
 				}
-				configInfo[0].setEncryption("");
-				if (cacheItem.isBeta() && !cacheItem
-						.canRead((String) request.getAttribute("clientIp"))) {
-					configInfo[0] = null;
+				if (configInfo[0] != null) {
+					configInfo[0].setEncryption("");
+					if (cacheItem.isBeta() && !cacheItem
+							.canRead((String) request.getAttribute("clientIp"))) {
+						configInfo[0] = null;
+					}
+					log.debug("config-info : {}", configInfo[0]);
 				}
-				log.debug("config-info : {}", configInfo[0]);
 			}
 
 			@Override
@@ -123,6 +132,44 @@ public class CachePersistentHandler implements PersistentHandler {
 
 	@Override
 	public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
+		// Remove the configuration file, if open the file dump operation, the need to be
+		// cleared
+		if (systemEnv.isDumpToFile()) {
+			final CacheItem cacheItem = configCacheItemManager.queryCacheItem(namespaceId,
+					request.getGroupId(), request.getDataId());
+			cacheItem.executeWriteWork(new WriteWork() {
+				@Override
+				public void job() {
+					configCacheItemManager.removeCacheFromDisk(cacheItem.getNamespaceId(),
+							cacheItem.getGroupId(), cacheItem.getDataId());
+				}
+
+				@Override
+				public void onError(Exception exception) {
+
+				}
+			});
+			// Cancel CacheItem manager
+			configCacheItemManager.deregisterConfigCacheItem(cacheItem.getNamespaceId(),
+					cacheItem.getGroupId(), cacheItem.getDataId());
+		}
 		return persistentHandler.removeConfigInfo(namespaceId, request);
+	}
+
+	@Override
+	public boolean saveConfigHistory(String namespaceId,
+			PublishConfigHistory publishConfigHistory) {
+		return persistentHandler.saveConfigHistory(namespaceId, publishConfigHistory);
+	}
+
+	@Override
+	public boolean removeConfigHistory(String namespaceId,
+			DeleteConfigHistory deleteConfigHistory) {
+		return persistentHandler.removeConfigHistory(namespaceId, deleteConfigHistory);
+	}
+
+	@Override
+	public int priority() {
+		return HIGH_PRIORITY / 2;
 	}
 }

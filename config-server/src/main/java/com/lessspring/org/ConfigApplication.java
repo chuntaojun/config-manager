@@ -16,6 +16,9 @@
  */
 package com.lessspring.org;
 
+import javax.annotation.PostConstruct;
+
+import io.prometheus.client.hotspot.DefaultExports;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.SpringApplication;
@@ -31,6 +34,11 @@ public class ConfigApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ConfigApplication.class, args);
+	}
+
+	@PostConstruct
+	public void init() {
+		DefaultExports.initialize();
 	}
 
 }

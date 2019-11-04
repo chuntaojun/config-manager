@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event;
+package com.lessspring.org.pojo.event.config;
 
 import com.lessspring.org.event.EventType;
 
@@ -34,18 +34,6 @@ public class NotifyEvent extends BaseEvent {
 		return TYPE;
 	}
 
-	public static void copy(long sequence, NotifyEvent source, NotifyEvent target) {
-		target.setNamespaceId(source.getNamespaceId());
-		target.setGroupId(source.getGroupId());
-		target.setDataId(source.getDataId());
-		target.setEventType(source.getEventType());
-		target.setSource(source.getSource());
-		target.setEncryption(source.getEncryption());
-		target.setClientIps(source.getClientIps());
-		target.setBeta(source.isBeta());
-		target.setSequence(sequence);
-	}
-
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -61,7 +49,6 @@ public class NotifyEvent extends BaseEvent {
 		private String clientIps;
 		private EventType eventType;
 		private String entryption;
-		private long createTime = System.currentTimeMillis();
 
 		private Builder() {
 		}
@@ -113,11 +100,6 @@ public class NotifyEvent extends BaseEvent {
 
 		public Builder eventType(EventType eventType) {
 			this.eventType = eventType;
-			return this;
-		}
-
-		public Builder createTime(long createTime) {
-			this.createTime = createTime;
 			return this;
 		}
 

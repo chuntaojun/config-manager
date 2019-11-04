@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.jvm;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.lessspring.org.Constant;
 import com.sun.management.HotSpotDiagnosticMXBean;
 
 /**

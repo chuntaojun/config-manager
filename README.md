@@ -1,4 +1,4 @@
-# config-manager
+# config-manager（目前为个人毕设项目）
 
 #### LessSpring ConfigManager
 
@@ -18,7 +18,7 @@
 
  - [x] 本地配置优先原则
  - [x] 本地容灾措施
- - [x] Raft协议集成H2（初步完成，Multi-Group部分待研究）
+ - [x] *Raft*协议集成H2（初步完成，Multi-Group部分待研究）
  - [x] 简单权限（暂未实现资源的权限设置）
  - [x] 采取*nacos*的文件缓存理念
  - [x] 配置文件加解密实现
@@ -27,6 +27,8 @@
  - [ ] 前端页面、可视化管理
  - [ ] 数据分片存储（摆脱单机存储的限制）
  - [ ] 支持*prometheus*数据监控
+ - [ ] 详细的日志输出分类
+ - [ ] 邮件通知系统
 
 #### 使用说明
 
@@ -54,7 +56,7 @@
 
 > Config-Manager-Server 端参数信息
 
-##### application.properties
+###### application.properties
 
 ```properties
 # config-manager-server 运行模式，单机——standalone，集群——cluster，默认以单机模式启动
@@ -80,9 +82,22 @@ com.lessspring.org.config-manager.anyuri=/, /api/v1/login, /api/v1/cluster/all
 com.lessspring.org.config-manager.raft.electionTimeoutMs=
 # 设置raft快照任务间隔时间
 com.lessspring.org.config-manager.raft.snapshotIntervalSecs=
+
+#
+com.lessspring.org.config-manager.email.host=
+#
+com.lessspring.org.config-manager.email.username=
+#
+com.lessspring.org.config-manager.email.password=
+#
+com.lessspring.org.config-manager.email.smtp.auth=
+#
+com.lessspring.org.config-manager.starttls.enable=
+#
+com.lessspring.org.config-manager.email.starttls.required=
 ```
 
-##### cluster.properties
+###### cluster.properties
 
 ```properties
 # 本机的ip index 序号
@@ -92,6 +107,13 @@ cluster.server.node.ip.{num}=127.0.0.1
 # 机器 num 的 port 信息
 cluster.server.node.port.{num}=2959
 ```
+
+##### key 的构建说明
+
+> config-manager-client
+
+
+> config-manager-server
 
 
 

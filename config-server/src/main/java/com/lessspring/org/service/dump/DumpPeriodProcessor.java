@@ -22,6 +22,7 @@ import java.util.function.BiConsumer;
 
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.dump.task.DumpTask4Period;
+import com.lessspring.org.executor.NameThreadFactory;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -59,12 +60,8 @@ public class DumpPeriodProcessor implements DumpProcessor<DumpTask4Period> {
 
 	@Override
 	public void init() {
-		this.executor = new ScheduledThreadPoolExecutor(1, r -> {
-			Thread thread = new Thread(r);
-			thread.setDaemon(true);
-			thread.setName("com.lessspring.org.service.dump.Executor");
-			return thread;
-		});
+		this.executor = new ScheduledThreadPoolExecutor(1,
+				new NameThreadFactory("com.lessspring.org.service.dump.Executor"));
 	}
 
 	@Override

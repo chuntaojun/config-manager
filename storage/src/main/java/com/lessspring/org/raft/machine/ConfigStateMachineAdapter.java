@@ -74,7 +74,10 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 						// Bz Id synchronization
 						final TransactionId transactionId = transactionIdManager
 								.query(datum.getKey());
-						transactionId.setId(id);
+						// This business is not globally unique ID requirements, ignored
+						if (transactionId != null) {
+							transactionId.setId(id);
+						}
 					}
 					final Transaction transaction = new Transaction(id, datum.getBz(),
 							datum.getKey(), datum.getValue(), datum.getOperation());

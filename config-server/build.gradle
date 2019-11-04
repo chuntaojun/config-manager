@@ -29,8 +29,12 @@ dependencies {
     compile 'com.auth0:java-jwt:3.4.1'
     compile 'org.springframework.boot:spring-boot-starter-webflux'
     compile 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    compile 'org.springframework.boot:spring-boot-starter-mail'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
     implementation('org.springframework.boot:spring-boot-starter-aop')
     compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+    compile group: 'io.prometheus', name: 'simpleclient_httpserver', version: '0.8.0'
+    compile group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.8.0'
     compile group: 'io.netty', name: 'netty-tcnative-boringssl-static', version: '2.0.26.Final'
     compile group: 'org.apache.commons', name: 'commons-csv', version: '1.7'
     compile group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.0'

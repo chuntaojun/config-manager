@@ -37,10 +37,12 @@ public class DatumAsyncUserProcessor extends BaseAsyncUserProcessor<Datum> {
 	@Override
 	public void handleRequest(BizContext bizCtx, AsyncContext asyncCtx, Datum request) {
 		try {
-			CompletableFuture<ResponseData<Boolean>> future = clusterServer
-					.apply(request);
-			asyncCtx.sendResponse(
-					Response.builder().success(future.get().getData()).build());
+			if (clusterServer.isLeader()) {
+				CompletableFuture<ResponseData<Boolean>> future = clusterServer
+						.apply(request);
+				asyncCtx.sendResponse(
+						Response.builder().success(future.get().getData()).build());
+			}
 		}
 		catch (Exception e) {
 			log.error("Fail to apply follower request : {}", request);

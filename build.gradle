@@ -21,7 +21,7 @@ subprojects {
         compile group: 'commons-io', name: 'commons-io', version: '2.6'
         compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
-        compile group: 'io.prometheus', name: 'simpleclient', version: '0.7.0'
+        compile group: 'io.prometheus', name: 'simpleclient', version: '0.8.0'
         compile group: 'io.projectreactor', name: 'reactor-core', version: '3.2.9.RELEASE'
         compile 'com.google.guava:guava:28.1-jre'
         compile group: 'com.lmax', name: 'disruptor', version: '3.4.2'

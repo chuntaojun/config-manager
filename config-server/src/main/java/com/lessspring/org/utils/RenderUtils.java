@@ -38,8 +38,7 @@ public final class RenderUtils {
 		return ok().header("Access-Control-Allow-Origin", "*")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
-				.subscribeOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
+				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
 	}
 
 }

@@ -19,17 +19,12 @@ package com.lessspring.org.configuration.filter;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.lessspring.org.constant.Code;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
@@ -86,34 +81,24 @@ public class ConfigWebFilter implements WebFilter {
 	@Override
 	public Mono<Void> filter(@NotNull ServerWebExchange exchange,
 			@NotNull WebFilterChain chain) {
-		Future<Mono<Void>> future = executor.submit(() -> {
-			ServerHttpRequest request = exchange.getRequest();
-			String path = request.getPath().value();
-			// To release the URL white list
-			if (uriMatcher(path, anyOneUri)) {
-				return chain.filter(exchange);
-			}
-			// Give priority to perform user custom interceptors
-			Mono<Void> mono = filterChain.filter(exchange);
-			filterChain.destroy();
-			if (Objects.nonNull(mono)) {
-				return mono;
-			}
-			boolean hasAuth = permissionIntercept(exchange);
-			if (!hasAuth) {
-				return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
-						HASH_NO_PRIVILEGE.getDescribe());
-			}
+		ServerHttpRequest request = exchange.getRequest();
+		String path = request.getPath().value();
+		// To release the URL white list
+		if (uriMatcher(path, anyOneUri)) {
 			return chain.filter(exchange);
-		});
-		try {
-			// Handling requests with asynchronous tasks
-			return future.get(5000, TimeUnit.MILLISECONDS);
 		}
-		catch (InterruptedException | ExecutionException | TimeoutException e) {
-			return filterResponse(exchange.getResponse(), Code.SERVER_BUSY.getCode(),
-					Code.SERVER_BUSY.getMsg());
+		// Give priority to perform user custom interceptors
+		Mono<Void> mono = filterChain.filter(exchange);
+		filterChain.destroy();
+		if (Objects.nonNull(mono)) {
+			return mono;
 		}
+		boolean hasAuth = permissionIntercept(exchange);
+		if (!hasAuth) {
+			return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
+					HASH_NO_PRIVILEGE.getDescribe());
+		}
+		return chain.filter(exchange);
 	}
 
 	private boolean permissionIntercept(ServerWebExchange exchange) {

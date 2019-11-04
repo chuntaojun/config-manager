@@ -14,39 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event;
-
-import com.lessspring.org.constant.Code;
-import com.lessspring.org.exception.BaseException;
+package com.lessspring.org.pojo.event.email;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class VerifyException extends BaseException {
-	@Override
-	public Code code() {
-		return Code.VERIFY_ERROR;
-	}
+public class WarnEmailEvent extends BaseEmailEvent {
 
-	public VerifyException() {
-		super();
-	}
-
-	public VerifyException(String message) {
-		super(message);
-	}
-
-	public VerifyException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public VerifyException(Throwable cause) {
-		super(cause);
-	}
-
-	protected VerifyException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
+	public WarnEmailEvent(String eventLabel) {
+		super(eventLabel);
 	}
 }

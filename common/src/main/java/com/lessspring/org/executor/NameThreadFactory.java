@@ -14,41 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event;
+package com.lessspring.org.executor;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@AllArgsConstructor
-public class PublishLogEvent {
+public class NameThreadFactory implements ThreadFactory {
 
-	public static final String TYPE = "PublishLogEvent";
+	private final AtomicInteger id = new AtomicInteger(0);
 
-	private long sequence;
-	private String namespaceId;
-	private String dataId;
-	private String groupId;
-	private String clientIp;
-	private long publishTime;
+	private String name;
 
-	public PublishLogEvent() {
+	public NameThreadFactory(String name) {
+		this.name = name;
 	}
 
-	public static void copy(long sequence, PublishLogEvent source,
-			PublishLogEvent target) {
-		target.setSequence(sequence);
-		target.setNamespaceId(source.namespaceId);
-		target.setGroupId(source.groupId);
-		target.setDataId(source.getDataId());
-		target.setClientIp(source.clientIp);
-		target.setPublishTime(source.getPublishTime());
+	@Override
+	public Thread newThread(@NotNull Runnable r) {
+		String _name = name + id.getAndDecrement();
+		return new Thread(new WrapperRunnable(r), _name);
 	}
-
 }

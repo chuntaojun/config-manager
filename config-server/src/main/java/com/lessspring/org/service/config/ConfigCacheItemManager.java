@@ -35,7 +35,7 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.WriteWork;
-import com.lessspring.org.pojo.event.ConfigChangeEvent;
+import com.lessspring.org.pojo.event.config.ConfigChangeEvent;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +93,9 @@ public class ConfigCacheItemManager {
 				.configType(configInfoDTO.getType()).build();
 		registerConfigCacheItem(namespaceId, event);
 		updateContent(namespaceId, event);
+
+		// help gc
+		event = null;
 	}
 
 	public void dumpConfigBeta(final String namespaceId,
@@ -109,6 +112,9 @@ public class ConfigCacheItemManager {
 				.build();
 		registerConfigCacheItem(namespaceId, event);
 		updateContent(namespaceId, event);
+
+		// help gc
+		event = null;
 	}
 
 	public void registerConfigCacheItem(final String namespaceId,
@@ -147,10 +153,8 @@ public class ConfigCacheItemManager {
 		}
 	}
 
-	public void deregisterConfigCacheItem(final String namespaceId,
-			final ConfigChangeEvent event) {
-		final String key = NameUtils.buildName(namespaceId, event.getGroupId(),
-				event.getDataId());
+	public void deregisterConfigCacheItem(final String namespaceId, final String groupId, final String dataId) {
+		final String key = NameUtils.buildName(namespaceId, groupId, dataId);
 		cacheItemMap.remove(key);
 	}
 
@@ -175,6 +179,17 @@ public class ConfigCacheItemManager {
 	public String readCacheFromDisk(final String namespaceId, final String key) {
 		final String path = Paths.get("config-cache", namespaceId).toString();
 		return DiskUtils.readFile(path, key);
+	}
+
+	public boolean removeCacheFromDisk(final String namespaceId, final String groupId,
+			final String dataId) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return removeCacheFromDisk(namespaceId, key);
+	}
+
+	public boolean removeCacheFromDisk(final String namespaceId, final String key) {
+		final String path = Paths.get("config-cache", namespaceId).toString();
+		return DiskUtils.deleteFile(path, key);
 	}
 
 	public boolean updateContent(final String namespaceId,

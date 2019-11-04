@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event;
+package com.lessspring.org.exception;
 
 import com.lessspring.org.constant.Code;
 import com.lessspring.org.exception.BaseException;
@@ -23,31 +23,30 @@ import com.lessspring.org.exception.BaseException;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class UserNotFoundException extends BaseException {
-
+public class VerifyException extends BaseException {
 	@Override
 	public Code code() {
-		return Code.USER_NOT_FOUNT;
+		return Code.VERIFY_ERROR;
 	}
 
-	public UserNotFoundException() {
+	public VerifyException() {
 		super();
 	}
 
-	public UserNotFoundException(String message) {
+	public VerifyException(String message) {
 		super(message);
 	}
 
-	public UserNotFoundException(String message, Throwable cause) {
+	public VerifyException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public UserNotFoundException(Throwable cause) {
+	public VerifyException(Throwable cause) {
 		super(cause);
 	}
 
-	protected UserNotFoundException(String message, Throwable cause,
-			boolean enableSuppression, boolean writableStackTrace) {
+	protected VerifyException(String message, Throwable cause, boolean enableSuppression,
+			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 }

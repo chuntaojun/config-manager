@@ -48,12 +48,10 @@ class ServerSentEventListener<T> extends EventSourceListener {
 	public ServerSentEventListener(final EventReceiver<T> receiver, Class<T> cls) {
 		super();
 		this.receiver = receiver;
-		synchronized (monitor) {
-			typeCls = cls;
-			EventBus eventBus = new EventBus("config-watch-event-publisher");
-			eventBusMap.computeIfAbsent(receiver.attention(), s -> eventBus);
-			eventBus.register(receiver);
-		}
+		typeCls = cls;
+		EventBus eventBus = new EventBus("config-watch-event-publisher");
+		eventBusMap.computeIfAbsent(receiver.attention(), s -> eventBus);
+		eventBus.register(receiver);
 	}
 
 	@Override

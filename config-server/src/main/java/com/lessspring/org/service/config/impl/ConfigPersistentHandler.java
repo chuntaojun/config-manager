@@ -16,39 +16,30 @@
  */
 package com.lessspring.org.service.config.impl;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
-import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
-import com.lessspring.org.event.EventType;
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
-import com.lessspring.org.pojo.event.ConfigChangeEvent;
-import com.lessspring.org.pojo.event.NotifyEvent;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
+import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.config.PersistentHandler;
-import com.lessspring.org.service.publish.WatchClientManager;
+import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
-import com.lessspring.org.utils.DisruptorFactory;
+import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.SystemEnv;
-import com.lmax.disruptor.WorkHandler;
-import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -59,14 +50,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @Slf4j
 @Component(value = "persistentHandler")
-public class ConfigPersistentHandler
-		implements PersistentHandler, WorkHandler<ConfigChangeEvent> {
-
-	private final Disruptor<NotifyEvent> disruptorHolder;
-
-	@Autowired
-	@Lazy
-	private ConfigCacheItemManager configCacheItemManager;
+public class ConfigPersistentHandler implements PersistentHandler {
 
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
@@ -78,18 +62,6 @@ public class ConfigPersistentHandler
 	private TransactionTemplate transactionTemplate;
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
-
-	public ConfigPersistentHandler(WatchClientManager watchClientManager) {
-		disruptorHolder = DisruptorFactory.build(NotifyEvent::new,
-				"Notify-Event-Disruptor");
-		disruptorHolder.handleEventsWithWorkerPool(watchClientManager);
-		disruptorHolder.start();
-	}
-
-	@PreDestroy
-	public void shutdown() {
-		disruptorHolder.shutdown();
-	}
 
 	@Transactional(readOnly = true)
 	@Override
@@ -117,8 +89,7 @@ public class ConfigPersistentHandler
 			info.setFile(source);
 		}
 		else {
-			info.setContent(
-					new String(source, Charset.forName(StandardCharsets.UTF_8.name())));
+			info.setContent(ByteUtils.toString(source));
 		}
 		return info;
 	}
@@ -167,10 +138,9 @@ public class ConfigPersistentHandler
 			final QueryConfigInfo queryConfigInfo = QueryConfigInfo.builder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).build();
-			// ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
-			// ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
-			// DBUtils.changeConfigInfo2History(old, history);
-			// historyMapper.save(history);
+			ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
+			ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
+			DBUtils.changeConfigInfo2History(old, history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
 					.content(save).type(request.getType()).build();
@@ -192,27 +162,19 @@ public class ConfigPersistentHandler
 	}
 
 	@Override
-	public void onEvent(ConfigChangeEvent event) throws Exception {
-		try {
-			if (EventType.PUBLISH.compareTo(event.getEventType()) == 0) {
-				configCacheItemManager.registerConfigCacheItem(event.getNamespaceId(),
-						event);
-			}
-			if (EventType.DELETE.compareTo(event.getEventType()) == 0) {
-				configCacheItemManager.deregisterConfigCacheItem(event.getNamespaceId(),
-						event);
-				return;
-			}
-			configCacheItemManager.updateContent(event.getNamespaceId(), event);
-			NotifyEvent source = NotifyEvent.builder().namespaceId(event.getNamespaceId())
-					.groupId(event.getGroupId()).dataId(event.getDataId())
-					.eventType(event.getEventType()).entryption(event.getEncryption())
-					.build();
-			disruptorHolder.publishEvent(
-					(target, sequence1) -> NotifyEvent.copy(sequence1, source, target));
-		}
-		catch (Exception e) {
-			log.error("notify ConfigChangeEvent has some error : {0}", e);
-		}
+	public boolean saveConfigHistory(String namespaceId,
+			PublishConfigHistory publishConfigHistory) {
+		return false;
+	}
+
+	@Override
+	public boolean removeConfigHistory(String namespaceId,
+			DeleteConfigHistory deleteConfigHistory) {
+		return false;
+	}
+
+	@Override
+	public int priority() {
+		return LOW_PRIORITY;
 	}
 }

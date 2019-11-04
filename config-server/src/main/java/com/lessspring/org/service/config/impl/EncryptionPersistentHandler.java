@@ -20,6 +20,8 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
+import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.service.encryption.EncryptionService;
 import lombok.extern.slf4j.Slf4j;
@@ -68,5 +70,22 @@ public class EncryptionPersistentHandler implements PersistentHandler {
 	@Override
 	public boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request) {
 		return persistentHandler.removeConfigInfo(namespaceId, request);
+	}
+
+	@Override
+	public boolean saveConfigHistory(String namespaceId,
+			PublishConfigHistory publishConfigHistory) {
+		return persistentHandler.saveConfigHistory(namespaceId, publishConfigHistory);
+	}
+
+	@Override
+	public boolean removeConfigHistory(String namespaceId,
+			DeleteConfigHistory deleteConfigHistory) {
+		return persistentHandler.removeConfigHistory(namespaceId, deleteConfigHistory);
+	}
+
+	@Override
+	public int priority() {
+		return HIGH_PRIORITY;
 	}
 }

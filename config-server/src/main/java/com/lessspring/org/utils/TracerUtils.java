@@ -32,7 +32,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.PathUtils;
-import com.lessspring.org.pojo.event.PublishLogEvent;
+import com.lessspring.org.pojo.event.config.PublishLogEvent;
+import com.lessspring.org.pojo.event.config.PublishLogEventHandler;
 import com.lessspring.org.pojo.vo.PublishLogVO;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -43,7 +44,7 @@ import com.lmax.disruptor.dsl.Disruptor;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class TracerUtils implements WorkHandler<PublishLogEvent> {
+public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 
 	private long id = 0;
 	private final String tracerName = "config-manager-tracer-";
@@ -63,20 +64,24 @@ public final class TracerUtils implements WorkHandler<PublishLogEvent> {
 		return SINGLE_TON;
 	}
 
-	private Disruptor<PublishLogEvent> disruptor = DisruptorFactory
-			.build(PublishLogEvent::new, "PublishLog-Disruptor");
+	private Disruptor<PublishLogEventHandler> disruptor = DisruptorFactory
+			.build(PublishLogEventHandler::new, PublishLogEvent.class);
 
 	private TracerUtils() {
 	}
 
 	public void publishPublishEvent(PublishLogEvent source) {
-		disruptor.publishEvent(
-				(target, sequence) -> PublishLogEvent.copy(sequence, source, target));
+		disruptor.publishEvent((target, sequence) -> {
+			source.setSequence(sequence);
+			target.rest();
+			target.setEvent(source);
+		});
 		disruptor.handleEventsWithWorkerPool(this);
 	}
 
 	@Override
-	public void onEvent(PublishLogEvent event) throws Exception {
+	public void onEvent(PublishLogEventHandler eventHandler) throws Exception {
+		final PublishLogEvent event = eventHandler.getEvent();
 		if (countReuseAble == 0) {
 			countReuseAble = 100_000;
 			id++;

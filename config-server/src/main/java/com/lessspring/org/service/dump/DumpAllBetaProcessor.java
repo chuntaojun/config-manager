@@ -20,8 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
@@ -29,7 +27,7 @@ import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.cluster.DistroRouter;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4Beta;
-import org.jetbrains.annotations.NotNull;
+import com.lessspring.org.executor.NameThreadFactory;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -64,18 +62,8 @@ public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 
 	@Override
 	public void init() {
-		this.executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
-
-			AtomicInteger id = new AtomicInteger(0);
-
-			@Override
-			public Thread newThread(@NotNull Runnable r) {
-				Thread thread = new Thread(r,
-						"com.lessspring.org.config.DumpAllBeta-" + id.getAndIncrement());
-				thread.setDaemon(true);
-				return thread;
-			}
-		});
+		this.executor = Executors.newFixedThreadPool(4,
+				new NameThreadFactory("com.lessspring.org.config.DumpAllBeta-"));
 	}
 
 	@Override

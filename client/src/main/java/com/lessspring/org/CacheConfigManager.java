@@ -26,6 +26,7 @@ import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
+import com.lessspring.org.common.RequestLimitManager;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
@@ -44,11 +45,11 @@ public class CacheConfigManager implements LifeCycle {
 	private SerializerUtils serializer = SerializerUtils.getInstance();
 
 	private HttpClient httpClient;
+	private RequestLimitManager limitManager = new RequestLimitManager();
 
 	private final String namespaceId;
 	private final boolean localPref;
 	private final ConfigFilterManager configFilterManager;
-
 	private final AtomicBoolean inited = new AtomicBoolean(false);
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
@@ -65,6 +66,7 @@ public class CacheConfigManager implements LifeCycle {
 	public void init() {
 		if (inited.compareAndSet(false, true)) {
 			this.worker.setConfigManager(this);
+			LifeCycleHelper.invokeInit(limitManager);
 		}
 	}
 
@@ -150,8 +152,10 @@ public class CacheConfigManager implements LifeCycle {
 		if (isInited() && destroyed.compareAndSet(false, true)) {
 			LifeCycleHelper.invokeDestroy(httpClient);
 			LifeCycleHelper.invokeDestroy(worker);
+			LifeCycleHelper.invokeDestroy(limitManager);
 			worker = null;
 			httpClient = null;
+			limitManager = null;
 		}
 	}
 

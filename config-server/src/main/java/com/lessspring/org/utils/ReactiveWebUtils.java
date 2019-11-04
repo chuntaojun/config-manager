@@ -18,6 +18,7 @@ package com.lessspring.org.utils;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.springframework.web.reactive.function.server.ServerRequest;
 
@@ -31,6 +32,10 @@ public final class ReactiveWebUtils {
 
 	public static Optional<Object> getAttribute(String name, ServerRequest request) {
 		return request.attribute(name);
+	}
+
+	private static Supplier<String> getselfIp() {
+		return () -> "";
 	}
 
 }

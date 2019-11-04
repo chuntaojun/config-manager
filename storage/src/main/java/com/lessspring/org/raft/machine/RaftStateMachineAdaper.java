@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
-import com.lessspring.org.ThreadPoolHelper;
+import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.raft.LeaderStatusListener;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.TransactionCommitCallback;

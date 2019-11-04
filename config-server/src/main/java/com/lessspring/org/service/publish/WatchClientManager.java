@@ -29,8 +29,9 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.ReadWork;
-import com.lessspring.org.pojo.event.NotifyEvent;
-import com.lessspring.org.pojo.event.PublishLogEvent;
+import com.lessspring.org.pojo.event.config.NotifyEvent;
+import com.lessspring.org.pojo.event.config.NotifyEventHandler;
+import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
@@ -51,7 +52,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
  */
 @Slf4j
 @Component
-public class WatchClientManager implements WorkHandler<NotifyEvent> {
+public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 
 	private final long parallelThreshold = 100;
 
@@ -159,7 +160,8 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 	// TODO Push the trajectory logging
 
 	@Override
-	public void onEvent(NotifyEvent event) throws Exception {
+	public void onEvent(NotifyEventHandler eventHandler) throws Exception {
+		NotifyEvent event = eventHandler.getEvent();
 		final CacheItem cacheItem = cacheItemManager.queryCacheItem(
 				event.getNamespaceId(), event.getGroupId(), event.getDataId());
 		final String configInfoJson = cacheItemManager.readCacheFromDisk(
@@ -174,43 +176,29 @@ public class WatchClientManager implements WorkHandler<NotifyEvent> {
 		else {
 			stream = set.stream();
 		}
-		cacheItem.executeReadWork(new ReadWork() {
-			@Override
-			public void job() {
-				stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
-						.forEach(client -> {
-							// If it is beta configuration file, you need to check the
-							// client
-							// IP information
-							if (event.isBeta()) {
-								if (cacheItem.canRead(client.getClientIp())) {
-									return;
-								}
-							}
-							try {
-								writeResponse(client, configInfoJson);
-								finishWorks[0]++;
-								tracer.publishPublishEvent(PublishLogEvent.builder()
-										.namespaceId(event.getNamespaceId())
-										.groupId(event.getGroupId())
-										.dataId(event.getDataId())
-										.clientIp(client.getClientIp())
-										.publishTime(System.currentTimeMillis()).build());
-							}
-							catch (Exception e) {
-								log.error("[Notify WatchClient has Error] : {}",
-										e.getMessage());
-							}
-						});
-				log.info("total notify clients finish success is : {}", finishWorks[0]);
-			}
-
-			@Override
-			public void onError(Exception exception) {
-				log.error("notify watcher has some error : {}", exception);
-
-			}
-		});
+		stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+				.forEach(client -> {
+					// If it is beta configuration file, you need to check the
+					// client IP information
+					if (event.isBeta()) {
+						if (cacheItem.canRead(client.getClientIp())) {
+							return;
+						}
+					}
+					try {
+						writeResponse(client, configInfoJson);
+						finishWorks[0]++;
+						tracer.publishPublishEvent(PublishLogEvent.builder()
+								.namespaceId(event.getNamespaceId())
+								.groupId(event.getGroupId()).dataId(event.getDataId())
+								.clientIp(client.getClientIp())
+								.publishTime(System.currentTimeMillis()).build());
+					}
+					catch (Exception e) {
+						log.error("[Notify WatchClient has Error] : {}", e.getMessage());
+					}
+				});
+		log.info("total notify clients finish success is : {}", finishWorks[0]);
 	}
 
 }

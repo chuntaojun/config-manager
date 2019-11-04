@@ -40,7 +40,7 @@ import com.alipay.sofa.jraft.rpc.RpcResponseClosure;
 import com.alipay.sofa.jraft.rpc.impl.cli.BoltCliClientService;
 import com.google.protobuf.Message;
 import com.lessspring.org.LifeCycle;
-import com.lessspring.org.ThreadPoolHelper;
+import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.machine.ConfigStateMachineAdapter;
 import com.lessspring.org.raft.vo.ServerNode;
