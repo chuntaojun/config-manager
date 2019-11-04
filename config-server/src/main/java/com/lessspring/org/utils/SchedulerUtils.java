@@ -26,6 +26,7 @@ import com.lessspring.org.executor.BaseRejectedExecutionHandler;
 import com.lessspring.org.executor.BaseThreadPoolExecutor;
 import com.lessspring.org.executor.NameThreadFactory;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,6 +36,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class SchedulerUtils {
+
+	private static final SchedulerUtils INSTANCE = new SchedulerUtils();
+
+	private SchedulerUtils() {
+	}
+
+	public static SchedulerUtils getSingleton() {
+		return INSTANCE;
+	}
 
 	private static final int CORE_POOL_SIZE = 512;
 	private static final int MAX_POOL_SIZE = 1024;

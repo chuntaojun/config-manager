@@ -22,16 +22,20 @@ import javax.annotation.Resource;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
+import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
+import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
@@ -134,10 +138,9 @@ public class ConfigPersistentHandler implements PersistentHandler {
 			final QueryConfigInfo queryConfigInfo = QueryConfigInfo.builder()
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).build();
-			// ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
-			// ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
-			// DBUtils.changeConfigInfo2History(old, history);
-			// historyMapper.save(history);
+			ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
+			ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
+			DBUtils.changeConfigInfo2History(old, history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
 					.content(save).type(request.getType()).build();
@@ -156,6 +159,18 @@ public class ConfigPersistentHandler implements PersistentHandler {
 			configInfoMapper.removeConfigInfo(request);
 		}
 		return true;
+	}
+
+	@Override
+	public boolean saveConfigHistory(String namespaceId,
+			PublishConfigHistory publishConfigHistory) {
+		return false;
+	}
+
+	@Override
+	public boolean removeConfigHistory(String namespaceId,
+			DeleteConfigHistory deleteConfigHistory) {
+		return false;
 	}
 
 	@Override

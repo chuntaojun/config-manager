@@ -176,43 +176,29 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		else {
 			stream = set.stream();
 		}
-		cacheItem.executeReadWork(new ReadWork() {
-			@Override
-			public void job() {
-				stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
-						.forEach(client -> {
-							// If it is beta configuration file, you need to check the
-							// client
-							// IP information
-							if (event.isBeta()) {
-								if (cacheItem.canRead(client.getClientIp())) {
-									return;
-								}
-							}
-							try {
-								writeResponse(client, configInfoJson);
-								finishWorks[0]++;
-								tracer.publishPublishEvent(PublishLogEvent.builder()
-										.namespaceId(event.getNamespaceId())
-										.groupId(event.getGroupId())
-										.dataId(event.getDataId())
-										.clientIp(client.getClientIp())
-										.publishTime(System.currentTimeMillis()).build());
-							}
-							catch (Exception e) {
-								log.error("[Notify WatchClient has Error] : {}",
-										e.getMessage());
-							}
-						});
-				log.info("total notify clients finish success is : {}", finishWorks[0]);
-			}
-
-			@Override
-			public void onError(Exception exception) {
-				log.error("notify watcher has some error : {}", exception);
-
-			}
-		});
+		stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+				.forEach(client -> {
+					// If it is beta configuration file, you need to check the
+					// client IP information
+					if (event.isBeta()) {
+						if (cacheItem.canRead(client.getClientIp())) {
+							return;
+						}
+					}
+					try {
+						writeResponse(client, configInfoJson);
+						finishWorks[0]++;
+						tracer.publishPublishEvent(PublishLogEvent.builder()
+								.namespaceId(event.getNamespaceId())
+								.groupId(event.getGroupId()).dataId(event.getDataId())
+								.clientIp(client.getClientIp())
+								.publishTime(System.currentTimeMillis()).build());
+					}
+					catch (Exception e) {
+						log.error("[Notify WatchClient has Error] : {}", e.getMessage());
+					}
+				});
+		log.info("total notify clients finish success is : {}", finishWorks[0]);
 	}
 
 }

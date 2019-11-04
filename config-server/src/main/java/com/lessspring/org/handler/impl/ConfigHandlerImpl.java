@@ -23,6 +23,7 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.service.config.ConfigOperationService;
+import com.lessspring.org.service.config.OperationService;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.utils.ReactiveWebUtils;
@@ -44,9 +45,9 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @Service(value = "configHandler")
 public class ConfigHandlerImpl implements ConfigHandler {
 
-	private final ConfigOperationService operationService;
+	private final OperationService operationService;
 
-	public ConfigHandlerImpl(ConfigOperationService operationService) {
+	public ConfigHandlerImpl(OperationService operationService) {
 		this.operationService = operationService;
 	}
 
@@ -57,7 +58,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	public Mono<ServerResponse> publishConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
-				.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER))
+				.publishOn(Schedulers
+						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER))
 				.map(publishRequest -> operationService.publishConfig(namespaceId,
 						publishRequest))
 				.map(Mono::just).flatMap(RenderUtils::render);
@@ -70,7 +72,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	public Mono<ServerResponse> modifyConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
-				.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER))
+				.publishOn(Schedulers
+						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER))
 				.map(publishRequest -> operationService.modifyConfig(namespaceId,
 						publishRequest))
 				.map(Mono::just).flatMap(RenderUtils::render);
@@ -91,7 +94,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		queryRequest.setAttribute("clientIp", clientIp);
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.queryConfig(namespaceId, queryRequest));
-		mono = mono.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
+		mono = mono.publishOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 		return RenderUtils.render(mono);
 	}
 
@@ -109,7 +113,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.beta(isBeta).groupId(groupId).dataId(dataId).build();
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.removeConfig(namespaceId, deleteRequest));
-		mono = mono.publishOn(Schedulers.fromExecutor(SchedulerUtils.WEB_HANDLER));
+		mono = mono.publishOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 		return RenderUtils.render(mono);
 	}
 }

@@ -14,23 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
-
-import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
-import com.lessspring.org.raft.machine.RaftStateMachineAdaper;
-import com.lessspring.org.raft.pojo.Datum;
+package com.lessspring.org.pojo.event.config;
 
 /**
- * Used for processing a request from the followers
- *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class BaseAsyncUserProcessor<T extends Datum>
-		extends AsyncUserProcessor<T> {
-
-	ClusterServer clusterServer;
-
-	public abstract void initCluster(ClusterServer clusterServer);
-
+public class ConfigHistoryHandler {
 }

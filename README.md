@@ -1,4 +1,4 @@
-# config-manager
+# config-manager（目前为个人毕设项目）
 
 #### LessSpring ConfigManager
 

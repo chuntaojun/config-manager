@@ -49,7 +49,6 @@ public class NotifyEvent extends BaseEvent {
 		private String clientIps;
 		private EventType eventType;
 		private String entryption;
-		private long createTime = System.currentTimeMillis();
 
 		private Builder() {
 		}
@@ -101,11 +100,6 @@ public class NotifyEvent extends BaseEvent {
 
 		public Builder eventType(EventType eventType) {
 			this.eventType = eventType;
-			return this;
-		}
-
-		public Builder createTime(long createTime) {
-			this.createTime = createTime;
 			return this;
 		}
 

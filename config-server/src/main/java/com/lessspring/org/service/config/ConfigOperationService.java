@@ -37,8 +37,10 @@ import com.lessspring.org.pojo.event.config.ConfigChangeEvent;
 import com.lessspring.org.pojo.event.config.ConfigChangeEventHandler;
 import com.lessspring.org.pojo.event.config.NotifyEvent;
 import com.lessspring.org.pojo.event.config.NotifyEventHandler;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.NamespaceRequest;
+import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.exception.TransactionException;
@@ -68,11 +70,15 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConfigOperationService implements WorkHandler<ConfigChangeEventHandler> {
+public class ConfigOperationService
+		implements OperationService, WorkHandler<ConfigChangeEventHandler> {
 
 	private final String createConfig = "CREATE_CONFIG";
 	private final String modifyConfig = "MODIFY_CONFIG";
 	private final String deleteConfig = "DELETE_CONFIG";
+
+	private final String createConfigHistory = "CREATE_CONFIG_HISTORY";
+	private final String deleteConfigHistory = "DELETE_CONFIG_HISTORY";
 
 	private final NamespaceService namespaceService;
 	private final Disruptor<ConfigChangeEventHandler> changeEventDisruptor;
@@ -116,6 +122,10 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 				modifyConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, deleteConsumer(),
 				deleteConfig);
+		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG,
+				saveConfigHistoryConsumer(), createConfigHistory);
+		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG,
+				deleteConfigHistoryConsumer(), deleteConfigHistory);
 		clusterManager.init();
 		failCallback = throwable -> null;
 	}
@@ -126,6 +136,7 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 		clusterManager.destroy();
 	}
 
+	@Override
 	public ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request) {
 		ConfigInfo info = persistentHandler.readConfigContent(namespaceId, request);
 		if (Objects.isNull(info)) {
@@ -134,6 +145,7 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 		return ResponseData.success(info);
 	}
 
+	@Override
 	public ResponseData<?> publishConfig(String namespaceId,
 			PublishConfigRequest request) {
 		PublishConfigRequest4 request4 = PublishConfigRequest4.copy(namespaceId, request);
@@ -154,6 +166,7 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 		return commit(datum);
 	}
 
+	@Override
 	public ResponseData<?> modifyConfig(String namespaceId,
 			PublishConfigRequest request) {
 		PublishConfigRequest4 request4 = PublishConfigRequest4.copy(namespaceId, request);
@@ -174,6 +187,7 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 		return commit(datum);
 	}
 
+	@Override
 	public ResponseData<?> removeConfig(String namespaceId, DeleteConfigRequest request) {
 		DeleteConfigRequest4 request4 = DeleteConfigRequest4.copy(namespaceId, request);
 		String key;
@@ -191,6 +205,18 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 				DeleteConfigRequest4.CLASS_NAME);
 		datum.setOperation(deleteConfig);
 		return commit(datum);
+	}
+
+	@Override
+	public ResponseData<?> saveConfigHistory(String namespaceId,
+			PublishConfigHistory request) {
+		return null;
+	}
+
+	@Override
+	public ResponseData<?> removeConfigHistory(String namespaceId,
+			DeleteConfigHistory request) {
+		return null;
 	}
 
 	private void publishEvent(ConfigChangeEvent source) {
@@ -303,6 +329,34 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 
 	}
 
+	private TransactionConsumer<Transaction> saveConfigHistoryConsumer() {
+		return new TransactionConsumer<Transaction>() {
+			@Override
+			public void accept(Transaction transaction) throws Throwable {
+
+			}
+
+			@Override
+			public void onError(TransactionException te) {
+
+			}
+		};
+	}
+
+	private TransactionConsumer<Transaction> deleteConfigHistoryConsumer() {
+		return new TransactionConsumer<Transaction>() {
+			@Override
+			public void accept(Transaction transaction) throws Throwable {
+
+			}
+
+			@Override
+			public void onError(TransactionException te) {
+
+			}
+		};
+	}
+
 	@Override
 	public void onEvent(ConfigChangeEventHandler eventHandler) throws Exception {
 		try {
@@ -313,7 +367,7 @@ public class ConfigOperationService implements WorkHandler<ConfigChangeEventHand
 			}
 			if (EventType.DELETE.compareTo(event.getEventType()) == 0) {
 				configCacheItemManager.deregisterConfigCacheItem(event.getNamespaceId(),
-						event);
+						event.getGroupId(), event.getDataId());
 				return;
 			}
 			configCacheItemManager.updateContent(event.getNamespaceId(), event);

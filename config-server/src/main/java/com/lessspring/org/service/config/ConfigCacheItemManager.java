@@ -153,10 +153,8 @@ public class ConfigCacheItemManager {
 		}
 	}
 
-	public void deregisterConfigCacheItem(final String namespaceId,
-			final ConfigChangeEvent event) {
-		final String key = NameUtils.buildName(namespaceId, event.getGroupId(),
-				event.getDataId());
+	public void deregisterConfigCacheItem(final String namespaceId, final String groupId, final String dataId) {
+		final String key = NameUtils.buildName(namespaceId, groupId, dataId);
 		cacheItemMap.remove(key);
 	}
 
@@ -181,6 +179,17 @@ public class ConfigCacheItemManager {
 	public String readCacheFromDisk(final String namespaceId, final String key) {
 		final String path = Paths.get("config-cache", namespaceId).toString();
 		return DiskUtils.readFile(path, key);
+	}
+
+	public boolean removeCacheFromDisk(final String namespaceId, final String groupId,
+			final String dataId) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return removeCacheFromDisk(namespaceId, key);
+	}
+
+	public boolean removeCacheFromDisk(final String namespaceId, final String key) {
+		final String path = Paths.get("config-cache", namespaceId).toString();
+		return DiskUtils.deleteFile(path, key);
 	}
 
 	public boolean updateContent(final String namespaceId,

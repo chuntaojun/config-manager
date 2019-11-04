@@ -17,10 +17,13 @@
 package com.lessspring.org.service.config;
 
 import com.lessspring.org.Priority;
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
+import com.lessspring.org.pojo.request.PublishConfigHistory;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -63,5 +66,23 @@ public interface PersistentHandler extends Priority {
 	 * @return delete result
 	 */
 	boolean removeConfigInfo(String namespaceId, DeleteConfigRequest request);
+
+	/**
+	 * Save the configuration file record
+	 *
+	 * @param namespaceId namespaceId
+	 * @param publishConfigHistory {@link PublishConfigHistory}
+	 * @return operation label
+	 */
+	boolean saveConfigHistory(String namespaceId, PublishConfigHistory publishConfigHistory);
+
+	/**
+	 * Delete the configuration file record
+	 *
+	 * @param namespaceId namespaceId
+	 * @param deleteConfigHistory {@link DeleteConfigHistory}
+	 * @return operation label
+	 */
+	boolean removeConfigHistory(String namespaceId, DeleteConfigHistory deleteConfigHistory);
 
 }
