@@ -14,26 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
+package com.lessspring.org;
 
-import com.lessspring.org.AbstractListener;
+import java.util.concurrent.Executor;
+
+import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.pojo.ChangekeyEvent;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class ChangeKeyListener extends AbstractListener {
-	@Override
-	public void onReceive(ConfigInfo configInfo) {
+public abstract class AbstractListener {
 
+	@Subscribe
+	protected void receive(ConfigInfo configInfo) {
+		onReceive(configInfo);
 	}
 
 	/**
-	 * To monitor changes in the configuration part
-	 * 
-	 * @param changekeyEvent {@link ChangekeyEvent}
+	 * receive when config has change
+	 *
+	 * @param configInfo {@link ConfigInfo}
 	 */
-	public abstract void onChange(ChangekeyEvent changekeyEvent);
+	public abstract void onReceive(ConfigInfo configInfo);
+
+	public Executor executor() {
+		return null;
+	}
+
 }

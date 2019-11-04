@@ -57,6 +57,9 @@ import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +74,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConfigOperationService
-		implements OperationService, WorkHandler<ConfigChangeEventHandler> {
+		implements OperationService, WorkHandler<ConfigChangeEventHandler>, Watcher {
 
 	private final String createConfig = "CREATE_CONFIG";
 	private final String modifyConfig = "MODIFY_CONFIG";
@@ -89,8 +92,7 @@ public class ConfigOperationService
 	private FailCallback failCallback;
 	private ConfigCacheItemManager configCacheItemManager;
 
-	public ConfigOperationService(
-			@Qualifier(value = "encryptionPersistentHandler") PersistentHandler persistentHandler,
+	public ConfigOperationService(PersistentHandler persistentHandler,
 			NamespaceService namespaceService,
 			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager, WatchClientManager watchClientManager,
@@ -108,6 +110,13 @@ public class ConfigOperationService
 				NotifyEvent.class);
 		notifyEventDisruptor.handleEventsWithWorkerPool(watchClientManager);
 		notifyEventDisruptor.start();
+
+		registerToPublisher();
+
+	}
+
+	private void registerToPublisher() {
+		persistentHandler.getPublisher().registerWatcher(this);
 	}
 
 	@PostConstruct
@@ -126,7 +135,6 @@ public class ConfigOperationService
 				saveConfigHistoryConsumer(), createConfigHistory);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG,
 				deleteConfigHistoryConsumer(), deleteConfigHistory);
-		clusterManager.init();
 		failCallback = throwable -> null;
 	}
 
@@ -210,13 +218,27 @@ public class ConfigOperationService
 	@Override
 	public ResponseData<?> saveConfigHistory(String namespaceId,
 			PublishConfigHistory request) {
-		return null;
+		request.setNamespaceId(namespaceId);
+		String key = TransactionUtils.buildTransactionKey(
+				PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_HISTORY,
+				namespaceId, request.getGroupId(), request.getDataId());
+		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
+				PublishConfigHistory.CLASS_NAME);
+		datum.setOperation(createConfigHistory);
+		return commit(datum);
 	}
 
 	@Override
 	public ResponseData<?> removeConfigHistory(String namespaceId,
 			DeleteConfigHistory request) {
-		return null;
+		request.setNamespaceId(namespaceId);
+		String key = TransactionUtils.buildTransactionKey(
+				PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_HISTORY,
+				namespaceId, request.getGroupId(), request.getDataId());
+		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
+				DeleteConfigHistory.CLASS_NAME);
+		datum.setOperation(deleteConfigHistory);
+		return commit(datum);
 	}
 
 	private void publishEvent(ConfigChangeEvent source) {
@@ -250,7 +272,7 @@ public class ConfigOperationService
 	}
 
 	private TransactionConsumer<Transaction> publishConsumer() {
-		return new TransactionConsumer<Transaction>() {
+		return new TransactionConsumer<>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
 				PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(),
@@ -280,7 +302,7 @@ public class ConfigOperationService
 	}
 
 	private TransactionConsumer<Transaction> modifyConsumer() {
-		return new TransactionConsumer<Transaction>() {
+		return new TransactionConsumer<>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
 				PublishConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(),
@@ -308,7 +330,7 @@ public class ConfigOperationService
 	}
 
 	private TransactionConsumer<Transaction> deleteConsumer() {
-		return new TransactionConsumer<Transaction>() {
+		return new TransactionConsumer<>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
 				DeleteConfigRequest4 request4 = GsonUtils.toObj(transaction.getData(),
@@ -330,10 +352,13 @@ public class ConfigOperationService
 	}
 
 	private TransactionConsumer<Transaction> saveConfigHistoryConsumer() {
-		return new TransactionConsumer<Transaction>() {
+		return new TransactionConsumer<>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
-
+				PublishConfigHistory history = GsonUtils.toObj(transaction.getData(),
+						PublishConfigHistory.class);
+				history.setAttribute("id", transaction.getId());
+				persistentHandler.saveConfigHistory(history.getNamespaceId(), history);
 			}
 
 			@Override
@@ -344,10 +369,12 @@ public class ConfigOperationService
 	}
 
 	private TransactionConsumer<Transaction> deleteConfigHistoryConsumer() {
-		return new TransactionConsumer<Transaction>() {
+		return new TransactionConsumer<>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
-
+				DeleteConfigHistory history = GsonUtils.toObj(transaction.getData(),
+						DeleteConfigHistory.class);
+				persistentHandler.removeConfigHistory(history.getNamespaceId(), history);
 			}
 
 			@Override
@@ -386,4 +413,19 @@ public class ConfigOperationService
 		}
 	}
 
+	@Override
+	public void onNotify(Occurrence occurrence, Publisher publisher) {
+		Object event = occurrence.getOrigin();
+		CompletableFuture<Boolean> future = occurrence.getAnswer();
+		future.complete(true);
+		if (event instanceof PublishConfigHistory) {
+			PublishConfigHistory request = (PublishConfigHistory) event;
+			saveConfigHistory(request.getNamespaceId(), request);
+			return;
+		}
+		if (event instanceof DeleteConfigHistory) {
+			DeleteConfigHistory request = (DeleteConfigHistory) event;
+			removeConfigHistory(request.getNamespaceId(), request);
+		}
+	}
 }

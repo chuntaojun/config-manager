@@ -14,26 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
+package com.lessspring.org.observer;
 
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.pojo.ChangekeyEvent;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
+ * A simple observer pattern - the publisher
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class ChangeKeyListener extends AbstractListener {
-	@Override
-	public void onReceive(ConfigInfo configInfo) {
+public abstract class Publisher {
 
+	private List<Watcher> watchers = new CopyOnWriteArrayList<>();
+
+	public void registerWatcher(Watcher watcher) {
+		watchers.add(watcher);
 	}
 
-	/**
-	 * To monitor changes in the configuration part
-	 * 
-	 * @param changekeyEvent {@link ChangekeyEvent}
-	 */
-	public abstract void onChange(ChangekeyEvent changekeyEvent);
+	public void deregisterWatcher(Watcher watcher) {
+		watchers.remove(watcher);
+	}
+
+	// With correction notice the Occurrence of the result, By accessing
+	// CompleteableFuture to processing the Watcher
+
+	protected void notifyAllWatcher(Occurrence event) {
+		for (Watcher watcher : watchers) {
+			watcher.onNotify(event, this);
+		}
+	}
+
 }

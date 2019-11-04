@@ -32,13 +32,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 
 	private static final Logger logger = Logger.getAnonymousLogger();

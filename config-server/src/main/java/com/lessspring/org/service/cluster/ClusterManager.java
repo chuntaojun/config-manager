@@ -46,6 +46,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -77,6 +79,7 @@ public class ClusterManager {
 		this.snapshotOperate = snapshotOperate;
 	}
 
+	@PostConstruct
 	public void init() {
 		if (initialize.compareAndSet(false, true)) {
 			final String raftCacheDir = Paths

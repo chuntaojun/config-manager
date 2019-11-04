@@ -32,12 +32,14 @@ import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.service.config.PersistentHandler;
+import com.lessspring.org.service.config.AbstracePersistentHandler;
 import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
 import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.SystemEnv;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
@@ -50,7 +52,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @Slf4j
 @Component(value = "persistentHandler")
-public class ConfigPersistentHandler implements PersistentHandler {
+public class ConfigPersistentHandler extends AbstracePersistentHandler {
 
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
@@ -62,6 +64,11 @@ public class ConfigPersistentHandler implements PersistentHandler {
 	private TransactionTemplate transactionTemplate;
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
+
+	@Override
+	public Publisher getPublisher() {
+		return this;
+	}
 
 	@Transactional(readOnly = true)
 	@Override
@@ -119,7 +126,6 @@ public class ConfigPersistentHandler implements PersistentHandler {
 		return true;
 	}
 
-	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request) {
 		int affect = -1;
@@ -145,6 +151,7 @@ public class ConfigPersistentHandler implements PersistentHandler {
 					.groupId(request.getGroupId()).dataId(request.getDataId())
 					.content(save).type(request.getType()).build();
 			affect = configInfoMapper.updateConfigInfo(infoDTO);
+			notifyAllWatcher(Occurrence.newInstance(history));
 		}
 		log.debug("modify config-success, affect rows is : {}", affect);
 		return true;

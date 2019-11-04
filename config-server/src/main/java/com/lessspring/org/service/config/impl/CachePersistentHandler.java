@@ -20,7 +20,6 @@ import java.util.Objects;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
@@ -30,10 +29,11 @@ import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.pojo.WriteWork;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
+import com.lessspring.org.service.config.AbstracePersistentHandler;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
-import com.lessspring.org.service.config.PersistentHandler;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
+import com.lessspring.org.observer.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,17 +50,22 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component(value = "cachePersistentHandler")
-public class CachePersistentHandler implements PersistentHandler {
+public class CachePersistentHandler extends AbstracePersistentHandler {
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	private final ConfigCacheItemManager configCacheItemManager;
-	private final PersistentHandler persistentHandler;
+	private final AbstracePersistentHandler persistentHandler;
 
 	public CachePersistentHandler(ConfigCacheItemManager configCacheItemManager,
-			@Qualifier(value = "persistentHandler") PersistentHandler persistentHandler) {
+			@Qualifier(value = "persistentHandler") AbstracePersistentHandler persistentHandler) {
 		this.configCacheItemManager = configCacheItemManager;
 		this.persistentHandler = persistentHandler;
+	}
+
+	@Override
+	public Publisher getPublisher() {
+		return persistentHandler;
 	}
 
 	@Override

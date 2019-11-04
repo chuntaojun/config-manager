@@ -27,7 +27,6 @@ public final class DBUtils {
 
 	public static void changeConfigInfo2History(ConfigInfoDTO dto,
 			ConfigInfoHistoryDTO historyDTO) {
-		historyDTO.setConfigInfoId(dto.getId());
 		historyDTO.setNamespaceId(dto.getNamespaceId());
 		historyDTO.setGroupId(dto.getGroupId());
 		historyDTO.setDataId(dto.getDataId());

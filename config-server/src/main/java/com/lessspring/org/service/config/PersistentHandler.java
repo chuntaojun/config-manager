@@ -17,19 +17,26 @@
 package com.lessspring.org.service.config;
 
 import com.lessspring.org.Priority;
-import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
+import com.lessspring.org.observer.Publisher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public interface PersistentHandler extends Priority {
+
+	/**
+	 * get publisher, The implementation of the interface is often a class
+	 *
+	 * @return {@link Publisher}
+	 */
+	Publisher getPublisher();
 
 	/**
 	 * read config-info
@@ -74,7 +81,8 @@ public interface PersistentHandler extends Priority {
 	 * @param publishConfigHistory {@link PublishConfigHistory}
 	 * @return operation label
 	 */
-	boolean saveConfigHistory(String namespaceId, PublishConfigHistory publishConfigHistory);
+	boolean saveConfigHistory(String namespaceId,
+			PublishConfigHistory publishConfigHistory);
 
 	/**
 	 * Delete the configuration file record
@@ -83,6 +91,7 @@ public interface PersistentHandler extends Priority {
 	 * @param deleteConfigHistory {@link DeleteConfigHistory}
 	 * @return operation label
 	 */
-	boolean removeConfigHistory(String namespaceId, DeleteConfigHistory deleteConfigHistory);
+	boolean removeConfigHistory(String namespaceId,
+			DeleteConfigHistory deleteConfigHistory);
 
 }

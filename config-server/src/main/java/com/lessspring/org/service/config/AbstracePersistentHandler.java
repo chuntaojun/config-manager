@@ -14,11 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.pojo.event.config;
+package com.lessspring.org.service.config;
+
+import com.lessspring.org.observer.Publisher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ConfigHistoryHandler {
+public abstract class AbstracePersistentHandler extends Publisher
+		implements PersistentHandler {
+
 }

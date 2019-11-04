@@ -19,7 +19,7 @@ package com.lessspring.org.watch;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.lessspring.org.common.AbstractListener;
+import com.lessspring.org.AbstractListener;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.utils.PlaceholderProcessor;
 

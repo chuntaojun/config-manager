@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class PublishConfigHistory extends PublishConfigRequest4 {
 
+	public static final String CLASS_NAME = PublishConfigHistory.class.getCanonicalName();
+
 	private Long lastModifyTime;
 
 	public Long getLastModifyTime() {

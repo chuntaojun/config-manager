@@ -19,7 +19,6 @@ package com.lessspring.org;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import com.lessspring.org.common.AbstractListener;
 import com.lessspring.org.config.ConfigService;
 import com.lessspring.org.model.dto.ConfigInfo;
 import org.junit.Test;

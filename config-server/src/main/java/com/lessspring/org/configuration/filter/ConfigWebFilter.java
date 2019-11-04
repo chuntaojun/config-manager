@@ -19,7 +19,6 @@ package com.lessspring.org.configuration.filter;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -30,7 +29,6 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.service.security.SecurityService;
 import com.lessspring.org.utils.GsonUtils;
-import com.lessspring.org.utils.SchedulerUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +58,6 @@ public class ConfigWebFilter implements WebFilter {
 
 	private final FilterChain filterChain;
 	private final SecurityService securityService;
-	private final ThreadPoolExecutor executor = SchedulerUtils.WEB_HANDLER;
 
 	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
 		this.securityService = securityService;
@@ -111,13 +108,11 @@ public class ConfigWebFilter implements WebFilter {
 			return false;
 		}
 		Optional<DecodedJWT> result = securityService.verify(token);
-		result.ifPresent(decodedJWT -> {
-			exchange.getSession().subscribe(webSession -> {
-				Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(),
-						Privilege.class);
-				webSession.getAttributes().put("privilege", privilege);
-			});
-		});
+		result.ifPresent(decodedJWT -> exchange.getSession().subscribe(webSession -> {
+			Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(),
+					Privilege.class);
+			webSession.getAttributes().put("privilege", privilege);
+		}));
 		return result.isPresent();
 	}
 

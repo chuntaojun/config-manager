@@ -24,15 +24,17 @@ import java.util.Map;
  */
 public class DeleteConfigHistory extends BaseRequest4 {
 
-	private String namesapceId = "default";
+	public static final String CLASS_NAME = DeleteConfigHistory.class.getCanonicalName();
+
+	private String namespaceId = "default";
 	private Long lastModifyTime;
 
-	public String getNamesapceId() {
-		return namesapceId;
+	public String getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setNamesapceId(String namesapceId) {
-		this.namesapceId = namesapceId;
+	public void setNamespaceId(String namesapceId) {
+		this.namespaceId = namesapceId;
 	}
 
 	public Long getLastModifyTime() {
@@ -80,7 +82,7 @@ public class DeleteConfigHistory extends BaseRequest4 {
 
 		public DeleteConfigHistory build() {
 			DeleteConfigHistory deleteConfigHistory = new DeleteConfigHistory();
-			deleteConfigHistory.setNamesapceId(namesapceId);
+			deleteConfigHistory.setNamespaceId(namesapceId);
 			deleteConfigHistory.setDataId(dataId);
 			deleteConfigHistory.setGroupId(groupId);
 			deleteConfigHistory.setLastModifyTime(lastModifyTime);

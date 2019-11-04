@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.lessspring.org.common.AbstractListener;
+import com.lessspring.org.AbstractListener;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

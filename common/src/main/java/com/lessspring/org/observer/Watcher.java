@@ -14,26 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
-
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.pojo.ChangekeyEvent;
+package com.lessspring.org.observer;
 
 /**
+ * A simple observer pattern - the watcher
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class ChangeKeyListener extends AbstractListener {
-	@Override
-	public void onReceive(ConfigInfo configInfo) {
-
-	}
+public interface Watcher {
 
 	/**
-	 * To monitor changes in the configuration part
-	 * 
-	 * @param changekeyEvent {@link ChangekeyEvent}
+	 * The event, the callback listener
+	 *
+	 * @param occurrence occurrence {@link Occurrence}
+	 * @param publisher event publisher
 	 */
-	public abstract void onChange(ChangekeyEvent changekeyEvent);
+	void onNotify(Occurrence occurrence, Publisher publisher);
+
 }

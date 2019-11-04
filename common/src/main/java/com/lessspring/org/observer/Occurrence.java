@@ -14,33 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
+package com.lessspring.org.observer;
 
-import java.util.concurrent.Executor;
-
-import com.google.common.eventbus.Subscribe;
-import com.lessspring.org.model.dto.ConfigInfo;
+import java.lang.ref.SoftReference;
+import java.util.concurrent.CompletableFuture;
 
 /**
+ * Publishers of events, By accessing CompleteableFuture to processing the Watcher
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class AbstractListener {
+public class Occurrence {
 
-	@Subscribe
-	protected void receive(ConfigInfo configInfo) {
-		onReceive(configInfo);
+	private SoftReference<Object> origin;
+	private CompletableFuture<Boolean> answer = new CompletableFuture<>();
+
+	private Occurrence() {
 	}
 
-	/**
-	 * receive when config has change
-	 *
-	 * @param configInfo {@link ConfigInfo}
-	 */
-	public abstract void onReceive(ConfigInfo configInfo);
-
-	public Executor executor() {
-		return null;
+	public static Occurrence newInstance(Object event) {
+		Occurrence occurrence = new Occurrence();
+		occurrence.origin = new SoftReference<>(event);
+		return occurrence;
 	}
 
+	public Object getOrigin() {
+		return origin.get();
+	}
+
+	public CompletableFuture<Boolean> getAnswer() {
+		return answer;
+	}
 }

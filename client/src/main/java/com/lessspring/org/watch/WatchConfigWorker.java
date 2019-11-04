@@ -34,7 +34,7 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.common.AbstractListener;
+import com.lessspring.org.AbstractListener;
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.filter.ConfigFilterManager;
