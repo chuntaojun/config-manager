@@ -14,4 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
+package com.lessspring.org.common.parser;
+
+import java.util.Map;
+import java.util.function.Predicate;
+
+import com.lessspring.org.model.dto.ConfigInfo;
+
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+class JsonParser extends AbstraceParser {
+
+	private Predicate<String> jsonPred = "json"::equalsIgnoreCase;
+
+	@Override
+	public Map<String, Object> toMap(ConfigInfo configInfo) {
+		if (jsonPred.test(configInfo.getType())) {
+
+		}
+		return onNext(configInfo);
+	}
+}

@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
-import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.Retry;
 import com.lessspring.org.http.param.Header;
@@ -58,8 +58,8 @@ public class ClusterNodeWatch extends Observable implements LifeCycle {
 	@Override
 	public void init() {
 
-		executor = new ScheduledThreadPoolExecutor(1,
-				new NameThreadFactory("com.lessspring.org.config-manager.client.refresh-clusterInfo"));
+		executor = new ScheduledThreadPoolExecutor(1, new NameThreadFactory(
+				"com.lessspring.org.config-manager.client.refresh-clusterInfo"));
 
 		notifyObservers(nodeList);
 

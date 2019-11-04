@@ -14,45 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.common;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-import com.lessspring.org.common.AbstractListener;
-import com.lessspring.org.config.ConfigService;
+import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.dto.ConfigInfo;
-import org.junit.Test;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class Test_ClusterInfo {
+public abstract class AbstractListener {
 
-	@Test
-	public void testSplitClusterInfo() throws InterruptedException {
-		String clusterInfo = "127.0.0.1:2959";
-		Configuration configuration = new Configuration();
-		configuration.setServers(clusterInfo);
-		configuration.setUsername("lessSpring");
-		configuration.setPassword("29591314");
-		ConfigService configService = ConfigServiceFactory
-				.createConfigService(configuration);
-		configService.addListener("DEFAULT_GROUP", "liaochuntao", new AbstractListener() {
-			@Override
-			public void onReceive(ConfigInfo configInfo) {
-				System.out.println(configInfo);
-			}
+	@Subscribe
+	protected void receive(ConfigInfo configInfo) {
+		onReceive(configInfo);
+	}
 
-			@Override
-			public Executor executor() {
-				return Executors.newFixedThreadPool(2);
-			}
-		});
-		while (true) {
-			Thread.sleep(1000);
-		}
+	/**
+	 * receive when config has change
+	 *
+	 * @param configInfo {@link ConfigInfo}
+	 */
+	public abstract void onReceive(ConfigInfo configInfo);
+
+	public Executor executor() {
+		return null;
 	}
 
 }

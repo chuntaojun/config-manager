@@ -28,15 +28,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
-import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.NameUtils;
-import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.common.AbstractListener;
+import com.lessspring.org.executor.NameThreadFactory;
+import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
@@ -58,7 +58,8 @@ public class WatchConfigWorker implements LifeCycle {
 	private static Logger logger = Logger.getAnonymousLogger();
 
 	private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
-			Runtime.getRuntime().availableProcessors(), new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
+			Runtime.getRuntime().availableProcessors(),
+			new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
 
 	private Map<String, CacheItem> cacheItemMap;
 	private CacheConfigManager configManager;

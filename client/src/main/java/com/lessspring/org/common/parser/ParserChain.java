@@ -14,33 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.common.parser;
 
-import java.util.concurrent.Executor;
+import java.util.Map;
 
-import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class AbstractListener {
+public final class ParserChain {
 
-	@Subscribe
-	protected void receive(ConfigInfo configInfo) {
-		onReceive(configInfo);
+	private AbstraceParser first;
+
+	public ParserChain() {
+		AbstraceParser ymlParser = new YamlParser();
+		AbstraceParser jsonParser = new JsonParser();
+		AbstraceParser xmlParser = new XmlParser();
+		AbstraceParser propertiesParser = new PropertiesParser();
+		ymlParser.setNext(jsonParser);
+		jsonParser.setNext(xmlParser);
+		xmlParser.setNext(propertiesParser);
+		first = ymlParser;
 	}
 
-	/**
-	 * receive when config has change
-	 *
-	 * @param configInfo {@link ConfigInfo}
-	 */
-	public abstract void onReceive(ConfigInfo configInfo);
-
-	public Executor executor() {
-		return null;
+	public final Map<String, Object> toMap(ConfigInfo configInfo) {
+		return first.toMap(configInfo);
 	}
 
 }
