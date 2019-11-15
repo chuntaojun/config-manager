@@ -19,10 +19,10 @@ package com.lessspring.org.service.cluster;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -45,8 +45,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -85,10 +83,8 @@ public class ClusterManager {
 			final String raftCacheDir = Paths
 					.get(pathConstants.getParentPath(), "raft-data").toString();
 			final RaftServerOptions configuration = RaftServerOptions.builder()
-					.cacheDir(raftCacheDir)
-					.electionTimeoutMs(electionTimeoutMs)
-					.snapshotIntervalSecs(snapshotIntervalSecs)
-					.build();
+					.cacheDir(raftCacheDir).electionTimeoutMs(electionTimeoutMs)
+					.snapshotIntervalSecs(snapshotIntervalSecs).build();
 			clusterServer = new ClusterServer(configuration);
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);

@@ -43,7 +43,6 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 		private String namespaceId;
 		private String groupId;
 		private String dataId;
-		private Boolean file;
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
@@ -71,11 +70,6 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 
 		public ConfigInfoHistoryDTOBuilder dataId(String dataId) {
 			this.dataId = dataId;
-			return this;
-		}
-
-		public ConfigInfoHistoryDTOBuilder file(Boolean file) {
-			this.file = file;
 			return this;
 		}
 
@@ -115,7 +109,6 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 			configInfoHistoryDTO.setNamespaceId(namespaceId);
 			configInfoHistoryDTO.setGroupId(groupId);
 			configInfoHistoryDTO.setDataId(dataId);
-			configInfoHistoryDTO.setFile(file);
 			configInfoHistoryDTO.setFileSource(fileSource);
 			configInfoHistoryDTO.setContent(content);
 			configInfoHistoryDTO.setType(type);

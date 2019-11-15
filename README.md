@@ -82,7 +82,8 @@ com.lessspring.org.config-manager.anyuri=/, /api/v1/login, /api/v1/cluster/all
 com.lessspring.org.config-manager.raft.electionTimeoutMs=
 # 设置raft快照任务间隔时间
 com.lessspring.org.config-manager.raft.snapshotIntervalSecs=
-
+# 是否开启线程池任务耗时计算
+com.lessspring.org.config-manager.openWorkCostDisplay=true | false
 #
 com.lessspring.org.config-manager.email.host=
 #

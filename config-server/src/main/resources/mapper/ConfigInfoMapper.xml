@@ -10,9 +10,9 @@
         <result column="namespace_id" property="namespaceId"/>
         <result column="content" property="content"/>
         <result column="config_type" property="type"/>
-        <result column="" property="createTime"/>
+        <result column="create_time" property="createTime"/>
         <result column="encryption" property="encryption"/>
-        <result column="" property="fileSource"/>
+        <result column="file_source" property="fileSource"/>
     </resultMap>
 
     <resultMap type="com.lessspring.org.db.dto.ConfigBetaInfoDTO" id="ConfigBetaInfoDTO">
@@ -22,23 +22,24 @@
         <result column="namespace_id" property="namespaceId"/>
         <result column="content" property="content"/>
         <result column="config_type" property="type"/>
-        <result column="" property="createTime"/>
+        <result column="create_time" property="createTime"/>
         <result column="encryption" property="encryption"/>
-        <result column="" property="fileSource"/>
-        <result column="" property="clientIps"/>
+        <result column="file_source" property="fileSource"/>
+        <result column="client_ips" property="clientIps"/>
     </resultMap>
 
     <!--  save config-infog  -->
     <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
-        INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type)
+        INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type, create_time)
         VALUES (
         #{dto.id},
         #{dto.dataId},
         #{dto.groupId},
         #{dto.namespaceId},
         #{dto.content},
-        #{dto.type});
+        #{dto.type},
+        #{dto.createTime});
     </insert>
 
     <!--  save config-info-beta  -->

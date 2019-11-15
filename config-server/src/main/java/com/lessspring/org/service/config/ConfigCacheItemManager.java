@@ -89,7 +89,7 @@ public class ConfigCacheItemManager {
 				.groupId(configInfoDTO.getGroupId()).dataId(configInfoDTO.getDataId())
 				.content(com.lessspring.org.utils.StringUtils
 						.newString4UTF8(configInfoDTO.getContent()))
-				.file(configInfoDTO.getFile()).fileSource(configInfoDTO.getFileSource())
+				.fileSource(configInfoDTO.getFileSource())
 				.configType(configInfoDTO.getType()).build();
 		registerConfigCacheItem(namespaceId, event);
 		updateContent(namespaceId, event);
@@ -107,7 +107,7 @@ public class ConfigCacheItemManager {
 				.groupId(betaInfoDTO.getGroupId()).dataId(betaInfoDTO.getDataId())
 				.content(new String(betaInfoDTO.getContent(),
 						Charset.forName(StandardCharsets.UTF_8.name())))
-				.file(betaInfoDTO.getFile()).fileSource(betaInfoDTO.getFileSource())
+				.fileSource(betaInfoDTO.getFileSource())
 				.clientIps(betaInfoDTO.getClientIps()).configType(betaInfoDTO.getType())
 				.build();
 		registerConfigCacheItem(namespaceId, event);
@@ -153,7 +153,8 @@ public class ConfigCacheItemManager {
 		}
 	}
 
-	public void deregisterConfigCacheItem(final String namespaceId, final String groupId, final String dataId) {
+	public void deregisterConfigCacheItem(final String namespaceId, final String groupId,
+			final String dataId) {
 		final String key = NameUtils.buildName(namespaceId, groupId, dataId);
 		cacheItemMap.remove(key);
 	}

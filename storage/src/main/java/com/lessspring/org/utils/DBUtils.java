@@ -31,7 +31,6 @@ public final class DBUtils {
 		historyDTO.setGroupId(dto.getGroupId());
 		historyDTO.setDataId(dto.getDataId());
 		historyDTO.setContent(dto.getContent());
-		historyDTO.setFile(dto.getFile());
 		historyDTO.setFileSource(dto.getFileSource());
 		historyDTO.setLastModifyTime(System.currentTimeMillis());
 		historyDTO.setCreateTime(dto.getCreateTime());

@@ -16,25 +16,52 @@
  */
 package com.lessspring.org.configuration;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.kqueue.KQueueEventLoopGroup;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
+import org.springframework.boot.web.embedded.netty.NettyServerCustomizer;
 import org.springframework.boot.web.server.Http2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Custom netty container related parameters
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Configuration
 public class ConfigNettyReactiveWebServerFactory {
 
+	@Value("${com.lessspring.org.config-manager.netty.loopThreads}")
+	private int loopThreads;
+
+	@Value("${com.lessspring.org.config-manager.netty.workerThreads}")
+	private int workerThreads;
+
 	@Bean
 	public NettyReactiveWebServerFactory nettyReactiveWebServerFactory() {
-		return new NettyReactiveWebServerFactory() {
+		NettyReactiveWebServerFactory factory = new NettyReactiveWebServerFactory() {
 			@Override
 			public void setHttp2(Http2 http2) {
 				http2.setEnabled(true);
 			}
+
 		};
+		factory.addServerCustomizers((NettyServerCustomizer) httpServer -> {
+			httpServer.tcpConfiguration(tcpServer -> {
+				tcpServer.bootstrap(serverBootstrap -> {
+					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads);
+					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads);
+					serverBootstrap.group(core, worker);
+					return serverBootstrap;
+				});
+				return null;
+			});
+			return httpServer;
+		});
+		return factory;
 	}
 }

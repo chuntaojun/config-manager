@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.SOURCE)
 @Documented
 public @interface WaitFinish {

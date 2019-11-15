@@ -27,8 +27,6 @@ import com.lessspring.org.executor.BaseThreadPoolExecutor;
 import com.lessspring.org.executor.NameThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.stereotype.Component;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -66,8 +64,9 @@ public class SchedulerUtils {
 
 	private ThreadPoolExecutor newThreadPoolExecutor() {
 		BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(CORE_POOL_SIZE,
-				MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(8),
-				threadFactory, rejectedExecutionHandler);
+				MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+				new ArrayBlockingQueue<Runnable>(8), threadFactory,
+				rejectedExecutionHandler);
 		executor.allowCoreThreadTimeOut(true);
 		executor.setOpenWorkCostDisplay(systemEnv.isOpenWorkCostDisplay());
 		return executor;

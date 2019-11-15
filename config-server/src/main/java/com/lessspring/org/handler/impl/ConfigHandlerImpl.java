@@ -22,7 +22,6 @@ import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.service.config.ConfigOperationService;
 import com.lessspring.org.service.config.OperationService;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;

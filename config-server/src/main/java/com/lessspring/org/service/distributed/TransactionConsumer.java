@@ -35,7 +35,8 @@ public interface TransactionConsumer<T> {
 	/**
 	 * roll back
 	 */
-	default void rollBack() {}
+	default void rollBack() {
+	}
 
 	/**
 	 * Abnormal transaction callback handler

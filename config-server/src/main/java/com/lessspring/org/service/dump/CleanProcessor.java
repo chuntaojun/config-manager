@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Resource;
 
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
@@ -34,7 +35,6 @@ import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
-import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RequireHelper;
 import com.lessspring.org.utils.WaitFinish;

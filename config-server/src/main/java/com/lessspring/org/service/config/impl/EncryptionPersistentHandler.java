@@ -20,11 +20,11 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.service.config.AbstracePersistentHandler;
 import com.lessspring.org.service.encryption.EncryptionService;
-import com.lessspring.org.observer.Publisher;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;

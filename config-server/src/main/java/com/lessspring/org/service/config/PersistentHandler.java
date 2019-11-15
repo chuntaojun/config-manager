@@ -21,9 +21,9 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
-import com.lessspring.org.observer.Publisher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
