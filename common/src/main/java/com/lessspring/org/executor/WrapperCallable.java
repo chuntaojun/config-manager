@@ -25,22 +25,16 @@ import java.util.logging.Logger;
  */
 public class WrapperCallable<V> extends TimeTask implements Callable<V> {
 
-	private static final Logger logger = Logger.getAnonymousLogger();
-
 	private final Callable<V> target;
 
-	public WrapperCallable(Callable<V> target) {
+	WrapperCallable(Callable<V> target) {
 		this.target = target;
 	}
 
 	@Override
 	public V call() throws Exception {
 		V v = null;
-		// logger.info(Thread.currentThread().getName() + " start work");
-		// start();
 		v = target.call();
-		// logger.info(Thread.currentThread().getName() + " end work, spend time : "
-		// + spendTime());
 		return v;
 	}
 }

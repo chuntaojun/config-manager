@@ -16,29 +16,21 @@
  */
 package com.lessspring.org.executor;
 
-import java.util.logging.Logger;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class WrapperRunnable extends TimeTask implements Runnable {
 
-	private static final Logger logger = Logger.getAnonymousLogger();
-
 	private final Runnable target;
 
-	public WrapperRunnable(Runnable target) {
+	WrapperRunnable(Runnable target) {
 		this.target = target;
 	}
 
 	@Override
 	public void run() {
-		// logger.info(Thread.currentThread().getName() + " start work");
-		// start();
 		target.run();
-		// logger.info(Thread.currentThread().getName() + " end work, spend time : "
-		// + spendTime());
 	}
 
 }
