@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.pojo;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +24,13 @@ import java.util.Map;
  */
 public class ChangekeyEvent {
 
-	private Map<String, Object> oldConfig = new HashMap<>(8);
-	private Map<String, Object> newConfig = new HashMap<>(8);
+	private final Map<String, Object> changeKey;
 
+	public ChangekeyEvent(Map<String, Object> changeKey) {
+		this.changeKey = changeKey;
+	}
+
+	public Map<String, Object> getChangeKey() {
+		return changeKey;
+	}
 }

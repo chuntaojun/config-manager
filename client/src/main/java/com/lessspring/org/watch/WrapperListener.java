@@ -54,9 +54,17 @@ class WrapperListener extends AbstractListener {
 		return !Objects.equals(lastMd5, md5);
 	}
 
+	/**
+	 * @return the encryption
+	 */
+	public String getEncryption() {
+		return encryption;
+	}
+
 	@Override
 	public void onReceive(ConfigInfo configInfo) {
 		processor.decryption(Optional.ofNullable(configInfo), encryption);
+		configInfo.setEncryption(encryption);
 		listener.onReceive(configInfo);
 	}
 

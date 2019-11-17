@@ -88,6 +88,12 @@ public class WatchConfigWorker implements LifeCycle {
 	public void registerListener(String groupId, String dataId, String encryption,
 			AbstractListener listener) {
 		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+
+		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
+
+		if (listener instanceof ChangeKeyListener) {
+			((ChangeKeyListener) listener).setConfigManager(configManager);
+		}
 		cacheItem.addListener(new WrapperListener(listener, encryption));
 	}
 
