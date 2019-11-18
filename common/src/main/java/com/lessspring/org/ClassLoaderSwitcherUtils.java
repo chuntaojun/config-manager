@@ -14,22 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft;
 
-import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
-import com.lessspring.org.raft.pojo.Datum;
+package com.lessspring.org;
 
 /**
- * Used for processing a request from the followers
- *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class BaseAsyncUserProcessor<T extends Datum>
-		extends AsyncUserProcessor<T> {
+public final class ClassLoaderSwitcherUtils {
 
-	ClusterServer clusterServer;
+    private static ThreadLocal<ClassLoader> PRE_CLASS_LOADER_HOLDER = new ThreadLocal<>();
 
-	public abstract void initCluster(ClusterServer clusterServer);
+    public static void change(Object obj) {
+        change(obj.getClass());
+    }
+
+    public static void change(Class<?> cls) {
+        PRE_CLASS_LOADER_HOLDER.set(Thread.currentThread().getContextClassLoader());
+        Thread.currentThread().setContextClassLoader(cls.getClassLoader());
+    }
+
+    public static void rollBack() {
+        Thread.currentThread().setContextClassLoader(PRE_CLASS_LOADER_HOLDER.get());
+        PRE_CLASS_LOADER_HOLDER.remove();
+    }
 
 }

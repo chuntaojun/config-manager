@@ -47,7 +47,7 @@ import org.apache.commons.io.FileUtils;
  */
 public final class DiskUtils {
 
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static Logger logger = Logger.getLogger("com.lessspring.org.DiskUtils");
 
 	private final static String NO_SPACE_CN = "设备上没有空间";
 	private final static String NO_SPACE_EN = "No space left on device";

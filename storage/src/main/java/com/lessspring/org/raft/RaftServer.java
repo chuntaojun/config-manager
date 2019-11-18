@@ -43,6 +43,7 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.machine.ConfigStateMachineAdapter;
+import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -138,7 +139,7 @@ class RaftServer implements LifeCycle {
 		csm.setTransactionIdManager(manager);
 	}
 
-	void registerAsyncUserProcessor(BaseAsyncUserProcessor processor) {
+	void registerAsyncUserProcessor(BaseAsyncUserProcessor<Datum> processor) {
 		rpcServer.registerUserProcessor(processor);
 	}
 

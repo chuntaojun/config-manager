@@ -90,7 +90,7 @@ public class NodeManager implements LeaderStatusListener {
 	}
 
 	public synchronized Collection<ServerNode> serverNodes() {
-		return new HashMap(nodeMap).values();
+		return new HashMap<>(nodeMap).values();
 	}
 
 	private void notifyListener() {

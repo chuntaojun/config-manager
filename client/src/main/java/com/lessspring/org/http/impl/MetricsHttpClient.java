@@ -69,6 +69,7 @@ public class MetricsHttpClient implements HttpClient {
 		return client.post(url, header, query, body, token);
 	}
 
+	@SuppressWarnings("all")
 	@Override
 	public <T> void serverSendEvent(String url, Header header, Body body, Class<T> cls,
 			EventReceiver receiver) {

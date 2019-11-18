@@ -120,12 +120,9 @@ public class ConfigWebFilter implements WebFilter {
 		return Arrays.stream(matcherUri).anyMatch(path::startsWith);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Mono<Void> filterResponse(ServerHttpResponse response, HttpStatus status,
 			String s) {
-		return response.writeWith(
-				Mono.just(response.bufferFactory().wrap(GsonUtils.toJsonBytes(ResponseData
-						.builder().withCode(status.value()).withData(s).build()))));
+		return filterResponse(response, status.value(), s);
 	}
 
 	@SuppressWarnings("unchecked")

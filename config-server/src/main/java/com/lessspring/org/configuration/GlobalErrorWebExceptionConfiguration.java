@@ -79,7 +79,7 @@ public class GlobalErrorWebExceptionConfiguration {
 			log.error("[The request url information]：{}", request.uri());
 			log.error("[Internal error information]：{}",
 					String.valueOf(errorMap.get("trace")).substring(0, 2_000));
-			Mono<ResponseData> errMono;
+			Mono<ResponseData<?>> errMono;
 			if (throwable instanceof BaseException) {
 				BaseException exception = (BaseException) throwable;
 				errMono = Mono

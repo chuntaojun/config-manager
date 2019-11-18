@@ -80,8 +80,10 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 		ServerNode[] nodes = serverNodeAR.get();
 		int hash = distroHash(key);
 		int index = hash % nodes.length;
-		return Objects.equals(nodeManager.getSelf(), nodes[index]) ? nodeManager.getSelf()
+		ServerNode targetNode = Objects.equals(nodeManager.getSelf(), nodes[index]) ? nodeManager.getSelf()
 				: nodes[index];
+		log.info("[DistroRouter] has router to ServerNode : {}", targetNode);
+		return targetNode;
 	}
 
 	public boolean isPrincipal(String key) {

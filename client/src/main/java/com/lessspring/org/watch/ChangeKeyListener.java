@@ -57,9 +57,11 @@ public abstract class ChangeKeyListener extends AbstractListener {
 	public abstract void onChange(ChangekeyEvent changekeyEvent);
 
 	/**
-	 * @param newInfo
-	 * @param oldInfo
-	 * @return
+	 * compute the old config-info and new config-info has change
+	 * 
+	 * @param newInfo new config-info
+	 * @param oldInfo old config-info
+	 * @return save the key has changed
 	 */
 	Map<String, Object> doCompare(ConfigInfo newInfo, ConfigInfo oldInfo) {
 		ParserChain chain = ParserChain.getInstance();

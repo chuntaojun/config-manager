@@ -100,6 +100,7 @@ public class ClusterChoose implements Observer, LifeCycle {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object arg) {
 		Set<String> newClusterInfo = (Set<String>) arg;

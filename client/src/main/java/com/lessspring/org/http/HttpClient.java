@@ -89,6 +89,7 @@ public interface HttpClient extends LifeCycle {
 	 * @param cls return type
 	 * @param receiver {@link EventReceiver}
 	 */
+	@SuppressWarnings("all")
 	<T> void serverSendEvent(String url, Header header, Body body, Class<T> cls,
 			EventReceiver receiver);
 

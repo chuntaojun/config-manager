@@ -18,7 +18,6 @@ package com.lessspring.org.web;
 
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.NotifyHandler;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,6 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 @Configuration
 public class NotifyRouter {
 
