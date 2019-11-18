@@ -27,6 +27,10 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
 public final class PropertyUtils {
 
     private static Properties properties = new Properties();

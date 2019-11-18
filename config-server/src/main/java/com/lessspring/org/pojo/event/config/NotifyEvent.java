@@ -39,7 +39,6 @@ public class NotifyEvent extends BaseEvent {
 	}
 
 	public static final class Builder {
-		public static String TYPE = "NotifyEvent";
 		private long sequence;
 		private String namespaceId;
 		private String dataId;
@@ -90,11 +89,6 @@ public class NotifyEvent extends BaseEvent {
 
 		public Builder entryption(String entryption) {
 			this.entryption = entryption;
-			return this;
-		}
-
-		public Builder TYPE(String TYPE) {
-			this.TYPE = TYPE;
 			return this;
 		}
 

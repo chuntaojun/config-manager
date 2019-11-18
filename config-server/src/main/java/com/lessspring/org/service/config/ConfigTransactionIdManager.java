@@ -21,7 +21,6 @@ import java.util.Map;
 
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.pojo.TransactionId;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 @Component
 public class ConfigTransactionIdManager implements TransactionIdManager {
 

@@ -17,7 +17,6 @@
 package com.lessspring.org.service.distributed;
 
 import com.lessspring.org.utils.PropertiesEnum;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 @Component(value = "userTransactionCommitCallback")
 public class UserTransactionCommitCallback extends BaseTransactionCommitCallback {
 

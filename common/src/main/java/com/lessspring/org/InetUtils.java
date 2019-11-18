@@ -20,6 +20,7 @@ package com.lessspring.org;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ public final class InetUtils {
     private static boolean useOnlySiteLocalInterface = false;
 
     private static boolean preferHostnameOverIp = false;
+
+    public static InetSocketAddress ALL_IP = new InetSocketAddress("0.0.0.0", 0);
 
     private static List<String> preferredNetworks = new ArrayList<String>();
 

@@ -171,8 +171,13 @@ public final class DiskUtils {
 
 	public static File openFile(String path, String fileName, boolean rewrite) {
 		File directory = new File(path);
+		boolean mkdirs = true;
 		if (!directory.exists()) {
-			boolean mkdirs = directory.mkdirs();
+			mkdirs = directory.mkdirs();
+		}
+		if (!mkdirs) {
+			logger.warning("[DiskUtils] can't create directory");
+			return null;
 		}
 		File file = new File(path, fileName);
 		try {
