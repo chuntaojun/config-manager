@@ -50,18 +50,13 @@ public class ConfigNettyReactiveWebServerFactory {
 			}
 
 		};
-		factory.addServerCustomizers((NettyServerCustomizer) httpServer -> {
-			httpServer.tcpConfiguration(tcpServer -> {
-				tcpServer.bootstrap(serverBootstrap -> {
+		factory.addServerCustomizers((NettyServerCustomizer) httpServer -> httpServer
+				.tcpConfiguration(tcpServer -> tcpServer.bootstrap(serverBootstrap -> {
 					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads);
 					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads);
 					serverBootstrap.group(core, worker);
 					return serverBootstrap;
-				});
-				return null;
-			});
-			return httpServer;
-		});
+				})));
 		return factory;
 	}
 }
