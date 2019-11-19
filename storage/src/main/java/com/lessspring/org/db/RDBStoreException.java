@@ -22,6 +22,8 @@ package com.lessspring.org.db;
  */
 public class RDBStoreException extends RuntimeException {
 
+	private static final long serialVersionUID = 6999291090373619498L;
+
 	public RDBStoreException() {
 		super();
 	}

@@ -18,20 +18,22 @@ package com.lessspring.org.cluster;
 
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.lessspring.org.LifeCycle;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClusterChoose implements Observer, LifeCycle {
+public class ClusterChoose implements Watcher, LifeCycle {
 
 	private ClusterNodeWatch watch;
 
@@ -94,21 +96,20 @@ public class ClusterChoose implements Observer, LifeCycle {
 				clusterFind = clusterInfos.iterator();
 			}
 			lastClusterIp = clusterFind.next();
-		}
-		finally {
+		} finally {
 			readLock.unlock();
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void update(Observable o, Object arg) {
-		Set<String> newClusterInfo = (Set<String>) arg;
+	public void onNotify(Occurrence occurrence, Publisher publisher) {
+		Set<String> newClusterInfo = (Set<String>) occurrence.getOrigin();
 		writeLock.lock();
 		try {
 			clusterInfos = newClusterInfo;
 			clusterFind = clusterInfos.iterator();
-		}
-		finally {
+		} finally {
 			writeLock.unlock();
 		}
 	}

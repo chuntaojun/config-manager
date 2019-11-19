@@ -24,6 +24,8 @@ import com.lessspring.org.constant.Code;
  */
 public class AuthForbidException extends BaseException {
 
+	private static final long serialVersionUID = -5920415513080921210L;
+
 	@Override
 	public Code code() {
 		return Code.UNAUTHORIZED;

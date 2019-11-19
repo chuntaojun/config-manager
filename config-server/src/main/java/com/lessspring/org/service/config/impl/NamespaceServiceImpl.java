@@ -67,7 +67,6 @@ public class NamespaceServiceImpl implements NamespaceService {
 	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
 
 	private final String createNamespace = "CREATE_NAMESPACE";
-	private final String modifyNamespace = "MODIFY_NAMESPACE";
 	private final String deleteNamespace = "DELETE_NAMESPACE";
 	private final String createAuth4Namespace = "CREATA_AUTH_NAMESPACE";
 

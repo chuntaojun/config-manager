@@ -39,8 +39,6 @@ class ServerSentEventListener<T> extends EventSourceListener {
 
 	private static final Map<String, EventBus> eventBusMap = new HashMap<>();
 
-	private static final Object monitor = new Object();
-
 	private final EventReceiver<T> receiver;
 
 	private Class<T> typeCls;

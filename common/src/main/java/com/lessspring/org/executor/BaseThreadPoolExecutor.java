@@ -23,6 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
@@ -39,8 +40,7 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 
 	private static final Logger logger = Logger.getLogger("com.lessspring.org.executor.BaseThreadPoolExecutor");
 
-	private ThreadLocal<Long> workCostTimeLocal = ThreadLocal
-			.withInitial(System::currentTimeMillis);
+	private ThreadLocal<Long> workCostTimeLocal = ThreadLocal.withInitial(System::currentTimeMillis);
 
 	private boolean openWorkCostDisplay = false;
 
@@ -48,36 +48,42 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 		this.openWorkCostDisplay = openWorkCostDisplay;
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
-			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
+	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit) {
+		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime, unit, new LinkedBlockingQueue<>());
+	}
+
+	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit, ThreadFactory factory) {
+		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime, unit, new LinkedBlockingQueue<>(), factory);
+	}
+
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit) {
+		this(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>());
+	}
+
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+			BlockingQueue<Runnable> workQueue) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
-			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
-			ThreadFactory threadFactory) {
-		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-				threadFactory);
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
+		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
-			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
-			RejectedExecutionHandler handler) {
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+			BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
-			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
-			ThreadFactory threadFactory, RejectedExecutionHandler handler) {
-		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-				threadFactory, handler);
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) {
+		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
 	}
 
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) {
 		if (openWorkCostDisplay) {
-			logger.info(MessageFormat.format("{0} start work",
-					Thread.currentThread().getName()));
+			logger.info(MessageFormat.format("{0} start work", Thread.currentThread().getName()));
 			workCostTimeLocal.get();
 		}
 	}
@@ -85,8 +91,7 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 	@Override
 	protected void afterExecute(Runnable r, Throwable t) {
 		if (openWorkCostDisplay) {
-			logger.info(MessageFormat.format("{0} end work, spend time : {1}",
-					Thread.currentThread().getName(),
+			logger.info(MessageFormat.format("{0} end work, spend time : {1}", Thread.currentThread().getName(),
 					System.currentTimeMillis() - workCostTimeLocal.get()));
 			workCostTimeLocal.remove();
 		}
@@ -128,27 +133,24 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 	}
 
 	@Override
-	public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
-			throws InterruptedException, ExecutionException {
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
 		return super.invokeAny(tasks);
 	}
 
 	@Override
-	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout,
-			TimeUnit unit)
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		return super.invokeAny(tasks, timeout, unit);
 	}
 
 	@Override
-	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
-			throws InterruptedException {
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
 		return super.invokeAll(tasks);
 	}
 
 	@Override
-	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
-			long timeout, TimeUnit unit) throws InterruptedException {
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+			throws InterruptedException {
 		return super.invokeAll(tasks, timeout, unit);
 	}
 }

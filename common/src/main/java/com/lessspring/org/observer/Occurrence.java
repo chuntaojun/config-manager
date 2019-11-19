@@ -17,6 +17,7 @@
 package com.lessspring.org.observer;
 
 import java.lang.ref.SoftReference;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -28,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 public class Occurrence {
 
 	private SoftReference<Object> origin;
-	private CompletableFuture<Boolean> answer = new CompletableFuture<>();
+	private CompletableFuture<Boolean> answer;
 
 	private Occurrence() {
 	}
@@ -39,11 +40,17 @@ public class Occurrence {
 		return occurrence;
 	}
 
+	public static Occurrence newInstanceWithFuture(Object args) {
+		Occurrence occurrence = newInstance(args);
+		occurrence.answer = new CompletableFuture<>();
+		return occurrence;
+	}
+
 	public Object getOrigin() {
 		return origin.get();
 	}
 
-	public CompletableFuture<Boolean> getAnswer() {
-		return answer;
+	public Optional<CompletableFuture<Boolean>> getAnswer() {
+		return Optional.ofNullable(answer);
 	}
 }

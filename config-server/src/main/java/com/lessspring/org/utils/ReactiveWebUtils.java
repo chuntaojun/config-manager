@@ -16,9 +16,10 @@
  */
 package com.lessspring.org.utils;
 
-import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import com.lessspring.org.InetUtils;
 
 import org.springframework.web.reactive.function.server.ServerRequest;
 
@@ -28,14 +29,12 @@ import org.springframework.web.reactive.function.server.ServerRequest;
  */
 public final class ReactiveWebUtils {
 
-	public static InetSocketAddress ALL_IP = new InetSocketAddress("0.0.0.0", 0);
-
 	public static Optional<Object> getAttribute(String name, ServerRequest request) {
 		return request.attribute(name);
 	}
 
 	private static Supplier<String> getselfIp() {
-		return () -> "";
+		return () -> InetUtils.getSelfIp();
 	}
 
 }

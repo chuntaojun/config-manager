@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.lessspring.org.CacheConfigManager;
+import com.lessspring.org.ClassLoaderSwitcherUtils;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
@@ -88,6 +89,12 @@ public class WatchConfigWorker implements LifeCycle {
 	public void registerListener(String groupId, String dataId, String encryption,
 			AbstractListener listener) {
 		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+
+		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
+
+		if (listener instanceof ChangeKeyListener) {
+			((ChangeKeyListener) listener).setConfigManager(configManager);
+		}
 		cacheItem.addListener(new WrapperListener(listener, encryption));
 	}
 
@@ -103,16 +110,17 @@ public class WatchConfigWorker implements LifeCycle {
 		String key = NameUtils.buildName(groupId, dataId);
 		Optional<List<AbstractListener>> listeners = Optional
 				.ofNullable(cacheItemMap.get(key).listListener());
+
+		// do some processor to configInfo by filter chain
+		configFilterManager.doFilter(configInfo);
+		
 		listeners.ifPresent(abstractListeners -> {
 			for (AbstractListener listener : abstractListeners) {
 				Runnable job = () -> {
 					// In order to make the spi mechanisms can work better
-					ClassLoader preLoader = Thread.currentThread()
-							.getContextClassLoader();
-					Thread.currentThread()
-							.setContextClassLoader(listener.getClass().getClassLoader());
+					ClassLoaderSwitcherUtils.change(listener);
 					listener.onReceive(configInfo);
-					Thread.currentThread().setContextClassLoader(preLoader);
+					ClassLoaderSwitcherUtils.rollBack();
 				};
 				Executor userExecutor = listener.executor();
 				if (Objects.isNull(userExecutor)) {

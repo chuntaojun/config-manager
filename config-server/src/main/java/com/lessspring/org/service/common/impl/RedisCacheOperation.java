@@ -39,7 +39,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 public class RedisCacheOperation implements CacheOperation {
 
 	@Autowired
-	private ReactiveRedisTemplate redisTemplate;
+	private ReactiveRedisTemplate<String, String> redisTemplate;
 
 	@Override
 	public Optional<byte[]> get(String key) {
@@ -57,6 +57,7 @@ public class RedisCacheOperation implements CacheOperation {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Optional<T> getObj(String key) {
 		CompletableFuture<T> future = new CompletableFuture<>();

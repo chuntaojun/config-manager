@@ -14,41 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.exception;
 
-import com.lessspring.org.constant.Code;
+package com.lessspring.org;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class DiskException extends BaseException {
+public final class StrackUtils {
 
-	private static final long serialVersionUID = -1446108721154799171L;
-
-	@Override
-	public Code code() {
-		return Code.DISK_OVERFLOW;
-	}
-
-	public DiskException() {
-		super();
-	}
-
-	public DiskException(String message) {
-		super(message);
-	}
-
-	public DiskException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public DiskException(Throwable cause) {
-		super(cause);
-	}
-
-	protected DiskException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
 }

@@ -17,7 +17,6 @@
 package com.lessspring.org.raft;
 
 import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
-import com.lessspring.org.raft.machine.RaftStateMachineAdaper;
 import com.lessspring.org.raft.pojo.Datum;
 
 /**

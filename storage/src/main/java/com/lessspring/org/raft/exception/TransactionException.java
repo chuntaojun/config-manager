@@ -25,6 +25,8 @@ import com.lessspring.org.raft.pojo.Transaction;
  */
 public class TransactionException extends Exception {
 
+	private static final long serialVersionUID = -576017038035937821L;
+
 	private Code errorCode = Code.ERROR;
 
 	private Transaction transaction;

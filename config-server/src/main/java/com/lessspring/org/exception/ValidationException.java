@@ -23,6 +23,9 @@ import com.lessspring.org.constant.Code;
  * @since 0.0.1
  */
 public class ValidationException extends BaseException {
+	
+	private static final long serialVersionUID = -9218287556864398381L;
+
 	@Override
 	public Code code() {
 		return Code.VERIFY_ERROR;

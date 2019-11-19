@@ -65,6 +65,7 @@ public final class SerializerUtils {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T deserialize(byte[] data, Class<T> clazz) {
 		return kryoPool.run(kryo -> {
 			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);

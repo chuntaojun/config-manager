@@ -25,10 +25,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.lessspring.org.NameUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public class CacheItem {
 
 	public static final short CACHE_ITEM = 0;
@@ -123,6 +126,7 @@ public class CacheItem {
 	}
 
 	public void executeReadWork(ReadWork readWork) {
+		log.info("execute read work ");
 		try {
 			if (readLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
 				try {
@@ -142,6 +146,7 @@ public class CacheItem {
 	}
 
 	public void executeWriteWork(WriteWork writeWork) {
+		log.info("execute write work ");
 		try {
 			if (writeLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
 				try {

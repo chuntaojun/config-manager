@@ -38,4 +38,12 @@ public class ThreadPoolHelper {
 		}
 	}
 
+	public static boolean isShutdown(ThreadPoolExecutor executor) {
+		return Objects.isNull(executor) || executor.isShutdown();
+	}
+
+	public static boolean isShutdown(ExecutorService executor) {
+		return Objects.isNull(executor) || executor.isShutdown();
+	}
+
 }

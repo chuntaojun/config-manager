@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@SuppressWarnings("all")
 public final class EncryptionUtils {
 
 	private static Cipher cipher;

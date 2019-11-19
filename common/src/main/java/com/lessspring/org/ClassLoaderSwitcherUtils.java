@@ -14,26 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
 
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.pojo.ChangekeyEvent;
+package com.lessspring.org;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class ChangeKeyListener extends AbstractListener {
-	@Override
-	public void onReceive(ConfigInfo configInfo) {
+public final class ClassLoaderSwitcherUtils {
 
-	}
+    private static ThreadLocal<ClassLoader> PRE_CLASS_LOADER_HOLDER = new ThreadLocal<>();
 
-	/**
-	 * To monitor changes in the configuration part
-	 * 
-	 * @param changekeyEvent {@link ChangekeyEvent}
-	 */
-	public abstract void onChange(ChangekeyEvent changekeyEvent);
+    public static void change(Object obj) {
+        change(obj.getClass());
+    }
+
+    public static void change(Class<?> cls) {
+        PRE_CLASS_LOADER_HOLDER.set(Thread.currentThread().getContextClassLoader());
+        Thread.currentThread().setContextClassLoader(cls.getClassLoader());
+    }
+
+    public static void rollBack() {
+        Thread.currentThread().setContextClassLoader(PRE_CLASS_LOADER_HOLDER.get());
+        PRE_CLASS_LOADER_HOLDER.remove();
+    }
+
 }

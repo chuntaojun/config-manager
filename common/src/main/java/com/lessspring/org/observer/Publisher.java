@@ -18,6 +18,10 @@ package com.lessspring.org.observer;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
+import com.lessspring.org.executor.BaseThreadPoolExecutor;
+import com.lessspring.org.executor.NameThreadFactory;
 
 /**
  * A simple observer pattern - the publisher
@@ -28,6 +32,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class Publisher {
 
 	private List<Watcher> watchers = new CopyOnWriteArrayList<>();
+
+	private BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(1, 60, TimeUnit.SECONDS, new NameThreadFactory("com.lessspring.org.config-manager.Publisher"));
+
+	{
+		executor.allowCoreThreadTimeOut(true);
+	}
 
 	public void registerWatcher(Watcher watcher) {
 		watchers.add(watcher);
@@ -41,9 +51,20 @@ public abstract class Publisher {
 	// CompleteableFuture to processing the Watcher
 
 	protected void notifyAllWatcher(Occurrence event) {
-		for (Watcher watcher : watchers) {
-			watcher.onNotify(event, this);
-		}
+		executor.execute(() -> {
+			for (Watcher watcher : watchers) {
+				watcher.onNotify(event, this);
+			}
+		});
+	}
+
+	protected void notifyAllWatcher(Object args) {
+		final Occurrence event = Occurrence.newInstance(args);
+		executor.execute(() -> {
+			for (Watcher watcher : watchers) {
+				watcher.onNotify(event, this);
+			}
+		});
 	}
 
 }

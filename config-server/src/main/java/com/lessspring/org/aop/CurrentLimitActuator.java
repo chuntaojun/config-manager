@@ -25,7 +25,6 @@ import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
 import com.lessspring.org.utils.RenderUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -41,7 +40,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
+
 @Component
 @Aspect
 public class CurrentLimitActuator {

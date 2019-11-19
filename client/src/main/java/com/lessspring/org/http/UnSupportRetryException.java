@@ -22,6 +22,8 @@ package com.lessspring.org.http;
  */
 public class UnSupportRetryException extends RuntimeException {
 
+	private static final long serialVersionUID = 364330232668671497L;
+
 	public UnSupportRetryException() {
 		super();
 	}

@@ -23,6 +23,9 @@ import com.lessspring.org.constant.Code;
  * @since 0.0.1
  */
 public class VerifyException extends BaseException {
+
+	private static final long serialVersionUID = -1378391030668980873L;
+
 	@Override
 	public Code code() {
 		return Code.VERIFY_ERROR;

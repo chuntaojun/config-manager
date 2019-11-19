@@ -70,7 +70,7 @@ public class CacheConfigManager implements LifeCycle {
 		}
 	}
 
-	ConfigInfo query(String groupId, String dataId, String token) {
+	public ConfigInfo query(String groupId, String dataId, String token) {
 		ConfigInfo result = null;
 		if (localPref) {
 			result = localPreference(groupId, dataId);

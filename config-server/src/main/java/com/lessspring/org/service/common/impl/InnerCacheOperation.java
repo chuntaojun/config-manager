@@ -33,6 +33,7 @@ import com.lessspring.org.service.common.CacheOperation;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@SuppressWarnings("all")
 public class InnerCacheOperation implements CacheOperation {
 
 	private final InnerCache<String, Object> cache = new InnerCache<String, Object>();

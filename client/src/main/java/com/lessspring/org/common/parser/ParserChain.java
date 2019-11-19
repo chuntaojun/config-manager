@@ -28,7 +28,16 @@ public final class ParserChain {
 
 	private AbstraceParser first;
 
-	public ParserChain() {
+	private static final ParserChain INSTANCE = new ParserChain();
+
+	/**
+	 * @return the instance
+	 */
+	public static ParserChain getInstance() {
+		return INSTANCE;
+	}
+
+	private ParserChain() {
 		AbstraceParser ymlParser = new YamlParser();
 		AbstraceParser jsonParser = new JsonParser();
 		AbstraceParser xmlParser = new XmlParser();
