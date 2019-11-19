@@ -58,4 +58,13 @@ public abstract class Publisher {
 		});
 	}
 
+	protected void notifyAllWatcher(Object args) {
+		final Occurrence event = Occurrence.newInstance(args);
+		executor.execute(() -> {
+			for (Watcher watcher : watchers) {
+				watcher.onNotify(event, this);
+			}
+		});
+	}
+
 }

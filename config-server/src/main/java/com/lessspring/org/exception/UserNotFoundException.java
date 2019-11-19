@@ -25,6 +25,8 @@ import com.lessspring.org.exception.BaseException;
  */
 public class UserNotFoundException extends BaseException {
 
+	private static final long serialVersionUID = -7033386107872492814L;
+
 	@Override
 	public Code code() {
 		return Code.USER_NOT_FOUNT;

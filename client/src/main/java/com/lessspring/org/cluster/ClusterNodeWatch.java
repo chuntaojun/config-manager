@@ -18,8 +18,6 @@ package com.lessspring.org.cluster;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +32,8 @@ import com.lessspring.org.http.Retry;
 import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 
 import static com.lessspring.org.constant.Code.SUCCESS;
 
@@ -41,7 +41,7 @@ import static com.lessspring.org.constant.Code.SUCCESS;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClusterNodeWatch extends Observable implements LifeCycle {
+public class ClusterNodeWatch extends Publisher implements LifeCycle {
 
 	private ScheduledThreadPoolExecutor executor;
 
@@ -61,7 +61,7 @@ public class ClusterNodeWatch extends Observable implements LifeCycle {
 		executor = new ScheduledThreadPoolExecutor(1, new NameThreadFactory(
 				"com.lessspring.org.config-manager.client.refresh-clusterInfo"));
 
-		notifyObservers(nodeList);
+		notifyAllWatcher(nodeList);
 
 		executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(15),
 				TimeUnit.MILLISECONDS);
@@ -118,8 +118,8 @@ public class ClusterNodeWatch extends Observable implements LifeCycle {
 		executor.schedule(this::refreshCluster, delay, TimeUnit.MILLISECONDS);
 	}
 
-	public void register(Observer watcher) {
-		addObserver(watcher);
+	public void register(Watcher watcher) {
+		registerWatcher(watcher);
 	}
 
 	public Set<String> copyNodeList() {

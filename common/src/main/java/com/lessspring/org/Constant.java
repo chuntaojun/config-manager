@@ -28,8 +28,8 @@ public class Constant {
 
 	static {
 		String newLine;
-		try {
-			newLine = new Formatter().format("%n").toString();
+		try(Formatter formatter = new Formatter()) {
+			newLine = formatter.format("%n").toString();
 		}
 		catch (Exception e) {
 			newLine = "\n";
