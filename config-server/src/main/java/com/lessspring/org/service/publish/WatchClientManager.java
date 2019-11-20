@@ -87,6 +87,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 			synchronized (monitor) {
 				clientCnt--;
 			}
+			// For in the form of the key : NameUtils.buildName(groupId, dataId)
 			Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
 					.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
 			for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher
@@ -141,7 +142,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 
 				@Override
 				public void onError(Exception exception) {
-
+					log.error("[doQuickCompare] when execute read job has some error : {}", exception);
 				}
 			});
 		});
@@ -167,6 +168,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		final String configInfoJson = cacheItemManager.readCacheFromDisk(
 				event.getNamespaceId(), event.getGroupId(), event.getDataId());
 		long[] finishWorks = new long[1];
+		final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
 		Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
 				.getOrDefault(event.getNamespaceId(), Collections.emptyMap()).entrySet();
 		Stream<Map.Entry<String, Set<WatchClient>>> stream;
@@ -176,7 +178,8 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		else {
 			stream = set.stream();
 		}
-		stream.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
+		stream.filter(entry -> Objects.equals(key, entry.getKey()))
+				.flatMap(stringSetEntry -> stringSetEntry.getValue().stream())
 				.forEach(client -> {
 					// If it is beta configuration file, you need to check the
 					// client IP information

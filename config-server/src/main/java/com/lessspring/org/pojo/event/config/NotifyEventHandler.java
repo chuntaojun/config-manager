@@ -16,20 +16,22 @@
  */
 package com.lessspring.org.pojo.event.config;
 
+import java.lang.ref.SoftReference;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class NotifyEventHandler {
 
-	private NotifyEvent event;
+	private SoftReference<NotifyEvent> event;
 
 	public NotifyEvent getEvent() {
-		return event;
+		return event.get();
 	}
 
 	public void setEvent(NotifyEvent event) {
-		this.event = event;
+		this.event = new SoftReference<>(event);
 	}
 
 	public void rest() {

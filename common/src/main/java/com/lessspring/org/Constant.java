@@ -28,12 +28,44 @@ public class Constant {
 
 	static {
 		String newLine;
-		try {
-			newLine = new Formatter().format("%n").toString();
+		try(Formatter formatter = new Formatter()) {
+			newLine = formatter.format("%n").toString();
 		}
 		catch (Exception e) {
 			newLine = "\n";
 		}
 		NEWLINE = newLine;
 	}
+
+	public static final String CONFIG_MANAGER_SERVER_IP = "com.lessspring.org.config-manager.server.ip";
+
+	/**
+	 * 
+	 */
+	public static final String USE_ONLY_SITE_INTERFACES = "com.lessspring.org.config-manager.inetutils.use-only-site-local-interfaces";
+
+	/**
+	 * 
+	 */
+	public static final String PREFERRED_NETWORKS = "com.lessspring.org.config-manager.inetutils.preferred-networks";
+	
+	/**
+	 * 
+	 */
+	public static final String IGNORED_INTERFACES = "com.lessspring.org.config-manager.inetutils.ignored-interfaces";
+	
+	/**
+	 * 
+	 */
+	public static final String IP_ADDRESS = "com.lessspring.org.config-manager.inetutils.ip-address";
+	
+	/**
+	 * 
+	 */
+	public static final String PREFER_HOSTNAME_OVER_IP = "com.lessspring.org.config-manager.inetutils.prefer-hostname-over-ip";
+	
+	/**
+	 * 
+	 */
+    public static final String SYSTEM_PREFER_HOSTNAME_OVER_IP = "com.lessspring.org.config-manager.preferHostnameOverIp";
 }

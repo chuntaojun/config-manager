@@ -52,6 +52,7 @@ public class BaseConfigRequest {
 		return attributes;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T getAttribute(String key) {
 		return (T) attributes.get(key);
 	}

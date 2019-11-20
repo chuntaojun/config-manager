@@ -3,6 +3,16 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lessspring.org.repository.ConfigInfoHistoryMapper">
 
+    <resultMap id="ConfigInfoHistoryDTO" type="com.lessspring.org.db.dto.ConfigInfoHistoryDTO">
+        <id column="id" property="id" />
+        <result column="namespace_id" property="namespaceId" />
+        <result column="group_id" property="groupId" />
+        <result column="data_id" property="dataId" />
+        <result column="content" property="content" />
+        <result column="config_type" property="type" />
+        <result column="last_modify_time" property="lastModifyTime" />
+    </resultMap>
+
     <!--  save config-info-history  -->
     <insert id="save"></insert>
 

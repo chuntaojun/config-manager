@@ -17,6 +17,7 @@
 package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.handler.NamespaceHandler;
+import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.service.config.NamespaceService;
 import reactor.core.publisher.Mono;
 

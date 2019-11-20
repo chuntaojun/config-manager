@@ -37,11 +37,11 @@ public abstract class BaseEmailEvent {
 		this.eventLabel = eventLabel;
 	}
 
-		public String getReceiver() {
-				return receiver;
-		}
+	public String getReceiver() {
+		return receiver;
+	}
 
-		public void setReceiver(String receiver) {
-				this.receiver = receiver;
-		}
+	public void setReceiver(String receiver) {
+		this.receiver = receiver;
+	}
 }

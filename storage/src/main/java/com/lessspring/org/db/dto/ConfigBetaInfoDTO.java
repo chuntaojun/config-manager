@@ -43,7 +43,6 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 		private String namespaceId;
 		private String groupId;
 		private String dataId;
-		private Boolean file;
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
@@ -75,11 +74,6 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 
 		public ConfigBetaInfoDTOBuilder dataId(String dataId) {
 			this.dataId = dataId;
-			return this;
-		}
-
-		public ConfigBetaInfoDTOBuilder file(Boolean file) {
-			this.file = file;
 			return this;
 		}
 
@@ -115,7 +109,6 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			configBetaInfoDTO.setNamespaceId(namespaceId);
 			configBetaInfoDTO.setGroupId(groupId);
 			configBetaInfoDTO.setDataId(dataId);
-			configBetaInfoDTO.setFile(file);
 			configBetaInfoDTO.setFileSource(fileSource);
 			configBetaInfoDTO.setContent(content);
 			configBetaInfoDTO.setType(type);

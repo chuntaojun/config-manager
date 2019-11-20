@@ -20,9 +20,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.dump.task.DumpTask4Period;
-import com.lessspring.org.executor.NameThreadFactory;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

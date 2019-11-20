@@ -89,7 +89,7 @@ public class ConfigCacheItemManager {
 				.groupId(configInfoDTO.getGroupId()).dataId(configInfoDTO.getDataId())
 				.content(com.lessspring.org.utils.StringUtils
 						.newString4UTF8(configInfoDTO.getContent()))
-				.file(configInfoDTO.getFile()).fileSource(configInfoDTO.getFileSource())
+				.fileSource(configInfoDTO.getFileSource())
 				.configType(configInfoDTO.getType()).build();
 		registerConfigCacheItem(namespaceId, event);
 		updateContent(namespaceId, event);
@@ -107,7 +107,7 @@ public class ConfigCacheItemManager {
 				.groupId(betaInfoDTO.getGroupId()).dataId(betaInfoDTO.getDataId())
 				.content(new String(betaInfoDTO.getContent(),
 						Charset.forName(StandardCharsets.UTF_8.name())))
-				.file(betaInfoDTO.getFile()).fileSource(betaInfoDTO.getFileSource())
+				.fileSource(betaInfoDTO.getFileSource())
 				.clientIps(betaInfoDTO.getClientIps()).configType(betaInfoDTO.getType())
 				.build();
 		registerConfigCacheItem(namespaceId, event);
@@ -121,6 +121,7 @@ public class ConfigCacheItemManager {
 			final ConfigChangeEvent event) {
 		final String key = NameUtils.buildName(namespaceId, event.getGroupId(),
 				event.getDataId());
+		log.info("[{}] register into configCacheItemManager", key);
 		Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 		if (StringUtils.isNotEmpty(event.getClientIps())) {
 			for (String ip : event.getClientIps().split(",")) {
@@ -153,8 +154,10 @@ public class ConfigCacheItemManager {
 		}
 	}
 
-	public void deregisterConfigCacheItem(final String namespaceId, final String groupId, final String dataId) {
+	public void deregisterConfigCacheItem(final String namespaceId, final String groupId,
+			final String dataId) {
 		final String key = NameUtils.buildName(namespaceId, groupId, dataId);
+		log.info("[{}] deregister into configCacheItemManager", key);
 		cacheItemMap.remove(key);
 	}
 
@@ -227,7 +230,7 @@ public class ConfigCacheItemManager {
 
 			@Override
 			public void onError(Exception exception) {
-
+				log.error("update content has some error : {}", exception);
 			}
 		});
 		return result[0];

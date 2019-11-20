@@ -92,6 +92,7 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 								status = new Status(RaftError.UNKNOWN,
 										"Exception handling within a transaction : %s",
 										e.getErrorCode());
+								log.error("TransactionCommitCallback when onApply has some error", e);
 							}
 						}
 					}

@@ -23,12 +23,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.lessspring.org.model.vo.JwtResponse;
+import com.lessspring.org.observer.Publisher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class AuthHolder extends Observable {
+public class AuthHolder extends Publisher {
 
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
@@ -40,7 +41,7 @@ public class AuthHolder extends Observable {
 	private volatile String token = "";
 
 	void register(LoginHandler handler) {
-		addObserver(handler);
+		registerWatcher(handler);
 	}
 
 	void updateToken(JwtResponse token) {
@@ -60,7 +61,7 @@ public class AuthHolder extends Observable {
 		try {
 			if (expireTime - lastRefreshTime < threshold) {
 				CountDownLatch latch = new CountDownLatch(1);
-				notifyObservers(latch);
+				notifyAllWatcher(latch);
 				long waitTime = 10L;
 				latch.await(waitTime, TimeUnit.SECONDS);
 			}
@@ -78,7 +79,7 @@ public class AuthHolder extends Observable {
 		readLock.lock();
 		try {
 			CountDownLatch latch = new CountDownLatch(1);
-			notifyObservers(latch);
+			notifyAllWatcher(latch);
 			long waitTime = 10L;
 			latch.await(waitTime, TimeUnit.SECONDS);
 		}

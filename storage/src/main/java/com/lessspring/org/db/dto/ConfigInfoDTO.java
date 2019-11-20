@@ -35,7 +35,6 @@ public class ConfigInfoDTO {
 	private String namespaceId;
 	private String groupId;
 	private String dataId;
-	private Boolean file;
 	private byte[] fileSource;
 	private byte[] content;
 	private String type;
@@ -51,7 +50,6 @@ public class ConfigInfoDTO {
 		private String namespaceId;
 		private String groupId;
 		private String dataId;
-		private Boolean file;
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
@@ -78,11 +76,6 @@ public class ConfigInfoDTO {
 
 		public ConfigInfoDTOBuilder dataId(String dataId) {
 			this.dataId = dataId;
-			return this;
-		}
-
-		public ConfigInfoDTOBuilder file(Boolean file) {
-			this.file = file;
 			return this;
 		}
 
@@ -117,7 +110,6 @@ public class ConfigInfoDTO {
 			configInfoDTO.setNamespaceId(namespaceId);
 			configInfoDTO.setGroupId(groupId);
 			configInfoDTO.setDataId(dataId);
-			configInfoDTO.setFile(file);
 			configInfoDTO.setFileSource(fileSource);
 			configInfoDTO.setContent(content);
 			configInfoDTO.setType(type);

@@ -16,17 +16,16 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.InetUtils;
 import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.service.config.ConfigOperationService;
 import com.lessspring.org.service.config.OperationService;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
-import com.lessspring.org.utils.ReactiveWebUtils;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
 import org.jetbrains.annotations.NotNull;
@@ -89,7 +88,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		final String dataId = request.queryParam("dataId").orElse("");
 		final QueryConfigRequest queryRequest = QueryConfigRequest.sbuilder()
 				.groupId(groupId).dataId(dataId).build();
-		final String clientIp = request.remoteAddress().orElse(ReactiveWebUtils.ALL_IP)
+		final String clientIp = request.remoteAddress().orElse(InetUtils.ALL_IP)
 				.getHostName();
 		queryRequest.setAttribute("clientIp", clientIp);
 		Mono<ResponseData<?>> mono = Mono

@@ -16,8 +16,6 @@
  */
 package com.lessspring.org.auth;
 
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
-import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
@@ -34,22 +32,24 @@ import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class LoginHandler implements Observer, LifeCycle {
+public class LoginHandler implements Watcher, LifeCycle {
 
-	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
-			1, new NameThreadFactory("com.lessspring.org.config-manager.client.auth"));
+	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1,
+			new NameThreadFactory("com.lessspring.org.config-manager.client.auth"));
 
 	private final HttpClient httpClient;
 	private final AuthHolder authHolder;
 	private final Configuration configuration;
 
-	public LoginHandler(HttpClient httpClient, AuthHolder authHolder,
-			Configuration configuration) {
+	public LoginHandler(HttpClient httpClient, AuthHolder authHolder, Configuration configuration) {
 		this.httpClient = httpClient;
 		this.authHolder = authHolder;
 		this.configuration = configuration;
@@ -75,8 +75,7 @@ public class LoginHandler implements Observer, LifeCycle {
 		request.setUsername(username);
 		request.setPassword(password);
 		final Body body = Body.objToBody(request);
-		ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN,
-				Header.EMPTY, Query.EMPTY, body,
+		ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN, Header.EMPTY, Query.EMPTY, body,
 				new TypeToken<ResponseData<JwtResponse>>() {
 				});
 		if (responseData.ok()) {
@@ -102,8 +101,8 @@ public class LoginHandler implements Observer, LifeCycle {
 	}
 
 	@Override
-	public void update(Observable o, Object arg) {
-		CountDownLatch latch = (CountDownLatch) arg;
+	public void onNotify(Occurrence occurrence, Publisher publisher) {
+		CountDownLatch latch = (CountDownLatch) occurrence.getOrigin();
 		createLoginWork(latch::countDown);
 	}
 }

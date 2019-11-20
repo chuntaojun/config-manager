@@ -24,6 +24,8 @@ import com.lessspring.org.constant.Code;
  */
 public class TpsLimitException extends BaseException {
 
+	private static final long serialVersionUID = 5464340790545128228L;
+
 	@Override
 	public Code code() {
 		return Code.SERVER_BUSY;

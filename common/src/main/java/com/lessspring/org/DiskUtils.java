@@ -47,7 +47,7 @@ import org.apache.commons.io.FileUtils;
  */
 public final class DiskUtils {
 
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static Logger logger = Logger.getLogger("com.lessspring.org.DiskUtils");
 
 	private final static String NO_SPACE_CN = "设备上没有空间";
 	private final static String NO_SPACE_EN = "No space left on device";
@@ -171,8 +171,13 @@ public final class DiskUtils {
 
 	public static File openFile(String path, String fileName, boolean rewrite) {
 		File directory = new File(path);
+		boolean mkdirs = true;
 		if (!directory.exists()) {
-			boolean mkdirs = directory.mkdirs();
+			mkdirs = directory.mkdirs();
+		}
+		if (!mkdirs) {
+			logger.warning("[DiskUtils] can't create directory");
+			return null;
 		}
 		File file = new File(path, fileName);
 		try {

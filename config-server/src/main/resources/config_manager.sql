@@ -1,31 +1,53 @@
-CREATE SCHEMA config_manager;
+create SCHEMA config_manager;
 
-CREATE TABLE config_info
+create TABLE config_info
 (
     id           bigint       not null auto_increment,
     namespace_id varchar(128) not null,
     group_id     varchar(64)  not null,
     data_id      varchar(64)  not null,
-    content      binary       not null,
+    content      binary,
     config_type  varchar(32)  not null default 'text',
+    file_source  binary,
+    encryption   varchar(128) not null default '',
+    create_time  bigint       not null,
     primary key (id),
     unique key (namespace_id, group_id, data_id)
 );
 
-CREATE TABLE config_info_beta
+create TABLE config_info_beta
 (
     id           bigint        not null auto_increment,
     namespace_id varchar(128)  not null,
     group_id     varchar(64)   not null,
     data_id      varchar(64)   not null,
-    content      blob          not null,
+    content      binary        not null,
     config_type  varchar(32)   not null default 'text',
+    file_source  binary,
+    encryption   varchar(128)  not null default '',
+    create_time  bigint        not null,
     client_ips   varchar(1024) not null,
     primary key (id),
     unique key (namespace_id, group_id, data_id)
 );
 
-CREATE TABLE user
+create TABLE config_info_history
+(
+    id           bigint        not null auto_increment,
+    namespace_id varchar(128)  not null,
+    group_id     varchar(64)   not null,
+    data_id      varchar(64)   not null,
+    content      binary        not null,
+    config_type  varchar(32)   not null default 'text',
+    file_source  binary,
+    encryption   varchar(128)  not null default '',
+    create_time  bigint        not null,
+    last_modify_time bigint    not null ,
+    primary key (id),
+    unique key (namespace_id, group_id, data_id, last_modify_time)
+);
+
+create TABLE user
 (
     id        int          not null auto_increment,
     user_name varchar(50)  not null,
@@ -34,7 +56,7 @@ CREATE TABLE user
     unique key (user_name)
 );
 
-CREATE TABLE user_role
+create TABLE user_role
 (
     id        bigint not null auto_increment,
     user_id   bigint not null,
@@ -42,7 +64,7 @@ CREATE TABLE user_role
     primary key (id)
 );
 
-CREATE TABLE namespace
+create TABLE namespace
 (
     id             bigint        not null auto_increment,
     namespace_name varchar(1000) not null,
@@ -51,7 +73,7 @@ CREATE TABLE namespace
     unique key (namespace_id)
 );
 
-CREATE TABLE namespace_permissions
+create TABLE namespace_permissions
 (
     id           bigint       not null auto_increment,
     user_id      bigint       not null,
@@ -59,8 +81,8 @@ CREATE TABLE namespace_permissions
     primary key (id)
 );
 
-INSERT INTO user(user_name, password)
+insert into user(user_name, password)
 VALUES ('lessSpring', '29591314');
 
-INSERT INTO namespace(namespace_name, namespace_id)
-VALUES ('default', 'default');
+insert into namespace(namespace_name, namespace_id)
+values ('default', 'default');

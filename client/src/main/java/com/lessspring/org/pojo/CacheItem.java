@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.lessspring.org.AbstractListener;
+import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -31,6 +32,7 @@ public class CacheItem {
 	private String groupId;
 	private String dataId;
 	private String lastMd5 = "";
+	private ConfigInfo oldInfo;
 	private CopyOnWriteArrayList<AbstractListener> listeners;
 
 	public String getGroupId() {
@@ -55,6 +57,14 @@ public class CacheItem {
 
 	public void setLastMd5(String lastMd5) {
 		this.lastMd5 = lastMd5;
+	}
+
+	public void setConfigInfo(ConfigInfo info) {
+		this.oldInfo = info;
+	}
+
+	public ConfigInfo getConfigInfo() {
+		return oldInfo;
 	}
 
 	public void addListener(AbstractListener listener) {

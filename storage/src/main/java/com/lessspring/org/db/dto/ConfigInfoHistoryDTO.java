@@ -32,7 +32,6 @@ import lombok.NoArgsConstructor;
 public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 
 	public static final String NAME = "ConfigInfoHistoryDTO";
-	private Long configInfoId;
 	private Long lastModifyTime;
 
 	public static ConfigInfoHistoryDTOBuilder sbuilder() {
@@ -43,9 +42,7 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 		private Long id;
 		private String namespaceId;
 		private String groupId;
-		private Long configInfoId;
 		private String dataId;
-		private Boolean file;
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
@@ -71,18 +68,8 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 			return this;
 		}
 
-		public ConfigInfoHistoryDTOBuilder configInfoId(Long configInfoId) {
-			this.configInfoId = configInfoId;
-			return this;
-		}
-
 		public ConfigInfoHistoryDTOBuilder dataId(String dataId) {
 			this.dataId = dataId;
-			return this;
-		}
-
-		public ConfigInfoHistoryDTOBuilder file(Boolean file) {
-			this.file = file;
 			return this;
 		}
 
@@ -121,9 +108,7 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 			configInfoHistoryDTO.setId(id);
 			configInfoHistoryDTO.setNamespaceId(namespaceId);
 			configInfoHistoryDTO.setGroupId(groupId);
-			configInfoHistoryDTO.setConfigInfoId(configInfoId);
 			configInfoHistoryDTO.setDataId(dataId);
-			configInfoHistoryDTO.setFile(file);
 			configInfoHistoryDTO.setFileSource(fileSource);
 			configInfoHistoryDTO.setContent(content);
 			configInfoHistoryDTO.setType(type);

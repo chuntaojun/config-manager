@@ -23,6 +23,9 @@ import com.lessspring.org.constant.Code;
  * @since 0.0.1
  */
 public class NoSuchRoleException extends BaseException {
+
+	private static final long serialVersionUID = -6423222916509656312L;
+
 	@Override
 	public Code code() {
 		return Code.ROLE_ILLEGAL;

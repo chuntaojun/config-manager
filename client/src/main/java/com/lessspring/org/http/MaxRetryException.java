@@ -22,6 +22,8 @@ package com.lessspring.org.http;
  */
 public class MaxRetryException extends RuntimeException {
 
+	private static final long serialVersionUID = -4979169814819643504L;
+
 	public MaxRetryException() {
 		super();
 	}

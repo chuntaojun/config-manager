@@ -56,7 +56,6 @@ public class ClusterServer implements LifeCycle {
 	private RaftServer raftServer;
 	private TransactionIdManager transactionIdManager;
 
-	private RaftServerOptions raftServerOptions = new RaftServerOptions();
 
 	static {
 		NodeManager nodeManager = NodeManager.getInstance();
@@ -73,9 +72,7 @@ public class ClusterServer implements LifeCycle {
 	}
 
 	public ClusterServer(RaftServerOptions raftServerOptions) {
-		if (Objects.nonNull(raftServerOptions)) {
-			this.raftServerOptions = raftServerOptions;
-		}
+		raftServerOptions = Objects.isNull(raftServerOptions) ? new RaftServerOptions() : raftServerOptions;
 		raftServer = new RaftServer(raftServerOptions);
 		raftServer.init();
 	}
@@ -89,7 +86,7 @@ public class ClusterServer implements LifeCycle {
 		}
 	}
 
-	public void registerAsyncUserProcessor(BaseAsyncUserProcessor processor) {
+	public void registerAsyncUserProcessor(BaseAsyncUserProcessor<Datum> processor) {
 		processor.initCluster(this);
 		raftServer.registerAsyncUserProcessor(processor);
 	}

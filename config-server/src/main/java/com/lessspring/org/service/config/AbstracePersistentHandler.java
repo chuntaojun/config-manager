@@ -14,4 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.common;
+package com.lessspring.org.service.config;
+
+import com.lessspring.org.observer.Publisher;
+
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+public abstract class AbstracePersistentHandler extends Publisher
+		implements PersistentHandler {
+
+}

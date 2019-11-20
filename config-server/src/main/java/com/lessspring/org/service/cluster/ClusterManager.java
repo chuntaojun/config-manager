@@ -19,10 +19,10 @@ package com.lessspring.org.service.cluster;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -77,15 +77,14 @@ public class ClusterManager {
 		this.snapshotOperate = snapshotOperate;
 	}
 
+	@PostConstruct
 	public void init() {
 		if (initialize.compareAndSet(false, true)) {
 			final String raftCacheDir = Paths
 					.get(pathConstants.getParentPath(), "raft-data").toString();
 			final RaftServerOptions configuration = RaftServerOptions.builder()
-					.cacheDir(raftCacheDir)
-					.electionTimeoutMs(electionTimeoutMs)
-					.snapshotIntervalSecs(snapshotIntervalSecs)
-					.build();
+					.cacheDir(raftCacheDir).electionTimeoutMs(electionTimeoutMs)
+					.snapshotIntervalSecs(snapshotIntervalSecs).build();
 			clusterServer = new ClusterServer(configuration);
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);
@@ -159,7 +158,7 @@ public class ClusterManager {
 			nodeManager.nodeLeave(node);
 			break;
 		default:
-			throw new IllegalArgumentException("Illegal cluster nodes change event type");
+			throw new IllegalArgumentException("Illegal cluster nodes transfer event type");
 		}
 	}
 

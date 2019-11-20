@@ -23,6 +23,9 @@ import com.lessspring.org.constant.Code;
  * @since 0.0.1
  */
 public class DiskException extends BaseException {
+
+	private static final long serialVersionUID = -1446108721154799171L;
+
 	@Override
 	public Code code() {
 		return Code.DISK_OVERFLOW;

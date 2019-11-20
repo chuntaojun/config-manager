@@ -27,20 +27,14 @@ import com.lessspring.org.executor.BaseThreadPoolExecutor;
 import com.lessspring.org.executor.NameThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.stereotype.Component;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-@Component
 public class SchedulerUtils {
 
 	private static final SchedulerUtils INSTANCE = new SchedulerUtils();
-
-	private SchedulerUtils() {
-	}
 
 	public static SchedulerUtils getSingleton() {
 		return INSTANCE;
@@ -49,14 +43,13 @@ public class SchedulerUtils {
 	private static final int CORE_POOL_SIZE = 512;
 	private static final int MAX_POOL_SIZE = 1024;
 	private static final long KEEP_ALIVE_TIME = 60;
-	private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
-	private static ThreadFactory threadFactory = new NameThreadFactory(
+	private ThreadFactory threadFactory = new NameThreadFactory(
 			"com.lessspring.org.config-manager.webHandler-");
 
-	private static RejectedExecutionHandler rejectedExecutionHandler = new BaseRejectedExecutionHandler(
+	private RejectedExecutionHandler rejectedExecutionHandler = new BaseRejectedExecutionHandler(
 			"com.lessspring.org.config-manager.webHandler", true,
 			"com.lessspring.org.config-manager.webHandler") {
 		@Override
@@ -71,8 +64,9 @@ public class SchedulerUtils {
 
 	private ThreadPoolExecutor newThreadPoolExecutor() {
 		BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(CORE_POOL_SIZE,
-				MAX_POOL_SIZE, KEEP_ALIVE_TIME, UNIT, new ArrayBlockingQueue<Runnable>(8),
-				threadFactory, rejectedExecutionHandler);
+				MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+				new ArrayBlockingQueue<Runnable>(8), threadFactory,
+				rejectedExecutionHandler);
 		executor.allowCoreThreadTimeOut(true);
 		executor.setOpenWorkCostDisplay(systemEnv.isOpenWorkCostDisplay());
 		return executor;

@@ -20,11 +20,11 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
-import com.lessspring.org.service.config.PersistentHandler;
+import com.lessspring.org.service.config.AbstracePersistentHandler;
 import com.lessspring.org.service.encryption.EncryptionService;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,19 +35,23 @@ import org.springframework.stereotype.Service;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
 @Primary
 @Service(value = "encryptionPersistentHandler")
-public class EncryptionPersistentHandler implements PersistentHandler {
+public class EncryptionPersistentHandler extends AbstracePersistentHandler {
 
 	@Autowired
 	private EncryptionService encryptionService;
 
 	@Autowired
 	@Qualifier(value = "cachePersistentHandler")
-	private PersistentHandler persistentHandler;
+	private AbstracePersistentHandler persistentHandler;
 
 	public EncryptionPersistentHandler() {
+	}
+
+	@Override
+	public Publisher getPublisher() {
+		return persistentHandler;
 	}
 
 	@Override

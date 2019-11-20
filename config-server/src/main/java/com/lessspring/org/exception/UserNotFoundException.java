@@ -17,13 +17,14 @@
 package com.lessspring.org.exception;
 
 import com.lessspring.org.constant.Code;
-import com.lessspring.org.exception.BaseException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class UserNotFoundException extends BaseException {
+
+	private static final long serialVersionUID = -7033386107872492814L;
 
 	@Override
 	public Code code() {

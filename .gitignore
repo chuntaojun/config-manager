@@ -21,8 +21,10 @@
 **/nbproject/private/
 **/build/
 **/out/
+**/bin/
 **/.gradle/
 /nbbuild/
+/bin/
 /dist/
 /nbdist/
 /.nb-gradle/

@@ -14,4 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.lessspring.org;
+
+/**
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+public final class ClassLoaderSwitchUtils {
+
+    private static ThreadLocal<ClassLoader> PRE_CLASS_LOADER_HOLDER = new ThreadLocal<>();
+
+    public static void transfer(Object obj) {
+        transfer(obj.getClass());
+    }
+
+    public static void transfer(Class<?> cls) {
+        PRE_CLASS_LOADER_HOLDER.set(Thread.currentThread().getContextClassLoader());
+        Thread.currentThread().setContextClassLoader(cls.getClassLoader());
+    }
+
+    public static void rollBack() {
+        Thread.currentThread().setContextClassLoader(PRE_CLASS_LOADER_HOLDER.get());
+        PRE_CLASS_LOADER_HOLDER.remove();
+    }
+
+}
