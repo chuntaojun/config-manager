@@ -158,7 +158,7 @@ public class ClusterManager {
 			nodeManager.nodeLeave(node);
 			break;
 		default:
-			throw new IllegalArgumentException("Illegal cluster nodes change event type");
+			throw new IllegalArgumentException("Illegal cluster nodes transfer event type");
 		}
 	}
 

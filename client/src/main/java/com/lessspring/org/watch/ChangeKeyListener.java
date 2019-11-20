@@ -57,7 +57,7 @@ public abstract class ChangeKeyListener extends AbstractListener {
 	public abstract void onChange(ChangekeyEvent changekeyEvent);
 
 	/**
-	 * compute the old config-info and new config-info has change
+	 * compute the old config-info and new config-info has transfer
 	 * 
 	 * @param newInfo new config-info
 	 * @param oldInfo old config-info

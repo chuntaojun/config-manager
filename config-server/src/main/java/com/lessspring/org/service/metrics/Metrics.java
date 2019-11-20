@@ -20,6 +20,8 @@ import com.lessspring.org.LifeCycle;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -27,6 +29,8 @@ import io.prometheus.client.Histogram;
 public final class Metrics implements LifeCycle {
 
 	private static final Metrics INSTANCE = new Metrics();
+	private static final AtomicBoolean inited = new AtomicBoolean(false);
+	private static final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 	static {
 		INSTANCE.init();
@@ -44,26 +48,29 @@ public final class Metrics implements LifeCycle {
 
 	@Override
 	public void init() {
-		this.monitor = Gauge.build().name("config_manager_monitor")
-				.labelNames("module", "name").help("config_manager_monitor").register();
-		this.clientRequestHistogram = Histogram.build()
-				.labelNames("module", "method", "url", "code")
-				.name("config_manager_client_request")
-				.help("config_manager_client_request").register();
+		if (inited.compareAndSet(false, true)) {
+			this.monitor = Gauge.build().name("config_manager_monitor")
+					.labelNames("module", "name").help("config_manager_monitor").register();
+			this.clientRequestHistogram = Histogram.build()
+					.labelNames("module", "method", "url", "code")
+					.name("config_manager_client_request")
+					.help("config_manager_client_request").register();
+		}
 	}
 
 	@Override
 	public void destroy() {
-
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+		}
 	}
 
 	@Override
 	public boolean isInited() {
-		return false;
+		return inited.get();
 	}
 
 	@Override
 	public boolean isDestroyed() {
-		return false;
+		return destroyed.get();
 	}
 }

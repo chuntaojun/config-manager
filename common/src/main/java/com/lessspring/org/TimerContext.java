@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public final class TimerContext {
 
-    public static class TimerContextNoArgsNoResult {
+    private static class TimerContextNoArgsNoResult {
 
         private static final Logger logger = Logger.getLogger("com.lessspring.org.utils.TimerContextNoArgsNoResult");
 
@@ -50,7 +50,7 @@ public final class TimerContext {
 
     }
 
-    public static class TimerContextWithArgsNoResult<A> {
+    private static class TimerContextWithArgsNoResult<A> {
 
         private static final Logger logger = Logger.getLogger("com.lessspring.org.utils.TimerContextWithArgsNoResult");
 
@@ -69,7 +69,7 @@ public final class TimerContext {
         }
     }
 
-    public static class TimerContextNoArgsWithResult<R> {
+    private static class TimerContextNoArgsWithResult<R> {
 
         private static final Logger logger = Logger.getLogger("com.lessspring.org.utils.TimerContextNoArgsWithResult");
 
@@ -82,15 +82,15 @@ public final class TimerContext {
         R acquire() {
             R result;
             long startTime = System.currentTimeMillis();
-            logger.info("[TimerContextWithArgsNoResult] start in : " + startTime);
+            logger.info("[TimerContextNoArgsWithResult] start in : " + startTime);
             result = supplier.get();
             long endTime = System.currentTimeMillis();
-            logger.info("[TimerContextWithArgsNoResult] end in : " + endTime + ", cost : " + (endTime - startTime) + " Ms");
+            logger.info("[TimerContextNoArgsWithResult] end in : " + endTime + ", cost : " + (endTime - startTime) + " Ms");
             return result;
         }
     }
 
-    public static class TimerContextWithArgsAndResult<A, R> {
+    private static class TimerContextWithArgsAndResult<A, R> {
 
         private static final Logger logger = Logger.getLogger("com.lessspring.org.utils.TimerContextWithArgsAndResult");
 
@@ -100,13 +100,13 @@ public final class TimerContext {
             this.function = function;
         }
 
-        R applt(A a) {
+        R apply(A a) {
             R result;
             long startTime = System.currentTimeMillis();
-            logger.info("[TimerContextWithArgsNoResult] start in : " + startTime);
+            logger.info("[TimerContextWithArgsAndResult] start in : " + startTime);
             result = function.apply(a);
             long endTime = System.currentTimeMillis();
-            logger.info("[TimerContextWithArgsNoResult] end in : " + endTime + ", cost : " + (endTime - startTime) + " Ms");
+            logger.info("[TimerContextWithArgsAndResult] end in : " + endTime + ", cost : " + (endTime - startTime) + " Ms");
             return result;
         }
     }
@@ -128,7 +128,7 @@ public final class TimerContext {
 
     public static <A, R> R invokeWithArgsWithResult(Function<A, R> function, A args) {
         TimerContextWithArgsAndResult<A, R> context = new TimerContextWithArgsAndResult<>(function);
-        return context.applt(args);
+        return context.apply(args);
     }
 
 }

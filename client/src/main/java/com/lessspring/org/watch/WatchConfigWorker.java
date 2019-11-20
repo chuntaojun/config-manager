@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.lessspring.org.CacheConfigManager;
-import com.lessspring.org.ClassLoaderSwitcherUtils;
+import com.lessspring.org.ClassLoaderSwitchUtils;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
@@ -118,9 +118,9 @@ public class WatchConfigWorker implements LifeCycle {
 			for (AbstractListener listener : abstractListeners) {
 				Runnable job = () -> {
 					// In order to make the spi mechanisms can work better
-					ClassLoaderSwitcherUtils.change(listener);
+					ClassLoaderSwitchUtils.transfer(listener);
 					listener.onReceive(configInfo);
-					ClassLoaderSwitcherUtils.rollBack();
+					ClassLoaderSwitchUtils.rollBack();
 				};
 				Executor userExecutor = listener.executor();
 				if (Objects.isNull(userExecutor)) {
@@ -221,7 +221,7 @@ public class WatchConfigWorker implements LifeCycle {
 				watchInfo);
 		final Body body = Body.objToBody(request);
 
-		// Create a receiving server push change event receiver
+		// Create a receiving server push transfer event receiver
 		receiver = new EventReceiver<WatchResponse>() {
 
 			private String name;

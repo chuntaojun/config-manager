@@ -142,7 +142,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 
 				@Override
 				public void onError(Exception exception) {
-
+					log.error("[doQuickCompare] when execute read job has some error : {}", exception);
 				}
 			});
 		});

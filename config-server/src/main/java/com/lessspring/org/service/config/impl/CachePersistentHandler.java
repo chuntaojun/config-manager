@@ -88,7 +88,7 @@ public class CachePersistentHandler extends AbstracePersistentHandler {
 							request);
 					// After they perform query operations dto objects attached to the
 					// attributes
-					// Can't change the order
+					// Can't transfer the order
 					ConfigInfoDTO dto = request.getAttribute(ConfigInfoDTO.NAME);
 					if (Objects.isNull(dto)) {
 						configInfo[0] = infoDB;

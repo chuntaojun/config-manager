@@ -27,7 +27,7 @@ import com.lessspring.org.raft.vo.ServerNode;
 public interface NodeChangeListener {
 
 	/**
-	 * Node change notification callback
+	 * Node transfer notification callback
 	 *
 	 * @param newServerNodes {@link Collection<ServerNode>}
 	 */

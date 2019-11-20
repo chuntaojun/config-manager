@@ -18,6 +18,7 @@ subprojects {
     dependencies {
         implementation("com.squareup.okhttp3:okhttp:4.2.0")
         implementation 'com.esotericsoftware:kryo:4.0.2'
+        compile group: 'org.jctools', name: 'jctools-core', version: '2.1.2'
         compile group: 'commons-io', name: 'commons-io', version: '2.6'
         compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
