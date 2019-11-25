@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.configuration.security;
 
+import com.lessspring.org.service.security.AuthorityProcessor;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,5 +37,12 @@ public @interface NeedAuth {
 	 * @return parameter name
 	 */
 	String argueName();
+
+	/**
+	 * Return handler to execute privilege check
+	 *
+	 * @return
+	 */
+	Class<AuthorityProcessor> handler();
 
 }

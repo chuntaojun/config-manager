@@ -16,22 +16,29 @@
  */
 package com.lessspring.org.configuration.tps;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import com.google.common.util.concurrent.RateLimiter;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 import com.lessspring.org.tps.FailStrategy;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
-
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -40,33 +47,40 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TpsConfiguration {
 
-	private final TpsManager tpsManager;
-
-	@Autowired
-	private TpsSetting tpsSetting;
-
-	public TpsConfiguration(TpsManager tpsManager) {
-		this.tpsManager = tpsManager;
+	@Bean
+	public TpsAnnotationProcessor tpsAnnotationProcessor(TpsManager tpsManager) {
+		return new TpsAnnotationProcessor(tpsManager);
 	}
 
-	@Bean
-	public TpsAnnotationProcessor tpsAnnotationProcessor() {
-		return new TpsAnnotationProcessor();
-	}
-
-	@Bean
+	@Bean(value = "tpsSetting")
 	public TpsSetting tpsSetting() {
 		return new TpsSetting();
 	}
 
-	private class TpsAnnotationProcessor implements BeanPostProcessor {
+	public static class TpsAnnotationProcessor implements BeanPostProcessor, Watcher<TpsSetting>, ApplicationContextAware {
+
+		@Autowired
+		private TpsSetting tpsSetting;
+
+		@Autowired
+		private TpsAnnotationProcessor annotationProcessor;
+
+		private final TpsManager tpsManager;
+
+		private ApplicationContext applicationContext;
+
+		public TpsAnnotationProcessor(TpsManager tpsManager) {
+			this.tpsManager = tpsManager;
+		}
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName)
-				throws BeansException {
-			Map<String, Integer> customer = new HashMap<>(8);
+		public Object postProcessBeforeInitialization(@NotNull Object bean,
+				String beanName) throws BeansException {
+			final Map<String, Double> customer = new HashMap<>(8);
 			for (TpsSetting.TpsResource resource : tpsSetting.getResources()) {
-				customer.put(resource.getResourceName(), resource.getQps());
+				Duration duration = resource.getDuration();
+				customer.put(resource.getResourceName(),
+						resource.getQps() * 1.0D / duration.getSeconds());
 			}
 			Class<?> cls = bean.getClass();
 			if (cls.isAnnotationPresent(OpenTpsLimit.class)) {
@@ -75,12 +89,14 @@ public class TpsConfiguration {
 					LimitRule rule = method.getAnnotation(LimitRule.class);
 					if (rule != null) {
 						Supplier<TpsManager.LimitRuleEntry> limiterSupplier = () -> {
-							Integer customerQps = customer.get(rule.resource());
+							final Double customerQps = customer.get(rule.resource());
+							final TimeUnit unit = rule.timeUnit();
 							if (customerQps != null && customerQps == -1) {
 								return null;
 							}
-							RateLimiter limiter = RateLimiter.create(
-									customerQps == null ? rule.qps() : customerQps);
+							double qps = customerQps == null ? rule.qps()
+									: customerQps / unit.toSeconds(1);
+							final RateLimiter limiter = RateLimiter.create(qps);
 							Class<? extends FailStrategy> failStrategy = rule
 									.failStrategy();
 							try {
@@ -103,9 +119,25 @@ public class TpsConfiguration {
 		}
 
 		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName)
-				throws BeansException {
+		public Object postProcessAfterInitialization(@NotNull Object bean,
+				String beanName) throws BeansException {
 			return bean;
+		}
+
+		@Override
+		public void onNotify(Occurrence<TpsSetting> occurrence, Publisher publisher) {
+			tpsSetting = occurrence.getOrigin();
+			String[] beanNames = applicationContext.getBeanDefinitionNames();
+			for (String beanName : beanNames) {
+				annotationProcessor.postProcessBeforeInitialization(
+						applicationContext.getBean(beanName), beanName);
+			}
+		}
+
+		@Override
+		public void setApplicationContext(@NotNull ApplicationContext applicationContext)
+				throws BeansException {
+			this.applicationContext = applicationContext;
 		}
 	}
 

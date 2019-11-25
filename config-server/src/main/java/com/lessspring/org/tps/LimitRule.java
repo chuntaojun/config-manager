@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -42,6 +43,13 @@ public @interface LimitRule {
 	 * @return default value is 60 / s
 	 */
 	int qps() default 60;
+
+	/**
+	 * qps time unit
+	 *
+	 * @return default value <code>TimeUnit.SECONDS</code>
+	 */
+	TimeUnit timeUnit() default TimeUnit.SECONDS;
 
 	/**
 	 * Fault tolerant strategy

@@ -46,6 +46,41 @@ public final class PropertiesEnum {
 
 	}
 
+	public enum EmailType {
+
+		/**
+		 * info email label
+		 */
+		INFO(0, "info email"),
+
+		/**
+		 * warn email label
+		 */
+		WARN(1, "warn email"),
+
+		/**
+		 * error email label
+		 */
+		ERROR(-1, "error email")
+		;
+
+		int code;
+		String desc;
+
+		EmailType(int code, String desc) {
+			this.code = code;
+			this.desc = desc;
+		}
+
+		public int getCode() {
+			return code;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+	}
+
 	public enum Role {
 
 		/**

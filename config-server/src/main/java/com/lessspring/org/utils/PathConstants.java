@@ -16,12 +16,11 @@
  */
 package com.lessspring.org.utils;
 
-import javax.annotation.PostConstruct;
-
 import com.lessspring.org.PathUtils;
 import lombok.Getter;
-
 import org.springframework.beans.factory.annotation.Value;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

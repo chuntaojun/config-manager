@@ -16,6 +16,11 @@
  */
 package com.lessspring.org.utils;
 
+import com.lessspring.org.PathUtils;
+
+import java.time.LocalDate;
+import java.util.function.Supplier;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -35,6 +40,9 @@ public final class SystemEnv {
 
 	private SystemEnv() {
 	}
+
+	public Supplier<String> jvmHeapDumpFileNameSuppiler = () -> PathUtils.finalPath("jvm",
+			"config-manager-jvm-" + LocalDate.now() + ".hprof");
 
 	private boolean dumpToFile = true;
 

@@ -27,7 +27,7 @@ import com.lessspring.org.utils.PlaceholderProcessor;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-class WrapperListener extends AbstractListener {
+public class WrapperListener extends AbstractListener {
 
 	private static final PlaceholderProcessor processor = new PlaceholderProcessor();
 
@@ -37,7 +37,7 @@ class WrapperListener extends AbstractListener {
 
 	private final AbstractListener listener;
 
-	WrapperListener(AbstractListener listener, String encryption) {
+	public WrapperListener(AbstractListener listener, String encryption) {
 		this.listener = listener;
 		this.encryption = encryption;
 	}

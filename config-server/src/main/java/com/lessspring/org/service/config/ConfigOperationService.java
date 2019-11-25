@@ -16,15 +16,6 @@
  */
 package com.lessspring.org.service.config;
 
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.exception.NotThisResourceException;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -63,9 +54,17 @@ import com.lessspring.org.utils.TransactionUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -416,16 +415,19 @@ public class ConfigOperationService
 	@Override
 	public void onNotify(Occurrence occurrence, Publisher publisher) {
 		Object event = occurrence.getOrigin();
-		CompletableFuture<Boolean> future = occurrence.getAnswer();
-		future.complete(true);
-		if (event instanceof PublishConfigHistory) {
-			PublishConfigHistory request = (PublishConfigHistory) event;
-			saveConfigHistory(request.getNamespaceId(), request);
-			return;
-		}
-		if (event instanceof DeleteConfigHistory) {
-			DeleteConfigHistory request = (DeleteConfigHistory) event;
-			removeConfigHistory(request.getNamespaceId(), request);
-		}
+		Optional<CompletableFuture<Boolean>> futureOpt = occurrence.getAnswer();
+		futureOpt.ifPresent(future -> {
+			future.complete(true);
+			if (event instanceof PublishConfigHistory) {
+				PublishConfigHistory request = (PublishConfigHistory) event;
+				saveConfigHistory(request.getNamespaceId(), request);
+				return;
+			}
+			if (event instanceof DeleteConfigHistory) {
+				DeleteConfigHistory request = (DeleteConfigHistory) event;
+				removeConfigHistory(request.getNamespaceId(), request);
+			}
+		});
+
 	}
 }

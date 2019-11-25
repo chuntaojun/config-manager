@@ -16,32 +16,31 @@
  */
 package com.lessspring.org.service.security.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.Resource;
-
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.repository.NamespacePermissionsMapper;
 import com.lessspring.org.service.security.AuthorityProcessor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-@Component(value = "authorityProcessor")
-public class AuthorityProcessorImpl implements AuthorityProcessor {
+@Component(value = "namespaceAuthorityProcessor")
+public class NameAuthorityProcessorImpl implements AuthorityProcessor {
 
 	@Resource
 	private NamespacePermissionsMapper permissionsMapper;
 
 	@Override
-	public boolean hasAuth(Privilege privilege, String namespaceId) {
+	public boolean hasAuth(Privilege privilege) {
+		final String namespaceId = privilege.getAttachment("namespaceId");
 		Set<String> namespaceIds = new HashSet<>(privilege.getOwnerNamespaces());
 		if (namespaceIds.contains(namespaceId)) {
 			return true;

@@ -62,7 +62,6 @@ public class WatchConfigWorker implements LifeCycle {
 			Runtime.getRuntime().availableProcessors(),
 			new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
 
-	private Map<String, CacheItem> cacheItemMap;
 	private CacheConfigManager configManager;
 	private final HttpClient httpClient;
 	private final Configuration configuration;
@@ -78,30 +77,11 @@ public class WatchConfigWorker implements LifeCycle {
 
 	@Override
 	public void init() {
-		this.cacheItemMap = new ConcurrentHashMap<>(16);
 	}
 
 	public void setConfigManager(CacheConfigManager configManager) {
 		this.configManager = configManager;
 		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
-	}
-
-	public void registerListener(String groupId, String dataId, String encryption,
-			AbstractListener listener) {
-		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
-
-		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
-
-		if (listener instanceof ChangeKeyListener) {
-			((ChangeKeyListener) listener).setConfigManager(configManager);
-		}
-		cacheItem.addListener(new WrapperListener(listener, encryption));
-	}
-
-	public void deregisterListener(String groupId, String dataId,
-			AbstractListener listener) {
-		CacheItem cacheItem = getCacheItem(groupId, dataId);
-		cacheItem.removeListener(new WrapperListener(listener, ""));
 	}
 
 	private void notifyWatcher(ConfigInfo configInfo) {
@@ -155,7 +135,7 @@ public class WatchConfigWorker implements LifeCycle {
 	// When your listener list changes, to build a monitoring events and
 	// initiate Watch requests to the server
 
-	private void onChange() {
+	public void onChange() {
 		if (Objects.nonNull(receiver)) {
 			receiver.cancle();
 			receiver = null;
@@ -167,54 +147,22 @@ public class WatchConfigWorker implements LifeCycle {
 		logger.warning(throwable.getMessage());
 	}
 
-	private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		final boolean[] add = new boolean[] { false };
-		Supplier<CacheItem> supplier = () -> {
-			add[0] = true;
-			return CacheItem.builder().withGroupId(groupId).withDataId(dataId)
-					.withLastMd5("").build();
-		};
-		cacheItemMap.computeIfAbsent(key, s -> supplier.get());
-		if (add[0]) {
-			onChange();
-		}
-		return cacheItemMap.get(key);
-	}
-
-	private void removeCacheItem(String groupId, String dataId) {
-		String key = NameUtils.buildName(groupId, dataId);
-		if (cacheItemMap.containsKey(key)) {
-			cacheItemMap.remove(key);
-			onChange();
-		}
-	}
-
-	private CacheItem getCacheItem(String groupId, String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		return cacheItemMap.get(key);
-	}
-
 	private void updateAndNotify(ConfigInfo configInfo) {
 		final String groupId = configInfo.getGroupId();
 		final String dataId = configInfo.getDataId();
 		final String key = NameUtils.buildName(groupId, dataId);
 		final String lastMd5 = MD5Utils.md5Hex(configInfo.toBytes());
-		final CacheItem oldItem = cacheItemMap.get(key);
+		final CacheItem oldItem = configManager.getCacheItem(groupId, dataId);
 		if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {
 			oldItem.setLastMd5(lastMd5);
 			notifyWatcher(configInfo);
 		}
 	}
 
-	public Map<String, CacheItem> copy() {
-		return new HashMap<>(cacheItemMap);
-	}
-
 	// Create a Watcher to monitor configuration changes information
 
 	private void createWatcher() {
-		Map<String, CacheItem> tmp = copy();
+		Map<String, CacheItem> tmp = configManager.copy();
 		Map<String, String> watchInfo = tmp.entrySet().stream().collect(HashMap::new,
 				(m, e) -> m.put(e.getKey(), e.getValue().getLastMd5()), HashMap::putAll);
 		final WatchRequest request = new WatchRequest(configuration.getNamespaceId(),

@@ -16,9 +16,6 @@
  */
 package com.lessspring.org;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.common.limit.RequestLimitManager;
@@ -30,9 +27,19 @@ import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PathConstants;
+import com.lessspring.org.watch.ChangeKeyListener;
 import com.lessspring.org.watch.WatchConfigWorker;
+import com.lessspring.org.watch.WrapperListener;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -46,6 +53,8 @@ public class CacheConfigManager implements LifeCycle {
 
 	private HttpClient httpClient;
 	private RequestLimitManager limitManager = new RequestLimitManager();
+	
+	private Map<String, CacheItem> cacheItemMap;
 
 	private final String namespaceId;
 	private final boolean localPref;
@@ -65,9 +74,60 @@ public class CacheConfigManager implements LifeCycle {
 	@Override
 	public void init() {
 		if (inited.compareAndSet(false, true)) {
+			this.cacheItemMap = new ConcurrentHashMap<>(16);
 			this.worker.setConfigManager(this);
 			LifeCycleHelper.invokeInit(limitManager);
 		}
+	}
+
+	public void registerListener(String groupId, String dataId, String encryption,
+			AbstractListener listener) {
+		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+
+		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
+
+		if (listener instanceof ChangeKeyListener) {
+			ReflectUtils.inject(listener, this, "configManager");
+		}
+		cacheItem.addListener(new WrapperListener(listener, encryption));
+	}
+
+	public void deregisterListener(String groupId, String dataId,
+			AbstractListener listener) {
+		CacheItem cacheItem = getCacheItem(groupId, dataId);
+		cacheItem.removeListener(new WrapperListener(listener, ""));
+	}
+
+	private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		final boolean[] add = new boolean[] { false };
+		Supplier<CacheItem> supplier = () -> {
+			add[0] = true;
+			return CacheItem.builder().withGroupId(groupId).withDataId(dataId)
+					.withLastMd5("").build();
+		};
+		cacheItemMap.computeIfAbsent(key, s -> supplier.get());
+		if (add[0]) {
+			worker.onChange();
+		}
+		return cacheItemMap.get(key);
+	}
+
+	public Map<String, CacheItem> copy() {
+		return new HashMap<>(cacheItemMap);
+	}
+
+	private void removeCacheItem(String groupId, String dataId) {
+		String key = NameUtils.buildName(groupId, dataId);
+		if (cacheItemMap.containsKey(key)) {
+			cacheItemMap.remove(key);
+			worker.onChange();
+		}
+	}
+
+	public CacheItem getCacheItem(String groupId, String dataId) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return cacheItemMap.get(key);
 	}
 
 	public ConfigInfo query(String groupId, String dataId, String token) {

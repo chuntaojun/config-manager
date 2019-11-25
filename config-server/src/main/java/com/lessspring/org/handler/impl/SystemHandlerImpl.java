@@ -16,32 +16,94 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.google.gson.reflect.TypeToken;
+import com.lessspring.org.configuration.tps.TpsConfiguration;
+import com.lessspring.org.configuration.tps.TpsSetting;
 import com.lessspring.org.handler.SystemHandler;
+import com.lessspring.org.jvm.JvmUtils;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.pojo.request.PublishQpsRequest;
 import com.lessspring.org.service.dump.DumpService;
+import com.lessspring.org.tps.LimitRule;
+import com.lessspring.org.tps.OpenTpsLimit;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.RenderUtils;
+import com.lessspring.org.utils.SystemEnv;
+import com.lessspring.org.utils.TracerUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Method;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Service
-public class SystemHandlerImpl implements SystemHandler {
+@OpenTpsLimit
+public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHandler {
 
 	private final LoggingSystem loggingSystem;
 	private final DumpService dumpService;
+	private final TracerUtils tracerUtils;
+	private final TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor;
+	private SystemEnv systemEnv;
+	private StandardEnvironment environment = new StandardEnvironment();
+	private ConfigurationBeanFactoryMetadata beanFactoryMetadata;
 
-	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService) {
+	@Autowired
+	private TpsSetting tpsSetting;
+
+	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService,
+			TracerUtils tracerUtils,
+			TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor,
+			ApplicationContext applicationContext) {
 		this.loggingSystem = loggingSystem;
 		this.dumpService = dumpService;
+		this.tracerUtils = tracerUtils;
+		this.tpsAnnotationProcessor = tpsAnnotationProcessor;
+		this.beanFactoryMetadata = applicationContext.getBean(
+				ConfigurationBeanFactoryMetadata.BEAN_NAME,
+				ConfigurationBeanFactoryMetadata.class);
+	}
+
+	@PostConstruct
+	public void init() {
+		systemEnv = SystemEnv.getSingleton();
+		registerWatcher(tpsAnnotationProcessor);
 	}
 
 	@NotNull
@@ -63,8 +125,90 @@ public class SystemHandlerImpl implements SystemHandler {
 
 	@NotNull
 	@Override
-	public Mono<ServerResponse> forceDumoConfig(ServerRequest request) {
+	public Mono<ServerResponse> forceDumpConfig(ServerRequest request) {
 		dumpService.forceDump(false);
 		return RenderUtils.render(Mono.just(ResponseData.success()));
+	}
+
+	@NotNull
+	@Override
+	public Mono<ServerResponse> publishLog(ServerRequest request) {
+		return RenderUtils
+				.render(Mono.just(ResponseData.success(tracerUtils.analyzePublishLog())));
+	}
+
+	@NotNull
+	@Override
+	@LimitRule(resource = "system-resource", qps = 1, timeUnit = TimeUnit.MINUTES)
+	public Mono<ServerResponse> jvmHeapDump(ServerRequest request) {
+		final String fileName = systemEnv.jvmHeapDumpFileNameSuppiler.get();
+		log.info("[Jvm heap dump] file name : {}", fileName);
+		Supplier<Resource> callable = () -> {
+			try {
+				final boolean isLive = Boolean.parseBoolean(
+						(String) request.attribute("isLive").orElse("true"));
+				final File file = JvmUtils.jMap(fileName, isLive);
+				return new UrlResource(file.toURI());
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		};
+		return ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"" + fileName + "\"")
+				.body(BodyInserters.fromResource(callable.get()));
+	}
+
+	@SuppressWarnings("all")
+	@NotNull
+	@Override
+	public Mono<ServerResponse> publishQpsSetting(ServerRequest request) {
+		return request.bodyToMono(String.class).map(s -> (ResponseData<String>) GsonUtils
+				.toObj(s, new TypeToken<ResponseData<String>>() {
+				})).map(responseData -> {
+					String result = responseData.getData();
+					Properties properties = new Properties();
+					try {
+						properties.load(new StringReader(result));
+					}
+					catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					return properties;
+				}).map(properties -> {
+					String name = "qps";
+					PropertySource propertySource = new PropertiesPropertySource(name,
+							properties);
+					if (environment.containsProperty(name)) {
+						environment.getPropertySources().replace(name, propertySource);
+					}
+					else {
+						environment.getPropertySources().addLast(propertySource);
+					}
+					return Binder.get(environment);
+				}).flatMap(binder -> {
+					ResolvableType type = getBeanType(tpsSetting, "tpsSetting");
+					Bindable target = Bindable.of(type).withExistingValue(tpsSetting);
+					binder.bind(PublishQpsRequest.PREFIX, target);
+					tpsAnnotationProcessor.onNotify(Occurrence.newInstance(tpsSetting),
+							this);
+					return RenderUtils.render(Mono.just(ResponseData.success()));
+				})
+				.onErrorResume(new Function<Throwable, Mono<? extends ServerResponse>>() {
+					@Override
+					public Mono<? extends ServerResponse> apply(Throwable throwable) {
+						return RenderUtils
+								.render(Mono.just(ResponseData.fail(throwable)));
+					}
+				});
+	}
+
+	private ResolvableType getBeanType(Object bean, String beanName) {
+		Method factoryMethod = this.beanFactoryMetadata.findFactoryMethod(beanName);
+		if (factoryMethod != null) {
+			return ResolvableType.forMethodReturnType(factoryMethod);
+		}
+		return ResolvableType.forClass(bean.getClass());
 	}
 }

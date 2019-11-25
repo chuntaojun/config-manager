@@ -21,10 +21,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.lessspring.org.NameUtils;
 
+import com.lessspring.org.ThreadUtils;
+import com.lessspring.org.utils.CasReadWriteLock;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,9 +36,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CacheItem {
-
-	public static final short CACHE_ITEM = 0;
-	public static final short TEMP_CACHE_ITEM = 0;
 
 	private final String namespaceId;
 
@@ -53,11 +53,14 @@ public class CacheItem {
 
 	private final String key;
 
+	private final Object locker = new Object();
+
 	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+	/**
+	 * 一个简单的读写锁实现
+	 */
+	private final CasReadWriteLock casReadWriteLock = new CasReadWriteLock();
 
 	public CacheItem(String namespaceId, String groupId, String dataId, boolean file) {
 		this.namespaceId = namespaceId;
@@ -125,43 +128,36 @@ public class CacheItem {
 		return betaClientIps.isEmpty() || !betaClientIps.contains(clientIp);
 	}
 
-	public void executeReadWork(ReadWork readWork) {
-		log.info("execute read work ");
-		try {
-			if (readLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
-				try {
-					readWork.job();
-				}
-				catch (Exception e) {
-					readWork.onError(e);
-				}
-				finally {
-					readLock.unlock();
-				}
-			}
-		}
-		catch (InterruptedException ignore) {
+	// 需要考虑清楚，如果写线程到了悲观锁，而读线程因为乐观锁而正在执行，
+	// 那么存在读写同时运行的情况，需要考虑如何避免此类现象，确保线程安全
 
+	public void executeReadWork(ReadWork readWork) {
+		log.warn("execute read work ");
+		if (casReadWriteLock.tryReadLock()) {
+			try {
+				readWork.job();
+			}
+			catch (Exception e) {
+				readWork.onError(e);
+			}
+			finally {
+				casReadWriteLock.unReadLock();
+			}
 		}
 	}
 
 	public void executeWriteWork(WriteWork writeWork) {
-		log.info("execute write work ");
-		try {
-			if (writeLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
-				try {
-					writeWork.job();
-				}
-				catch (Exception e) {
-					writeWork.onError(e);
-				}
-				finally {
-					writeLock.unlock();
-				}
+		log.warn("execute write work ");
+		if (casReadWriteLock.tryWriteLock()) {
+			try {
+				writeWork.job();
 			}
-		}
-		catch (InterruptedException ignore) {
-
+			catch (Exception e) {
+				writeWork.onError(e);
+			}
+			finally {
+				casReadWriteLock.unWriteLock();
+			}
 		}
 	}
 }

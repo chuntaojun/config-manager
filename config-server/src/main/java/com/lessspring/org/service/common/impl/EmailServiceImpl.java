@@ -16,44 +16,121 @@
  */
 package com.lessspring.org.service.common.impl;
 
-import javax.annotation.PostConstruct;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 import com.lessspring.org.pojo.event.email.BaseEmailEvent;
-import com.lessspring.org.pojo.event.email.ErrorEmailEvent;
-import com.lessspring.org.pojo.event.email.WarnEmailEvent;
+import com.lessspring.org.service.common.EmailNotifyProperties;
 import com.lessspring.org.service.common.EmailService;
-
+import com.lessspring.org.utils.PropertiesEnum;
+import com.lessspring.org.utils.SystemEnv;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Component
-public class EmailServiceImpl implements EmailService {
+public class EmailServiceImpl extends Publisher<BaseEmailEvent>
+		implements EmailService, Watcher<BaseEmailEvent> {
 
-	private EventBus eventBus;
+	@Autowired
+	private EmailNotifyProperties emailNotifyProperties;
+
+	private Map<PropertiesEnum.EmailType, List<String>> receivers = new HashMap<>();
+
+	private final JavaMailSender mailSender;
+
+	private SystemEnv systemEnv;
+
+	public EmailServiceImpl(JavaMailSender mailSender) {
+		this.mailSender = mailSender;
+	}
 
 	@PostConstruct
 	public void init() {
-		eventBus = new EventBus("com.lessspring.org.config-manager.emailBus");
-		eventBus.register(this);
+		registerWatcher(this);
+		systemEnv = SystemEnv.getSingleton();
+		for (EmailNotifyProperties.NotifyReceiver receiver : emailNotifyProperties
+				.getNotifyReceivers()) {
+			receivers.computeIfAbsent(receiver.getNotifyType(),
+					emailType -> new ArrayList<>());
+			List<String> list = receivers.get(receiver.getNotifyType());
+			list.add(receiver.getReceiverEmail());
+		}
 	}
 
 	@Override
 	public void publishEmailEvent(BaseEmailEvent baseEmailEvent) {
-		eventBus.post(baseEmailEvent);
+		notifyAllWatcher(baseEmailEvent);
 	}
 
-	@Subscribe
-	public void onWarnEvent(WarnEmailEvent event) throws Exception {
-
+	private void sendEmail(String toAddr, String title, String content) {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setFrom(systemEnv.getEmailHost());
+		message.setTo(toAddr);
+		message.setSubject(title);
+		message.setText(content);
+		try {
+			mailSender.send(message);
+			log.info("email has already send");
+		}
+		catch (Exception e) {
+			log.error("send email has some error : {}", e);
+		}
 	}
 
-	@Subscribe
-	public void onErrorEvent(ErrorEmailEvent event) throws Exception {
+	private void sendAttachmentsMail(String toAddr, String title, String content,
+			File file) {
+		MimeMessage message = mailSender.createMimeMessage();
 
+		try {
+			MimeMessageHelper helper = new MimeMessageHelper(message, true);
+			helper.setFrom(systemEnv.getEmailHost());
+			helper.setTo(toAddr);
+			helper.setSubject(title);
+			helper.setText(content, true);
+			FileSystemResource attachment = new FileSystemResource(file);
+			helper.addAttachment(file.getName(), attachment);
+			mailSender.send(message);
+			file.delete();
+		}
+		catch (MessagingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onNotify(Occurrence<BaseEmailEvent> occurrence, Publisher publisher) {
+		BaseEmailEvent event = occurrence.getOrigin();
+		if (event.hasAttachment()) {
+			for (String receiver : receivers.get(event.getType())) {
+				sendAttachmentsMail(receiver,
+						event.getEventLabel() + "@@" + event.getTitle(), event.getMsg(),
+						event.getAttachment());
+			}
+		}
+		else {
+			for (String receiver : receivers.get(event.getType())) {
+				sendEmail(receiver, event.getEventLabel() + "@@" + event.getTitle(),
+						event.getMsg());
+			}
+		}
 	}
 }

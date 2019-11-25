@@ -16,15 +16,14 @@
  */
 package com.lessspring.org.tps;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import com.google.common.util.concurrent.RateLimiter;
 import com.lessspring.org.constant.Code;
 import com.lessspring.org.model.vo.ResponseData;
-
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -59,7 +58,8 @@ public class TpsManager {
 		if (entry == null) {
 			return;
 		}
-		limiterManager.putIfAbsent(key, entry);
+		// Allows programs to modify QPS Settings at run time
+		limiterManager.put(key, entry);
 	}
 
 	public static class LimitRuleEntry {

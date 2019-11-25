@@ -16,16 +16,16 @@
  */
 package com.lessspring.org.configuration;
 
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
+import com.lessspring.org.PathUtils;
 import com.lessspring.org.exception.BaseException;
+import com.lessspring.org.jvm.JvmUtils;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.event.email.ErrorEmailEvent;
+import com.lessspring.org.service.common.EmailService;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RenderUtils;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -39,6 +39,12 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -47,6 +53,9 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @Slf4j
 @Configuration
 public class GlobalErrorWebExceptionConfiguration {
+
+	@Autowired
+	private EmailService emailService;
 
 	@Component
 	@Order(-2)
@@ -80,7 +89,27 @@ public class GlobalErrorWebExceptionConfiguration {
 			log.error("[Internal error information]：{}",
 					String.valueOf(errorMap.get("trace")).substring(0, 2_000));
 			Mono<ResponseData<?>> errMono;
-			if (throwable instanceof BaseException) {
+			if (throwable instanceof OutOfMemoryError) {
+				log.error("Emergency error : OutOfMemoryError");
+				final String fileName = PathUtils.finalPath("jvm",
+						"config-manager-jvm-" + LocalDate.now());
+				log.info("[Dump Jvm File] : file name : {}", fileName);
+				final File file;
+				try {
+					final ErrorEmailEvent emailEvent = new ErrorEmailEvent(
+							PropertiesEnum.EmailType.ERROR);
+					file = JvmUtils.jMap(fileName, true);
+					emailEvent.setTitle("[Application has OutOfMemoryError]");
+					emailEvent.setAttachment(file);
+					emailEvent.setMsg(throwable.getLocalizedMessage());
+					emailService.publishEmailEvent(emailEvent);
+				}
+				catch (Exception e) {
+					throwable = e;
+				}
+				errMono = Mono.just(ResponseData.fail(throwable));
+			}
+			else if (throwable instanceof BaseException) {
 				BaseException exception = (BaseException) throwable;
 				errMono = Mono
 						.just(ResponseData.builder().withCode(exception.code().getCode())

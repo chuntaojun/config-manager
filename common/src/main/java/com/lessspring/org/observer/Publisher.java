@@ -16,12 +16,12 @@
  */
 package com.lessspring.org.observer;
 
+import com.lessspring.org.executor.BaseThreadPoolExecutor;
+import com.lessspring.org.executor.NameThreadFactory;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-
-import com.lessspring.org.executor.BaseThreadPoolExecutor;
-import com.lessspring.org.executor.NameThreadFactory;
 
 /**
  * A simple observer pattern - the publisher
@@ -29,7 +29,7 @@ import com.lessspring.org.executor.NameThreadFactory;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class Publisher {
+public abstract class Publisher<T> {
 
 	private List<Watcher> watchers = new CopyOnWriteArrayList<>();
 
@@ -50,7 +50,7 @@ public abstract class Publisher {
 	// With correction notice the Occurrence of the result, By accessing
 	// CompleteableFuture to processing the Watcher
 
-	protected void notifyAllWatcher(Occurrence event) {
+	protected void notifyAllWatcher(Occurrence<T> event) {
 		executor.execute(() -> {
 			for (Watcher watcher : watchers) {
 				watcher.onNotify(event, this);
@@ -58,7 +58,7 @@ public abstract class Publisher {
 		});
 	}
 
-	protected void notifyAllWatcher(Object args) {
+	protected void notifyAllWatcher(T args) {
 		final Occurrence event = Occurrence.newInstance(args);
 		executor.execute(() -> {
 			for (Watcher watcher : watchers) {

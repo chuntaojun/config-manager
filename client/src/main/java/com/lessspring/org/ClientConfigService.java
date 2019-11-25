@@ -163,7 +163,7 @@ final class ClientConfigService implements ConfigService {
 	public void addListener(String groupId, String dataId, String encryption,
 			AbstractListener... listeners) {
 		for (AbstractListener listener : listeners) {
-			watchConfigWorker.registerListener(groupId, dataId, encryption, listener);
+			configManager.registerListener(groupId, dataId, encryption, listener);
 		}
 	}
 
@@ -171,7 +171,7 @@ final class ClientConfigService implements ConfigService {
 	public void removeListener(String groupId, String dataId,
 			AbstractListener... listeners) {
 		for (AbstractListener listener : listeners) {
-			watchConfigWorker.deregisterListener(groupId, dataId, listener);
+			configManager.deregisterListener(groupId, dataId, listener);
 		}
 	}
 

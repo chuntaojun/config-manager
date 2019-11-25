@@ -26,27 +26,27 @@ import java.util.concurrent.CompletableFuture;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class Occurrence {
+public class Occurrence<T> {
 
-	private SoftReference<Object> origin;
+	private SoftReference<T> origin;
 	private CompletableFuture<Boolean> answer;
 
 	private Occurrence() {
 	}
 
-	public static Occurrence newInstance(Object event) {
-		Occurrence occurrence = new Occurrence();
+	public static <T>Occurrence<T> newInstance(T event) {
+		Occurrence<T> occurrence = new Occurrence<>();
 		occurrence.origin = new SoftReference<>(event);
 		return occurrence;
 	}
 
-	public static Occurrence newInstanceWithFuture(Object args) {
-		Occurrence occurrence = newInstance(args);
+	public static <T>Occurrence<T> newInstanceWithFuture(T args) {
+		Occurrence<T> occurrence = newInstance(args);
 		occurrence.answer = new CompletableFuture<>();
 		return occurrence;
 	}
 
-	public Object getOrigin() {
+	public T getOrigin() {
 		return origin.get();
 	}
 

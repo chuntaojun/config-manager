@@ -47,6 +47,14 @@ create TABLE config_info_history
     unique key (namespace_id, group_id, data_id, last_modify_time)
 );
 
+create TABLE kms_secret_key(
+    id          bigint         not null auto_increment,
+    namespace_id    varchar(128)    not null,
+    secret_key      varchar(2048)   not null,
+    primary key(id),
+    unique key(secret_key)
+)
+
 create TABLE user
 (
     id        int          not null auto_increment,

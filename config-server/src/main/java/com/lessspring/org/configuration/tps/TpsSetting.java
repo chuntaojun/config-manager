@@ -16,10 +16,11 @@
  */
 package com.lessspring.org.configuration.tps;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -42,6 +43,7 @@ public class TpsSetting {
 
 		private String resourceName;
 		private Integer qps;
+		private Duration duration;
 
 		public String getResourceName() {
 			return resourceName;
@@ -57,6 +59,14 @@ public class TpsSetting {
 
 		public void setQps(Integer qps) {
 			this.qps = qps;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
 		}
 	}
 

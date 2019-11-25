@@ -16,9 +16,11 @@
  */
 package com.lessspring.org.pojo;
 
-import java.util.List;
-
 import com.lessspring.org.utils.PropertiesEnum;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The custom of a simple access objects
@@ -33,6 +35,7 @@ public class Privilege {
 	private List<String> ownerNamespaces;
 	private transient String jwt;
 	private PropertiesEnum.Role role;
+	private Map<String, Object> attachments = new HashMap<>(8);
 
 	public Long getUserId() {
 		return userId;
@@ -76,6 +79,11 @@ public class Privilege {
 
 	public boolean isRoleCorrectly(PropertiesEnum.Role target) {
 		return 0 == target.compareTo(role);
+	}
+
+	@SuppressWarnings("all")
+	public <T> T getAttachment(String key) {
+		return (T) attachments.get(key);
 	}
 
 	@Override

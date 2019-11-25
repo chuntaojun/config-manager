@@ -23,20 +23,25 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.PathUtils;
+import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.pojo.event.config.PublishLogEventHandler;
 import com.lessspring.org.pojo.vo.PublishLogVO;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
+import org.springframework.stereotype.Component;
 
 /**
  * Notify the tracker
@@ -44,6 +49,7 @@ import com.lmax.disruptor.dsl.Disruptor;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Component
 public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 
 	private long id = 0;
@@ -52,11 +58,8 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 	private int countReuseAble = 100_000;
 	private FileChannel fileChannel;
 	private final ScheduledExecutorService executorService = Executors
-			.newSingleThreadScheduledExecutor(r -> {
-				Thread thread = new Thread(r, "com.lessspring.org.config-manager.tracer");
-				thread.setDaemon(true);
-				return thread;
-			});
+			.newSingleThreadScheduledExecutor(
+					new NameThreadFactory("com.lessspring.org.config-manager.tracer-"));
 
 	private static final TracerUtils SINGLE_TON = new TracerUtils();
 
@@ -68,6 +71,9 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 			.build(PublishLogEventHandler::new, PublishLogEvent.class);
 
 	private TracerUtils() {
+		// 自动删除老旧文件
+		executorService.scheduleWithFixedDelay(this::autoDeleteOldFile, 6, 12,
+				TimeUnit.HOURS);
 	}
 
 	public void publishPublishEvent(PublishLogEvent source) {
@@ -87,8 +93,6 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 			id++;
 			fileChannel.close();
 			fileChannel = null;
-			// 自动删除老旧文件
-			executorService.submit(this::autoDeleteOldFile);
 		}
 		String fileName = tracerName + id + ".csv";
 		if (Objects.isNull(fileChannel)) {
@@ -111,7 +115,7 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 		Map<String, PublishLogVO> tmpRecord = new LinkedHashMap<>(32);
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(new FileInputStream(file)))) {
-			String line = "";
+			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] infos = line.split(",");
 				RequireHelper.requireNotNull(infos, "This line is null");
@@ -135,9 +139,15 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 	}
 
 	private void autoDeleteOldFile() {
-		int lastDeleteFileId = (int) Math.max(0, id - 1);
-		String fileName = tracerName + lastDeleteFileId + ".csv";
-		DiskUtils.deleteFile(PathUtils.finalPath(path), fileName);
+		File file = new File(PathUtils.finalPath(path));
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			assert files != null;
+			Arrays.sort(files, (o1, o2) -> (int) (o1.lastModified() - o2.lastModified()));
+			for (int i = 0; i < files.length - 10; i++) {
+				files[i].delete();
+			}
+		}
 	}
 
 }
