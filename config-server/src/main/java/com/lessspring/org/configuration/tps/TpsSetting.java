@@ -20,7 +20,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -29,21 +31,27 @@ import java.util.List;
 @ConfigurationProperties(prefix = "com.lessspring.org.config-manager.tps")
 public class TpsSetting {
 
-	private List<TpsResource> resources = new ArrayList<>();
+	private ArrayList<TpsResource> resources = new ArrayList<>();
 
 	public List<TpsResource> getResources() {
 		return resources;
 	}
 
-	public void setResources(List<TpsResource> resources) {
+	public void setResources(ArrayList<TpsResource> resources) {
 		this.resources = resources;
+	}
+
+	public void updateResource(TpsResource... _resources) {
+		List<TpsResource> resourceList = Arrays.asList(_resources);
+		resources.removeAll(resourceList);
+		resources.addAll(resourceList);
 	}
 
 	public static class TpsResource {
 
 		private String resourceName;
-		private Integer qps;
-		private Duration duration;
+		private Integer qps = 0;
+		private Duration duration = Duration.ofSeconds(1);
 
 		public String getResourceName() {
 			return resourceName;
@@ -67,6 +75,24 @@ public class TpsSetting {
 
 		public void setDuration(Duration duration) {
 			this.duration = duration;
+		}
+
+		@Override
+		public String toString() {
+			return "TpsResource{" +
+					"resourceName='" + resourceName + '\'' +
+					", qps=" + qps +
+					", duration=" + duration +
+					'}';
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof TpsResource) {
+				TpsResource tr2 = (TpsResource) obj;
+				return Objects.equals(resourceName, tr2.resourceName);
+			}
+			return false;
 		}
 	}
 

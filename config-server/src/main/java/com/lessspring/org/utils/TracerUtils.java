@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +40,7 @@ import com.lessspring.org.pojo.event.config.PublishLogEventHandler;
 import com.lessspring.org.pojo.vo.PublishLogVO;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -52,21 +52,15 @@ import org.springframework.stereotype.Component;
 @Component
 public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 
-	private long id = 0;
+	private static final TracerUtils SINGLE_TON = new TracerUtils();
 	private final String tracerName = "config-manager-tracer-";
 	private final String path = "watch-publish-tracer";
-	private int countReuseAble = 100_000;
-	private FileChannel fileChannel;
 	private final ScheduledExecutorService executorService = Executors
 			.newSingleThreadScheduledExecutor(
 					new NameThreadFactory("com.lessspring.org.config-manager.tracer-"));
-
-	private static final TracerUtils SINGLE_TON = new TracerUtils();
-
-	public static TracerUtils getSingleton() {
-		return SINGLE_TON;
-	}
-
+	private long id = 0;
+	private int countReuseAble = 100_000;
+	private FileChannel fileChannel;
 	private Disruptor<PublishLogEventHandler> disruptor = DisruptorFactory
 			.build(PublishLogEventHandler::new, PublishLogEvent.class);
 
@@ -74,6 +68,10 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 		// 自动删除老旧文件
 		executorService.scheduleWithFixedDelay(this::autoDeleteOldFile, 6, 12,
 				TimeUnit.HOURS);
+	}
+
+	public static TracerUtils getSingleton() {
+		return SINGLE_TON;
 	}
 
 	public void publishPublishEvent(PublishLogEvent source) {

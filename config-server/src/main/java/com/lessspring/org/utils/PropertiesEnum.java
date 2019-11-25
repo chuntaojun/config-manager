@@ -61,8 +61,7 @@ public final class PropertiesEnum {
 		/**
 		 * error email label
 		 */
-		ERROR(-1, "error email")
-		;
+		ERROR(-1, "error email");
 
 		int code;
 		String desc;
@@ -109,10 +108,6 @@ public final class PropertiesEnum {
 			this.type = type;
 		}
 
-		public short getType() {
-			return type;
-		}
-
 		public static Role choose(short type) {
 			if (type == (short) 0) {
 				return Role.ADMIN;
@@ -127,6 +122,10 @@ public final class PropertiesEnum {
 				return Role.TESTER;
 			}
 			throw new IllegalArgumentException("Illegal user roles");
+		}
+
+		public short getType() {
+			return type;
 		}
 	}
 

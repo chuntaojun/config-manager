@@ -16,10 +16,10 @@
  */
 package com.lessspring.org.pojo.event.email;
 
-import com.lessspring.org.utils.PropertiesEnum;
-
 import java.io.File;
 import java.util.Objects;
+
+import com.lessspring.org.utils.PropertiesEnum;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

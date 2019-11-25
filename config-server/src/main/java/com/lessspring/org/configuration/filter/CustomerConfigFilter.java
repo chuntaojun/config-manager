@@ -16,17 +16,16 @@
  */
 package com.lessspring.org.configuration.filter;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import com.lessspring.org.Priority;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.utils.GsonUtils;
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -54,9 +53,9 @@ public interface CustomerConfigFilter extends Priority {
 	@SuppressWarnings("unchecked")
 	default Mono<Void> filterResponse(ServerHttpResponse response, HttpStatus status,
 			String s) {
-		return response.writeWith(
-				Mono.just(response.bufferFactory().wrap(GsonUtils.toJsonBytes(ResponseData
-						.<String>builder().withCode(status.value()).withData(s).build()))));
+		return response.writeWith(Mono.just(response.bufferFactory()
+				.wrap(GsonUtils.toJsonBytes(ResponseData.<String> builder()
+						.withCode(status.value()).withData(s).build()))));
 	}
 
 	/**

@@ -17,8 +17,9 @@
 
 package com.lessspring.org.configuration.filter;
 
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
@@ -30,7 +31,7 @@ public class IgnoreResourceConfigFilter implements CustomerConfigFilter {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, FilterChain chain) {
-		final String url = exchange.getRequest().getPath().contextPath().value();
+		final String url = exchange.getRequest().getPath().toString();
 		if (url.contains(ignore)) {
 			return filterResponse(exchange.getResponse(), "");
 		}

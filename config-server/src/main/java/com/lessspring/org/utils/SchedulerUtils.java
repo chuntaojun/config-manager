@@ -35,20 +35,12 @@ import lombok.extern.slf4j.Slf4j;
 public class SchedulerUtils {
 
 	private static final SchedulerUtils INSTANCE = new SchedulerUtils();
-
-	public static SchedulerUtils getSingleton() {
-		return INSTANCE;
-	}
-
 	private static final int CORE_POOL_SIZE = 512;
 	private static final int MAX_POOL_SIZE = 1024;
 	private static final long KEEP_ALIVE_TIME = 60;
-
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
-
 	private ThreadFactory threadFactory = new NameThreadFactory(
 			"com.lessspring.org.config-manager.webHandler-");
-
 	private RejectedExecutionHandler rejectedExecutionHandler = new BaseRejectedExecutionHandler(
 			"com.lessspring.org.config-manager.webHandler", true,
 			"com.lessspring.org.config-manager.webHandler") {
@@ -59,8 +51,11 @@ public class SchedulerUtils {
 					executor.toString());
 		}
 	};
-
 	public final ThreadPoolExecutor WEB_HANDLER = newThreadPoolExecutor();
+
+	public static SchedulerUtils getSingleton() {
+		return INSTANCE;
+	}
 
 	private ThreadPoolExecutor newThreadPoolExecutor() {
 		BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(CORE_POOL_SIZE,

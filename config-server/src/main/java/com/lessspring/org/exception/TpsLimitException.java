@@ -26,11 +26,6 @@ public class TpsLimitException extends BaseException {
 
 	private static final long serialVersionUID = 5464340790545128228L;
 
-	@Override
-	public Code code() {
-		return Code.SERVER_BUSY;
-	}
-
 	public TpsLimitException() {
 		super();
 	}
@@ -50,5 +45,10 @@ public class TpsLimitException extends BaseException {
 	protected TpsLimitException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.SERVER_BUSY;
 	}
 }

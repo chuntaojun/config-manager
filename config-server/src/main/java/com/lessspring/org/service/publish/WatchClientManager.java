@@ -59,9 +59,8 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	private final TracerUtils tracer = TracerUtils.getSingleton();
-
-	private long clientCnt = 0;
 	private final Object monitor = new Object();
+	private long clientCnt = 0;
 	private Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
 			8);
 
@@ -142,7 +141,9 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 
 				@Override
 				public void onError(Exception exception) {
-					log.error("[doQuickCompare] when execute read job has some error : {}", exception);
+					log.error(
+							"[doQuickCompare] when execute read job has some error : {}",
+							exception);
 				}
 			});
 		});

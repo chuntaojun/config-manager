@@ -26,11 +26,6 @@ public class DiskException extends BaseException {
 
 	private static final long serialVersionUID = -1446108721154799171L;
 
-	@Override
-	public Code code() {
-		return Code.DISK_OVERFLOW;
-	}
-
 	public DiskException() {
 		super();
 	}
@@ -50,5 +45,10 @@ public class DiskException extends BaseException {
 	protected DiskException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.DISK_OVERFLOW;
 	}
 }

@@ -47,10 +47,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
@@ -60,12 +57,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -143,21 +139,26 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 	public Mono<ServerResponse> jvmHeapDump(ServerRequest request) {
 		final String fileName = systemEnv.jvmHeapDumpFileNameSuppiler.get();
 		log.info("[Jvm heap dump] file name : {}", fileName);
+		final File[] files = new File[] { null };
 		Supplier<Resource> callable = () -> {
 			try {
 				final boolean isLive = Boolean.parseBoolean(
 						(String) request.attribute("isLive").orElse("true"));
 				final File file = JvmUtils.jMap(fileName, isLive);
+				files[0] = file;
 				return new UrlResource(file.toURI());
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		};
-		return ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
-				.header(HttpHeaders.CONTENT_DISPOSITION,
-						"attachment; filename=\"" + fileName + "\"")
-				.body(BodyInserters.fromResource(callable.get()));
+		return RenderUtils.render(callable.get()).doOnTerminate(() -> {
+			if (Objects.nonNull(files[0])) {
+				if (files[0].exists()) {
+					files[0].delete();
+				}
+			}
+		});
 	}
 
 	@SuppressWarnings("all")
@@ -188,7 +189,7 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 					}
 					return Binder.get(environment);
 				}).flatMap(binder -> {
-					ResolvableType type = getBeanType(tpsSetting, "tpsSetting");
+					ResolvableType type = getBeanType(tpsSetting);
 					Bindable target = Bindable.of(type).withExistingValue(tpsSetting);
 					binder.bind(PublishQpsRequest.PREFIX, target);
 					tpsAnnotationProcessor.onNotify(Occurrence.newInstance(tpsSetting),
@@ -204,8 +205,14 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 				});
 	}
 
-	private ResolvableType getBeanType(Object bean, String beanName) {
-		Method factoryMethod = this.beanFactoryMetadata.findFactoryMethod(beanName);
+	@NotNull
+	@Override
+	public Mono<ServerResponse> queryQpsSetting(ServerRequest request) {
+		return RenderUtils.render(Mono.just(tpsSetting));
+	}
+
+	private ResolvableType getBeanType(Object bean) {
+		Method factoryMethod = this.beanFactoryMetadata.findFactoryMethod("tpsSetting");
 		if (factoryMethod != null) {
 			return ResolvableType.forMethodReturnType(factoryMethod);
 		}

@@ -73,4 +73,13 @@ public interface SystemHandler {
 	@NotNull
 	Mono<ServerResponse> publishQpsSetting(ServerRequest request);
 
+	/**
+	 * query qps setting
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> queryQpsSetting(ServerRequest request);
+
 }

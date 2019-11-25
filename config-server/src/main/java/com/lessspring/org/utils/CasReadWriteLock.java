@@ -1,11 +1,11 @@
 package com.lessspring.org.utils;
 
-import com.lessspring.org.ThreadUtils;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.lessspring.org.ThreadUtils;
 
 /**
  * A simple read-write lock implementation
@@ -24,56 +24,58 @@ public class CasReadWriteLock {
 
 	private final AtomicInteger monitor = new AtomicInteger(IN_FREE_STATUS);
 
-    private final AtomicBoolean inHappyCode = new AtomicBoolean(true);
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+	private final AtomicBoolean inHappyCode = new AtomicBoolean(true);
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
 	public boolean tryReadLock() {
 		return tryReadLock(MAX_RETRY_CNT);
 	}
 
-    public boolean tryReadLock(int retryCnt) {
+	public boolean tryReadLock(int retryCnt) {
 		for (int i = 0; i < retryCnt; i++) {
-		    if (!inHappyCode.get()) {
-		        break;
-            }
+			if (!inHappyCode.get()) {
+				break;
+			}
 			if (monitor.compareAndSet(IN_FREE_STATUS, IN_READ_STATUS)
 					|| monitor.get() == IN_READ_STATUS) {
-			    inHappyCode.lazySet(true);
+				inHappyCode.lazySet(true);
 				return true;
 			}
-            ThreadUtils.sleep(1);
+			ThreadUtils.sleep(1);
 		}
 		inHappyCode.lazySet(false);
-        try {
-            return readLock.tryLock(1000L, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            return false;
-        }
+		try {
+			return readLock.tryLock(1000L, TimeUnit.MILLISECONDS);
+		}
+		catch (InterruptedException e) {
+			return false;
+		}
 	}
 
 	public boolean tryWriteLock() {
 		return tryWriteLock(MAX_RETRY_CNT);
 	}
 
-    public boolean tryWriteLock(int retryCnt) {
+	public boolean tryWriteLock(int retryCnt) {
 		for (int i = 0; i < retryCnt; i++) {
-            if (!inHappyCode.get()) {
-                break;
-            }
+			if (!inHappyCode.get()) {
+				break;
+			}
 			if (monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
-                inHappyCode.lazySet(true);
+				inHappyCode.lazySet(true);
 				return true;
 			}
-            ThreadUtils.sleep(1);
+			ThreadUtils.sleep(1);
 		}
-        inHappyCode.lazySet(false);
-        try {
-            return writeLock.tryLock(1000L, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            return false;
-        }
+		inHappyCode.lazySet(false);
+		try {
+			return writeLock.tryLock(1000L, TimeUnit.MILLISECONDS);
+		}
+		catch (InterruptedException e) {
+			return false;
+		}
 	}
 
 	public void unReadLock() {
@@ -81,9 +83,9 @@ public class CasReadWriteLock {
 		readLock.unlock();
 	}
 
-    public void unWriteLock() {
-        monitor.lazySet(IN_FREE_STATUS);
-        writeLock.unlock();
-    }
+	public void unWriteLock() {
+		monitor.lazySet(IN_FREE_STATUS);
+		writeLock.unlock();
+	}
 
 }

@@ -24,7 +24,9 @@ import com.lessspring.org.tps.FailStrategy;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -32,11 +34,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -44,6 +50,7 @@ import java.util.function.Supplier;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Configuration
 public class TpsConfiguration {
 
@@ -57,16 +64,14 @@ public class TpsConfiguration {
 		return new TpsSetting();
 	}
 
-	public static class TpsAnnotationProcessor implements BeanPostProcessor, Watcher<TpsSetting>, ApplicationContextAware {
-
-		@Autowired
-		private TpsSetting tpsSetting;
-
-		@Autowired
-		private TpsAnnotationProcessor annotationProcessor;
+	public static class TpsAnnotationProcessor
+			implements BeanPostProcessor, Watcher<TpsSetting>, ApplicationContextAware {
 
 		private final TpsManager tpsManager;
-
+		@Autowired
+		private TpsSetting tpsSetting;
+		@Autowired
+		private TpsAnnotationProcessor annotationProcessor;
 		private ApplicationContext applicationContext;
 
 		public TpsAnnotationProcessor(TpsManager tpsManager) {
@@ -76,26 +81,48 @@ public class TpsConfiguration {
 		@Override
 		public Object postProcessBeforeInitialization(@NotNull Object bean,
 				String beanName) throws BeansException {
-			final Map<String, Double> customer = new HashMap<>(8);
+			final Map<String, Tuple2<Double, TpsSetting.TpsResource>> customer = new HashMap<>(
+					8);
 			for (TpsSetting.TpsResource resource : tpsSetting.getResources()) {
-				Duration duration = resource.getDuration();
-				customer.put(resource.getResourceName(),
-						resource.getQps() * 1.0D / duration.getSeconds());
+				Duration duration = Optional.ofNullable(resource.getDuration())
+						.orElse(Duration.ofSeconds(1));
+				Tuple2<Double, TpsSetting.TpsResource> tuple2 = Tuples
+						.of(resource.getQps() * 1.0D / duration.getSeconds(), resource);
+				customer.put(resource.getResourceName(), tuple2);
 			}
-			Class<?> cls = bean.getClass();
+			Class<?> cls;
+			if (AopUtils.isCglibProxy(bean) || AopUtils.isAopProxy(bean)) {
+				cls = AopUtils.getTargetClass(bean);
+			}
+			else {
+				cls = bean.getClass();
+			}
 			if (cls.isAnnotationPresent(OpenTpsLimit.class)) {
 				Method[] methods = cls.getMethods();
 				for (Method method : methods) {
 					LimitRule rule = method.getAnnotation(LimitRule.class);
 					if (rule != null) {
 						Supplier<TpsManager.LimitRuleEntry> limiterSupplier = () -> {
-							final Double customerQps = customer.get(rule.resource());
+							Tuple2<Double, TpsSetting.TpsResource> tuple2 = customer
+									.get(rule.resource());
+							if (Objects.isNull(tuple2)) {
+								TpsSetting.TpsResource tpsResource = new TpsSetting.TpsResource();
+								tpsResource.setResourceName(rule.resource());
+								tuple2 = Tuples.of(0D, tpsResource);
+							}
+							final double customerQps = tuple2.getT1();
 							final TimeUnit unit = rule.timeUnit();
-							if (customerQps != null && customerQps == -1) {
+							// if qps == -1, Close the QPS current limit of the interface
+							if (customerQps == -1) {
 								return null;
 							}
-							double qps = customerQps == null ? rule.qps()
+							double qps = customerQps == 0 ? rule.qps()
 									: customerQps / unit.toSeconds(1);
+							final TpsSetting.TpsResource resource = tuple2.getT2();
+							resource.setQps(rule.qps());
+							resource.setDuration(Duration.ofSeconds(unit.toSeconds(1)));
+							log.info("[TpsResource] : {}", resource);
+							tpsSetting.updateResource(resource);
 							final RateLimiter limiter = RateLimiter.create(qps);
 							Class<? extends FailStrategy> failStrategy = rule
 									.failStrategy();

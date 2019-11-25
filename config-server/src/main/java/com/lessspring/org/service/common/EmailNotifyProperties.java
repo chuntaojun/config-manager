@@ -17,11 +17,12 @@
 
 package com.lessspring.org.service.common;
 
-import com.lessspring.org.utils.PropertiesEnum;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.lessspring.org.utils.PropertiesEnum;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
@@ -30,43 +31,43 @@ import java.util.List;
 @ConfigurationProperties(prefix = "com.lessspring.org.config-manager.email.notify")
 public class EmailNotifyProperties {
 
-    private List<NotifyReceiver> notifyReceivers = new ArrayList<>();
+	private List<NotifyReceiver> notifyReceivers = new ArrayList<>();
 
-    public List<NotifyReceiver> getNotifyReceivers() {
-        return notifyReceivers;
-    }
+	public List<NotifyReceiver> getNotifyReceivers() {
+		return notifyReceivers;
+	}
 
-    public void setNotifyReceivers(List<NotifyReceiver> notifyReceivers) {
-        this.notifyReceivers = notifyReceivers;
-    }
+	public void setNotifyReceivers(List<NotifyReceiver> notifyReceivers) {
+		this.notifyReceivers = notifyReceivers;
+	}
 
-    public static class NotifyReceiver {
+	public static class NotifyReceiver {
 
-        private PropertiesEnum.EmailType notifyType;
-        private String receiverEmail;
+		private PropertiesEnum.EmailType notifyType;
+		private String receiverEmail;
 
-        public NotifyReceiver() {
-        }
+		public NotifyReceiver() {
+		}
 
-        public NotifyReceiver(PropertiesEnum.EmailType notifyType, String receiverEmail) {
-            this.notifyType = notifyType;
-            this.receiverEmail = receiverEmail;
-        }
+		public NotifyReceiver(PropertiesEnum.EmailType notifyType, String receiverEmail) {
+			this.notifyType = notifyType;
+			this.receiverEmail = receiverEmail;
+		}
 
-        public PropertiesEnum.EmailType getNotifyType() {
-            return notifyType;
-        }
+		public PropertiesEnum.EmailType getNotifyType() {
+			return notifyType;
+		}
 
-        public void setNotifyType(PropertiesEnum.EmailType notifyType) {
-            this.notifyType = notifyType;
-        }
+		public void setNotifyType(PropertiesEnum.EmailType notifyType) {
+			this.notifyType = notifyType;
+		}
 
-        public String getReceiverEmail() {
-            return receiverEmail;
-        }
+		public String getReceiverEmail() {
+			return receiverEmail;
+		}
 
-        public void setReceiverEmail(String receiverEmail) {
-            this.receiverEmail = receiverEmail;
-        }
-    }
+		public void setReceiverEmail(String receiverEmail) {
+			this.receiverEmail = receiverEmail;
+		}
+	}
 }

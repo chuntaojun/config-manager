@@ -16,12 +16,17 @@
  */
 package com.lessspring.org.configuration;
 
+import java.util.Collections;
+import java.util.Objects;
+
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import reactor.netty.http.server.HttpServer;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -34,10 +39,6 @@ import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.netty.http.server.HttpServer;
-
-import java.util.Collections;
-import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -46,16 +47,13 @@ import java.util.Objects;
 @Configuration
 public class HttpServerConfiguration {
 
+	private final Environment environment;
 	@Value("${com.lessspring.org.config-manager.netty.loopThreads}")
 	private int loopThreads;
-
 	@Value("${com.lessspring.org.config-manager.netty.workerThreads}")
 	private int workerThreads;
-
 	@Value("${server.port}")
 	private int serverPort;
-
-	private final Environment environment;
 
 	public HttpServerConfiguration(Environment environment) {
 		this.environment = environment;
@@ -88,8 +86,8 @@ public class HttpServerConfiguration {
 		ReactorHttpHandlerAdapter httpHandlerAdapter = new ReactorHttpHandlerAdapter(
 				handler);
 		HttpServer httpServer = HttpServer.create().host("localhost")
-				.port(Integer.parseInt(Objects.requireNonNull(environment
-						.getProperty("server.port"))));
+				.port(Integer.parseInt(
+						Objects.requireNonNull(environment.getProperty("server.port"))));
 		httpServer = httpServer
 				.tcpConfiguration(tcpServer -> tcpServer.bootstrap(serverBootstrap -> {
 					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads);

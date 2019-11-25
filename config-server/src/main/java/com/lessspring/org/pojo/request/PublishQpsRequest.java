@@ -25,37 +25,37 @@ import java.time.Duration;
  */
 public class PublishQpsRequest {
 
-    public static final String PREFIX = "com.lessspring.org.config-manager.tps";
+	public static final String PREFIX = "com.lessspring.org.config-manager.tps";
 
-    private String resourceName;
-    private Integer qps;
-    private Duration duration;
+	private String resourceName;
+	private Integer qps;
+	private Duration duration;
 
-    public static String getPREFIX() {
-        return PREFIX;
-    }
+	public static String getPREFIX() {
+		return PREFIX;
+	}
 
-    public String getResourceName() {
-        return resourceName;
-    }
+	public String getResourceName() {
+		return resourceName;
+	}
 
-    public void setResourceName(String resourceName) {
-        this.resourceName = resourceName;
-    }
+	public void setResourceName(String resourceName) {
+		this.resourceName = resourceName;
+	}
 
-    public Integer getQps() {
-        return qps;
-    }
+	public Integer getQps() {
+		return qps;
+	}
 
-    public void setQps(Integer qps) {
-        this.qps = qps;
-    }
+	public void setQps(Integer qps) {
+		this.qps = qps;
+	}
 
-    public Duration getDuration() {
-        return duration;
-    }
+	public Duration getDuration() {
+		return duration;
+	}
 
-    public void setDuration(Duration duration) {
-        this.duration = duration;
-    }
+	public void setDuration(Duration duration) {
+		this.duration = duration;
+	}
 }

@@ -4,6 +4,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.service.security.AuthorityProcessor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,13 +15,13 @@ import org.springframework.stereotype.Service;
 @Service(value = "systemAuthorityProcessorImpl")
 public class SystemAuthorityProcessorImpl implements AuthorityProcessor {
 
-    @Override
-    public boolean hasAuth(Privilege privilege) {
-        return false;
-    }
+	@Override
+	public boolean hasAuth(Privilege privilege) {
+		return false;
+	}
 
-    @Override
-    public ResponseData<?> createAuth(String namespaceId) {
-        return null;
-    }
+	@Override
+	public ResponseData<?> createAuth(String namespaceId) {
+		return null;
+	}
 }

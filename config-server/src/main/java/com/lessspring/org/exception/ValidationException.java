@@ -23,13 +23,8 @@ import com.lessspring.org.constant.Code;
  * @since 0.0.1
  */
 public class ValidationException extends BaseException {
-	
-	private static final long serialVersionUID = -9218287556864398381L;
 
-	@Override
-	public Code code() {
-		return Code.VERIFY_ERROR;
-	}
+	private static final long serialVersionUID = -9218287556864398381L;
 
 	public ValidationException() {
 		super();
@@ -50,5 +45,10 @@ public class ValidationException extends BaseException {
 	protected ValidationException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.VERIFY_ERROR;
 	}
 }

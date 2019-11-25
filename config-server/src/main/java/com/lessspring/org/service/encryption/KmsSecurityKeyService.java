@@ -27,28 +27,28 @@ import com.lessspring.org.model.vo.ResponseData;
  */
 public interface KmsSecurityKeyService {
 
-    /**
-     * create kms key
-     *
-     * @param request {@link KmsKeyRequest}
-     * @return create operation label
-     */
-    ResponseData<Boolean> createSecretKey(KmsKeyRequest request);
+	/**
+	 * create kms key
+	 *
+	 * @param request {@link KmsKeyRequest}
+	 * @return create operation label
+	 */
+	ResponseData<Boolean> createSecretKey(KmsKeyRequest request);
 
-    /**
-     * query kms key
-     *
-     * @param request {@link KmsKeyRequest}
-     * @return {@link KmsKeyResponse}
-     */
-    ResponseData<KmsKeyResponse> queryKmsKey(KmsKeyRequest request);
+	/**
+	 * query kms key
+	 *
+	 * @param request {@link KmsKeyRequest}
+	 * @return {@link KmsKeyResponse}
+	 */
+	ResponseData<KmsKeyResponse> queryKmsKey(KmsKeyRequest request);
 
-    /**
-     * remove secret key
-     *
-     * @param request {@link KmsKeyRequest}
-     * @return remove operation label
-     */
-    ResponseData<Boolean> deleteSecretKey(KmsKeyRequest request);
+	/**
+	 * remove secret key
+	 *
+	 * @param request {@link KmsKeyRequest}
+	 * @return remove operation label
+	 */
+	ResponseData<Boolean> deleteSecretKey(KmsKeyRequest request);
 
 }

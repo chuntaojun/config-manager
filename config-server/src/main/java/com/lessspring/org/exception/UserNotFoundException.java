@@ -26,11 +26,6 @@ public class UserNotFoundException extends BaseException {
 
 	private static final long serialVersionUID = -7033386107872492814L;
 
-	@Override
-	public Code code() {
-		return Code.USER_NOT_FOUNT;
-	}
-
 	public UserNotFoundException() {
 		super();
 	}
@@ -50,5 +45,10 @@ public class UserNotFoundException extends BaseException {
 	protected UserNotFoundException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.USER_NOT_FOUNT;
 	}
 }

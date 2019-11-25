@@ -16,6 +16,16 @@
  */
 package com.lessspring.org.service.common.impl;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
@@ -25,21 +35,13 @@ import com.lessspring.org.service.common.EmailService;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -50,13 +52,10 @@ import java.util.Map;
 public class EmailServiceImpl extends Publisher<BaseEmailEvent>
 		implements EmailService, Watcher<BaseEmailEvent> {
 
+	private final JavaMailSender mailSender;
 	@Autowired
 	private EmailNotifyProperties emailNotifyProperties;
-
 	private Map<PropertiesEnum.EmailType, List<String>> receivers = new HashMap<>();
-
-	private final JavaMailSender mailSender;
-
 	private SystemEnv systemEnv;
 
 	public EmailServiceImpl(JavaMailSender mailSender) {

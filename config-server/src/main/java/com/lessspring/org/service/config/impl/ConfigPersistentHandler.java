@@ -54,16 +54,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component(value = "persistentHandler")
 public class ConfigPersistentHandler extends AbstracePersistentHandler {
 
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
-
 	@Resource
 	private ConfigInfoHistoryMapper historyMapper;
-
 	@Resource
 	private TransactionTemplate transactionTemplate;
-
-	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	@Override
 	public Publisher getPublisher() {

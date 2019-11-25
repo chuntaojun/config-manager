@@ -16,15 +16,14 @@
  */
 package com.lessspring.org.configuration.filter;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.ServiceLoader;
-
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.ServiceLoader;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -44,7 +43,7 @@ class DefaultFilterChain implements FilterChain {
 			filters.add(filter);
 		}
 		filters.sort(Comparator.comparingInt(CustomerConfigFilter::priority));
-		filters.addFirst(configFilter);
+		filters.addLast(configFilter);
 	}
 
 	@Override

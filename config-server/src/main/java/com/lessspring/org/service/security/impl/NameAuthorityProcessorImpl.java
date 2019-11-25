@@ -21,6 +21,7 @@ import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.repository.NamespacePermissionsMapper;
 import com.lessspring.org.service.security.AuthorityProcessor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -32,6 +33,7 @@ import java.util.Set;
  * @since 0.0.1
  */
 @Slf4j
+@Primary
 @Component(value = "namespaceAuthorityProcessor")
 public class NameAuthorityProcessorImpl implements AuthorityProcessor {
 

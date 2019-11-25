@@ -26,8 +26,8 @@ import com.lessspring.org.service.encryption.EncryptionService;
  */
 public class KmsEncryptionServiceImpl implements EncryptionService {
 
-    @Override
-    public void handle(PublishConfigRequest request) {
+	@Override
+	public void handle(PublishConfigRequest request) {
 
-    }
+	}
 }

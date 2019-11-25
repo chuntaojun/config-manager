@@ -16,13 +16,6 @@
  */
 package com.lessspring.org.configuration.filter;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.model.vo.ResponseData;
@@ -32,8 +25,6 @@ import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -42,6 +33,13 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.lessspring.org.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 
@@ -53,11 +51,10 @@ import static com.lessspring.org.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 @Configuration
 public class ConfigWebFilter implements WebFilter {
 
-	@Value("${com.lessspring.org.config-manager.anyuri:null}")
-	private String[] anyOneUri;
-
 	private final FilterChain filterChain;
 	private final SecurityService securityService;
+	@Value("${com.lessspring.org.config-manager.anyuri:null}")
+	private String[] anyOneUri;
 
 	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
 		this.securityService = securityService;
@@ -80,15 +77,15 @@ public class ConfigWebFilter implements WebFilter {
 			@NotNull WebFilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
 		String path = request.getPath().value();
-		// To release the URL white list
-		if (uriMatcher(path, anyOneUri)) {
-			return chain.filter(exchange);
-		}
 		// Give priority to perform user custom interceptors
 		Mono<Void> mono = filterChain.filter(exchange);
 		filterChain.destroy();
 		if (Objects.nonNull(mono)) {
 			return mono;
+		}
+		// To release the URL white list
+		if (uriMatcher(path, anyOneUri)) {
+			return chain.filter(exchange);
 		}
 		boolean hasAuth = permissionIntercept(exchange);
 		if (!hasAuth) {

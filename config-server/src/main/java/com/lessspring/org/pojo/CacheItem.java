@@ -20,13 +20,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.lessspring.org.NameUtils;
-
-import com.lessspring.org.ThreadUtils;
 import com.lessspring.org.utils.CasReadWriteLock;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,23 +39,16 @@ public class CacheItem {
 	private final String dataId;
 
 	private final boolean file;
-
-	private volatile String lastMd5;
-
-	private volatile long lastUpdateTime;
-
-	private volatile boolean beta;
-
 	private final String key;
-
 	private final Object locker = new Object();
-
-	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
-
 	/**
 	 * 一个简单的读写锁实现
 	 */
 	private final CasReadWriteLock casReadWriteLock = new CasReadWriteLock();
+	private volatile String lastMd5;
+	private volatile long lastUpdateTime;
+	private volatile boolean beta;
+	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 
 	public CacheItem(String namespaceId, String groupId, String dataId, boolean file) {
 		this.namespaceId = namespaceId;
