@@ -59,18 +59,18 @@ public class ConfigEnvironmentProcessor implements EnvironmentPostProcessor {
 
 		if (StringUtils.isNoneEmpty(emailHost, emailUsername, emailPwd)) {
 			String semailHost = "spring.mail.host";
-			environment.getSystemEnvironment().put(semailHost, emailHost);
+			environment.getSystemProperties().put(semailHost, emailHost);
 			String semailUsername = "spring.mail.username";
-			environment.getSystemEnvironment().put(semailUsername, emailUsername);
+			environment.getSystemProperties().put(semailUsername, emailUsername);
 			String semailPwd = "spring.mail.password";
-			environment.getSystemEnvironment().put(semailPwd, emailPwd);
+			environment.getSystemProperties().put(semailPwd, emailPwd);
 			String semailSmtpAuth = "spring.mail.properties.mail.smtp.auth";
-			environment.getSystemEnvironment().put(semailSmtpAuth, emailSmtpAuth);
+			environment.getSystemProperties().put(semailSmtpAuth, emailSmtpAuth);
 			String semailSmtpStarttlsEnable = "spring.mail.properties.mail.smtp.starttls.enable";
-			environment.getSystemEnvironment().put(semailSmtpStarttlsEnable,
+			environment.getSystemProperties().put(semailSmtpStarttlsEnable,
 					emailSmtpStarttlsEnable);
 			String semailSmtpStarttlsRequired = "spring.mail.properties.mail.smtp.starttls.required";
-			environment.getSystemEnvironment().put(semailSmtpStarttlsRequired,
+			environment.getSystemProperties().put(semailSmtpStarttlsRequired,
 					emailSmtpStarttlsRequired);
 		}
 

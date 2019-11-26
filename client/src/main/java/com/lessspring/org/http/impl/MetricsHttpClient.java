@@ -54,7 +54,8 @@ public class MetricsHttpClient implements HttpClient {
 		ResponseData<T> response = null;
 		try {
 			response = client.get(url, header, query, token);
-		} finally {
+		}
+		finally {
 			timer.observeDuration();
 			timer.close();
 		}
@@ -68,7 +69,8 @@ public class MetricsHttpClient implements HttpClient {
 		ResponseData<T> response = null;
 		try {
 			response = client.delete(url, header, query, token);
-		} finally {
+		}
+		finally {
 			timer.observeDuration();
 			timer.close();
 		}
@@ -82,7 +84,8 @@ public class MetricsHttpClient implements HttpClient {
 		ResponseData<T> response = null;
 		try {
 			response = client.put(url, header, query, body, token);
-		} finally {
+		}
+		finally {
 			timer.observeDuration();
 			timer.close();
 		}
@@ -96,7 +99,8 @@ public class MetricsHttpClient implements HttpClient {
 		ResponseData<T> response = null;
 		try {
 			response = client.post(url, header, query, body, token);
-		} finally {
+		}
+		finally {
 			timer.observeDuration();
 			timer.close();
 		}

@@ -40,12 +40,13 @@ import io.prometheus.client.Histogram;
  */
 public final class MetricsMonitor {
 
-    private static Histogram confClientRequestHistogram = Histogram.build().labelNames("module", "method", "url", "code")
-            .name("conf_client_request").help("conf_client_request")
-            .register();
+	private static Histogram confClientRequestHistogram = Histogram.build()
+			.labelNames("module", "method", "url", "code").name("conf_client_request")
+			.help("conf_client_request").register();
 
-    public static Histogram.Timer getRequestMonitor(String method, String url, String code) {
-        return confClientRequestHistogram.labels("Conf", method, url, code).startTimer();
-    }
+	public static Histogram.Timer getRequestMonitor(String method, String url,
+			String code) {
+		return confClientRequestHistogram.labels("Conf", method, url, code).startTimer();
+	}
 
 }

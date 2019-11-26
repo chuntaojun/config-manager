@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
-import com.lessspring.org.ClassLoaderSwitcherUtils;
+import com.lessspring.org.ClassLoaderSwitchUtils;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
@@ -55,7 +55,7 @@ public class WatchConfigWorker implements LifeCycle {
 
 	private static Logger logger = Logger.getAnonymousLogger();
 
-	private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
+	private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(
 			Runtime.getRuntime().availableProcessors(),
 			new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
 
@@ -78,7 +78,7 @@ public class WatchConfigWorker implements LifeCycle {
 
 	public void setConfigManager(CacheConfigManager configManager) {
 		this.configManager = configManager;
-		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
+		EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void notifyWatcher(ConfigInfo configInfo) {
@@ -89,13 +89,12 @@ public class WatchConfigWorker implements LifeCycle {
 
 		// do some processor to configInfo by filter chain
 		configFilterManager.doFilter(configInfo);
-
 		for (AbstractListener listener : listeners) {
 			Runnable job = () -> {
 				// In order to make the spi mechanisms can work better
-				ClassLoaderSwitcherUtils.change(listener);
+				ClassLoaderSwitchUtils.transfer(listener);
 				listener.onReceive(configInfo);
-				ClassLoaderSwitcherUtils.rollBack();
+				ClassLoaderSwitchUtils.rollBack();
 			};
 			Executor userExecutor = listener.executor();
 			if (Objects.isNull(userExecutor)) {
@@ -113,7 +112,7 @@ public class WatchConfigWorker implements LifeCycle {
 		receiver = null;
 		configManager = null;
 		LifeCycleHelper.invokeDestroy(httpClient);
-		ThreadPoolHelper.invokeShutdown(executor);
+		ThreadPoolHelper.invokeShutdown(EXECUTOR);
 	}
 
 	@Override
@@ -134,7 +133,7 @@ public class WatchConfigWorker implements LifeCycle {
 			receiver.cancle();
 			receiver = null;
 		}
-		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
+		EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void onError(Throwable throwable) {
@@ -162,7 +161,7 @@ public class WatchConfigWorker implements LifeCycle {
 				watchInfo);
 		final Body body = Body.objToBody(request);
 
-		// Create a receiving server push change event receiver
+		// Create a receiving server push transfer event receiver
 		receiver = new EventReceiver<WatchResponse>() {
 
 			private String name;

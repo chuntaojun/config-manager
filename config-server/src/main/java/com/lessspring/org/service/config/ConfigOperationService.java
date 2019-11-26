@@ -17,6 +17,7 @@
 package com.lessspring.org.service.config;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -416,16 +417,19 @@ public class ConfigOperationService
 	@Override
 	public void onNotify(Occurrence occurrence, Publisher publisher) {
 		Object event = occurrence.getOrigin();
-		CompletableFuture<Boolean> future = occurrence.getAnswer();
-		future.complete(true);
-		if (event instanceof PublishConfigHistory) {
-			PublishConfigHistory request = (PublishConfigHistory) event;
-			saveConfigHistory(request.getNamespaceId(), request);
-			return;
-		}
-		if (event instanceof DeleteConfigHistory) {
-			DeleteConfigHistory request = (DeleteConfigHistory) event;
-			removeConfigHistory(request.getNamespaceId(), request);
-		}
+		Optional<CompletableFuture<Boolean>> futureOpt = occurrence.getAnswer();
+		futureOpt.ifPresent(future -> {
+			future.complete(true);
+			if (event instanceof PublishConfigHistory) {
+				PublishConfigHistory request = (PublishConfigHistory) event;
+				saveConfigHistory(request.getNamespaceId(), request);
+				return;
+			}
+			if (event instanceof DeleteConfigHistory) {
+				DeleteConfigHistory request = (DeleteConfigHistory) event;
+				removeConfigHistory(request.getNamespaceId(), request);
+			}
+		});
+
 	}
 }

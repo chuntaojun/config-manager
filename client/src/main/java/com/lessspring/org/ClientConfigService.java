@@ -29,7 +29,6 @@ import com.lessspring.org.http.impl.MetricsHttpClient;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.watch.WatchConfigWorker;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -67,7 +66,8 @@ final class ClientConfigService implements ConfigService {
 
 			choose.setWatch(clusterNodeWatch);
 
-			configManager = new CacheConfigManager(httpClient, configuration, configFilterManager);
+			configManager = new CacheConfigManager(httpClient, configuration,
+					configFilterManager);
 
 			// The calling component all initialization of the hook
 			LifeCycleHelper.invokeInit(httpClient);

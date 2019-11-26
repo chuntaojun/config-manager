@@ -21,9 +21,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.event.email.WarnEmailEvent;
+import com.lessspring.org.service.common.EmailService;
 import com.lessspring.org.tps.LimitRule;
 import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.tps.TpsManager;
+import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RenderUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -32,6 +36,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,6 +51,9 @@ import org.springframework.stereotype.Component;
 public class CurrentLimitActuator {
 
 	private final TpsManager tpsManager;
+
+	@Autowired
+	private EmailService emailService;
 
 	private Map<String, LimitRule> methodCache = new ConcurrentHashMap<>();
 
@@ -71,10 +79,14 @@ public class CurrentLimitActuator {
 						s -> method.getAnnotation(LimitRule.class));
 				LimitRule rule = methodCache.get(key);
 				TpsManager.LimitRuleEntry entry = tpsManager.query(rule.resource());
-				ResponseData<?> data = entry.tryAcquire();
+				final ResponseData<?> data = entry.tryAcquire();
 				if (data == null) {
 					return pjp.proceed();
 				}
+				final WarnEmailEvent emailEvent = new WarnEmailEvent(
+						PropertiesEnum.EmailType.WARN);
+				emailEvent.setMsg(GsonUtils.toJson(data));
+				emailService.publishEmailEvent(emailEvent);
 				return RenderUtils.render(Mono.just(data));
 			}
 		}

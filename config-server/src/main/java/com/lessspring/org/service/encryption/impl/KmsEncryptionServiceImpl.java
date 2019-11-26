@@ -14,17 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.metrics;
 
-import lombok.extern.slf4j.Slf4j;
+package com.lessspring.org.service.encryption.impl;
 
-import org.springframework.stereotype.Component;
+import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.service.encryption.EncryptionService;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @Created at 2019-11-23 21:07
  */
-@Slf4j
-@Component
-public class PerformanceScheduler {
+public class KmsEncryptionServiceImpl implements EncryptionService {
+
+	@Override
+	public void handle(PublishConfigRequest request) {
+
+	}
 }

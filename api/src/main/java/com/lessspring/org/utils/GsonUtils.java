@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -47,6 +48,10 @@ public final class GsonUtils {
 
 	public static <T> T toObj(String json, Class<T> cls) {
 		return GSON.fromJson(json, cls);
+	}
+
+	public static <T> T toObj(String json, TypeToken typeToken) {
+		return GSON.fromJson(json, typeToken.getType());
 	}
 
 	public static <T> T toObj(String json, Type cls) {

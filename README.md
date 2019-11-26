@@ -1,6 +1,10 @@
-# config-manager（目前为个人毕设项目）
+# Conf（目前为个人毕设项目）
 
-#### LessSpring ConfigManager
+非常幸运的在编写此项目的过程中认识了我的女友——YJW
+
+#### Conf
+
+![Config-Manager](config-manager.png)
 
 在造的一款基于*raft+h2*的分布式配置管理组件，不再需要依赖额外的数据库组件，完全依靠*Raft*协议来实现集群间的数据同步
 
@@ -21,14 +25,16 @@
  - [x] *Raft*协议集成H2（初步完成，Multi-Group部分待研究）
  - [x] 简单权限（暂未实现资源的权限设置）
  - [x] 采取*nacos*的文件缓存理念
- - [x] 配置文件加解密实现
+ - [x] 配置文件加解密实现（参考Jasypt）
  - [ ] 配置的灰度发布（目前参考*nacos*的基于*IP*实现）
  - [x] 配置变动监听功能
  - [ ] 前端页面、可视化管理
  - [ ] 数据分片存储（摆脱单机存储的限制）
  - [ ] 支持*prometheus*数据监控
  - [ ] 详细的日志输出分类
- - [ ] 邮件通知系统
+ - [x] 邮件通知系统
+ - [ ] 采用KMS的思想实现数据的加密
+ - [x] 系统接口QPS限制、动态变更QPS设置完成
 
 #### 使用说明
 
@@ -84,17 +90,17 @@ com.lessspring.org.config-manager.raft.electionTimeoutMs=
 com.lessspring.org.config-manager.raft.snapshotIntervalSecs=
 # 是否开启线程池任务耗时计算
 com.lessspring.org.config-manager.openWorkCostDisplay=true | false
-#
+# 邮件系统 host
 com.lessspring.org.config-manager.email.host=
-#
+# 邮件系统 用户姓名
 com.lessspring.org.config-manager.email.username=
-#
+# 邮件系统 用户密码
 com.lessspring.org.config-manager.email.password=
-#
+# 邮件系统 smtp auth
 com.lessspring.org.config-manager.email.smtp.auth=
-#
+# 邮件系统 starttls enable
 com.lessspring.org.config-manager.starttls.enable=
-#
+# 邮件系统 starttls required
 com.lessspring.org.config-manager.email.starttls.required=
 ```
 
@@ -112,6 +118,7 @@ cluster.server.node.port.{num}=2959
 ##### key 的构建说明
 
 > config-manager-client
+
 
 
 > config-manager-server

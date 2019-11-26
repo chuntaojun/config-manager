@@ -44,6 +44,42 @@ public interface SystemHandler {
 	 * @return {@link Mono<ServerResponse>}
 	 */
 	@NotNull
-	Mono<ServerResponse> forceDumoConfig(ServerRequest request);
+	Mono<ServerResponse> forceDumpConfig(ServerRequest request);
+
+	/**
+	 * get publish log
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> publishLog(ServerRequest request);
+
+	/**
+	 * dump now jvm heap
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> jvmHeapDump(ServerRequest request);
+
+	/**
+	 * publish qps setting
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> publishQpsSetting(ServerRequest request);
+
+	/**
+	 * query qps setting
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	@NotNull
+	Mono<ServerResponse> queryQpsSetting(ServerRequest request);
 
 }

@@ -26,7 +26,8 @@ import org.springframework.http.codec.ServerSentEvent;
  */
 public final class SseUtils {
 
-	public static <T> ServerSentEvent<ResponseData<T>> createServerSentEvent(ResponseData<T> data) {
+	public static <T> ServerSentEvent<ResponseData<T>> createServerSentEvent(
+			ResponseData<T> data) {
 		return ServerSentEvent.builder(data).build();
 	}
 

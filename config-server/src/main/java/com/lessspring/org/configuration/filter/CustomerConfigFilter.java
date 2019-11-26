@@ -54,9 +54,9 @@ public interface CustomerConfigFilter extends Priority {
 	@SuppressWarnings("unchecked")
 	default Mono<Void> filterResponse(ServerHttpResponse response, HttpStatus status,
 			String s) {
-		return response.writeWith(
-				Mono.just(response.bufferFactory().wrap(GsonUtils.toJsonBytes(ResponseData
-						.<String>builder().withCode(status.value()).withData(s).build()))));
+		return response.writeWith(Mono.just(response.bufferFactory()
+				.wrap(GsonUtils.toJsonBytes(ResponseData.<String> builder()
+						.withCode(status.value()).withData(s).build()))));
 	}
 
 	/**

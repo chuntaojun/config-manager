@@ -1,9 +1,11 @@
 **/build/
 !gradle/wrapper/gradle-wrapper.jar
 
+### project ###
+*.properties
+
 ### STS ###
 *.apt_generated
-*.classpath
 *.factorypath
 *.settings
 *.springBeans

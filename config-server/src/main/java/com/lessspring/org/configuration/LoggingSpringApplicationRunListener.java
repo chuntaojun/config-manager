@@ -34,6 +34,7 @@ package com.lessspring.org.configuration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -47,65 +48,70 @@ import static org.springframework.core.io.ResourceLoader.CLASSPATH_URL_PREFIX;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class LoggingSpringApplicationRunListener implements SpringApplicationRunListener, Ordered {
+public class LoggingSpringApplicationRunListener
+		implements SpringApplicationRunListener, Ordered {
 
-    private static final String DEFAULT_CONF_LOGBACK_LOCATION = CLASSPATH_URL_PREFIX + "config-manager.xml";
+	private static final String DEFAULT_CONF_LOGBACK_LOCATION = CLASSPATH_URL_PREFIX
+			+ "config-manager.xml";
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggingSpringApplicationRunListener.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(LoggingSpringApplicationRunListener.class);
 
-    private final SpringApplication application;
+	private final SpringApplication application;
 
-    private final String[] args;
+	private final String[] args;
 
-    public LoggingSpringApplicationRunListener(SpringApplication application, String[] args) {
-        this.application = application;
-        this.args = args;
-    }
+	public LoggingSpringApplicationRunListener(SpringApplication application,
+			String[] args) {
+		this.application = application;
+		this.args = args;
+	}
 
-    @Override
-    public void starting() {
+	@Override
+	public void starting() {
 
-    }
+	}
 
-    @Override
-    public void environmentPrepared(ConfigurableEnvironment environment) {
-        if (!environment.containsProperty(CONFIG_PROPERTY)) {
-            System.setProperty(CONFIG_PROPERTY, DEFAULT_CONF_LOGBACK_LOCATION);
-            if (logger.isInfoEnabled()) {
-                logger.info("There is no property named \"{}\" in Spring Boot Environment, " +
-                                "and whose value is {} will be set into System's Properties", CONFIG_PROPERTY,
-                        DEFAULT_CONF_LOGBACK_LOCATION);
-            }
-        }
-    }
+	@Override
+	public void environmentPrepared(ConfigurableEnvironment environment) {
+		if (!environment.containsProperty(CONFIG_PROPERTY)) {
+			System.setProperty(CONFIG_PROPERTY, DEFAULT_CONF_LOGBACK_LOCATION);
+			if (logger.isInfoEnabled()) {
+				logger.info(
+						"There is no property named \"{}\" in Spring Boot Environment, "
+								+ "and whose value is {} will be set into System's Properties",
+						CONFIG_PROPERTY, DEFAULT_CONF_LOGBACK_LOCATION);
+			}
+		}
+	}
 
-    @Override
-    public void contextPrepared(ConfigurableApplicationContext context) {
+	@Override
+	public void contextPrepared(ConfigurableApplicationContext context) {
 
-    }
+	}
 
-    @Override
-    public void contextLoaded(ConfigurableApplicationContext context) {
+	@Override
+	public void contextLoaded(ConfigurableApplicationContext context) {
 
-    }
+	}
 
-    @Override
-    public void started(ConfigurableApplicationContext context) {
+	@Override
+	public void started(ConfigurableApplicationContext context) {
 
-    }
+	}
 
-    @Override
-    public void running(ConfigurableApplicationContext context) {
+	@Override
+	public void running(ConfigurableApplicationContext context) {
 
-    }
+	}
 
-    @Override
-    public void failed(ConfigurableApplicationContext context, Throwable exception) {
+	@Override
+	public void failed(ConfigurableApplicationContext context, Throwable exception) {
 
-    }
+	}
 
-    @Override
-    public int getOrder() {
-        return HIGHEST_PRECEDENCE;
-    }
+	@Override
+	public int getOrder() {
+		return HIGHEST_PRECEDENCE;
+	}
 }

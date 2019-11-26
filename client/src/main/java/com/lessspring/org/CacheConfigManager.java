@@ -62,13 +62,15 @@ public class CacheConfigManager implements LifeCycle {
 	private final AtomicBoolean inited = new AtomicBoolean(false);
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
-	CacheConfigManager(HttpClient client, Configuration configuration, ConfigFilterManager configFilterManager) {
+	CacheConfigManager(HttpClient client, Configuration configuration,
+			ConfigFilterManager configFilterManager) {
 		this.httpClient = client;
 		this.namespaceId = configuration.getNamespaceId();
 		this.configFilterManager = configFilterManager;
 		this.localPref = configuration.isLocalPref();
 		this.watchConfigWorker = new WatchConfigWorker(httpClient, configuration,
-				configFilterManager);;
+				configFilterManager);
+		;
 		this.cacheItemMap = new ConcurrentHashMap<>(16);
 	}
 
@@ -79,20 +81,7 @@ public class CacheConfigManager implements LifeCycle {
 		}
 	}
 
-	void registerListener(String groupId, String dataId, String encryption,
-						  AbstractListener listener) {
-		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
-
-		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
-
-		if (listener instanceof ChangeKeyListener) {
-			ReflectUtils.injectFiled(listener, this, "configManager");
-		}
-		cacheItem.addListener(new WrapperListener(listener, encryption));
-	}
-
-	void deregisterListener(String groupId, String dataId,
-							AbstractListener listener) {
+	void deregisterListener(String groupId, String dataId, AbstractListener listener) {
 		CacheItem cacheItem = getCacheItem(groupId, dataId);
 		cacheItem.removeListener(new WrapperListener(listener, ""));
 	}
@@ -117,13 +106,34 @@ public class CacheConfigManager implements LifeCycle {
 		return Objects.isNull(item) ? Collections.emptyList() : item.listListener();
 	}
 
-	public CacheItem getCacheItem(String groupId, String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		return cacheItemMap.get(key);
+	public void registerListener(String groupId, String dataId, String encryption,
+			AbstractListener listener) {
+		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+
+		// if listener instance of ChangeKeyListener, should set CacheConfigManager into
+		// Listener
+
+		if (listener instanceof ChangeKeyListener) {
+			ReflectUtils.inject(listener, this, "configManager");
+		}
+		cacheItem.addListener(new WrapperListener(listener, encryption));
 	}
 
 	public Map<String, CacheItem> copy() {
 		return new HashMap<>(cacheItemMap);
+	}
+
+	private void removeCacheItem(String groupId, String dataId) {
+		String key = NameUtils.buildName(groupId, dataId);
+		if (cacheItemMap.containsKey(key)) {
+			cacheItemMap.remove(key);
+			watchConfigWorker.onChange();
+		}
+	}
+
+	public CacheItem getCacheItem(String groupId, String dataId) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return cacheItemMap.get(key);
 	}
 
 	public ConfigInfo query(String groupId, String dataId, String token) {

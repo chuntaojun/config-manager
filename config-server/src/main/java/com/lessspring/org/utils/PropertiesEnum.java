@@ -46,6 +46,40 @@ public final class PropertiesEnum {
 
 	}
 
+	public enum EmailType {
+
+		/**
+		 * info email label
+		 */
+		INFO(0, "info email"),
+
+		/**
+		 * warn email label
+		 */
+		WARN(1, "warn email"),
+
+		/**
+		 * error email label
+		 */
+		ERROR(-1, "error email");
+
+		int code;
+		String desc;
+
+		EmailType(int code, String desc) {
+			this.code = code;
+			this.desc = desc;
+		}
+
+		public int getCode() {
+			return code;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+	}
+
 	public enum Role {
 
 		/**
@@ -74,10 +108,6 @@ public final class PropertiesEnum {
 			this.type = type;
 		}
 
-		public short getType() {
-			return type;
-		}
-
 		public static Role choose(short type) {
 			if (type == (short) 0) {
 				return Role.ADMIN;
@@ -92,6 +122,10 @@ public final class PropertiesEnum {
 				return Role.TESTER;
 			}
 			throw new IllegalArgumentException("Illegal user roles");
+		}
+
+		public short getType() {
+			return type;
 		}
 	}
 

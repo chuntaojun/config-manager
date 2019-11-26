@@ -26,11 +26,6 @@ public class VerifyException extends BaseException {
 
 	private static final long serialVersionUID = -1378391030668980873L;
 
-	@Override
-	public Code code() {
-		return Code.VERIFY_ERROR;
-	}
-
 	public VerifyException() {
 		super();
 	}
@@ -50,5 +45,10 @@ public class VerifyException extends BaseException {
 	protected VerifyException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.VERIFY_ERROR;
 	}
 }

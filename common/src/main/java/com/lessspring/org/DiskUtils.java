@@ -182,6 +182,9 @@ public final class DiskUtils {
 		File file = new File(path, fileName);
 		try {
 			boolean create = true;
+			if (!file.exists()) {
+				file.createNewFile();
+			}
 			if (file.exists()) {
 				if (rewrite) {
 					file.delete();

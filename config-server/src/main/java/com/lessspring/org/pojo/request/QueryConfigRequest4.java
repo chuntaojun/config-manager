@@ -28,16 +28,16 @@ public class QueryConfigRequest4 extends QueryConfigRequest {
 
 	private Map<String, Object> attribute;
 
+	public static Builder sBuilder() {
+		return new Builder();
+	}
+
 	public Map<String, Object> getAttribute() {
 		return attribute;
 	}
 
 	public void setAttribute(Map<String, Object> attribute) {
 		this.attribute = attribute;
-	}
-
-	public static Builder sBuilder() {
-		return new Builder();
 	}
 
 	public static final class Builder {

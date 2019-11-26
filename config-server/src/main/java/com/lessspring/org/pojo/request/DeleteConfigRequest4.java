@@ -32,6 +32,17 @@ public class DeleteConfigRequest4 extends DeleteConfigRequest {
 
 	private Map<String, Object> attribute;
 
+	public static Builder sBuilder() {
+		return new Builder();
+	}
+
+	public static DeleteConfigRequest4 copy(String namespaceId,
+			DeleteConfigRequest request) {
+		return DeleteConfigRequest4.sBuilder().namespaceId(namespaceId)
+				.groupId(request.getGroupId()).dataId(request.getDataId())
+				.beta(request.isBeta()).build();
+	}
+
 	public String getNamespaceId() {
 		return namespaceId;
 	}
@@ -46,10 +57,6 @@ public class DeleteConfigRequest4 extends DeleteConfigRequest {
 
 	public void setAttribute(Map<String, Object> attribute) {
 		this.attribute = attribute;
-	}
-
-	public static Builder sBuilder() {
-		return new Builder();
 	}
 
 	public static final class Builder {
@@ -96,12 +103,5 @@ public class DeleteConfigRequest4 extends DeleteConfigRequest {
 			deleteConfigRequest4.setNamespaceId(namespaceId);
 			return deleteConfigRequest4;
 		}
-	}
-
-	public static DeleteConfigRequest4 copy(String namespaceId,
-			DeleteConfigRequest request) {
-		return DeleteConfigRequest4.sBuilder().namespaceId(namespaceId)
-				.groupId(request.getGroupId()).dataId(request.getDataId())
-				.beta(request.isBeta()).build();
 	}
 }

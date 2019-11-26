@@ -19,7 +19,9 @@ package com.lessspring.org.utils;
 import com.lessspring.org.model.vo.ResponseData;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -38,6 +40,14 @@ public final class RenderUtils {
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
 				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
+	}
+
+	@SuppressWarnings("all")
+	public static Mono<ServerResponse> render(Resource resource) {
+		return ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(BodyInserters.fromResource(resource));
 	}
 
 }

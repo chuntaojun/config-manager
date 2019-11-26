@@ -59,7 +59,8 @@ public class TpsManager {
 		if (entry == null) {
 			return;
 		}
-		limiterManager.putIfAbsent(key, entry);
+		// Allows programs to modify QPS Settings at run time
+		limiterManager.put(key, entry);
 	}
 
 	public static class LimitRuleEntry {

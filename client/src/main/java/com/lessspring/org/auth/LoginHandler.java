@@ -42,14 +42,15 @@ import com.lessspring.org.observer.Watcher;
  */
 public class LoginHandler implements Watcher, LifeCycle {
 
-	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1,
-			new NameThreadFactory("com.lessspring.org.config-manager.client.auth"));
+	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
+			1, new NameThreadFactory("com.lessspring.org.config-manager.client.auth"));
 
 	private final HttpClient httpClient;
 	private final AuthHolder authHolder;
 	private final Configuration configuration;
 
-	public LoginHandler(HttpClient httpClient, AuthHolder authHolder, Configuration configuration) {
+	public LoginHandler(HttpClient httpClient, AuthHolder authHolder,
+			Configuration configuration) {
 		this.httpClient = httpClient;
 		this.authHolder = authHolder;
 		this.configuration = configuration;
@@ -75,7 +76,8 @@ public class LoginHandler implements Watcher, LifeCycle {
 		request.setUsername(username);
 		request.setPassword(password);
 		final Body body = Body.objToBody(request);
-		ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN, Header.EMPTY, Query.EMPTY, body,
+		ResponseData<JwtResponse> responseData = httpClient.post(ApiConstant.LOGIN,
+				Header.EMPTY, Query.EMPTY, body,
 				new TypeToken<ResponseData<JwtResponse>>() {
 				});
 		if (responseData.ok()) {

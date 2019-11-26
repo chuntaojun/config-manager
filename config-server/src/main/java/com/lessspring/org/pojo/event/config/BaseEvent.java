@@ -24,6 +24,7 @@ import com.lessspring.org.event.EventType;
  */
 public abstract class BaseEvent {
 
+	private final long createTime = System.currentTimeMillis();
 	private long sequence;
 	private String namespaceId = "default";
 	private String dataId;
@@ -34,7 +35,6 @@ public abstract class BaseEvent {
 	private String encryption;
 	private Object source;
 	private EventType eventType;
-	private final long createTime = System.currentTimeMillis();
 
 	public long getSequence() {
 		return sequence;

@@ -70,10 +70,8 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 			{ "snapshot_user.csv", "user" }, { "snapshot_user_role.csv", "user_role" },
 			{ "snapshot_namespace.csv", "namespace" },
 			{ "snapshot_namespace_permissions.csv", "namespace_permissions" } };
-
-	private Executor executor;
-
 	private final DataSource dataSource;
+	private Executor executor;
 
 	public SnapshotOperateImpl(DataSource dataSource) {
 		this.dataSource = dataSource;

@@ -29,11 +29,13 @@ import com.lessspring.org.executor.NameThreadFactory;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class Publisher {
+public abstract class Publisher<T> {
 
 	private List<Watcher> watchers = new CopyOnWriteArrayList<>();
 
-	private BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(1, 60, TimeUnit.SECONDS, new NameThreadFactory("com.lessspring.org.config-manager.Publisher"));
+	private BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(1, 60,
+			TimeUnit.SECONDS,
+			new NameThreadFactory("com.lessspring.org.config-manager.Publisher"));
 
 	{
 		executor.allowCoreThreadTimeOut(true);
@@ -50,7 +52,7 @@ public abstract class Publisher {
 	// With correction notice the Occurrence of the result, By accessing
 	// CompleteableFuture to processing the Watcher
 
-	protected void notifyAllWatcher(Occurrence event) {
+	protected void notifyAllWatcher(Occurrence<T> event) {
 		executor.execute(() -> {
 			for (Watcher watcher : watchers) {
 				watcher.onNotify(event, this);
@@ -58,7 +60,7 @@ public abstract class Publisher {
 		});
 	}
 
-	protected void notifyAllWatcher(Object args) {
+	protected void notifyAllWatcher(T args) {
 		final Occurrence event = Occurrence.newInstance(args);
 		executor.execute(() -> {
 			for (Watcher watcher : watchers) {

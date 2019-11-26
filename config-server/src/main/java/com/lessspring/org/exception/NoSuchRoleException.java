@@ -26,11 +26,6 @@ public class NoSuchRoleException extends BaseException {
 
 	private static final long serialVersionUID = -6423222916509656312L;
 
-	@Override
-	public Code code() {
-		return Code.ROLE_ILLEGAL;
-	}
-
 	public NoSuchRoleException() {
 		super();
 	}
@@ -50,5 +45,10 @@ public class NoSuchRoleException extends BaseException {
 	protected NoSuchRoleException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.ROLE_ILLEGAL;
 	}
 }

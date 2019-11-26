@@ -16,6 +16,11 @@
  */
 package com.lessspring.org.utils;
 
+import java.time.LocalDate;
+import java.util.function.Supplier;
+
+import com.lessspring.org.PathUtils;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -30,27 +35,20 @@ public final class SystemEnv {
 	public static final String EMAIL_SMTP_STARTTLS_EQUIRED = "com.lessspring.org.config-manager.email.starttls.required";
 
 	private static final SystemEnv INSTANCE = new SystemEnv();
-
+	public Supplier<String> jvmHeapDumpFileNameSuppiler = () -> PathUtils
+			.finalPath("tmp/jvm", "config-manager-jvm-" + LocalDate.now() + ".hprof");
 	private boolean inited = false;
+	private boolean dumpToFile = true;
+	private boolean openWorkCostDisplay = false;
+	private String emailHost;
+	private String emailName;
+	private String emailPwd;
+	private String emailSmtpAuth;
+	private String emailSmtpStarttlsEnable;
+	private String emailSmtpStarttlsEequired;
 
 	private SystemEnv() {
 	}
-
-	private boolean dumpToFile = true;
-
-	private boolean openWorkCostDisplay = false;
-
-	private String emailHost;
-
-	private String emailName;
-
-	private String emailPwd;
-
-	private String emailSmtpAuth;
-
-	private String emailSmtpStarttlsEnable;
-
-	private String emailSmtpStarttlsEequired;
 
 	public static SystemEnv getSingleton() {
 		return INSTANCE;

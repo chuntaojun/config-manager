@@ -30,6 +30,10 @@ public class ConfigChangeEvent extends BaseEvent {
 	private byte[] fileSource;
 	private String configType;
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	public String getContent() {
 		return content;
 	}
@@ -57,10 +61,6 @@ public class ConfigChangeEvent extends BaseEvent {
 	@Override
 	public String label() {
 		return TYPE;
-	}
-
-	public static Builder builder() {
-		return new Builder();
 	}
 
 	public static final class Builder {

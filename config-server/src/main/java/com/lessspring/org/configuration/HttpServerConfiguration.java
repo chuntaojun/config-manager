@@ -20,9 +20,15 @@ import java.util.Collections;
 import java.util.Objects;
 
 import com.google.gson.GsonBuilder;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import reactor.netty.http.server.HttpServer;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +48,12 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class HttpServerConfiguration {
 
 	private final Environment environment;
+	@Value("${com.lessspring.org.config-manager.netty.loopThreads}")
+	private int loopThreads;
+	@Value("${com.lessspring.org.config-manager.netty.workerThreads}")
+	private int workerThreads;
+	@Value("${server.port}")
+	private int serverPort;
 
 	public HttpServerConfiguration(Environment environment) {
 		this.environment = environment;
@@ -76,6 +88,26 @@ public class HttpServerConfiguration {
 		HttpServer httpServer = HttpServer.create().host("localhost")
 				.port(Integer.parseInt(
 						Objects.requireNonNull(environment.getProperty("server.port"))));
+		httpServer = httpServer
+				.tcpConfiguration(tcpServer -> tcpServer.bootstrap(serverBootstrap -> {
+					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads);
+					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads);
+					serverBootstrap.group(core, worker);
+					serverBootstrap.channel(NioServerSocketChannel.class)
+							.option(ChannelOption.ALLOCATOR,
+									PooledByteBufAllocator.DEFAULT)
+							.option(ChannelOption.SO_REUSEADDR, true)
+							.option(ChannelOption.SO_BACKLOG, 1000)
+							.childOption(ChannelOption.ALLOCATOR,
+									PooledByteBufAllocator.DEFAULT)
+							.childOption(ChannelOption.SO_RCVBUF, 1024 * 1024)
+							.childOption(ChannelOption.SO_SNDBUF, 1024 * 1024)
+							.childOption(ChannelOption.AUTO_READ, false)
+							.childOption(ChannelOption.SO_KEEPALIVE, true)
+							.childOption(ChannelOption.TCP_NODELAY, true)
+							.childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000);
+					return serverBootstrap;
+				}));
 		return httpServer.handle(httpHandlerAdapter);
 	}
 

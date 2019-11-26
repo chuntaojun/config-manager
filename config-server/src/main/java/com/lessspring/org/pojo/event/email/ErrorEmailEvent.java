@@ -16,13 +16,15 @@
  */
 package com.lessspring.org.pojo.event.email;
 
+import com.lessspring.org.utils.PropertiesEnum;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class ErrorEmailEvent extends BaseEmailEvent {
 
-	public ErrorEmailEvent(String eventLabel) {
-		super(eventLabel);
+	public ErrorEmailEvent(PropertiesEnum.EmailType type) {
+		super(type);
 	}
 }

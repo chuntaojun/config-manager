@@ -50,17 +50,14 @@ import org.springframework.stereotype.Component;
 @Component(value = "dumpService")
 public class DumpService {
 
-	@Value("${com.lessspring.org.config-manager.environment}")
-	private String developEnv;
-
-	@Autowired
-	private PathConstants pathConstants;
-
-	@Resource
-	private ConfigInfoMapper configInfoMapper;
-
 	private final DumpProcessor<DumpTask4All> task4AllDumpProcessor;
 	private final DumpProcessor<DumpTask4Beta> task4BetaDumpProcessor;
+	@Value("${com.lessspring.org.config-manager.environment}")
+	private String developEnv;
+	@Autowired
+	private PathConstants pathConstants;
+	@Resource
+	private ConfigInfoMapper configInfoMapper;
 	private DumpProcessor<DumpTask4Period> periodProcessor;
 
 	public DumpService(ConfigCacheItemManager cacheItemManager) {

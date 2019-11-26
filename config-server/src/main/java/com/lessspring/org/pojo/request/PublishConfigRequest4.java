@@ -33,6 +33,21 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
 
 	private Map<String, Object> attribute;
 
+	public static Builder sBuilder() {
+		return new Builder();
+	}
+
+	public static PublishConfigRequest4 copy(String namespaceId,
+			PublishConfigRequest request) {
+		return PublishConfigRequest4.sBuilder().namespaceId(namespaceId)
+				.groupId(request.getGroupId()).dataId(request.getDataId())
+				.beta(request.isBeta()).clientIps(request.getClientIps())
+				.content(request.getContent()).type(request.getType())
+				.file(request.getFile()).isFile(request.isFile())
+				.encryption(request.getEncryption())
+				.requiresEncryption(request.isRequiresEncryption()).build();
+	}
+
 	public String getNamespaceId() {
 		return namespaceId;
 	}
@@ -47,10 +62,6 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
 
 	public void setAttributes(Map<String, Object> attribute) {
 		this.attribute = attribute;
-	}
-
-	public static Builder sBuilder() {
-		return new Builder();
 	}
 
 	public static final class Builder {
@@ -146,16 +157,5 @@ public class PublishConfigRequest4 extends PublishConfigRequest {
 			publishConfigRequest4.setNamespaceId(namespaceId);
 			return publishConfigRequest4;
 		}
-	}
-
-	public static PublishConfigRequest4 copy(String namespaceId,
-			PublishConfigRequest request) {
-		return PublishConfigRequest4.sBuilder().namespaceId(namespaceId)
-				.groupId(request.getGroupId()).dataId(request.getDataId())
-				.beta(request.isBeta()).clientIps(request.getClientIps())
-				.content(request.getContent()).type(request.getType())
-				.file(request.getFile()).isFile(request.isFile())
-				.encryption(request.getEncryption())
-				.requiresEncryption(request.isRequiresEncryption()).build();
 	}
 }

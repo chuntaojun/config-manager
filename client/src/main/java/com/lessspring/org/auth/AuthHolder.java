@@ -17,7 +17,6 @@
 package com.lessspring.org.auth;
 
 import java.util.Objects;
-import java.util.Observable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

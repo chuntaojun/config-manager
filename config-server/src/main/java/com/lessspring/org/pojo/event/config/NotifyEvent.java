@@ -29,13 +29,13 @@ public class NotifyEvent extends BaseEvent {
 	public NotifyEvent() {
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	@Override
 	public String label() {
 		return TYPE;
-	}
-
-	public static Builder builder() {
-		return new Builder();
 	}
 
 	public static final class Builder {

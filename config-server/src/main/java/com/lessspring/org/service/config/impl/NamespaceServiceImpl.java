@@ -64,18 +64,15 @@ import org.springframework.stereotype.Service;
 @Service(value = "namespaceService")
 public class NamespaceServiceImpl implements NamespaceService {
 
-	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
-
 	private final String createNamespace = "CREATE_NAMESPACE";
 	private final String deleteNamespace = "DELETE_NAMESPACE";
 	private final String createAuth4Namespace = "CREATA_AUTH_NAMESPACE";
-
-	@Resource
-	private NamespaceMapper namespaceMapper;
-
 	private final BaseTransactionCommitCallback commitCallback;
 	private final ClusterManager clusterManager;
 	private final AuthorityProcessor authorityProcessor;
+	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
+	@Resource
+	private NamespaceMapper namespaceMapper;
 	private FailCallback failCallback;
 
 	public NamespaceServiceImpl(

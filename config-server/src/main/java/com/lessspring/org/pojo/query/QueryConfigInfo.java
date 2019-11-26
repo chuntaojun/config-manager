@@ -47,6 +47,10 @@ public class QueryConfigInfo {
 		this.dataId = dataId;
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	public String getNamespaceId() {
 		return namespaceId;
 	}
@@ -77,10 +81,6 @@ public class QueryConfigInfo {
 
 	public void setBeta(boolean beta) {
 		this.beta = beta;
-	}
-
-	public static Builder builder() {
-		return new Builder();
 	}
 
 	public static final class Builder {

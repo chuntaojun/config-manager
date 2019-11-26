@@ -40,18 +40,18 @@ import com.lessspring.org.model.dto.ConfigInfo;
  */
 public class KmsEncryptionConfigFilter implements ConfigFilter {
 
-    @Override
-    public String name() {
-        return null;
-    }
+	@Override
+	public String name() {
+		return null;
+	}
 
-    @Override
-    public void filter(ConfigInfo configInfo) {
+	@Override
+	public void filter(ConfigInfo configInfo) {
 
-    }
+	}
 
-    @Override
-    public int priority() {
-        return 0;
-    }
+	@Override
+	public int priority() {
+		return 0;
+	}
 }
