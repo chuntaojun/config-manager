@@ -20,14 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.ClassLoaderSwitcherUtils;
 import com.lessspring.org.Configuration;
@@ -35,7 +33,6 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.AbstractListener;
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.filter.ConfigFilterManager;
@@ -62,7 +59,6 @@ public class WatchConfigWorker implements LifeCycle {
 			Runtime.getRuntime().availableProcessors(),
 			new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
 
-	private Map<String, CacheItem> cacheItemMap;
 	private CacheConfigManager configManager;
 	private final HttpClient httpClient;
 	private final Configuration configuration;
@@ -78,7 +74,6 @@ public class WatchConfigWorker implements LifeCycle {
 
 	@Override
 	public void init() {
-		this.cacheItemMap = new ConcurrentHashMap<>(16);
 	}
 
 	public void setConfigManager(CacheConfigManager configManager) {
@@ -86,51 +81,30 @@ public class WatchConfigWorker implements LifeCycle {
 		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
 	}
 
-	public void registerListener(String groupId, String dataId, String encryption,
-			AbstractListener listener) {
-		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
-
-		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
-
-		if (listener instanceof ChangeKeyListener) {
-			((ChangeKeyListener) listener).setConfigManager(configManager);
-		}
-		cacheItem.addListener(new WrapperListener(listener, encryption));
-	}
-
-	public void deregisterListener(String groupId, String dataId,
-			AbstractListener listener) {
-		CacheItem cacheItem = getCacheItem(groupId, dataId);
-		cacheItem.removeListener(new WrapperListener(listener, ""));
-	}
-
 	private void notifyWatcher(ConfigInfo configInfo) {
 		final String groupId = configInfo.getGroupId();
 		final String dataId = configInfo.getDataId();
 		String key = NameUtils.buildName(groupId, dataId);
-		Optional<List<AbstractListener>> listeners = Optional
-				.ofNullable(cacheItemMap.get(key).listListener());
+		List<AbstractListener> listeners = configManager.allListener(key);
 
 		// do some processor to configInfo by filter chain
 		configFilterManager.doFilter(configInfo);
-		
-		listeners.ifPresent(abstractListeners -> {
-			for (AbstractListener listener : abstractListeners) {
-				Runnable job = () -> {
-					// In order to make the spi mechanisms can work better
-					ClassLoaderSwitcherUtils.change(listener);
-					listener.onReceive(configInfo);
-					ClassLoaderSwitcherUtils.rollBack();
-				};
-				Executor userExecutor = listener.executor();
-				if (Objects.isNull(userExecutor)) {
-					job.run();
-				}
-				else {
-					userExecutor.execute(job);
-				}
+
+		for (AbstractListener listener : listeners) {
+			Runnable job = () -> {
+				// In order to make the spi mechanisms can work better
+				ClassLoaderSwitcherUtils.change(listener);
+				listener.onReceive(configInfo);
+				ClassLoaderSwitcherUtils.rollBack();
+			};
+			Executor userExecutor = listener.executor();
+			if (Objects.isNull(userExecutor)) {
+				job.run();
 			}
-		});
+			else {
+				userExecutor.execute(job);
+			}
+		}
 	}
 
 	@Override
@@ -155,7 +129,7 @@ public class WatchConfigWorker implements LifeCycle {
 	// When your listener list changes, to build a monitoring events and
 	// initiate Watch requests to the server
 
-	private void onChange() {
+	public void onChange() {
 		if (Objects.nonNull(receiver)) {
 			receiver.cancle();
 			receiver = null;
@@ -167,54 +141,21 @@ public class WatchConfigWorker implements LifeCycle {
 		logger.warning(throwable.getMessage());
 	}
 
-	private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		final boolean[] add = new boolean[] { false };
-		Supplier<CacheItem> supplier = () -> {
-			add[0] = true;
-			return CacheItem.builder().withGroupId(groupId).withDataId(dataId)
-					.withLastMd5("").build();
-		};
-		cacheItemMap.computeIfAbsent(key, s -> supplier.get());
-		if (add[0]) {
-			onChange();
-		}
-		return cacheItemMap.get(key);
-	}
-
-	private void removeCacheItem(String groupId, String dataId) {
-		String key = NameUtils.buildName(groupId, dataId);
-		if (cacheItemMap.containsKey(key)) {
-			cacheItemMap.remove(key);
-			onChange();
-		}
-	}
-
-	private CacheItem getCacheItem(String groupId, String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		return cacheItemMap.get(key);
-	}
-
 	private void updateAndNotify(ConfigInfo configInfo) {
 		final String groupId = configInfo.getGroupId();
 		final String dataId = configInfo.getDataId();
-		final String key = NameUtils.buildName(groupId, dataId);
 		final String lastMd5 = MD5Utils.md5Hex(configInfo.toBytes());
-		final CacheItem oldItem = cacheItemMap.get(key);
+		final CacheItem oldItem = configManager.getCacheItem(groupId, dataId);
 		if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {
 			oldItem.setLastMd5(lastMd5);
 			notifyWatcher(configInfo);
 		}
 	}
 
-	public Map<String, CacheItem> copy() {
-		return new HashMap<>(cacheItemMap);
-	}
-
 	// Create a Watcher to monitor configuration changes information
 
 	private void createWatcher() {
-		Map<String, CacheItem> tmp = copy();
+		Map<String, CacheItem> tmp = configManager.copy();
 		Map<String, String> watchInfo = tmp.entrySet().stream().collect(HashMap::new,
 				(m, e) -> m.put(e.getKey(), e.getValue().getLastMd5()), HashMap::putAll);
 		final WatchRequest request = new WatchRequest(configuration.getNamespaceId(),

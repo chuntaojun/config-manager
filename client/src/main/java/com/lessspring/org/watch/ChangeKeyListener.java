@@ -34,13 +34,6 @@ public abstract class ChangeKeyListener extends AbstractListener {
 
 	private CacheConfigManager configManager;
 
-	/**
-	 * @param configManager the configManager to set
-	 */
-	void setConfigManager(CacheConfigManager configManager) {
-		this.configManager = configManager;
-	}
-
 	@Override
 	public void onReceive(ConfigInfo configInfo) {
 		ConfigInfo oldInfo = configManager.query(configInfo.getGroupId(),

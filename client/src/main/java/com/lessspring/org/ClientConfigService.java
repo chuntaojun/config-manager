@@ -38,7 +38,6 @@ import com.lessspring.org.watch.WatchConfigWorker;
 final class ClientConfigService implements ConfigService {
 
 	private HttpClient httpClient;
-	private WatchConfigWorker watchConfigWorker;
 	private ClusterNodeWatch clusterNodeWatch;
 	private CacheConfigManager configManager;
 	private LoginHandler loginHandler;
@@ -68,18 +67,13 @@ final class ClientConfigService implements ConfigService {
 
 			choose.setWatch(clusterNodeWatch);
 
-			watchConfigWorker = new WatchConfigWorker(httpClient, configuration,
-					configFilterManager);
-			configManager = new CacheConfigManager(httpClient, configuration,
-					watchConfigWorker, configFilterManager);
+			configManager = new CacheConfigManager(httpClient, configuration, configFilterManager);
 
 			// The calling component all initialization of the hook
 			LifeCycleHelper.invokeInit(httpClient);
 			LifeCycleHelper.invokeInit(clusterNodeWatch);
 			LifeCycleHelper.invokeInit(loginHandler);
-			LifeCycleHelper.invokeInit(watchConfigWorker);
 			LifeCycleHelper.invokeInit(configManager);
-			watchConfigWorker.setConfigManager(configManager);
 		}
 	}
 
@@ -89,7 +83,6 @@ final class ClientConfigService implements ConfigService {
 			LifeCycleHelper.invokeDestroy(httpClient);
 			LifeCycleHelper.invokeDestroy(loginHandler);
 			LifeCycleHelper.invokeDestroy(clusterNodeWatch);
-			LifeCycleHelper.invokeDestroy(watchConfigWorker);
 			LifeCycleHelper.invokeDestroy(configManager);
 		}
 	}
@@ -163,7 +156,7 @@ final class ClientConfigService implements ConfigService {
 	public void addListener(String groupId, String dataId, String encryption,
 			AbstractListener... listeners) {
 		for (AbstractListener listener : listeners) {
-			watchConfigWorker.registerListener(groupId, dataId, encryption, listener);
+			configManager.registerListener(groupId, dataId, encryption, listener);
 		}
 	}
 
@@ -171,7 +164,7 @@ final class ClientConfigService implements ConfigService {
 	public void removeListener(String groupId, String dataId,
 			AbstractListener... listeners) {
 		for (AbstractListener listener : listeners) {
-			watchConfigWorker.deregisterListener(groupId, dataId, listener);
+			configManager.deregisterListener(groupId, dataId, listener);
 		}
 	}
 
