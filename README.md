@@ -26,7 +26,7 @@
  - [x] 简单权限（暂未实现资源的权限设置）
  - [x] 采取*nacos*的文件缓存理念
  - [x] 配置文件加解密实现（参考Jasypt）
- - [ ] 配置的灰度发布（目前参考*nacos*的基于*IP*实现）
+ - [ ] 配置的灰度发布（参考*nacos*的基于*IP*实现、基于*client-id*来实现：目前的实现，也是本项目采取的最终方案）
  - [x] 配置变动监听功能
  - [ ] 前端页面、可视化管理
  - [ ] 数据分片存储（摆脱单机存储的限制）
@@ -66,6 +66,11 @@
 ```properties
 # config-manager-server 运行模式，单机——standalone，集群——cluster，默认以单机模式启动
 com.lessspring.org.config-manager.server.mode=standalone
+# config-manager 退出时是否自动删除server相关文件，默认为false
+com.lessspring.org.config-manager.exitDeleteFile=false
+# netty相关线程参数设置
+com.lessspring.org.config-manager.netty.loopThreads=2
+com.lessspring.org.config-manager.netty.workerThreads=16
 # 缓存类型，inner为内部guava的Cache实现，redis，默认为inner
 com.lessspring.org.config-manager.cache.type=inner
 # 运行环境类型，设置为develop时，则不会开启权限验证

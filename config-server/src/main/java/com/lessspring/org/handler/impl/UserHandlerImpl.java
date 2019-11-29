@@ -23,7 +23,6 @@ import com.lessspring.org.pojo.request.UserRequest;
 import com.lessspring.org.service.security.SecurityService;
 import com.lessspring.org.service.user.UserService;
 import com.lessspring.org.utils.RenderUtils;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +44,6 @@ public class UserHandlerImpl implements UserHandler {
 		this.userService = userService;
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> login(ServerRequest request) {
 		return request.bodyToMono(LoginRequest.class)
@@ -53,28 +51,24 @@ public class UserHandlerImpl implements UserHandler {
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> createUser(ServerRequest request) {
 		return request.bodyToMono(UserRequest.class).map(userService::createUser)
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> removeUser(ServerRequest request) {
 		return request.bodyToMono(UserRequest.class).map(userService::removeUser)
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> modifyUser(ServerRequest request) {
 		return request.bodyToMono(UserRequest.class).map(userService::modifyUser)
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> queryAll(ServerRequest request) {
 		return RenderUtils.render(Mono.just(userService.queryAll()));

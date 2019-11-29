@@ -100,7 +100,9 @@ public class CacheItem {
 
 	public void setBetaClientIps(Set<String> betaClientIps) {
 		for (String clientIp : betaClientIps) {
-			if (Objects.equals("0.0.0.0:0", clientIp)) {
+			// if beta-client-ip has contain "0.0.0.0"(IP) or "*"(ClientId)
+			// beta will be lose efficacy
+			if (Objects.equals("0.0.0.0:0", clientIp) || Objects.equals("*", clientIp)) {
 				this.betaClientIps = Collections.emptySet();
 				return;
 			}

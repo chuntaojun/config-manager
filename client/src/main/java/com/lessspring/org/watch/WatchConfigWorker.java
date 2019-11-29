@@ -16,18 +16,7 @@
  */
 package com.lessspring.org.watch;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
-
+import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.ClassLoaderSwitchUtils;
 import com.lessspring.org.Configuration;
@@ -35,7 +24,6 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.AbstractListener;
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.filter.ConfigFilterManager;
@@ -49,6 +37,16 @@ import com.lessspring.org.model.vo.WatchResponse;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.MD5Utils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -87,20 +85,19 @@ public class WatchConfigWorker implements LifeCycle {
 	private void notifyWatcher(ConfigInfo configInfo) {
 		final String groupId = configInfo.getGroupId();
 		final String dataId = configInfo.getDataId();
-		String key = NameUtils.buildName(groupId, dataId);
 		Optional<List<AbstractListener>> listeners = Optional
-				.ofNullable(cacheItemMap.get(key).listListener());
+				.ofNullable(configManager.getCacheItem(groupId, dataId).listListener());
 
 		// do some processor to configInfo by filter chain
 		configFilterManager.doFilter(configInfo);
-		
+
 		listeners.ifPresent(abstractListeners -> {
 			for (AbstractListener listener : abstractListeners) {
 				Runnable job = () -> {
 					// In order to make the spi mechanisms can work better
 					ClassLoaderSwitchUtils.transfer(listener);
 					listener.onReceive(configInfo);
-					ClassLoaderSwitchUtils.rollBack();
+					ClassLoaderSwitchUtils.recover();
 				};
 				Executor userExecutor = listener.executor();
 				if (Objects.isNull(userExecutor)) {

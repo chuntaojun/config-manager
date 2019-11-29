@@ -26,7 +26,6 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**

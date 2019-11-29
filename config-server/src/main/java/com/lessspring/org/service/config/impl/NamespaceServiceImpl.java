@@ -19,6 +19,7 @@ package com.lessspring.org.service.config.impl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.lessspring.org.IDUtils;
 import com.lessspring.org.db.dto.NamespaceDTO;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.NamespaceRequest;
@@ -34,7 +35,6 @@ import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.service.security.AuthorityProcessor;
 import com.lessspring.org.utils.GsonUtils;
-import com.lessspring.org.utils.IDUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
 import com.lessspring.org.utils.vo.NamespaceVOUtils;
@@ -86,7 +86,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 	public void init() {
 		namespaceCache = CacheBuilder.newBuilder()
 				.expireAfterWrite(Duration.ofMinutes(15)).maximumSize(65535)
-				.build(new CacheLoader<>() {
+				.build(new CacheLoader<String, Optional<NamespaceDTO>>() {
 					@Override
 					public Optional<NamespaceDTO> load(String key) throws Exception {
 						return Optional

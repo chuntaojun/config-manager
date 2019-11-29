@@ -16,21 +16,28 @@
  */
 package com.lessspring.org.executor;
 
+import com.lessspring.org.context.Passthrough;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class WrapperRunnable extends TimeTask implements Runnable {
+public class WrapperRunnable extends Passthrough implements Runnable {
 
 	private final Runnable target;
 
-	WrapperRunnable(Runnable target) {
+	public WrapperRunnable(Runnable target) {
 		this.target = target;
 	}
 
 	@Override
 	public void run() {
-		target.run();
+		transfer();
+		try {
+			target.run();
+		} finally {
+			clean();
+		}
 	}
 
 }

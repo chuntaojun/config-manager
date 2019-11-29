@@ -34,7 +34,7 @@ public final class ClassLoaderSwitchUtils {
         Thread.currentThread().setContextClassLoader(cls.getClassLoader());
     }
 
-    public static void rollBack() {
+    public static void recover() {
         Thread.currentThread().setContextClassLoader(PRE_CLASS_LOADER_HOLDER.get());
         PRE_CLASS_LOADER_HOLDER.remove();
     }

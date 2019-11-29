@@ -34,18 +34,15 @@ import javax.sql.DataSource;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
-import com.alipay.sofa.jraft.entity.LocalFileMetaOutter;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import com.google.protobuf.ByteString;
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.pojo.ClusterMeta;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.utils.ServerStatus;
-import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -57,7 +54,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component(value = "snapshotOperate")
-public class SnapshotOperateImpl implements SnapshotOperate {
+public class H2SnapshotOperateImpl implements SnapshotOperate {
 
 	private final ClusterMeta clusterMeta = new ClusterMeta("com.lessspring.org.db");
 
@@ -73,7 +70,7 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 	private final DataSource dataSource;
 	private Executor executor;
 
-	public SnapshotOperateImpl(DataSource dataSource) {
+	public H2SnapshotOperateImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
@@ -155,13 +152,6 @@ public class SnapshotOperateImpl implements SnapshotOperate {
 		finally {
 			nodeManager.getSelf().setServerStatus(ServerStatus.HEALTH);
 		}
-	}
-
-	private <T> LocalFileMetaOutter.LocalFileMeta buildMetadata(final T metadata) {
-		return metadata == null ? null
-				: LocalFileMetaOutter.LocalFileMeta.newBuilder()
-						.setUserMeta(ByteString.copyFrom(GsonUtils.toJsonBytes(metadata)))
-						.build();
 	}
 
 	private boolean batchExec(List<String> sqls, String type) {

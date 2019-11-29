@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.tps;
+package com.lessspring.org.configuration.tps;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.lessspring.org.constant.Code;

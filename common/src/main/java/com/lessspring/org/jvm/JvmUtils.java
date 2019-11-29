@@ -16,9 +16,6 @@
  */
 package com.lessspring.org.jvm;
 
-import com.lessspring.org.Constant;
-import com.sun.management.HotSpotDiagnosticMXBean;
-
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -26,6 +23,9 @@ import java.lang.management.MemoryUsage;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.lessspring.org.Constant;
+import com.sun.management.HotSpotDiagnosticMXBean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

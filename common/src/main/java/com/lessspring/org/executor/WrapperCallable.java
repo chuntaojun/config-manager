@@ -16,24 +16,29 @@
  */
 package com.lessspring.org.executor;
 
+import com.lessspring.org.context.Passthrough;
+
 import java.util.concurrent.Callable;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class WrapperCallable<V> extends TimeTask implements Callable<V> {
+public class WrapperCallable<V> extends Passthrough implements Callable<V> {
 
 	private final Callable<V> target;
 
-	WrapperCallable(Callable<V> target) {
+	public WrapperCallable(Callable<V> target) {
 		this.target = target;
 	}
 
 	@Override
 	public V call() throws Exception {
-		V v = null;
-		v = target.call();
-		return v;
+		transfer();
+		try {
+			return target.call();
+		} finally {
+			clean();
+		}
 	}
 }

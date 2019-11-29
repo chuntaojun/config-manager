@@ -22,7 +22,7 @@
         UPDATE namespace SET auth_token = #{token} WHERE namespace_name = #{name}
     </update>
 
-    <!--  remove namespace  -->
+    <!--  clean namespace  -->
     <delete id="removeNamespace">
         DELETE
         FROM namespace

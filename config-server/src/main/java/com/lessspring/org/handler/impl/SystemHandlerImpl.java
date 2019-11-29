@@ -17,6 +17,8 @@
 package com.lessspring.org.handler.impl;
 
 import com.google.gson.reflect.TypeToken;
+import com.lessspring.org.configuration.tps.LimitRule;
+import com.lessspring.org.configuration.tps.OpenTpsLimit;
 import com.lessspring.org.configuration.tps.TpsConfiguration;
 import com.lessspring.org.configuration.tps.TpsSetting;
 import com.lessspring.org.handler.SystemHandler;
@@ -25,15 +27,14 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.pojo.request.PublishQpsRequest;
+import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.service.dump.DumpService;
-import com.lessspring.org.tps.LimitRule;
-import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.RenderUtils;
+import com.lessspring.org.utils.SchedulerUtils;
 import com.lessspring.org.utils.SystemEnv;
 import com.lessspring.org.utils.TracerUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -51,6 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -81,6 +83,9 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 	private ConfigurationBeanFactoryMetadata beanFactoryMetadata;
 
 	@Autowired
+	private TransactionIdManager idManager;
+
+	@Autowired
 	private TpsSetting tpsSetting;
 
 	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService,
@@ -102,7 +107,6 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 		registerWatcher(tpsAnnotationProcessor);
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> changeLogLevel(ServerRequest request) {
 		final String logLevel = request.queryParam("logLevel").orElse("info");
@@ -116,24 +120,26 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 		LogLevel finalNewLevel = newLevel;
 		loggingSystem.getLoggerConfigurations().forEach(
 				conf -> loggingSystem.setLogLevel(conf.getName(), finalNewLevel));
-		return RenderUtils.render(Mono.just(ResponseData.success()));
+		return RenderUtils.render(Mono.just(ResponseData.success())).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
-	@NotNull
 	@Override
+	@LimitRule(resource = "system-resource", qps = 1, timeUnit = TimeUnit.MINUTES)
 	public Mono<ServerResponse> forceDumpConfig(ServerRequest request) {
 		dumpService.forceDump(false);
-		return RenderUtils.render(Mono.just(ResponseData.success()));
+		return RenderUtils.render(Mono.just(ResponseData.success())).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> publishLog(ServerRequest request) {
 		return RenderUtils
-				.render(Mono.just(ResponseData.success(tracerUtils.analyzePublishLog())));
+				.render(Mono.just(ResponseData.success(tracerUtils.analyzePublishLog())))
+				.subscribeOn(Schedulers
+						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "system-resource", qps = 1, timeUnit = TimeUnit.MINUTES)
 	public Mono<ServerResponse> jvmHeapDump(ServerRequest request) {
@@ -158,11 +164,10 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 					files[0].delete();
 				}
 			}
-		});
+		}).subscribeOn(Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
 	@SuppressWarnings("all")
-	@NotNull
 	@Override
 	public Mono<ServerResponse> publishQpsSetting(ServerRequest request) {
 		return request.bodyToMono(String.class).map(s -> (ResponseData<String>) GsonUtils
@@ -202,13 +207,20 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 						return RenderUtils
 								.render(Mono.just(ResponseData.fail(throwable)));
 					}
-				});
+				}).subscribeOn(Schedulers
+						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> queryQpsSetting(ServerRequest request) {
-		return RenderUtils.render(Mono.just(tpsSetting));
+		return RenderUtils.render(Mono.just(tpsSetting)).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+	}
+
+	@Override
+	public Mono<ServerResponse> getAllTransactionIdInfo(ServerRequest request) {
+		return RenderUtils.render(Mono.just(idManager.all())).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
 	private ResolvableType getBeanType(Object bean) {

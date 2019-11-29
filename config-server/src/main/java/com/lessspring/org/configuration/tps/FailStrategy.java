@@ -14,21 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.executor;
+package com.lessspring.org.configuration.tps;
+
+import com.lessspring.org.model.vo.ResponseData;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class TimeTask {
+public abstract class FailStrategy {
 
-	private long startTime;
+	/**
+	 * Reach the QPS threshold to trigger
+	 *
+	 * @return {@link ResponseData}
+	 */
+	public abstract ResponseData<?> onLimit();
 
-	public void start() {
-		startTime = System.currentTimeMillis();
-	}
-
-	public long spendTime() {
-		return System.currentTimeMillis() - startTime;
-	}
 }

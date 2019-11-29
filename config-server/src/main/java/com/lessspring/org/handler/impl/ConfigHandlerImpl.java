@@ -24,11 +24,10 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.service.config.OperationService;
-import com.lessspring.org.tps.LimitRule;
-import com.lessspring.org.tps.OpenTpsLimit;
+import com.lessspring.org.configuration.tps.LimitRule;
+import com.lessspring.org.configuration.tps.OpenTpsLimit;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -50,7 +49,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		this.operationService = operationService;
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
@@ -64,7 +62,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
@@ -78,7 +75,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "query-config", qps = 2000)
 	@NeedAuth(argueName = "namespaceId")
@@ -98,7 +94,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		return RenderUtils.render(mono);
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")

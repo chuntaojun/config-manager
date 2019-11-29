@@ -16,10 +16,6 @@
  */
 package com.lessspring.org;
 
-import javax.annotation.PostConstruct;
-
-import io.prometheus.client.hotspot.DefaultExports;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -32,11 +28,6 @@ public class ConfigApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ConfigApplication.class, args);
-	}
-
-	@PostConstruct
-	public void init() {
-		DefaultExports.initialize();
 	}
 
 }

@@ -18,6 +18,8 @@ package com.lessspring.org.raft;
 
 import com.lessspring.org.raft.pojo.TransactionId;
 
+import java.util.Map;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -45,5 +47,19 @@ public interface TransactionIdManager {
 	 * @param transactionId {@link TransactionId}
 	 */
 	void deregister(TransactionId transactionId);
+
+	/**
+	 * Returns all transaction ID information
+	 *
+	 * @return {@link Map<String, TransactionId>}
+	 */
+	Map<String, TransactionId> all();
+
+	/**
+	 * load from snapshot
+	 *
+	 * @param snapshot
+	 */
+	void snapshotLoad(Map<String, TransactionId> snapshot);
 
 }

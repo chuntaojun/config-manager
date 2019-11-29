@@ -14,21 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.tps;
+package com.lessspring.org.configuration.tps;
 
+import com.lessspring.org.exception.TpsLimitException;
 import com.lessspring.org.model.vo.ResponseData;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class FailStrategy {
+@Slf4j
+public class ConfigFailStrategy extends FailStrategy {
 
-	/**
-	 * Reach the QPS threshold to trigger
-	 *
-	 * @return {@link ResponseData}
-	 */
-	public abstract ResponseData<?> onLimit();
-
+	@Override
+	public ResponseData<?> onLimit() {
+		log.warn(
+				"Current resource access beyond limit, request access restriction model");
+		return ResponseData.fail(new TpsLimitException(
+				"Current resource access beyond limit, request access restriction model"));
+	}
 }

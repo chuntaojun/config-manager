@@ -44,10 +44,10 @@ public interface KmsSecurityKeyService {
 	ResponseData<KmsKeyResponse> queryKmsKey(KmsKeyRequest request);
 
 	/**
-	 * remove secret key
+	 * clean secret key
 	 *
 	 * @param request {@link KmsKeyRequest}
-	 * @return remove operation label
+	 * @return clean operation label
 	 */
 	ResponseData<Boolean> deleteSecretKey(KmsKeyRequest request);
 

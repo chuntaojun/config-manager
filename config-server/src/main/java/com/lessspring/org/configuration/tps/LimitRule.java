@@ -14,18 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.tps;
+package com.lessspring.org.configuration.tps;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OpenTpsLimit {
+public @interface LimitRule {
+
+	/**
+	 * Set the resource name, according to the current limiting resource name
+	 *
+	 * @return The name of the resource, default value is "DEFAULT_RESOURCE"
+	 */
+	String resource() default "DEFAULT_RESOURCE";
+
+	/**
+	 * Can afford to pay the number of requests per second
+	 *
+	 * @return default value is 60 / s
+	 */
+	double qps() default 60D;
+
+	/**
+	 * qps time unit
+	 *
+	 * @return default value <code>TimeUnit.SECONDS</code>
+	 */
+	TimeUnit timeUnit() default TimeUnit.SECONDS;
+
+	/**
+	 * Fault tolerant strategy
+	 *
+	 * @return class which extends FailStrategy
+	 */
+	Class<? extends FailStrategy> failStrategy() default ConfigFailStrategy.class;
+
 }

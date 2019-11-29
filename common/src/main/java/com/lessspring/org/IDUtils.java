@@ -14,13 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.lessspring.org;
+
+import java.util.UUID;
+
+import com.lessspring.org.utils.MD5Utils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class StrackUtils {
+public final class IDUtils {
+
+	private IDUtils() {
+	}
+
+	public static String generateUuid(String name) {
+		return UUID.fromString(name).toString();
+	}
+
+	public static String generateUuid() {
+		return UUID.randomUUID().toString();
+	}
+
+	public static String generateMd5(String name) {
+		return MD5Utils.md5Hex(name);
+	}
 
 }

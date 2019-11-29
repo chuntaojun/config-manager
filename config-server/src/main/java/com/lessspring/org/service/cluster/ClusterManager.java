@@ -37,7 +37,6 @@ import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
-import com.lessspring.org.service.config.ConfigTransactionIdManager;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.utils.PathConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +58,7 @@ public class ClusterManager {
 	private final SnapshotOperate snapshotOperate;
 	private final List<BaseTransactionCommitCallback> commitCallbacks;
 	private final AtomicBoolean initialize = new AtomicBoolean(false);
-	private final TransactionIdManager transactionIdManager = new ConfigTransactionIdManager();
+	private final TransactionIdManager transactionIdManager;
 	@Autowired
 	private PathConstants pathConstants;
 	@Value("${com.lessspring.org.config-manager.raft.electionTimeoutMs:1000}")
@@ -69,9 +68,10 @@ public class ClusterManager {
 	private ClusterServer clusterServer;
 
 	public ClusterManager(List<BaseTransactionCommitCallback> commitCallbacks,
-			SnapshotOperate snapshotOperate) {
+			SnapshotOperate snapshotOperate, TransactionIdManager transactionIdManager) {
 		this.commitCallbacks = commitCallbacks;
 		this.snapshotOperate = snapshotOperate;
+		this.transactionIdManager = transactionIdManager;
 	}
 
 	@PostConstruct

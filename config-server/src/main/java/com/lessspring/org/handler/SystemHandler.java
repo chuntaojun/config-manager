@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.handler;
 
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -34,7 +33,6 @@ public interface SystemHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> changeLogLevel(ServerRequest request);
 
 	/**
@@ -43,7 +41,6 @@ public interface SystemHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> forceDumpConfig(ServerRequest request);
 
 	/**
@@ -52,7 +49,6 @@ public interface SystemHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> publishLog(ServerRequest request);
 
 	/**
@@ -61,7 +57,6 @@ public interface SystemHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> jvmHeapDump(ServerRequest request);
 
 	/**
@@ -70,7 +65,6 @@ public interface SystemHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> publishQpsSetting(ServerRequest request);
 
 	/**
@@ -79,7 +73,14 @@ public interface SystemHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> queryQpsSetting(ServerRequest request);
+
+	/**
+	 * Returns all transaction ID information
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	Mono<ServerResponse> getAllTransactionIdInfo(ServerRequest request);
 
 }

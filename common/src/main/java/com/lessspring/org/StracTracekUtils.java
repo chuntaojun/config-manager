@@ -14,24 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.tps;
 
-import com.lessspring.org.exception.TpsLimitException;
-import com.lessspring.org.model.vo.ResponseData;
-import lombok.extern.slf4j.Slf4j;
+package com.lessspring.org;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Slf4j
-public class ConfigFailStrategy extends FailStrategy {
+public final class StracTracekUtils {
 
-	@Override
-	public ResponseData<?> onLimit() {
-		log.warn(
-				"Current resource access beyond limit, request access restriction model");
-		return ResponseData.fail(new TpsLimitException(
-				"Current resource access beyond limit, request access restriction model"));
-	}
+    public static String stackTrace(final Throwable t) {
+        if (t == null) {
+            return "";
+        }
+
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream(); final PrintStream ps = new PrintStream(out)) {
+            t.printStackTrace(ps);
+            ps.flush();
+            return new String(out.toByteArray());
+        } catch (final IOException ignored) {
+            // ignored
+        }
+        return "";
+    }
+
 }

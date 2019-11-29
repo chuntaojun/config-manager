@@ -16,12 +16,12 @@
  */
 package com.lessspring.org.observer;
 
-import com.lessspring.org.executor.BaseThreadPoolExecutor;
-import com.lessspring.org.executor.NameThreadFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * A simple observer pattern - the publisher
@@ -31,15 +31,19 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Publisher<T> {
 
-	private List<Watcher> watchers = new CopyOnWriteArrayList<>();
+	private List<Watcher<T>> watchers = new CopyOnWriteArrayList<>();
 
-	private BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(1, 60, TimeUnit.SECONDS, new NameThreadFactory("com.lessspring.org.config-manager.Publisher"));
+	private FluxSink<Occurrence<T>> sink;
 
-	{
-		executor.allowCoreThreadTimeOut(true);
+	public Publisher() {
+		Flux.create((Consumer<FluxSink<Occurrence<T>>>) tFluxSink -> sink = tFluxSink)
+				.subscribe(tOccurrence -> {
+					watchers.parallelStream().forEach(
+							watcher -> watcher.onNotify(tOccurrence, Publisher.this));
+				});
 	}
 
-	public void registerWatcher(Watcher watcher) {
+	public void registerWatcher(Watcher<T> watcher) {
 		watchers.add(watcher);
 	}
 
@@ -48,23 +52,14 @@ public abstract class Publisher<T> {
 	}
 
 	// With correction notice the Occurrence of the result, By accessing
-	// CompleteableFuture to processing the Watcher
+	// CompletableFuture to processing the Watcher
 
 	protected void notifyAllWatcher(Occurrence<T> event) {
-		executor.execute(() -> {
-			for (Watcher watcher : watchers) {
-				watcher.onNotify(event, this);
-			}
-		});
+		sink.next(event);
 	}
 
 	protected void notifyAllWatcher(T args) {
-		final Occurrence event = Occurrence.newInstance(args);
-		executor.execute(() -> {
-			for (Watcher watcher : watchers) {
-				watcher.onNotify(event, this);
-			}
-		});
+		notifyAllWatcher(Occurrence.newInstance(args));
 	}
 
 }

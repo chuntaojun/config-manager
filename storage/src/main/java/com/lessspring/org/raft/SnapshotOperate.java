@@ -17,8 +17,11 @@
 package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.Closure;
+import com.alipay.sofa.jraft.entity.LocalFileMetaOutter;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import com.google.protobuf.ByteString;
+import com.lessspring.org.utils.GsonUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -41,5 +44,19 @@ public interface SnapshotOperate {
 	 * @return operation label
 	 */
 	boolean onSnapshotLoad(SnapshotReader reader);
+
+	/**
+	 *
+	 *
+	 * @param metadata
+	 * @param <T>
+	 * @return
+	 */
+	default <T> LocalFileMetaOutter.LocalFileMeta buildMetadata(final T metadata) {
+		return metadata == null ? null
+				: LocalFileMetaOutter.LocalFileMeta.newBuilder()
+				.setUserMeta(ByteString.copyFrom(GsonUtils.toJsonBytes(metadata)))
+				.build();
+	}
 
 }

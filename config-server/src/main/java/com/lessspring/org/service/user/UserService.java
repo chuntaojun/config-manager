@@ -45,7 +45,7 @@ public interface UserService {
 	ResponseData<?> modifyUser(UserRequest request);
 
 	/**
-	 * remove user by user-request
+	 * clean user by user-request
 	 *
 	 * @param request {@link UserRequest}
 	 * @return operation label

@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -99,59 +100,59 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 
 	@Override
 	public void execute(Runnable command) {
-		super.execute(command);
+		super.execute(new WrapperRunnable(command));
 	}
 
 	@Override
 	public boolean remove(Runnable task) {
-		return super.remove(task);
+		return super.remove(new WrapperRunnable(task));
 	}
 
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-		return super.newTaskFor(runnable, value);
+		return super.newTaskFor(new WrapperRunnable(runnable), value);
 	}
 
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-		return super.newTaskFor(callable);
+		return super.newTaskFor(new WrapperCallable<>(callable));
 	}
 
 	@Override
 	public Future<?> submit(Runnable task) {
-		return super.submit(task);
+		return super.submit(new WrapperRunnable(task));
 	}
 
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
-		return super.submit(task, result);
+		return super.submit(new WrapperRunnable(task), result);
 	}
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		return super.submit(task);
+		return super.submit(new WrapperCallable<>(task));
 	}
 
 	@Override
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-		return super.invokeAny(tasks);
+		return super.invokeAny(tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()));
 	}
 
 	@Override
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
-		return super.invokeAny(tasks, timeout, unit);
+		return super.invokeAny(tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()), timeout, unit);
 	}
 
 	@Override
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-		return super.invokeAll(tasks);
+		return super.invokeAll(tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()));
 	}
 
 	@Override
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
 			throws InterruptedException {
-		return super.invokeAll(tasks, timeout, unit);
+		return super.invokeAll(tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()), timeout, unit);
 	}
 
 }

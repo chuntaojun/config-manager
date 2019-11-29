@@ -20,24 +20,17 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
-import com.lessspring.org.tps.FailStrategy;
-import com.lessspring.org.tps.LimitRule;
-import com.lessspring.org.tps.OpenTpsLimit;
-import com.lessspring.org.tps.TpsManager;
+import com.lessspring.org.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -65,21 +59,20 @@ public class TpsConfiguration {
 	}
 
 	public static class TpsAnnotationProcessor
-			implements BeanPostProcessor, Watcher<TpsSetting>, ApplicationContextAware {
+			implements BeanPostProcessor, Watcher<TpsSetting> {
 
 		private final TpsManager tpsManager;
 		@Autowired
 		private TpsSetting tpsSetting;
 		@Autowired
 		private TpsAnnotationProcessor annotationProcessor;
-		private ApplicationContext applicationContext;
 
 		public TpsAnnotationProcessor(TpsManager tpsManager) {
 			this.tpsManager = tpsManager;
 		}
 
 		@Override
-		public Object postProcessBeforeInitialization(@NotNull Object bean,
+		public Object postProcessBeforeInitialization(Object bean,
 				String beanName) throws BeansException {
 			final Map<String, Tuple2<Double, TpsSetting.TpsResource>> customer = new HashMap<>(
 					8);
@@ -90,16 +83,9 @@ public class TpsConfiguration {
 						.of(resource.getQps() * 1.0D / duration.getSeconds(), resource);
 				customer.put(resource.getResourceName(), tuple2);
 			}
-			Class<?> cls;
-			if (AopUtils.isCglibProxy(bean) || AopUtils.isAopProxy(bean)) {
-				cls = AopUtils.getTargetClass(bean);
-			}
-			else {
-				cls = bean.getClass();
-			}
+			final Class<?> cls = AopUtils.getTargetClass(bean);
 			if (cls.isAnnotationPresent(OpenTpsLimit.class)) {
-				Method[] methods = cls.getMethods();
-				for (Method method : methods) {
+				Stream.of(cls.getMethods()).forEach(method -> {
 					LimitRule rule = method.getAnnotation(LimitRule.class);
 					if (rule != null) {
 						Supplier<TpsManager.LimitRuleEntry> limiterSupplier = () -> {
@@ -126,27 +112,32 @@ public class TpsConfiguration {
 							final RateLimiter limiter = RateLimiter.create(qps);
 							Class<? extends FailStrategy> failStrategy = rule
 									.failStrategy();
-							try {
-								FailStrategy strategy = failStrategy.newInstance();
-								TpsManager.LimitRuleEntry entry = new TpsManager.LimitRuleEntry();
-								entry.setLimitRule(rule);
+							TpsManager.LimitRuleEntry entry = tpsManager.query(rule.resource());
+							if (entry == null) {
+								entry = new TpsManager.LimitRuleEntry();
+								try {
+									FailStrategy strategy = failStrategy.newInstance();
+									entry.setRateLimiter(limiter);
+									entry.setStrategy(strategy);
+									return entry;
+								} catch (InstantiationException | IllegalAccessException e) {
+									throw new RuntimeException(e);
+								}
+							} else {
 								entry.setRateLimiter(limiter);
-								entry.setStrategy(strategy);
-								return entry;
 							}
-							catch (InstantiationException | IllegalAccessException e) {
-								throw new RuntimeException(e);
-							}
+							entry.setLimitRule(rule);
+							return entry;
 						};
 						tpsManager.registerLimiter(rule.resource(), limiterSupplier);
 					}
-				}
+				});
 			}
 			return bean;
 		}
 
 		@Override
-		public Object postProcessAfterInitialization(@NotNull Object bean,
+		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
 			return bean;
 		}
@@ -154,18 +145,13 @@ public class TpsConfiguration {
 		@Override
 		public void onNotify(Occurrence<TpsSetting> occurrence, Publisher publisher) {
 			tpsSetting = occurrence.getOrigin();
-			String[] beanNames = applicationContext.getBeanDefinitionNames();
+			String[] beanNames = SpringUtils.getBeanDefinitionNames();
 			for (String beanName : beanNames) {
 				annotationProcessor.postProcessBeforeInitialization(
-						applicationContext.getBean(beanName), beanName);
+						SpringUtils.getBean(beanName), beanName);
 			}
 		}
 
-		@Override
-		public void setApplicationContext(@NotNull ApplicationContext applicationContext)
-				throws BeansException {
-			this.applicationContext = applicationContext;
-		}
 	}
 
 }

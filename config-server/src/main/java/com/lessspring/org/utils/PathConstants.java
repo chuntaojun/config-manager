@@ -17,9 +17,12 @@
 package com.lessspring.org.utils;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
+import com.lessspring.org.DiskUtils;
 import com.lessspring.org.PathUtils;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -27,15 +30,28 @@ import org.springframework.beans.factory.annotation.Value;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 @Getter
 public class PathConstants {
 
 	@Value("${com.lessspring.org.config.manager.cache-dir:${user.home}/config-manager/server-${server.port}}")
 	private String parentPath;
 
+	@Value("${com.lessspring.org.config-manager.exitDeleteFile:false}")
+	private boolean exitDeleteFile;
+
 	@PostConstruct
 	public void init() {
 		PathUtils.init(parentPath);
+	}
+
+	@PreDestroy
+	public void destroy() {
+		if (exitDeleteFile) {
+			log.warn(
+					"In the exitDeleteFile mode, relevant files of config-manger will be deleted automatically");
+			DiskUtils.deleteDir(parentPath);
+		}
 	}
 
 }

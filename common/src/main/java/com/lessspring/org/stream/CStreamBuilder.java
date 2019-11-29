@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.lessspring.org;
+package com.lessspring.org.stream;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -26,9 +26,9 @@ import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
- * @Created at 2019-11-25 23:18
+ * @Created at 2019-11-28 16:45
  */
-public final class StreamUtils {
+public final class CStreamBuilder {
 
     private static final Logger logger = Logger
             .getLogger("com.lessspring.org.utils.StreamUtils");
@@ -37,7 +37,7 @@ public final class StreamUtils {
     private static final ForkJoinPool myPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
 
     /**
-     * Open {@link Stream<E>} of the collection in Java8, run by default to open parallel streams
+     * Open {@link Stream <E>} of the collection in Java8, run by default to open parallel streams
      *
      * @param collection    target collection
      * @param <E>           type
@@ -99,7 +99,5 @@ public final class StreamUtils {
     public static <R> Future<R> invokeAsync(Callable<R> callable) {
         return myPool.submit(callable);
     }
-
-
 
 }

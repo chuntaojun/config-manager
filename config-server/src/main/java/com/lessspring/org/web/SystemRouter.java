@@ -60,6 +60,18 @@ public class SystemRouter {
 						.andRoute(
 								POST(StringConst.API_V1 + "sys/qps/setting/update")
 										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								systemHandler::publishQpsSetting);
+								systemHandler::publishQpsSetting)
+						.andRoute(
+								GET(StringConst.API_V1 + "sys/idManager/info")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::getAllTransactionIdInfo)
+						.andRoute(
+								POST(StringConst.API_V1 + "sys/logLevel/update")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::changeLogLevel)
+						.andRoute(
+								POST(StringConst.API_V1 + "sys/config/forceDump")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::forceDumpConfig);
 	}
 }
