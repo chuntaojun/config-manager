@@ -1,11 +1,6 @@
 package com.lessspring.org.utils;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import com.lessspring.org.ThreadUtils;
 
 /**
  * A simple read-write lock implementation
@@ -22,70 +17,60 @@ public class CasReadWriteLock {
 
 	private static final int MAX_RETRY_CNT = 10;
 
+	private final AtomicInteger readCnt = new AtomicInteger(0);
+	private volatile boolean inWrite = false;
 	private final AtomicInteger monitor = new AtomicInteger(IN_FREE_STATUS);
 
-	private final AtomicBoolean inHappyCode = new AtomicBoolean(true);
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
-
-	public boolean tryReadLock() {
-		return tryReadLock(MAX_RETRY_CNT);
+	public void tryReadLock() {
+		tryReadLock(MAX_RETRY_CNT);
 	}
 
-	public boolean tryReadLock(int retryCnt) {
+	public void tryReadLock(int retryCnt) {
+		// 等待写锁释放
+		while (inWrite) {
+			// none
+		}
 		for (int i = 0; i < retryCnt; i++) {
-			if (!inHappyCode.get()) {
-				break;
-			}
 			if (monitor.compareAndSet(IN_FREE_STATUS, IN_READ_STATUS)
 					|| monitor.get() == IN_READ_STATUS) {
-				inHappyCode.lazySet(true);
-				return true;
+				readCnt.incrementAndGet();
+				return;
 			}
-			ThreadUtils.sleep(1);
-		}
-		inHappyCode.lazySet(false);
-		try {
-			return readLock.tryLock(1000L, TimeUnit.MILLISECONDS);
-		}
-		catch (InterruptedException e) {
-			return false;
 		}
 	}
 
-	public boolean tryWriteLock() {
-		return tryWriteLock(MAX_RETRY_CNT);
+	public void tryWriteLock() {
+		tryWriteLock(MAX_RETRY_CNT);
 	}
 
-	public boolean tryWriteLock(int retryCnt) {
+	public void tryWriteLock(int retryCnt) {
 		for (int i = 0; i < retryCnt; i++) {
-			if (!inHappyCode.get()) {
-				break;
+			if (readCnt.get() == 0
+					&& monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
+				return;
 			}
+		}
+		// 强行抢占锁，接下来的读锁全部等待
+		inWrite = true;
+		// 等待读锁完全释放
+		while (readCnt.get() != 0) {
+			// none
+		}
+		for (;;) {
 			if (monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
-				inHappyCode.lazySet(true);
-				return true;
+				return;
 			}
-			ThreadUtils.sleep(1);
-		}
-		inHappyCode.lazySet(false);
-		try {
-			return writeLock.tryLock(1000L, TimeUnit.MILLISECONDS);
-		}
-		catch (InterruptedException e) {
-			return false;
 		}
 	}
 
 	public void unReadLock() {
+		readCnt.decrementAndGet();
 		monitor.lazySet(IN_FREE_STATUS);
-		readLock.unlock();
 	}
 
 	public void unWriteLock() {
+		inWrite = false;
 		monitor.lazySet(IN_FREE_STATUS);
-		writeLock.unlock();
 	}
 
 }

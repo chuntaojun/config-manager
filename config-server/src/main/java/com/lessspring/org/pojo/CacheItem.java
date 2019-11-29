@@ -16,14 +16,14 @@
  */
 package com.lessspring.org.pojo;
 
+import com.lessspring.org.NameUtils;
+import com.lessspring.org.utils.CasReadWriteLock;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import com.lessspring.org.NameUtils;
-import com.lessspring.org.utils.CasReadWriteLock;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -123,31 +123,29 @@ public class CacheItem {
 
 	public void executeReadWork(ReadWork readWork) {
 		log.warn("execute read work ");
-		if (casReadWriteLock.tryReadLock()) {
-			try {
-				readWork.job();
-			}
-			catch (Exception e) {
-				readWork.onError(e);
-			}
-			finally {
-				casReadWriteLock.unReadLock();
-			}
+		casReadWriteLock.tryReadLock();
+		try {
+			readWork.job();
+		}
+		catch (Exception e) {
+			readWork.onError(e);
+		}
+		finally {
+			casReadWriteLock.unReadLock();
 		}
 	}
 
 	public void executeWriteWork(WriteWork writeWork) {
 		log.warn("execute write work ");
-		if (casReadWriteLock.tryWriteLock()) {
-			try {
-				writeWork.job();
-			}
-			catch (Exception e) {
-				writeWork.onError(e);
-			}
-			finally {
-				casReadWriteLock.unWriteLock();
-			}
+		casReadWriteLock.tryWriteLock();
+		try {
+			writeWork.job();
+		}
+		catch (Exception e) {
+			writeWork.onError(e);
+		}
+		finally {
+			casReadWriteLock.unWriteLock();
 		}
 	}
 }
