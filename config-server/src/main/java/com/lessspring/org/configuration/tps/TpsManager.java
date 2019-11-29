@@ -16,14 +16,15 @@
  */
 package com.lessspring.org.configuration.tps;
 
-import com.google.common.util.concurrent.RateLimiter;
-import com.lessspring.org.constant.Code;
-import com.lessspring.org.model.vo.ResponseData;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import com.google.common.util.concurrent.RateLimiter;
+import com.lessspring.org.constant.Code;
+import com.lessspring.org.model.vo.ResponseData;
+
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

@@ -75,8 +75,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 
 	public NamespaceServiceImpl(
 			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
-			ClusterManager clusterManager,
-			AuthorityProcessor authorityProcessor) {
+			ClusterManager clusterManager, AuthorityProcessor authorityProcessor) {
 		this.commitCallback = commitCallback;
 		this.clusterManager = clusterManager;
 		this.authorityProcessor = authorityProcessor;

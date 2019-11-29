@@ -23,16 +23,16 @@ package com.lessspring.org;
  */
 public final class ClassLoaderSwitchUtils {
 
-    private static ThreadLocal<ClassLoader> PRE_CLASS_LOADER_HOLDER = new ThreadLocal<>();
+	private static ThreadLocal<ClassLoader> PRE_CLASS_LOADER_HOLDER = new ThreadLocal<>();
 
-    public static void transfer(Object obj) {
-        transfer(obj.getClass());
-    }
+	public static void transfer(Object obj) {
+		transfer(obj.getClass());
+	}
 
-    public static void transfer(Class<?> cls) {
-        PRE_CLASS_LOADER_HOLDER.set(Thread.currentThread().getContextClassLoader());
-        Thread.currentThread().setContextClassLoader(cls.getClassLoader());
-    }
+	public static void transfer(Class<?> cls) {
+		PRE_CLASS_LOADER_HOLDER.set(Thread.currentThread().getContextClassLoader());
+		Thread.currentThread().setContextClassLoader(cls.getClassLoader());
+	}
 
     public static void recover() {
         Thread.currentThread().setContextClassLoader(PRE_CLASS_LOADER_HOLDER.get());

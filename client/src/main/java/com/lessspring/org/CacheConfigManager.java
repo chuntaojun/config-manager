@@ -16,7 +16,9 @@
  */
 package com.lessspring.org;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +27,6 @@ import java.util.function.Supplier;
 
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.common.limit.RequestLimitManager;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.param.Body;
@@ -42,20 +43,19 @@ import com.lessspring.org.watch.WatchConfigWorker;
 import com.lessspring.org.watch.WrapperListener;
 
 /**
+ * Manager of all actively pulled and monitored configuration items
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class CacheConfigManager implements LifeCycle {
 
-	private WatchConfigWorker worker;
-
 	private SerializerUtils serializer = SerializerUtils.getInstance();
 
 	private HttpClient httpClient;
-	private RequestLimitManager limitManager = new RequestLimitManager();
-	
-	private Map<String, CacheItem> cacheItemMap;
+	private WatchConfigWorker watchConfigWorker;
 
+	private final Map<String, CacheItem> cacheItemMap;
 	private final String namespaceId;
 	private final boolean localPref;
 	private final ConfigFilterManager configFilterManager;
@@ -63,37 +63,25 @@ public class CacheConfigManager implements LifeCycle {
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 	CacheConfigManager(HttpClient client, Configuration configuration,
-			WatchConfigWorker worker, ConfigFilterManager configFilterManager) {
+			ConfigFilterManager configFilterManager) {
 		this.httpClient = client;
-		this.worker = worker;
 		this.namespaceId = configuration.getNamespaceId();
 		this.configFilterManager = configFilterManager;
 		this.localPref = configuration.isLocalPref();
+		this.watchConfigWorker = new WatchConfigWorker(httpClient, configuration,
+				configFilterManager);
+		;
+		this.cacheItemMap = new ConcurrentHashMap<>(16);
 	}
 
 	@Override
 	public void init() {
 		if (inited.compareAndSet(false, true)) {
-			this.cacheItemMap = new ConcurrentHashMap<>(16);
-			this.worker.setConfigManager(this);
-			LifeCycleHelper.invokeInit(limitManager);
+			this.watchConfigWorker.setConfigManager(this);
 		}
 	}
 
-	public void registerListener(String groupId, String dataId, String encryption,
-			AbstractListener listener) {
-		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
-
-		// if listener instance of ChangeKeyListener, should set CacheConfigManager into Listener
-
-		if (listener instanceof ChangeKeyListener) {
-			ReflectUtils.inject(listener, this, "configManager");
-		}
-		cacheItem.addListener(new WrapperListener(listener, encryption));
-	}
-
-	public void deregisterListener(String groupId, String dataId,
-			AbstractListener listener) {
+	void deregisterListener(String groupId, String dataId, AbstractListener listener) {
 		CacheItem cacheItem = getCacheItem(groupId, dataId);
 		cacheItem.removeListener(new WrapperListener(listener, ""));
 	}
@@ -108,9 +96,27 @@ public class CacheConfigManager implements LifeCycle {
 		};
 		cacheItemMap.computeIfAbsent(key, s -> supplier.get());
 		if (add[0]) {
-			worker.onChange();
+			watchConfigWorker.onChange();
 		}
 		return cacheItemMap.get(key);
+	}
+
+	public List<AbstractListener> allListener(String key) {
+		final CacheItem item = cacheItemMap.get(key);
+		return Objects.isNull(item) ? Collections.emptyList() : item.listListener();
+	}
+
+	public void registerListener(String groupId, String dataId, String encryption,
+			AbstractListener listener) {
+		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+
+		// if listener instance of ChangeKeyListener, should set CacheConfigManager into
+		// Listener
+
+		if (listener instanceof ChangeKeyListener) {
+			ReflectUtils.inject(listener, this, "configManager");
+		}
+		cacheItem.addListener(new WrapperListener(listener, encryption));
 	}
 
 	public Map<String, CacheItem> copy() {
@@ -121,7 +127,7 @@ public class CacheConfigManager implements LifeCycle {
 		String key = NameUtils.buildName(groupId, dataId);
 		if (cacheItemMap.containsKey(key)) {
 			cacheItemMap.remove(key);
-			worker.onChange();
+			watchConfigWorker.onChange();
 		}
 	}
 
@@ -211,11 +217,11 @@ public class CacheConfigManager implements LifeCycle {
 	public void destroy() {
 		if (isInited() && destroyed.compareAndSet(false, true)) {
 			LifeCycleHelper.invokeDestroy(httpClient);
-			LifeCycleHelper.invokeDestroy(worker);
-			LifeCycleHelper.invokeDestroy(limitManager);
-			worker = null;
+			LifeCycleHelper.invokeDestroy(watchConfigWorker);
+
+			// help gc
+			watchConfigWorker = null;
 			httpClient = null;
-			limitManager = null;
 		}
 	}
 

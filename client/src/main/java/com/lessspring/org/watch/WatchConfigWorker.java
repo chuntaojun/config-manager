@@ -16,13 +16,22 @@
  */
 package com.lessspring.org.watch;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.ClassLoaderSwitchUtils;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
-import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.executor.ThreadPoolHelper;
@@ -38,16 +47,6 @@ import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.MD5Utils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -56,7 +55,7 @@ public class WatchConfigWorker implements LifeCycle {
 
 	private static Logger logger = Logger.getAnonymousLogger();
 
-	private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
+	private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(
 			Runtime.getRuntime().availableProcessors(),
 			new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
 
@@ -79,7 +78,7 @@ public class WatchConfigWorker implements LifeCycle {
 
 	public void setConfigManager(CacheConfigManager configManager) {
 		this.configManager = configManager;
-		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
+		EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void notifyWatcher(ConfigInfo configInfo) {
@@ -116,7 +115,7 @@ public class WatchConfigWorker implements LifeCycle {
 		receiver = null;
 		configManager = null;
 		LifeCycleHelper.invokeDestroy(httpClient);
-		ThreadPoolHelper.invokeShutdown(executor);
+		ThreadPoolHelper.invokeShutdown(EXECUTOR);
 	}
 
 	@Override
@@ -137,7 +136,7 @@ public class WatchConfigWorker implements LifeCycle {
 			receiver.cancle();
 			receiver = null;
 		}
-		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
+		EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void onError(Throwable throwable) {
@@ -147,7 +146,6 @@ public class WatchConfigWorker implements LifeCycle {
 	private void updateAndNotify(ConfigInfo configInfo) {
 		final String groupId = configInfo.getGroupId();
 		final String dataId = configInfo.getDataId();
-		final String key = NameUtils.buildName(groupId, dataId);
 		final String lastMd5 = MD5Utils.md5Hex(configInfo.toBytes());
 		final CacheItem oldItem = configManager.getCacheItem(groupId, dataId);
 		if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {

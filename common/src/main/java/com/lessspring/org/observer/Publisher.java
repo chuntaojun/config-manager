@@ -16,12 +16,12 @@
  */
 package com.lessspring.org.observer;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 /**
  * A simple observer pattern - the publisher
@@ -37,10 +37,8 @@ public abstract class Publisher<T> {
 
 	public Publisher() {
 		Flux.create((Consumer<FluxSink<Occurrence<T>>>) tFluxSink -> sink = tFluxSink)
-				.subscribe(tOccurrence -> {
-					watchers.parallelStream().forEach(
-							watcher -> watcher.onNotify(tOccurrence, Publisher.this));
-				});
+				.subscribe(tOccurrence -> watchers.parallelStream().forEach(
+						watcher -> watcher.onNotify(tOccurrence, Publisher.this)));
 	}
 
 	public void registerWatcher(Watcher<T> watcher) {

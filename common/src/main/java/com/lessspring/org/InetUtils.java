@@ -37,151 +37,163 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class InetUtils {
 
-    private static String selfIp;
+	private static String selfIp;
 
-    private static boolean useOnlySiteLocalInterface = false;
+	private static boolean useOnlySiteLocalInterface = false;
 
-    private static boolean preferHostnameOverIp = false;
+	private static boolean preferHostnameOverIp = false;
 
-    public static InetSocketAddress ALL_IP = new InetSocketAddress("0.0.0.0", 0);
+	public static InetSocketAddress ALL_IP = new InetSocketAddress("0.0.0.0", 0);
 
-    private static List<String> preferredNetworks = new ArrayList<String>();
+	private static List<String> preferredNetworks = new ArrayList<String>();
 
-    private static List<String> ignoredInterfaces = new ArrayList<String>();
+	private static List<String> ignoredInterfaces = new ArrayList<String>();
 
-    static {
-        useOnlySiteLocalInterface = Boolean.valueOf(PropertyUtils.getProperty(Constant.USE_ONLY_SITE_INTERFACES));
+	static {
+		useOnlySiteLocalInterface = Boolean
+				.valueOf(PropertyUtils.getProperty(Constant.USE_ONLY_SITE_INTERFACES));
 
-        List<String> networks = PropertyUtils.getPropertyList(Constant.PREFERRED_NETWORKS);
-        for (String preferred : networks) {
-            preferredNetworks.add(preferred);
-        }
+		List<String> networks = PropertyUtils
+				.getPropertyList(Constant.PREFERRED_NETWORKS);
+		for (String preferred : networks) {
+			preferredNetworks.add(preferred);
+		}
 
-        List<String> interfaces = PropertyUtils.getPropertyList(Constant.IGNORED_INTERFACES);
-        for (String ignored : interfaces) {
-            ignoredInterfaces.add(ignored);
-        }
+		List<String> interfaces = PropertyUtils
+				.getPropertyList(Constant.IGNORED_INTERFACES);
+		for (String ignored : interfaces) {
+			ignoredInterfaces.add(ignored);
+		}
 
-        String configManagerIp = System.getProperty(Constant.CONFIG_MANAGER_SERVER_IP);
-        if (StringUtils.isBlank(configManagerIp)) {
-            configManagerIp = PropertyUtils.getProperty(Constant.IP_ADDRESS);
-        }
+		String configManagerIp = System.getProperty(Constant.CONFIG_MANAGER_SERVER_IP);
+		if (StringUtils.isBlank(configManagerIp)) {
+			configManagerIp = PropertyUtils.getProperty(Constant.IP_ADDRESS);
+		}
 
-        if (!StringUtils.isBlank(configManagerIp) && !isIP(configManagerIp)) {
-            throw new RuntimeException("nacos address " + configManagerIp + " is not ip");
-        }
+		if (!StringUtils.isBlank(configManagerIp) && !isIP(configManagerIp)) {
+			throw new RuntimeException("nacos address " + configManagerIp + " is not ip");
+		}
 
-        selfIp = configManagerIp;
+		selfIp = configManagerIp;
 
-        if (StringUtils.isBlank(selfIp)) {
-            preferHostnameOverIp = Boolean.getBoolean(Constant.SYSTEM_PREFER_HOSTNAME_OVER_IP);
+		if (StringUtils.isBlank(selfIp)) {
+			preferHostnameOverIp = Boolean
+					.getBoolean(Constant.SYSTEM_PREFER_HOSTNAME_OVER_IP);
 
-            if (!preferHostnameOverIp) {
-                preferHostnameOverIp = Boolean.parseBoolean(PropertyUtils.getProperty(Constant.PREFER_HOSTNAME_OVER_IP));
-            }
+			if (!preferHostnameOverIp) {
+				preferHostnameOverIp = Boolean.parseBoolean(
+						PropertyUtils.getProperty(Constant.PREFER_HOSTNAME_OVER_IP));
+			}
 
-            if (preferHostnameOverIp) {
-                InetAddress inetAddress = null;
-                try {
-                    inetAddress = InetAddress.getLocalHost();
-                } catch (UnknownHostException e) {
-                }
-                if (inetAddress.getHostName().equals(inetAddress.getCanonicalHostName())) {
-                    selfIp = inetAddress.getHostName();
-                } else {
-                    selfIp = inetAddress.getCanonicalHostName();
-                }
-            } else {
-                selfIp = findFirstNonLoopbackAddress().getHostAddress();
-            }
-        }
-    }
+			if (preferHostnameOverIp) {
+				InetAddress inetAddress = null;
+				try {
+					inetAddress = InetAddress.getLocalHost();
+				}
+				catch (UnknownHostException e) {
+				}
+				if (inetAddress.getHostName()
+						.equals(inetAddress.getCanonicalHostName())) {
+					selfIp = inetAddress.getHostName();
+				}
+				else {
+					selfIp = inetAddress.getCanonicalHostName();
+				}
+			}
+			else {
+				selfIp = findFirstNonLoopbackAddress().getHostAddress();
+			}
+		}
+	}
 
-    public static String getSelfIp() {
-        return selfIp;
-    }
+	public static String getSelfIp() {
+		return selfIp;
+	}
 
-    public static InetAddress findFirstNonLoopbackAddress() {
-        InetAddress result = null;
+	public static InetAddress findFirstNonLoopbackAddress() {
+		InetAddress result = null;
 
-        try {
-            int lowest = Integer.MAX_VALUE;
-            for (Enumeration<NetworkInterface> nics = NetworkInterface
-                .getNetworkInterfaces(); nics.hasMoreElements(); ) {
-                NetworkInterface ifc = nics.nextElement();
-                if (ifc.isUp()) {
-                    if (ifc.getIndex() < lowest || result == null) {
-                        lowest = ifc.getIndex();
-                    } else if (result != null) {
-                        continue;
-                    }
+		try {
+			int lowest = Integer.MAX_VALUE;
+			for (Enumeration<NetworkInterface> nics = NetworkInterface
+					.getNetworkInterfaces(); nics.hasMoreElements();) {
+				NetworkInterface ifc = nics.nextElement();
+				if (ifc.isUp()) {
+					if (ifc.getIndex() < lowest || result == null) {
+						lowest = ifc.getIndex();
+					}
+					else if (result != null) {
+						continue;
+					}
 
-                    if (!ignoreInterface(ifc.getDisplayName())) {
-                        for (Enumeration<InetAddress> addrs = ifc
-                            .getInetAddresses(); addrs.hasMoreElements(); ) {
-                            InetAddress address = addrs.nextElement();
-                            if (address instanceof Inet4Address
-                                && !address.isLoopbackAddress()
-                                && isPreferredAddress(address)) {
-                                result = address;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException ex) {
-        }
+					if (!ignoreInterface(ifc.getDisplayName())) {
+						for (Enumeration<InetAddress> addrs = ifc
+								.getInetAddresses(); addrs.hasMoreElements();) {
+							InetAddress address = addrs.nextElement();
+							if (address instanceof Inet4Address
+									&& !address.isLoopbackAddress()
+									&& isPreferredAddress(address)) {
+								result = address;
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (IOException ex) {
+		}
 
-        if (result != null) {
-            return result;
-        }
+		if (result != null) {
+			return result;
+		}
 
-        try {
-            return InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-        }
+		try {
+			return InetAddress.getLocalHost();
+		}
+		catch (UnknownHostException e) {
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public static boolean isPreferredAddress(InetAddress address) {
-        if (useOnlySiteLocalInterface) {
-            final boolean siteLocalAddress = address.isSiteLocalAddress();
-            if (!siteLocalAddress) {
-            }
-            return siteLocalAddress;
-        }
-        if (preferredNetworks.isEmpty()) {
-            return true;
-        }
-        for (String regex : preferredNetworks) {
-            final String hostAddress = address.getHostAddress();
-            if (hostAddress.matches(regex) || hostAddress.startsWith(regex)) {
-                return true;
-            }
-        }
+	public static boolean isPreferredAddress(InetAddress address) {
+		if (useOnlySiteLocalInterface) {
+			final boolean siteLocalAddress = address.isSiteLocalAddress();
+			if (!siteLocalAddress) {
+			}
+			return siteLocalAddress;
+		}
+		if (preferredNetworks.isEmpty()) {
+			return true;
+		}
+		for (String regex : preferredNetworks) {
+			final String hostAddress = address.getHostAddress();
+			if (hostAddress.matches(regex) || hostAddress.startsWith(regex)) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    public static boolean ignoreInterface(String interfaceName) {
-        for (String regex : ignoredInterfaces) {
-            if (interfaceName.matches(regex)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public static boolean ignoreInterface(String interfaceName) {
+		for (String regex : ignoredInterfaces) {
+			if (interfaceName.matches(regex)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public static boolean isIP(String str) {
-        String num = "(25[0-5]|2[0-4]\\d|[0-1]\\d{2}|[1-9]?\\d)";
-        String regex = "^" + num + "\\." + num + "\\." + num + "\\." + num + "$";
-        return match(regex, str);
-    }
+	public static boolean isIP(String str) {
+		String num = "(25[0-5]|2[0-4]\\d|[0-1]\\d{2}|[1-9]?\\d)";
+		String regex = "^" + num + "\\." + num + "\\." + num + "\\." + num + "$";
+		return match(regex, str);
+	}
 
-    public static boolean match(String regex, String str) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(str);
-        return matcher.matches();
-    }
+	public static boolean match(String regex, String str) {
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(str);
+		return matcher.matches();
+	}
 }

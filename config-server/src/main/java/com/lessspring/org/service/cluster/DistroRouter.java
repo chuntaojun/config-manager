@@ -44,7 +44,7 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 	private final NodeManager nodeManager = NodeManager.getInstance();
 	private AtomicReference<ServerNode[]> serverNodeAR = new AtomicReference<>();;
 
-private DistroRouter() {
+	private DistroRouter() {
 	}
 
 	public static DistroRouter getInstance() {

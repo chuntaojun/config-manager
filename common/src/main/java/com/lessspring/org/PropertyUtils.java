@@ -33,51 +33,55 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class PropertyUtils {
 
-    private static Properties properties = new Properties();
+	private static Properties properties = new Properties();
 
-    static {
-        InputStream inputStream = null;
-        try {
-            String baseDir = PathUtils.join("conf", "application.properties");
-            if (!StringUtils.isBlank(baseDir)) {
-                inputStream = new FileInputStream(baseDir);
-            } else {
-                baseDir = PathUtils.join("application.properties");
-                inputStream = PropertyUtils.class.getResourceAsStream(baseDir);
-            }
-            properties.load(inputStream);
-        } catch (Exception e) {
-        } finally {
-            if (Objects.nonNull(inputStream)) {
-                try {
-                    inputStream.close();
-                } catch (IOException ignore) {
-                }
-            }
-        }
-    }
+	static {
+		InputStream inputStream = null;
+		try {
+			String baseDir = PathUtils.join("conf", "application.properties");
+			if (!StringUtils.isBlank(baseDir)) {
+				inputStream = new FileInputStream(baseDir);
+			}
+			else {
+				baseDir = PathUtils.join("application.properties");
+				inputStream = PropertyUtils.class.getResourceAsStream(baseDir);
+			}
+			properties.load(inputStream);
+		}
+		catch (Exception e) {
+		}
+		finally {
+			if (Objects.nonNull(inputStream)) {
+				try {
+					inputStream.close();
+				}
+				catch (IOException ignore) {
+				}
+			}
+		}
+	}
 
-    public static String getProperty(String key) {
-        return properties.getProperty(key);
-    }
+	public static String getProperty(String key) {
+		return properties.getProperty(key);
+	}
 
-    public static String getProperty(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
-    }
+	public static String getProperty(String key, String defaultValue) {
+		return properties.getProperty(key, defaultValue);
+	}
 
-    public static List<String> getPropertyList(String key) {
-        List<String> valueList = new ArrayList<>();
+	public static List<String> getPropertyList(String key) {
+		List<String> valueList = new ArrayList<>();
 
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
-            String value = properties.getProperty(key + "[" + i + "]");
-            if (StringUtils.isBlank(value)) {
-                break;
-            }
+		for (int i = 0; i < Integer.MAX_VALUE; i++) {
+			String value = properties.getProperty(key + "[" + i + "]");
+			if (StringUtils.isBlank(value)) {
+				break;
+			}
 
-            valueList.add(value);
-        }
+			valueList.add(value);
+		}
 
-        return valueList;
-    }
+		return valueList;
+	}
 
 }

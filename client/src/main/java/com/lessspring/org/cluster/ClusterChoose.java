@@ -95,7 +95,8 @@ public class ClusterChoose implements Watcher, LifeCycle {
 				clusterFind = clusterInfos.iterator();
 			}
 			lastClusterIp = clusterFind.next();
-		} finally {
+		}
+		finally {
 			readLock.unlock();
 		}
 	}
@@ -108,7 +109,8 @@ public class ClusterChoose implements Watcher, LifeCycle {
 		try {
 			clusterInfos = newClusterInfo;
 			clusterFind = clusterInfos.iterator();
-		} finally {
+		}
+		finally {
 			writeLock.unlock();
 		}
 	}

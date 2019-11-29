@@ -65,7 +65,8 @@ public class RaftServerOptions {
 			return this;
 		}
 
-		public RaftServerOptionsBuilder snapshotIntervalSecs(Integer snapshotIntervalSecs) {
+		public RaftServerOptionsBuilder snapshotIntervalSecs(
+				Integer snapshotIntervalSecs) {
 			this.snapshotIntervalSecs = snapshotIntervalSecs;
 			return this;
 		}

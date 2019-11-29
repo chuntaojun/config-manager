@@ -17,34 +17,35 @@
 
 package com.lessspring.org;
 
-
 import java.lang.reflect.Field;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
- * @Created at 2019-11-23 12:28
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @since 0.0.1
  */
 public final class ReflectUtils {
 
-    public static void inject(Object source, Object value, String fieldName) {
-        Class<?> cls = source.getClass();
-        try {
-            Field field = getFied(cls, fieldName);
-            field.set(source, value);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	public static void inject(Object source, Object value, String fieldName) {
+		Class<?> cls = source.getClass();
+		try {
+			Field field = getFied(cls, fieldName);
+			field.set(source, value);
+		}
+		catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    public static Field getFied(Class<?> cls, String fieldName) {
-        Field field = null;
-        try {
-            field = cls.getField(fieldName);
-            field.setAccessible(true);
-            return field;
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	public static Field getFied(Class<?> cls, String fieldName) {
+		Field field = null;
+		try {
+			field = cls.getField(fieldName);
+			field.setAccessible(true);
+			return field;
+		}
+		catch (NoSuchFieldException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 }

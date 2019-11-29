@@ -34,13 +34,13 @@ public class Occurrence<T> {
 	private Occurrence() {
 	}
 
-	public static <T>Occurrence<T> newInstance(T event) {
+	public static <T> Occurrence<T> newInstance(T event) {
 		Occurrence<T> occurrence = new Occurrence<>();
 		occurrence.origin = new SoftReference<>(event);
 		return occurrence;
 	}
 
-	public static <T>Occurrence<T> newInstanceWithFuture(T args) {
+	public static <T> Occurrence<T> newInstanceWithFuture(T args) {
 		Occurrence<T> occurrence = newInstance(args);
 		occurrence.answer = new CompletableFuture<>();
 		return occurrence;

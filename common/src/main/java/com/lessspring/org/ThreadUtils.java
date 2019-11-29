@@ -23,38 +23,41 @@ package com.lessspring.org;
  */
 public final class ThreadUtils {
 
-    public static void sleep(long time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException ignore) {
+	public static void sleep(long time) {
+		try {
+			Thread.sleep(time);
+		}
+		catch (InterruptedException ignore) {
 
-        }
-    }
+		}
+	}
 
-    public static void onWait(Object o) {
-        synchronized (o) {
-            try {
-                o.wait();
-            } catch (InterruptedException ignore) {
+	public static void onWait(Object o) {
+		synchronized (o) {
+			try {
+				o.wait();
+			}
+			catch (InterruptedException ignore) {
 
-            }
-        }
-    }
+			}
+		}
+	}
 
-    public static void onWait(Object o, long timeoutMillis) {
-        synchronized (o) {
-            try {
-                o.wait(timeoutMillis);
-            } catch (InterruptedException ignore) {
+	public static void onWait(Object o, long timeoutMillis) {
+		synchronized (o) {
+			try {
+				o.wait(timeoutMillis);
+			}
+			catch (InterruptedException ignore) {
 
-            }
-        }
-    }
+			}
+		}
+	}
 
-    public static void onNotify(Object o) {
-        synchronized (o) {
-            o.notify();
-        }
-    }
+	public static void onNotify(Object o) {
+		synchronized (o) {
+			o.notify();
+		}
+	}
 
 }

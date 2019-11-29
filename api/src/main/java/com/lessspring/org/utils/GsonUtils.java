@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.utils;
 
+import java.lang.reflect.Type;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

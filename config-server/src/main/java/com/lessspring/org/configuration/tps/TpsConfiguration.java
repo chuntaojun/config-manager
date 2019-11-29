@@ -16,21 +16,6 @@
  */
 package com.lessspring.org.configuration.tps;
 
-import com.google.common.util.concurrent.RateLimiter;
-import com.lessspring.org.observer.Occurrence;
-import com.lessspring.org.observer.Publisher;
-import com.lessspring.org.observer.Watcher;
-import com.lessspring.org.utils.SpringUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
-
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +24,22 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import com.google.common.util.concurrent.RateLimiter;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
+import com.lessspring.org.utils.SpringUtils;
+import lombok.extern.slf4j.Slf4j;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
+
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -72,8 +73,8 @@ public class TpsConfiguration {
 		}
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean,
-				String beanName) throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName)
+				throws BeansException {
 			final Map<String, Tuple2<Double, TpsSetting.TpsResource>> customer = new HashMap<>(
 					8);
 			for (TpsSetting.TpsResource resource : tpsSetting.getResources()) {
@@ -112,7 +113,8 @@ public class TpsConfiguration {
 							final RateLimiter limiter = RateLimiter.create(qps);
 							Class<? extends FailStrategy> failStrategy = rule
 									.failStrategy();
-							TpsManager.LimitRuleEntry entry = tpsManager.query(rule.resource());
+							TpsManager.LimitRuleEntry entry = tpsManager
+									.query(rule.resource());
 							if (entry == null) {
 								entry = new TpsManager.LimitRuleEntry();
 								try {
@@ -120,10 +122,13 @@ public class TpsConfiguration {
 									entry.setRateLimiter(limiter);
 									entry.setStrategy(strategy);
 									return entry;
-								} catch (InstantiationException | IllegalAccessException e) {
+								}
+								catch (InstantiationException
+										| IllegalAccessException e) {
 									throw new RuntimeException(e);
 								}
-							} else {
+							}
+							else {
 								entry.setRateLimiter(limiter);
 							}
 							entry.setLimitRule(rule);
@@ -137,8 +142,8 @@ public class TpsConfiguration {
 		}
 
 		@Override
-		public Object postProcessAfterInitialization(Object bean,
-				String beanName) throws BeansException {
+		public Object postProcessAfterInitialization(Object bean, String beanName)
+				throws BeansException {
 			return bean;
 		}
 
@@ -146,6 +151,7 @@ public class TpsConfiguration {
 		public void onNotify(Occurrence<TpsSetting> occurrence, Publisher publisher) {
 			tpsSetting = occurrence.getOrigin();
 			String[] beanNames = SpringUtils.getBeanDefinitionNames();
+			log.warn("[TpsAnnotationProcessor] Change of system QPS Settings");
 			for (String beanName : beanNames) {
 				annotationProcessor.postProcessBeforeInitialization(
 						SpringUtils.getBean(beanName), beanName);

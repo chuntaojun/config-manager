@@ -79,11 +79,8 @@ public class TpsSetting {
 
 		@Override
 		public String toString() {
-			return "TpsResource{" +
-					"resourceName='" + resourceName + '\'' +
-					", qps=" + qps +
-					", duration=" + duration +
-					'}';
+			return "TpsResource{" + "resourceName='" + resourceName + '\'' + ", qps="
+					+ qps + ", duration=" + duration + '}';
 		}
 
 		@Override
