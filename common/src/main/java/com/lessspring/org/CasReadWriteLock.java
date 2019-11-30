@@ -1,4 +1,4 @@
-package com.lessspring.org.utils;
+package com.lessspring.org;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,11 +21,11 @@ public class CasReadWriteLock {
 	private volatile boolean inWrite = false;
 	private final AtomicInteger monitor = new AtomicInteger(IN_FREE_STATUS);
 
-	public void tryReadLock() {
-		tryReadLock(MAX_RETRY_CNT);
+	public boolean tryReadLock() {
+		return tryReadLock(MAX_RETRY_CNT);
 	}
 
-	public void tryReadLock(int retryCnt) {
+	public boolean tryReadLock(int retryCnt) {
 		// 等待写锁释放
 		while (inWrite) {
 			// none
@@ -34,20 +34,21 @@ public class CasReadWriteLock {
 			if (monitor.compareAndSet(IN_FREE_STATUS, IN_READ_STATUS)
 					|| monitor.get() == IN_READ_STATUS) {
 				readCnt.incrementAndGet();
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
-	public void tryWriteLock() {
-		tryWriteLock(MAX_RETRY_CNT);
+	public boolean tryWriteLock() {
+		return tryWriteLock(MAX_RETRY_CNT);
 	}
 
-	public void tryWriteLock(int retryCnt) {
+	public boolean tryWriteLock(int retryCnt) {
 		for (int i = 0; i < retryCnt; i++) {
 			if (readCnt.get() == 0
 					&& monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
-				return;
+				return true;
 			}
 		}
 		// 强行抢占锁，接下来的读锁全部等待
@@ -56,11 +57,12 @@ public class CasReadWriteLock {
 		while (readCnt.get() != 0) {
 			// none
 		}
-		for (;;) {
+		for (int i = 0; i < retryCnt; i ++) {
 			if (monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	public void unReadLock() {

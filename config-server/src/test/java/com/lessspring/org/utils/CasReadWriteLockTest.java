@@ -1,5 +1,6 @@
 package com.lessspring.org.utils;
 
+import com.lessspring.org.CasReadWriteLock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,12 +24,13 @@ public class CasReadWriteLockTest {
             executorService.execute(() -> {
                 int k = 10_0000;
                 while (!finish || k -- != 0) {
-                    lock.tryReadLock();
-                    try {
-                        count[0] ++;
-                        inWrite = false;
-                    } finally {
-                        lock.unReadLock();
+                    if (lock.tryReadLock()) {
+                        try {
+                            count[0]++;
+                            inWrite = false;
+                        } finally {
+                            lock.unReadLock();
+                        }
                     }
                 }
                 finish = true;
@@ -37,19 +39,20 @@ public class CasReadWriteLockTest {
 
         executorService.execute(() -> {
             for (int i = 0 ; i < 10 ; i ++) {
-                lock.tryWriteLock();
-                try {
-                    inWrite = true;
-                    for (int j = 0; j < 3; j ++) {
-                        System.out.println("write work " + j);
-                        Assert.assertTrue(inWrite);
+                if (lock.tryWriteLock()) {
+                    try {
+                        inWrite = true;
+                        for (int j = 0; j < 3; j++) {
+                            System.out.println("write work " + j);
+                            Assert.assertTrue(inWrite);
+                        }
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                        finish = true;
+                        i = 1000 + 1;
+                    } finally {
+                        lock.unWriteLock();
                     }
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                    finish = true;
-                    i = 1000 + 1;
-                } finally {
-                    lock.unWriteLock();
                 }
             }
             finish = true;

@@ -27,6 +27,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.function.BiConsumer;
+
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
@@ -38,12 +40,22 @@ public final class RenderUtils {
 
 	private static TraceContextHolder contextHolder = TraceContextHolder.getInstance();
 
+	public static Mono<ServerResponse> render(ResponseData data) {
+		return render(Mono.justOrEmpty(data));
+	}
+
 	@SuppressWarnings("all")
 	public static Mono<ServerResponse> render(Mono<?> dataMono) {
 		return ok().header("Access-Control-Allow-Origin", "*")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
+				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
+				.doOnSuccessOrError(new BiConsumer<Mono<ServerResponse>, Throwable>() {
+					@Override
+					public void accept(Mono<ServerResponse> o, Throwable o2) {
+						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
+					}
+				});
 	}
 
 	@SuppressWarnings("all")
@@ -51,7 +63,13 @@ public final class RenderUtils {
 		return ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=\"" + resource.getFilename() + "\"")
-				.body(BodyInserters.fromResource(resource));
+				.body(BodyInserters.fromResource(resource))
+				.doOnSuccessOrError(new BiConsumer<ServerResponse, Throwable>() {
+					@Override
+					public void accept(ServerResponse serverResponse, Throwable throwable) {
+						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
+					}
+				});
 	}
 
 }

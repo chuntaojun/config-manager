@@ -17,7 +17,7 @@
 package com.lessspring.org.pojo;
 
 import com.lessspring.org.NameUtils;
-import com.lessspring.org.utils.CasReadWriteLock;
+import com.lessspring.org.CasReadWriteLock;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
@@ -40,7 +40,7 @@ public class CacheItem {
 
 	private final boolean file;
 	private final String key;
-	private final Object locker = new Object();
+
 	/**
 	 * 一个简单的读写锁实现
 	 */
@@ -120,32 +120,39 @@ public class CacheItem {
 
 	// 需要考虑清楚，如果写线程到了悲观锁，而读线程因为乐观锁而正在执行，
 	// 那么存在读写同时运行的情况，需要考虑如何避免此类现象，确保线程安全
+	// 返回值只代表任务是否被执行了
 
-	public void executeReadWork(ReadWork readWork) {
+	public boolean executeReadWork(ReadWork readWork) {
 		log.warn("execute read work ");
-		casReadWriteLock.tryReadLock();
-		try {
-			readWork.job();
-		}
-		catch (Exception e) {
-			readWork.onError(e);
-		}
-		finally {
-			casReadWriteLock.unReadLock();
+		if (casReadWriteLock.tryReadLock()) {
+			try {
+				readWork.job();
+			} catch (Exception e) {
+				readWork.onError(e);
+			} finally {
+				casReadWriteLock.unReadLock();
+			}
+			return true;
+		} else {
+			log.warn("");
+			return false;
 		}
 	}
 
-	public void executeWriteWork(WriteWork writeWork) {
+	public boolean executeWriteWork(WriteWork writeWork) {
 		log.warn("execute write work ");
-		casReadWriteLock.tryWriteLock();
-		try {
-			writeWork.job();
-		}
-		catch (Exception e) {
-			writeWork.onError(e);
-		}
-		finally {
-			casReadWriteLock.unWriteLock();
+		if (casReadWriteLock.tryWriteLock()) {
+			try {
+				writeWork.job();
+			} catch (Exception e) {
+				writeWork.onError(e);
+			} finally {
+				casReadWriteLock.unWriteLock();
+			}
+			return true;
+		} else {
+			log.warn("Failed to acquire write lock, no chance to execute, exit execution");
+			return false;
 		}
 	}
 }

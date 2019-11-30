@@ -16,18 +16,6 @@
  */
 package com.lessspring.org.handler.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import javax.annotation.PostConstruct;
-
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.configuration.tps.LimitRule;
 import com.lessspring.org.configuration.tps.OpenTpsLimit;
@@ -47,9 +35,6 @@ import com.lessspring.org.utils.SchedulerUtils;
 import com.lessspring.org.utils.SystemEnv;
 import com.lessspring.org.utils.TracerUtils;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -66,6 +51,19 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -130,14 +128,14 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 	@LimitRule(resource = "system-resource", qps = 1, timeUnit = TimeUnit.MINUTES)
 	public Mono<ServerResponse> forceDumpConfig(ServerRequest request) {
 		dumpService.forceDump(false);
-		return RenderUtils.render(Mono.just(ResponseData.success())).subscribeOn(
+		return RenderUtils.render(ResponseData.success()).subscribeOn(
 				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
 
 	@Override
 	public Mono<ServerResponse> publishLog(ServerRequest request) {
 		return RenderUtils
-				.render(Mono.just(ResponseData.success(tracerUtils.analyzePublishLog())))
+				.render(ResponseData.success(tracerUtils.analyzePublishLog()))
 				.subscribeOn(Schedulers
 						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
@@ -163,6 +161,7 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 		return RenderUtils.render(callable.get()).doOnTerminate(() -> {
 			if (Objects.nonNull(files[0])) {
 				if (files[0].exists()) {
+					log.warn("[JvmDump Handler] auto delete file when this request finish");
 					files[0].delete();
 				}
 			}
