@@ -11,6 +11,7 @@ create TABLE config_info
     file_source  binary,
     encryption   varchar(128) not null default '',
     create_time  bigint       not null,
+    version      bigint       not null default 0,
     primary key (id),
     unique key (namespace_id, group_id, data_id)
 );
@@ -27,6 +28,7 @@ create TABLE config_info_beta
     encryption   varchar(128)  not null default '',
     create_time  bigint        not null,
     client_ips   varchar(1024) not null,
+    version      bigint       not null default 0,
     primary key (id),
     unique key (namespace_id, group_id, data_id)
 );
@@ -42,7 +44,7 @@ create TABLE config_info_history
     file_source  binary,
     encryption   varchar(128)  not null default '',
     create_time  bigint        not null,
-    last_modify_time bigint    not null ,
+    last_modify_time bigint    not null,
     primary key (id),
     unique key (namespace_id, group_id, data_id, last_modify_time)
 );

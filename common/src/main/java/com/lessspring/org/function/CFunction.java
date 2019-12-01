@@ -1,6 +1,6 @@
 package com.lessspring.org.function;
 
-import com.lessspring.org.context.Passthrough;
+import com.lessspring.org.context.PassThrough;
 
 import java.util.function.Function;
 
@@ -8,7 +8,7 @@ import java.util.function.Function;
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
  * @Created at 2019-11-28 16:56
  */
-public class CFunction<T, R> extends Passthrough implements Function<T, R> {
+public class CFunction<T, R> extends PassThrough implements Function<T, R> {
 
     private final Function<T, R> source;
 

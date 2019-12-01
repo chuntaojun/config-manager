@@ -18,8 +18,9 @@ public class CasReadWriteLock {
 	private static final int MAX_RETRY_CNT = 10;
 
 	private final AtomicInteger readCnt = new AtomicInteger(0);
-	private volatile boolean inWrite = false;
 	private final AtomicInteger monitor = new AtomicInteger(IN_FREE_STATUS);
+
+	private volatile boolean inWrite = false;
 
 	public boolean tryReadLock() {
 		return tryReadLock(MAX_RETRY_CNT);
@@ -48,6 +49,7 @@ public class CasReadWriteLock {
 		for (int i = 0; i < retryCnt; i++) {
 			if (readCnt.get() == 0
 					&& monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
+				inWrite = true;
 				return true;
 			}
 		}
@@ -67,12 +69,20 @@ public class CasReadWriteLock {
 
 	public void unReadLock() {
 		readCnt.decrementAndGet();
-		monitor.lazySet(IN_FREE_STATUS);
+		monitor.set(IN_FREE_STATUS);
 	}
 
 	public void unWriteLock() {
 		inWrite = false;
-		monitor.lazySet(IN_FREE_STATUS);
+		monitor.set(IN_FREE_STATUS);
 	}
 
+	@Override
+	public String toString() {
+		return "CasReadWriteLock{" +
+				"readCnt=" + readCnt +
+				", inWrite=" + inWrite +
+				", monitor=" + monitor +
+				'}';
+	}
 }

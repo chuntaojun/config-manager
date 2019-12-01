@@ -17,6 +17,8 @@
 
 package com.lessspring.org.stream;
 
+import com.lessspring.org.executor.CForkJoinPool;
+
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
@@ -34,7 +36,7 @@ public final class CStreamBuilder {
             .getLogger("com.lessspring.org.utils.StreamUtils");
 
 
-    private static final ForkJoinPool myPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
+    private static final ForkJoinPool myPool = new CForkJoinPool(Runtime.getRuntime().availableProcessors());
 
     /**
      * Open {@link Stream <E>} of the collection in Java8, run by default to open parallel streams

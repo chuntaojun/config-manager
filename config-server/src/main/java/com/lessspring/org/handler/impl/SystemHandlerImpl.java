@@ -33,7 +33,7 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
 import com.lessspring.org.utils.SystemEnv;
-import com.lessspring.org.utils.TracerUtils;
+import com.lessspring.org.utils.TraceAnalyzer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
@@ -76,7 +76,7 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 
 	private final LoggingSystem loggingSystem;
 	private final DumpService dumpService;
-	private final TracerUtils tracerUtils;
+	private final TraceAnalyzer traceAnalyzer;
 	private final TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor;
 	private SystemEnv systemEnv;
 	private StandardEnvironment environment = new StandardEnvironment();
@@ -89,12 +89,12 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 	private TpsSetting tpsSetting;
 
 	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService,
-			TracerUtils tracerUtils,
-			TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor,
-			ApplicationContext applicationContext) {
+                             TraceAnalyzer traceAnalyzer,
+                             TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor,
+                             ApplicationContext applicationContext) {
 		this.loggingSystem = loggingSystem;
 		this.dumpService = dumpService;
-		this.tracerUtils = tracerUtils;
+		this.traceAnalyzer = traceAnalyzer;
 		this.tpsAnnotationProcessor = tpsAnnotationProcessor;
 		this.beanFactoryMetadata = applicationContext.getBean(
 				ConfigurationBeanFactoryMetadata.BEAN_NAME,
@@ -135,7 +135,7 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 	@Override
 	public Mono<ServerResponse> publishLog(ServerRequest request) {
 		return RenderUtils
-				.render(ResponseData.success(tracerUtils.analyzePublishLog()))
+				.render(ResponseData.success(traceAnalyzer.analyzePublishLog()))
 				.subscribeOn(Schedulers
 						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}

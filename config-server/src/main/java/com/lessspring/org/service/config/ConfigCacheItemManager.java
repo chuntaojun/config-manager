@@ -16,16 +16,6 @@
  */
 package com.lessspring.org.service.config;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Supplier;
-
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
@@ -40,9 +30,18 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -130,7 +129,7 @@ public class ConfigCacheItemManager {
 		}
 		Supplier<CacheItem> supplier = () -> {
 			final CacheItem itemSave = new CacheItem(namespaceId, event.getGroupId(),
-					event.getDataId(), event.isFile());
+					event.getDataId(), event.isFile(), event.getVersion());
 			if (event.isFile()) {
 				itemSave.setLastMd5(MD5Utils.md5Hex(event.getFileSource()));
 			}
@@ -151,6 +150,7 @@ public class ConfigCacheItemManager {
 			}
 			item.setBeta(event.isBeta());
 			item.setBetaClientIps(betaClientIps);
+			item.setVersion(event.getVersion());
 		}
 	}
 
@@ -168,7 +168,7 @@ public class ConfigCacheItemManager {
 		if (Objects.nonNull(item)) {
 			return item;
 		}
-		CacheItem tmp = new CacheItem(namespaceId, groupId, dataId, false);
+		CacheItem tmp = new CacheItem(namespaceId, groupId, dataId, false, 0);
 		item = cacheItemMap.putIfAbsent(key, tmp);
 		return (null == item) ? tmp : item;
 	}
@@ -226,6 +226,7 @@ public class ConfigCacheItemManager {
 				DiskUtils.writeFile(parentPath, NameUtils.buildName(groupId, dataId),
 						GsonUtils.toJsonBytes(configInfo));
 				cacheItem.setLastUpdateTime(System.currentTimeMillis());
+				cacheItem.setVersion(event.getVersion());
 			}
 
 			@Override

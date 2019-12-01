@@ -16,10 +16,15 @@
  */
 package com.lessspring.org.common.parser;
 
-import java.util.Map;
-import java.util.function.Predicate;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.lessspring.org.model.dto.ConfigInfo;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -32,8 +37,43 @@ class JsonParser extends AbstraceParser {
 	@Override
 	public Map<String, Object> toMap(ConfigInfo configInfo) {
 		if (jsonPred.test(configInfo.getType())) {
-
+			return parseJSON2Map(configInfo.getContent());
 		}
 		return onNext(configInfo);
+	}
+
+	private Map<String, Object> parseJSON2Map(String json) {
+		Map<String, Object> map = new HashMap<>(32);
+		com.google.gson.JsonParser p = new com.google.gson.JsonParser();
+		JsonElement jsonElement = p.parse(json);
+		if (null == jsonElement) {
+			return map;
+		}
+		parseJsonNode(map, jsonElement, "");
+		return map;
+	}
+
+	private void parseJsonNode(Map<String, Object> jsonMap, JsonElement jsonElement,
+			String parentKey) {
+		if (jsonElement.isJsonObject()) {
+			Set<Map.Entry<String, JsonElement>> es = jsonElement.getAsJsonObject()
+					.entrySet();
+			for (Map.Entry<String, JsonElement> entry : es) {
+				parseJsonNode(jsonMap, entry.getValue(),
+						StringUtils.isEmpty(parentKey) ? entry.getKey()
+								: parentKey + DOT + entry.getKey());
+			}
+		}
+		if (jsonElement.isJsonArray()) {
+			JsonArray array = jsonElement.getAsJsonArray();
+			int i = 0;
+			for (JsonElement item : array) {
+				parseJsonNode(jsonMap, item, parentKey + "[" + i + "]");
+				i++;
+			}
+		}
+		if (jsonElement.isJsonPrimitive() || jsonElement.isJsonNull()) {
+			jsonMap.put(parentKey, jsonElement.toString());
+		}
 	}
 }

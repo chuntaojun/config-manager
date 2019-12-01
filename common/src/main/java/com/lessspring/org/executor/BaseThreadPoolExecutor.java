@@ -26,7 +26,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -57,7 +56,7 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 	}
 
 	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit,
-			ThreadFactory factory) {
+			NameThreadFactory factory) {
 		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime,
 				unit, new LinkedBlockingQueue<>(), factory);
 	}
@@ -75,7 +74,7 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 
 	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
 			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
-			ThreadFactory threadFactory) {
+			NameThreadFactory threadFactory) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
 				threadFactory);
 	}
@@ -88,7 +87,7 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 
 	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
 			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
-			ThreadFactory threadFactory, RejectedExecutionHandler handler) {
+			NameThreadFactory threadFactory, RejectedExecutionHandler handler) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
 				threadFactory, handler);
 	}
@@ -109,6 +108,8 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 					Thread.currentThread().getName(),
 					System.currentTimeMillis() - workCostTimeLocal.get()));
 			workCostTimeLocal.remove();
+			CThread cThread = (CThread) Thread.currentThread();
+			cThread.cleanTraceContext();
 		}
 	}
 

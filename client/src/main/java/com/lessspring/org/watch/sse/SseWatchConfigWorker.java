@@ -14,27 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.watch;
+package com.lessspring.org.watch.sse;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.CacheConfigManager;
-import com.lessspring.org.ClassLoaderSwitchUtils;
 import com.lessspring.org.Configuration;
-import com.lessspring.org.LifeCycle;
 import com.lessspring.org.LifeCycleHelper;
 import com.lessspring.org.api.ApiConstant;
-import com.lessspring.org.executor.NameThreadFactory;
-import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
@@ -45,77 +29,41 @@ import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.model.vo.WatchResponse;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.MD5Utils;
+import com.lessspring.org.watch.AbstractWatchWorker;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class WatchConfigWorker implements LifeCycle {
+public class SseWatchConfigWorker extends AbstractWatchWorker {
 
 	private static Logger logger = Logger.getAnonymousLogger();
 
-	private static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(
-			Runtime.getRuntime().availableProcessors(),
-			new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
-
-	private CacheConfigManager configManager;
-	private final HttpClient httpClient;
-	private final Configuration configuration;
-	private final ConfigFilterManager configFilterManager;
 	private EventReceiver<WatchResponse> receiver;
 
-	public WatchConfigWorker(HttpClient httpClient, Configuration configuration,
+	public SseWatchConfigWorker(HttpClient httpClient, Configuration configuration,
 			ConfigFilterManager configFilterManager) {
-		this.httpClient = httpClient;
-		this.configuration = configuration;
-		this.configFilterManager = configFilterManager;
+		super(httpClient, configuration, configFilterManager);
 	}
 
 	@Override
 	public void init() {
-	}
-
-	public void setConfigManager(CacheConfigManager configManager) {
-		this.configManager = configManager;
-		EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
-	}
-
-	private void notifyWatcher(ConfigInfo configInfo) {
-		final String groupId = configInfo.getGroupId();
-		final String dataId = configInfo.getDataId();
-		Optional<List<AbstractListener>> listeners = Optional
-				.ofNullable(configManager.getCacheItem(groupId, dataId).listListener());
-
-		// do some processor to configInfo by filter chain
-		configFilterManager.doFilter(configInfo);
-
-		listeners.ifPresent(abstractListeners -> {
-			for (AbstractListener listener : abstractListeners) {
-				Runnable job = () -> {
-					// In order to make the spi mechanisms can work better
-					ClassLoaderSwitchUtils.transfer(listener);
-					listener.onReceive(configInfo);
-					ClassLoaderSwitchUtils.recover();
-				};
-				Executor userExecutor = listener.executor();
-				if (Objects.isNull(userExecutor)) {
-					job.run();
-				}
-				else {
-					userExecutor.execute(job);
-				}
-			}
-		});
+		super.init();
 	}
 
 	@Override
 	public void destroy() {
+		super.destroy();
 		receiver.cancle();
 		receiver = null;
-		configManager = null;
 		LifeCycleHelper.invokeDestroy(httpClient);
-		ThreadPoolHelper.invokeShutdown(EXECUTOR);
 	}
 
 	@Override
@@ -131,6 +79,7 @@ public class WatchConfigWorker implements LifeCycle {
 	// When your listener list changes, to build a monitoring events and
 	// initiate Watch requests to the server
 
+	@Override
 	public void onChange() {
 		if (Objects.nonNull(receiver)) {
 			receiver.cancle();
@@ -143,20 +92,10 @@ public class WatchConfigWorker implements LifeCycle {
 		logger.warning(throwable.getMessage());
 	}
 
-	private void updateAndNotify(ConfigInfo configInfo) {
-		final String groupId = configInfo.getGroupId();
-		final String dataId = configInfo.getDataId();
-		final String lastMd5 = MD5Utils.md5Hex(configInfo.toBytes());
-		final CacheItem oldItem = configManager.getCacheItem(groupId, dataId);
-		if (Objects.nonNull(oldItem) && oldItem.isChange(lastMd5)) {
-			oldItem.setLastMd5(lastMd5);
-			notifyWatcher(configInfo);
-		}
-	}
-
 	// Create a Watcher to monitor configuration changes information
 
-	private void createWatcher() {
+	@Override
+	public void createWatcher() {
 		Map<String, CacheItem> tmp = configManager.copy();
 		Map<String, String> watchInfo = tmp.entrySet().stream().collect(HashMap::new,
 				(m, e) -> m.put(e.getKey(), e.getValue().getLastMd5()), HashMap::putAll);
@@ -176,13 +115,13 @@ public class WatchConfigWorker implements LifeCycle {
 							.groupId(data.getGroupId()).dataId(data.getDataId())
 							.content(data.getContent()).encryption(data.getEncryption())
 							.file(data.getFile()).type(data.getType()).build();
-					WatchConfigWorker.this.updateAndNotify(configInfo);
+					SseWatchConfigWorker.this.updateAndNotify(configInfo);
 				}
 			}
 
 			@Override
 			public void onError(Throwable throwable) {
-				WatchConfigWorker.this.onError(throwable);
+				SseWatchConfigWorker.this.onError(throwable);
 			}
 
 			@Override

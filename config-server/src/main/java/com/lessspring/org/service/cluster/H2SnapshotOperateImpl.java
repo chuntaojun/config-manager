@@ -16,6 +16,26 @@
  */
 package com.lessspring.org.service.cluster;
 
+import com.alipay.sofa.jraft.Closure;
+import com.alipay.sofa.jraft.Status;
+import com.alipay.sofa.jraft.error.RaftError;
+import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
+import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import com.lessspring.org.DiskUtils;
+import com.lessspring.org.pojo.ClusterMeta;
+import com.lessspring.org.raft.NodeManager;
+import com.lessspring.org.raft.SnapshotOperate;
+import com.lessspring.org.raft.utils.ServerStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
+
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.channels.Channels;
@@ -25,28 +45,8 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.zip.ZipOutputStream;
-
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Status;
-import com.alipay.sofa.jraft.error.RaftError;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
-import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import com.lessspring.org.DiskUtils;
-import com.lessspring.org.executor.NameThreadFactory;
-import com.lessspring.org.pojo.ClusterMeta;
-import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.raft.SnapshotOperate;
-import com.lessspring.org.raft.utils.ServerStatus;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-
-import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -68,7 +68,7 @@ public class H2SnapshotOperateImpl implements SnapshotOperate {
 			{ "snapshot_namespace.csv", "namespace" },
 			{ "snapshot_namespace_permissions.csv", "namespace_permissions" } };
 	private final DataSource dataSource;
-	private Executor executor;
+	private FluxSink<Tuple2<SnapshotWriter, Closure>> source;
 
 	public H2SnapshotOperateImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -76,53 +76,56 @@ public class H2SnapshotOperateImpl implements SnapshotOperate {
 
 	@PostConstruct
 	public void init() {
-		executor = Executors.newFixedThreadPool(1,
-				new NameThreadFactory("com.lessspring.org.Raft.doSnapshot"));
+		Flux.create(
+				(Consumer<FluxSink<Tuple2<SnapshotWriter, Closure>>>) fluxSink -> source = fluxSink)
+				.subscribe(this::onSnapshotSave);
 	}
 
 	@Override
 	public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-		executor.execute(() -> {
-			try {
-				final String writePath = writer.getPath();
-				final String parentPath = Paths.get(writePath, SNAPSHOT_DIR).toString();
-				final File file = new File(parentPath);
+		source.next(Tuples.of(writer, done));
+	}
+
+	private void onSnapshotSave(Tuple2<SnapshotWriter, Closure> job) {
+		final SnapshotWriter writer = job.getT1();
+		final Closure done = job.getT2();
+		try {
+			final String writePath = writer.getPath();
+			final String parentPath = Paths.get(writePath, SNAPSHOT_DIR).toString();
+			final File file = new File(parentPath);
+			FileUtils.deleteDirectory(file);
+			FileUtils.forceMkdir(file);
+			List<String> sqls = new ArrayList<>();
+			for (String[] tableInfo : fileNames) {
+				final String filePath = parentPath + File.separator + tableInfo[0];
+				String sql = "CALL CSVWRITE('%s', 'SELECT * FROM %s');";
+				sql = String.format(sql, filePath, tableInfo[1]);
+				sqls.add(sql);
+			}
+			batchExec(sqls, "Snapshot save");
+			final String outputFile = Paths.get(writePath, SNAPSHOT_ARCHIVE).toString();
+			try (final FileOutputStream fOut = new FileOutputStream(outputFile);
+					final ZipOutputStream zOut = new ZipOutputStream(fOut)) {
+				WritableByteChannel channel = Channels.newChannel(zOut);
+				DiskUtils.compressDirectoryToZipFile(writePath, SNAPSHOT_DIR, zOut,
+						channel);
 				FileUtils.deleteDirectory(file);
-				FileUtils.forceMkdir(file);
-				List<String> sqls = new ArrayList<>();
-				for (String[] tableInfo : fileNames) {
-					final String filePath = parentPath + File.separator + tableInfo[0];
-					String sql = "CALL CSVWRITE('%s', 'SELECT * FROM %s');";
-					sql = String.format(sql, filePath, tableInfo[1]);
-					sqls.add(sql);
-				}
-				batchExec(sqls, "Snapshot save");
-				final String outputFile = Paths.get(writePath, SNAPSHOT_ARCHIVE)
-						.toString();
-				try (final FileOutputStream fOut = new FileOutputStream(outputFile);
-						final ZipOutputStream zOut = new ZipOutputStream(fOut)) {
-					WritableByteChannel channel = Channels.newChannel(zOut);
-					DiskUtils.compressDirectoryToZipFile(writePath, SNAPSHOT_DIR, zOut,
-							channel);
-					// fOut.getFD().sync();
-					FileUtils.deleteDirectory(file);
-				}
-				if (writer.addFile(SNAPSHOT_ARCHIVE, buildMetadata(clusterMeta))) {
-					done.run(Status.OK());
-				}
-				else {
-					done.run(new Status(RaftError.EIO, "Fail to add snapshot file: %s",
-							parentPath));
-				}
 			}
-			catch (final Throwable t) {
-				log.error("Fail to compress snapshot, path={}, file list={}, {}.",
-						writer.getPath(), writer.listFiles(), t);
-				done.run(new Status(RaftError.EIO,
-						"Fail to compress snapshot at %s, error is %s", writer.getPath(),
-						t.getMessage()));
+			if (writer.addFile(SNAPSHOT_ARCHIVE, buildMetadata(clusterMeta))) {
+				done.run(Status.OK());
 			}
-		});
+			else {
+				done.run(new Status(RaftError.EIO, "Fail to add snapshot file: %s",
+						parentPath));
+			}
+		}
+		catch (final Throwable t) {
+			log.error("Fail to compress snapshot, path={}, file list={}, {}.",
+					writer.getPath(), writer.listFiles(), t);
+			done.run(new Status(RaftError.EIO,
+					"Fail to compress snapshot at %s, error is %s", writer.getPath(),
+					t.getMessage()));
+		}
 	}
 
 	@Override

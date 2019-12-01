@@ -16,12 +16,12 @@
  */
 package com.lessspring.org.pojo;
 
+import com.lessspring.org.AbstractListener;
+import com.lessspring.org.model.dto.ConfigInfo;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.lessspring.org.AbstractListener;
-import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -91,6 +91,10 @@ public class CacheItem {
 
 	public boolean isChange(String remoteMd5) {
 		return !Objects.equals(lastMd5, remoteMd5);
+	}
+
+	public boolean isNew(ConfigInfo configInfo) {
+		return Objects.isNull(oldInfo) || configInfo.getVersion() > oldInfo.getVersion();
 	}
 
 	@Override

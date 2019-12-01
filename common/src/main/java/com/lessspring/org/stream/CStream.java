@@ -1,5 +1,7 @@
 package com.lessspring.org.stream;
 
+import com.lessspring.org.context.PassThrough;
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
@@ -20,11 +22,12 @@ import java.util.stream.Stream;
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
  * @Created at 2019-11-28 16:25
  */
-public class CStream<E> {
+public class CStream<E> extends PassThrough {
 
     private final Stream<E> source;
 
     public CStream(Stream<E> source) {
+        super();
         this.source = source;
     }
 

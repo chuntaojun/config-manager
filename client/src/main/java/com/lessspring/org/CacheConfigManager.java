@@ -16,17 +16,9 @@
  */
 package com.lessspring.org;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
-
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.param.Body;
@@ -38,9 +30,20 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PathConstants;
+import com.lessspring.org.watch.AbstractWatchWorker;
 import com.lessspring.org.watch.ChangeKeyListener;
-import com.lessspring.org.watch.WatchConfigWorker;
 import com.lessspring.org.watch.WrapperListener;
+import com.lessspring.org.watch.longpoll.LongPollWatchConfigWorker;
+import com.lessspring.org.watch.sse.SseWatchConfigWorker;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * Manager of all actively pulled and monitored configuration items
@@ -53,7 +56,7 @@ public class CacheConfigManager implements LifeCycle {
 	private SerializerUtils serializer = SerializerUtils.getInstance();
 
 	private HttpClient httpClient;
-	private WatchConfigWorker watchConfigWorker;
+	private AbstractWatchWorker watchWorker;
 
 	private final Map<String, CacheItem> cacheItemMap;
 	private final String namespaceId;
@@ -68,17 +71,25 @@ public class CacheConfigManager implements LifeCycle {
 		this.namespaceId = configuration.getNamespaceId();
 		this.configFilterManager = configFilterManager;
 		this.localPref = configuration.isLocalPref();
-		this.watchConfigWorker = new WatchConfigWorker(httpClient, configuration,
-				configFilterManager);
-		;
+		this.watchWorker = buildWatchWorker(httpClient, configuration, configFilterManager);
 		this.cacheItemMap = new ConcurrentHashMap<>(16);
 	}
 
 	@Override
 	public void init() {
 		if (inited.compareAndSet(false, true)) {
-			this.watchConfigWorker.setConfigManager(this);
+			this.watchWorker.setConfigManager(this);
 		}
+	}
+
+	private AbstractWatchWorker buildWatchWorker(HttpClient httpClient, Configuration configuration,
+												 ConfigFilterManager configFilterManager) {
+		if (configuration.getWatchType() == WatchType.SSE) {
+			return new SseWatchConfigWorker(httpClient, configuration,
+					configFilterManager);
+		}
+		return new LongPollWatchConfigWorker(httpClient, configuration,
+				configFilterManager);
 	}
 
 	void deregisterListener(String groupId, String dataId, AbstractListener listener) {
@@ -96,7 +107,7 @@ public class CacheConfigManager implements LifeCycle {
 		};
 		cacheItemMap.computeIfAbsent(key, s -> supplier.get());
 		if (add[0]) {
-			watchConfigWorker.onChange();
+			watchWorker.onChange();
 		}
 		return cacheItemMap.get(key);
 	}
@@ -127,7 +138,7 @@ public class CacheConfigManager implements LifeCycle {
 		String key = NameUtils.buildName(groupId, dataId);
 		if (cacheItemMap.containsKey(key)) {
 			cacheItemMap.remove(key);
-			watchConfigWorker.onChange();
+			watchWorker.onChange();
 		}
 	}
 
@@ -217,10 +228,10 @@ public class CacheConfigManager implements LifeCycle {
 	public void destroy() {
 		if (isInited() && destroyed.compareAndSet(false, true)) {
 			LifeCycleHelper.invokeDestroy(httpClient);
-			LifeCycleHelper.invokeDestroy(watchConfigWorker);
+			LifeCycleHelper.invokeDestroy(watchWorker);
 
 			// help gc
-			watchConfigWorker = null;
+			watchWorker = null;
 			httpClient = null;
 		}
 	}

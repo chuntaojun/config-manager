@@ -36,7 +36,7 @@ public class NameThreadFactory implements ThreadFactory {
 	@Override
 	public Thread newThread(Runnable r) {
 		String threadName = name + id.getAndDecrement();
-		Thread thread = new Thread(new WrapperRunnable(r), threadName);
+		CThread thread = new CThread(new WrapperRunnable(r), threadName);
 		thread.setUncaughtExceptionHandler(new BaseUncaughtExceptionHandler());
 		return thread;
 	}

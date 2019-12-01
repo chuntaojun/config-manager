@@ -17,19 +17,20 @@
 
 package com.lessspring.org;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -37,19 +38,18 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class InetUtils {
 
-	private static String selfIp;
-
 	private static boolean useOnlySiteLocalInterface = false;
 
 	private static boolean preferHostnameOverIp = false;
 
 	public static InetSocketAddress ALL_IP = new InetSocketAddress("0.0.0.0", 0);
 
-	private static List<String> preferredNetworks = new ArrayList<String>();
+	private static List<String> preferredNetworks = new CopyOnWriteArrayList<>();
 
-	private static List<String> ignoredInterfaces = new ArrayList<String>();
+	private static List<String> ignoredInterfaces = new CopyOnWriteArrayList<String>();
 
-	static {
+	private static Supplier<String> selfIpSupplier = () -> {
+		String selfIp;
 		useOnlySiteLocalInterface = Boolean
 				.valueOf(PropertyUtils.getProperty(Constant.USE_ONLY_SITE_INTERFACES));
 
@@ -104,10 +104,11 @@ public final class InetUtils {
 				selfIp = findFirstNonLoopbackAddress().getHostAddress();
 			}
 		}
-	}
+		return selfIp;
+	};
 
 	public static String getSelfIp() {
-		return selfIp;
+		return selfIpSupplier.get();
 	}
 
 	public static InetAddress findFirstNonLoopbackAddress() {

@@ -16,12 +16,11 @@
  */
 package com.lessspring.org.utils;
 
+import com.lessspring.org.InetUtils;
+import org.springframework.web.reactive.function.server.ServerRequest;
+
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import com.lessspring.org.InetUtils;
-
-import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -34,7 +33,7 @@ public final class ReactiveWebUtils {
 	}
 
 	private static Supplier<String> getselfIp() {
-		return () -> InetUtils.getSelfIp();
+		return InetUtils::getSelfIp;
 	}
 
 }

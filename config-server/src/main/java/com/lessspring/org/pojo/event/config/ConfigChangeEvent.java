@@ -29,6 +29,7 @@ public class ConfigChangeEvent extends BaseEvent {
 	private String content;
 	private byte[] fileSource;
 	private String configType;
+	private Long version = 0L;
 
 	public static Builder builder() {
 		return new Builder();
@@ -58,6 +59,14 @@ public class ConfigChangeEvent extends BaseEvent {
 		this.fileSource = fileSource;
 	}
 
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
+	}
+
 	@Override
 	public String label() {
 		return TYPE;
@@ -76,6 +85,7 @@ public class ConfigChangeEvent extends BaseEvent {
 		private byte[] fileSource;
 		private String clientIps;
 		private boolean beta;
+		private Long version = 0L;
 
 		private Builder() {
 		}
@@ -140,6 +150,11 @@ public class ConfigChangeEvent extends BaseEvent {
 			return this;
 		}
 
+		public Builder version(Long version) {
+			this.version = version;
+			return this;
+		}
+
 		public ConfigChangeEvent build() {
 			ConfigChangeEvent configChangeEvent = new ConfigChangeEvent();
 			configChangeEvent.setSource(source);
@@ -154,6 +169,7 @@ public class ConfigChangeEvent extends BaseEvent {
 			configChangeEvent.setBeta(beta);
 			configChangeEvent.setFileSource(fileSource);
 			configChangeEvent.setClientIps(clientIps);
+			configChangeEvent.setVersion(version);
 			return configChangeEvent;
 		}
 	}

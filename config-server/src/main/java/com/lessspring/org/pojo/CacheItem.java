@@ -48,9 +48,13 @@ public class CacheItem {
 	private volatile String lastMd5;
 	private volatile long lastUpdateTime;
 	private volatile boolean beta;
+	/**
+	 * 用于控制通知客户端时的新旧版本控制，避免就=旧版本覆盖新版本
+	 */
+	private volatile long version = 0;
 	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 
-	public CacheItem(String namespaceId, String groupId, String dataId, boolean file) {
+	public CacheItem(String namespaceId, String groupId, String dataId, boolean file, long version) {
 		this.namespaceId = namespaceId;
 		this.groupId = groupId;
 		this.dataId = dataId;
@@ -82,8 +86,21 @@ public class CacheItem {
 		return lastUpdateTime;
 	}
 
-	public void setLastUpdateTime(long lastUpdateTime) {
+	public synchronized void setLastUpdateTime(long lastUpdateTime) {
 		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	/**
+	 * 高危操作，谨慎调用
+	 *
+	 * @param version
+	 */
+	public void setVersion(long version) {
+		this.version = version;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	public boolean isBeta() {

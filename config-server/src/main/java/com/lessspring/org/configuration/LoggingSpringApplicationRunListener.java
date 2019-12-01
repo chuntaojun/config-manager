@@ -52,7 +52,7 @@ public class LoggingSpringApplicationRunListener
 		implements SpringApplicationRunListener, Ordered {
 
 	private static final String DEFAULT_CONF_LOGBACK_LOCATION = CLASSPATH_URL_PREFIX
-			+ "config-manager.xml";
+			+ "config-manager-logger.xml";
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(LoggingSpringApplicationRunListener.class);

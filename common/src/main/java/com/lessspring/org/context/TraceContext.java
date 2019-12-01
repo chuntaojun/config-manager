@@ -83,6 +83,11 @@ public final class TraceContext {
                 '}';
     }
 
+    public void clean() {
+        attachments.clear();
+        subContexts.clear();
+    }
+
     public synchronized TraceContext createSubContext() {
         TraceContext sub = new TraceContext(this);
         INSTANCE.setInvokeTraceContext(sub);

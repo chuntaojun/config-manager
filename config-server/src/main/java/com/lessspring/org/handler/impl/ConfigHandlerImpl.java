@@ -18,14 +18,14 @@ package com.lessspring.org.handler.impl;
 
 import com.lessspring.org.InetUtils;
 import com.lessspring.org.configuration.security.NeedAuth;
+import com.lessspring.org.configuration.tps.LimitRule;
+import com.lessspring.org.configuration.tps.OpenTpsLimit;
 import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.service.config.OperationService;
-import com.lessspring.org.configuration.tps.LimitRule;
-import com.lessspring.org.configuration.tps.OpenTpsLimit;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
 import reactor.core.publisher.Mono;
@@ -89,9 +89,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		queryRequest.setAttribute("clientIp", clientIp);
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.queryConfig(namespaceId, queryRequest));
-		mono = mono.publishOn(
+		return RenderUtils.render(mono).subscribeOn(
 				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
-		return RenderUtils.render(mono);
 	}
 
 	@Override

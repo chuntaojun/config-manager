@@ -1,6 +1,6 @@
 package com.lessspring.org.function;
 
-import com.lessspring.org.context.Passthrough;
+import com.lessspring.org.context.PassThrough;
 
 import java.util.function.Consumer;
 
@@ -8,7 +8,7 @@ import java.util.function.Consumer;
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
  * @Created at 2019-11-28 16:58
  */
-public class CConsumer<T> extends Passthrough implements Consumer<T> {
+public class CConsumer<T> extends PassThrough implements Consumer<T> {
 
     private final Consumer<T> source;
 

@@ -1,6 +1,5 @@
-package com.lessspring.org.utils;
+package com.lessspring.org;
 
-import com.lessspring.org.CasReadWriteLock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,10 +8,10 @@ import java.util.concurrent.Executors;
 
 public class CasReadWriteLockTest {
 
-	static volatile boolean finish = false;
-	static volatile boolean inWrite = true;
+    static volatile boolean finish = false;
+    static volatile boolean inWrite = true;
 
-	@Test
+    @Test
     public void readWriteLockTest() {
         final CasReadWriteLock lock = new CasReadWriteLock();
 
@@ -22,15 +21,19 @@ public class CasReadWriteLockTest {
 
         for (int i = 0; i < 10; i ++) {
             executorService.execute(() -> {
-                int k = 10_0000;
+                int k = 100;
                 while (!finish || k -- != 0) {
                     if (lock.tryReadLock()) {
+                        System.out.println("read tryReadLock " + Thread.currentThread().getName() + " : " + lock);
+                        inWrite = false;
                         try {
                             count[0]++;
-                            inWrite = false;
                         } finally {
+                            System.out.println("read unReadLock "  + Thread.currentThread().getName() +  " : " + lock);
                             lock.unReadLock();
                         }
+                    } else {
+                        System.out.println(Thread.currentThread().getName() + " 获取读锁失败，" + lock);
                     }
                 }
                 finish = true;
@@ -40,10 +43,10 @@ public class CasReadWriteLockTest {
         executorService.execute(() -> {
             for (int i = 0 ; i < 10 ; i ++) {
                 if (lock.tryWriteLock()) {
+                    System.out.println("write tryWriteLock " + Thread.currentThread().getName() + " : " + lock);
                     try {
                         inWrite = true;
                         for (int j = 0; j < 3; j++) {
-                            System.out.println("write work " + j);
                             Assert.assertTrue(inWrite);
                         }
                     } catch (Throwable t) {
@@ -51,8 +54,11 @@ public class CasReadWriteLockTest {
                         finish = true;
                         i = 1000 + 1;
                     } finally {
+                        System.out.println("write unWriteLock : " + lock);
                         lock.unWriteLock();
                     }
+                } else {
+                    System.out.println(Thread.currentThread().getName() + " 获取写锁失败，" + lock);
                 }
             }
             finish = true;

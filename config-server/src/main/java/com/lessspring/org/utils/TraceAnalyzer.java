@@ -16,6 +16,16 @@
  */
 package com.lessspring.org.utils;
 
+import com.lessspring.org.DiskUtils;
+import com.lessspring.org.PathUtils;
+import com.lessspring.org.executor.NameThreadFactory;
+import com.lessspring.org.pojo.event.config.PublishLogEvent;
+import com.lessspring.org.pojo.event.config.PublishLogEventHandler;
+import com.lessspring.org.pojo.vo.PublishLogVO;
+import com.lmax.disruptor.WorkHandler;
+import com.lmax.disruptor.dsl.Disruptor;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,17 +42,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.lessspring.org.DiskUtils;
-import com.lessspring.org.PathUtils;
-import com.lessspring.org.executor.NameThreadFactory;
-import com.lessspring.org.pojo.event.config.PublishLogEvent;
-import com.lessspring.org.pojo.event.config.PublishLogEventHandler;
-import com.lessspring.org.pojo.vo.PublishLogVO;
-import com.lmax.disruptor.WorkHandler;
-import com.lmax.disruptor.dsl.Disruptor;
-
-import org.springframework.stereotype.Component;
-
 /**
  * Notify the tracker
  *
@@ -50,9 +49,8 @@ import org.springframework.stereotype.Component;
  * @since 0.0.1
  */
 @Component
-public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
+public final class TraceAnalyzer implements WorkHandler<PublishLogEventHandler> {
 
-	private static final TracerUtils SINGLE_TON = new TracerUtils();
 	private final String tracerName = "config-manager-tracer-";
 	private final String path = "watch-publish-tracer";
 	private final ScheduledExecutorService executorService = Executors
@@ -64,14 +62,11 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 	private Disruptor<PublishLogEventHandler> disruptor = DisruptorFactory
 			.build(PublishLogEventHandler::new, PublishLogEvent.class);
 
-	private TracerUtils() {
+	private TraceAnalyzer() {
 		// 自动删除老旧文件
 		executorService.scheduleWithFixedDelay(this::autoDeleteOldFile, 6, 12,
 				TimeUnit.HOURS);
-	}
-
-	public static TracerUtils getSingleton() {
-		return SINGLE_TON;
+		disruptor.handleEventsWithWorkerPool(this);
 	}
 
 	public void publishPublishEvent(PublishLogEvent source) {
@@ -80,7 +75,6 @@ public final class TracerUtils implements WorkHandler<PublishLogEventHandler> {
 			target.rest();
 			target.setEvent(source);
 		});
-		disruptor.handleEventsWithWorkerPool(this);
 	}
 
 	@Override
