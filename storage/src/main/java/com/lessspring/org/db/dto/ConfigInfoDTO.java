@@ -38,7 +38,7 @@ public class ConfigInfoDTO {
 	private byte[] fileSource;
 	private byte[] content;
 	private String type;
-	private String encryption;
+	private String encryption = "";
 	private Long createTime;
 	private Long version = 0L;
 

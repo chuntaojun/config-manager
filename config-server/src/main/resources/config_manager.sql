@@ -1,5 +1,3 @@
-create SCHEMA config_manager;
-
 create TABLE config_info
 (
     id           bigint       not null auto_increment,
@@ -13,7 +11,7 @@ create TABLE config_info
     create_time  bigint       not null,
     version      bigint       not null default 0,
     primary key (id),
-    unique key (namespace_id, group_id, data_id)
+    unique (namespace_id, group_id, data_id)
 );
 
 create TABLE config_info_beta
@@ -30,7 +28,7 @@ create TABLE config_info_beta
     client_ips   varchar(1024) not null,
     version      bigint       not null default 0,
     primary key (id),
-    unique key (namespace_id, group_id, data_id)
+    unique (namespace_id, group_id, data_id)
 );
 
 create TABLE config_info_history
@@ -46,7 +44,7 @@ create TABLE config_info_history
     create_time  bigint        not null,
     last_modify_time bigint    not null,
     primary key (id),
-    unique key (namespace_id, group_id, data_id, last_modify_time)
+    unique (namespace_id, group_id, data_id, last_modify_time)
 );
 
 create TABLE kms_secret_key(
@@ -54,8 +52,8 @@ create TABLE kms_secret_key(
     namespace_id    varchar(128)    not null,
     secret_key      varchar(2048)   not null,
     primary key(id),
-    unique key(secret_key)
-)
+    unique (secret_key)
+);
 
 create TABLE user
 (
@@ -63,7 +61,7 @@ create TABLE user
     user_name varchar(50)  not null,
     password  varchar(128) not null,
     primary key (id),
-    unique key (user_name)
+    unique (user_name)
 );
 
 create TABLE user_role
@@ -74,13 +72,13 @@ create TABLE user_role
     primary key (id)
 );
 
-create TABLE namespace
+create TABLE config_namespace
 (
     id             bigint        not null auto_increment,
     namespace_name varchar(1000) not null,
     namespace_id   varchar(255),
     primary key (id),
-    unique key (namespace_id)
+    unique (namespace_id)
 );
 
 create TABLE namespace_permissions
@@ -94,5 +92,5 @@ create TABLE namespace_permissions
 insert into user(user_name, password)
 VALUES ('lessSpring', '29591314');
 
-insert into namespace(namespace_name, namespace_id)
+insert into config_namespace(namespace_name, namespace_id)
 values ('default', 'default');

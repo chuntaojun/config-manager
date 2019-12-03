@@ -33,7 +33,7 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
 import com.lessspring.org.utils.SystemEnv;
-import com.lessspring.org.utils.TraceAnalyzer;
+import com.lessspring.org.service.publish.TraceAnalyzer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;

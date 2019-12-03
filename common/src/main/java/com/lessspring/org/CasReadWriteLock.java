@@ -22,11 +22,14 @@ public class CasReadWriteLock {
 
 	private volatile boolean inWrite = false;
 
+	private Thread readThread;
+
 	public boolean tryReadLock() {
 		return tryReadLock(MAX_RETRY_CNT);
 	}
 
 	public boolean tryReadLock(int retryCnt) {
+		readThread = Thread.currentThread();
 		// 等待写锁释放
 		while (inWrite) {
 			// none
@@ -46,6 +49,11 @@ public class CasReadWriteLock {
 	}
 
 	public boolean tryWriteLock(int retryCnt) {
+		if (readThread == Thread.currentThread()) {
+			// 表明当前获取读锁的线程准备获取写锁
+			monitor.compareAndSet(IN_READ_STATUS, IN_WRITE_STATUS);
+			return true;
+		}
 		for (int i = 0; i < retryCnt; i++) {
 			if (readCnt.get() == 0
 					&& monitor.compareAndSet(IN_FREE_STATUS, IN_WRITE_STATUS)) {
@@ -68,11 +76,17 @@ public class CasReadWriteLock {
 	}
 
 	public void unReadLock() {
+		readThread = null;
 		readCnt.decrementAndGet();
 		monitor.set(IN_FREE_STATUS);
 	}
 
 	public void unWriteLock() {
+		if (readThread == Thread.currentThread()) {
+			// 表明当前获取写锁的线程还获取了读锁
+			monitor.set(IN_READ_STATUS);
+			return;
+		}
 		inWrite = false;
 		monitor.set(IN_FREE_STATUS);
 	}

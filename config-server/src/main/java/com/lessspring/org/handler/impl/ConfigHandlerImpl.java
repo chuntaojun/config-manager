@@ -16,10 +16,10 @@
  */
 package com.lessspring.org.handler.impl;
 
-import com.lessspring.org.InetUtils;
 import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.configuration.tps.LimitRule;
 import com.lessspring.org.configuration.tps.OpenTpsLimit;
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
@@ -84,8 +84,8 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		final String dataId = request.queryParam("dataId").orElse("");
 		final QueryConfigRequest queryRequest = QueryConfigRequest.sbuilder()
 				.groupId(groupId).dataId(dataId).build();
-		final String clientIp = request.remoteAddress().orElse(InetUtils.ALL_IP)
-				.getHostName();
+		final String clientIp = request.headers().asHttpHeaders()
+				.getFirst(StringConst.CLIENT_ID_NAME);
 		queryRequest.setAttribute("clientIp", clientIp);
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.queryConfig(namespaceId, queryRequest));

@@ -79,7 +79,7 @@ public class CachePersistentHandler extends AbstracePersistentHandler {
 			@Override
 			public void job() {
 				String s = configCacheItemManager.readCacheFromDisk(namespaceId,
-						request.getGroupId(), request.getDataId());
+						request.getGroupId(), request.getDataId(), cacheItem.isBeta());
 				// Directly read cache did not read to the configuration file,
 				// read the database directly
 				if (StringUtils.isEmpty(s)) {
@@ -109,8 +109,13 @@ public class CachePersistentHandler extends AbstracePersistentHandler {
 					if (cacheItem.isBeta() && !cacheItem
 							.canRead((String) request.getAttribute("clientIp"))) {
 						configInfo[0] = null;
+						log.debug(
+								"this config-info is beta and this client : [{}] can't read",
+								(String) request.getAttribute("clientIp"));
 					}
-					log.debug("config-info : {}", configInfo[0]);
+					else {
+						log.debug("config-info : {}", configInfo[0]);
+					}
 				}
 				request.getAttributes().clear();
 			}

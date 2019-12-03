@@ -50,9 +50,9 @@ public final class RenderUtils {
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
 				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
-				.doOnSuccessOrError(new BiConsumer<Mono<ServerResponse>, Throwable>() {
+				.doOnSuccessOrError(new BiConsumer() {
 					@Override
-					public void accept(Mono<ServerResponse> o, Throwable o2) {
+					public void accept(Object o, Object o2) {
 						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
 					}
 				});

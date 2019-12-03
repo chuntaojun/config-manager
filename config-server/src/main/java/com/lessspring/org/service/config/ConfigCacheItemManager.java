@@ -36,11 +36,11 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Supplier;
 
 /**
@@ -120,14 +120,14 @@ public class ConfigCacheItemManager {
 			final ConfigChangeEvent event) {
 		final String key = NameUtils.buildName(namespaceId, event.getGroupId(),
 				event.getDataId());
-		log.info("[{}] register into configCacheItemManager", key);
-		Set<String> betaClientIps = new CopyOnWriteArraySet<>();
-		if (StringUtils.isNotEmpty(event.getClientIps())) {
-			for (String ip : event.getClientIps().split(",")) {
-				betaClientIps.add(ip.trim());
-			}
-		}
+		Set<String> betaClientIps = new HashSet<>();
 		Supplier<CacheItem> supplier = () -> {
+			if (StringUtils.isNotEmpty(event.getClientIps())) {
+				String[] clientIps = event.getClientIps().split(",");
+				for (String ip : clientIps) {
+					betaClientIps.add(ip.trim());
+				}
+			}
 			final CacheItem itemSave = new CacheItem(namespaceId, event.getGroupId(),
 					event.getDataId(), event.isFile(), event.getVersion());
 			if (event.isFile()) {
@@ -151,6 +151,8 @@ public class ConfigCacheItemManager {
 			item.setBeta(event.isBeta());
 			item.setBetaClientIps(betaClientIps);
 			item.setVersion(event.getVersion());
+		} else {
+			log.info("[{}] register into configCacheItemManager", key);
 		}
 	}
 
@@ -173,31 +175,48 @@ public class ConfigCacheItemManager {
 		return (null == item) ? tmp : item;
 	}
 
-	public String readCacheFromDisk(final String namespaceId, final String groupId,
-			final String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		return readCacheFromDisk(namespaceId, key);
+	public String readCacheFromDisk(final String namespaceId, final String key) {
+		return _readCacheFromDisk(namespaceId, key, false);
 	}
 
-	public String readCacheFromDisk(final String namespaceId, final String key) {
-		final String path = Paths.get("config-cache", namespaceId).toString();
-		return DiskUtils.readFile(path, key);
+	public String readCacheFromDisk(final String namespaceId, final String groupId,
+			final String dataId) {
+		return readCacheFromDisk(namespaceId, groupId, dataId, false);
+	}
+
+	public String readCacheFromDisk(final String namespaceId, final String groupId,
+									final String dataId, final boolean isBeta) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return _readCacheFromDisk(namespaceId, key, isBeta);
 	}
 
 	public boolean removeCacheFromDisk(final String namespaceId, final String groupId,
-			final String dataId) {
-		final String key = NameUtils.buildName(groupId, dataId);
-		return removeCacheFromDisk(namespaceId, key);
+									   final String dataId) {
+		return removeCacheFromDisk(namespaceId, groupId, dataId, false);
 	}
 
-	public boolean removeCacheFromDisk(final String namespaceId, final String key) {
-		final String path = Paths.get("config-cache", namespaceId).toString();
-		return DiskUtils.deleteFile(path, key);
+	public boolean removeCacheFromDisk(final String namespaceId, final String groupId,
+			final String dataId, final boolean isBeta) {
+		final String key = NameUtils.buildName(groupId, dataId);
+		return _removeCacheFromDisk(namespaceId, key, isBeta);
+	}
+
+	private String _readCacheFromDisk(final String namespaceId, final String key, final boolean isBeta) {
+		String path = "config-cache" + (isBeta ? "-beta" : "");
+		final String finalPath = Paths.get(path, namespaceId).toString();
+		return DiskUtils.readFile(finalPath, key);
+	}
+
+	private boolean _removeCacheFromDisk(final String namespaceId, final String key, final boolean isBeta) {
+		String path = "config-cache" + (isBeta ? "-beta" : "");
+		final String finalPath = Paths.get(path, namespaceId).toString();
+		return DiskUtils.deleteFile(finalPath, key);
 	}
 
 	public boolean updateContent(final String namespaceId,
 			final ConfigChangeEvent event) {
-		final String parentPath = Paths.get("config-cache", namespaceId).toString();
+		String path = "config-cache" + (event.isBeta() ? "-beta" : "");
+		final String parentPath = Paths.get(path, namespaceId).toString();
 		final CacheItem cacheItem = queryCacheItem(namespaceId, event.getGroupId(),
 				event.getDataId());
 		event.setEncryption(StringUtils.EMPTY);
@@ -226,6 +245,7 @@ public class ConfigCacheItemManager {
 				DiskUtils.writeFile(parentPath, NameUtils.buildName(groupId, dataId),
 						GsonUtils.toJsonBytes(configInfo));
 				cacheItem.setLastUpdateTime(System.currentTimeMillis());
+				cacheItem.setBeta(event.isBeta());
 				cacheItem.setVersion(event.getVersion());
 			}
 

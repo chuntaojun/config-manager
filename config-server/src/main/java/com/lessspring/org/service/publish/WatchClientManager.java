@@ -27,7 +27,6 @@ import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
-import com.lessspring.org.utils.TraceAnalyzer;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -176,7 +175,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		final CacheItem cacheItem = cacheItemManager.queryCacheItem(
 				event.getNamespaceId(), event.getGroupId(), event.getDataId());
 		final String configInfoJson = cacheItemManager.readCacheFromDisk(
-				event.getNamespaceId(), event.getGroupId(), event.getDataId());
+				event.getNamespaceId(), event.getGroupId(), event.getDataId(), cacheItem.isBeta());
 		long[] finishWorks = new long[1];
 		final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
 		Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager

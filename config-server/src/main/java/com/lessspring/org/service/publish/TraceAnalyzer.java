@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.utils;
+package com.lessspring.org.service.publish;
 
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.PathUtils;
@@ -22,6 +22,9 @@ import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.pojo.event.config.PublishLogEventHandler;
 import com.lessspring.org.pojo.vo.PublishLogVO;
+import com.lessspring.org.utils.ByteUtils;
+import com.lessspring.org.utils.DisruptorFactory;
+import com.lessspring.org.utils.RequireHelper;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import org.springframework.stereotype.Component;
@@ -49,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  * @since 0.0.1
  */
 @Component
-public final class TraceAnalyzer implements WorkHandler<PublishLogEventHandler> {
+public class TraceAnalyzer implements WorkHandler<PublishLogEventHandler> {
 
 	private final String tracerName = "config-manager-tracer-";
 	private final String path = "watch-publish-tracer";
@@ -62,14 +65,14 @@ public final class TraceAnalyzer implements WorkHandler<PublishLogEventHandler> 
 	private Disruptor<PublishLogEventHandler> disruptor = DisruptorFactory
 			.build(PublishLogEventHandler::new, PublishLogEvent.class);
 
-	private TraceAnalyzer() {
+	public TraceAnalyzer() {
 		// 自动删除老旧文件
 		executorService.scheduleWithFixedDelay(this::autoDeleteOldFile, 6, 12,
 				TimeUnit.HOURS);
 		disruptor.handleEventsWithWorkerPool(this);
 	}
 
-	public void publishPublishEvent(PublishLogEvent source) {
+	void publishPublishEvent(PublishLogEvent source) {
 		disruptor.publishEvent((target, sequence) -> {
 			source.setSequence(sequence);
 			target.rest();

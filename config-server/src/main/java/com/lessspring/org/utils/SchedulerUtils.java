@@ -16,16 +16,15 @@
  */
 package com.lessspring.org.utils;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import com.lessspring.org.executor.BaseRejectedExecutionHandler;
 import com.lessspring.org.executor.BaseThreadPoolExecutor;
 import com.lessspring.org.executor.NameThreadFactory;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -39,7 +38,7 @@ public class SchedulerUtils {
 	private static final int MAX_POOL_SIZE = 1024;
 	private static final long KEEP_ALIVE_TIME = 60;
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
-	private ThreadFactory threadFactory = new NameThreadFactory(
+	private NameThreadFactory threadFactory = new NameThreadFactory(
 			"com.lessspring.org.config-manager.webHandler-");
 	private RejectedExecutionHandler rejectedExecutionHandler = new BaseRejectedExecutionHandler(
 			"com.lessspring.org.config-manager.webHandler", true,

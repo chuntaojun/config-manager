@@ -289,6 +289,10 @@ public class ConfigOperationService
 							.buildConfigChangeEvent(request4.getNamespaceId(), request4,
 									request4.getContent(), request4.getEncryption(),
 									EventType.PUBLISH);
+					event.setBeta(request4.isBeta());
+					if (request4.isBeta()) {
+						event.setClientIps(request4.getClientIps());
+					}
 					event.setConfigType(request4.getType());
 					ConfigOperationService.this.publishEvent(event);
 				}
@@ -317,6 +321,10 @@ public class ConfigOperationService
 					ConfigChangeEvent event = buildConfigChangeEvent(
 							request4.getNamespaceId(), request4, request4.getContent(),
 							request4.getEncryption(), EventType.MODIFIED);
+					event.setBeta(request4.isBeta());
+					if (request4.isBeta()) {
+						event.setClientIps(request4.getClientIps());
+					}
 					event.setConfigType(request4.getType());
 					publishEvent(event);
 				}
@@ -386,6 +394,7 @@ public class ConfigOperationService
 	@Override
 	public void onEvent(ConfigChangeEventHandler eventHandler) throws Exception {
 		try {
+			log.info("Begin Dump config-info to file : {}", eventHandler.getEvent());
 			ConfigChangeEvent event = eventHandler.getEvent();
 			if (EventType.PUBLISH.compareTo(event.getEventType()) == 0) {
 				configCacheItemManager.registerConfigCacheItem(event.getNamespaceId(),
@@ -394,6 +403,7 @@ public class ConfigOperationService
 			if (EventType.DELETE.compareTo(event.getEventType()) == 0) {
 				configCacheItemManager.deregisterConfigCacheItem(event.getNamespaceId(),
 						event.getGroupId(), event.getDataId());
+				log.info("remove config");
 				return;
 			}
 			configCacheItemManager.updateContent(event.getNamespaceId(), event);

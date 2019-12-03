@@ -132,7 +132,9 @@ public class CacheItem {
 	}
 
 	public boolean canRead(String clientIp) {
-		return betaClientIps.isEmpty() || !betaClientIps.contains(clientIp);
+		boolean a = betaClientIps.isEmpty();
+		boolean b = betaClientIps.contains(clientIp);
+		return a || b;
 	}
 
 	// 需要考虑清楚，如果写线程到了悲观锁，而读线程因为乐观锁而正在执行，

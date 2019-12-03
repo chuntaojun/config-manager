@@ -65,7 +65,7 @@ public class H2SnapshotOperateImpl implements SnapshotOperate {
 			{ "snapshot_config_info.csv", "config_info" },
 			{ "snapshot_config_info_beta.csv", "config_info_beta" },
 			{ "snapshot_user.csv", "user" }, { "snapshot_user_role.csv", "user_role" },
-			{ "snapshot_namespace.csv", "namespace" },
+			{ "snapshot_config_namespace.csv", "config_namespace" },
 			{ "snapshot_namespace_permissions.csv", "namespace_permissions" } };
 	private final DataSource dataSource;
 	private FluxSink<Tuple2<SnapshotWriter, Closure>> source;

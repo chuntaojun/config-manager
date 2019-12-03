@@ -60,6 +60,30 @@
 
 > Config-Manager-Client 端参数信息
 
+```java
+// 设置客户端的命名空间
+private String namespaceId = "default";
+// 设置ConF的地址
+private String servers;
+// 设置客户端相关缓存的路径
+private String cachePath = Paths
+			.get(System.getProperty("user.home"), "config_manager_client").toString();
+// 设置客户端的唯一标识
+private volatile String clientId;
+
+private String username;
+
+private String password;
+
+private String authToken;
+
+private boolean openHttps = false;
+
+private boolean localPref = false;
+
+private WatchType watchType = WatchType.SSE;
+```
+
 > Config-Manager-Server 端参数信息
 
 ###### application.properties
@@ -124,7 +148,7 @@ cluster.server.node.port.{num}=2959
 
 > config-manager-client
 
-
+配置唯一确定key={namespace-id}@#@{group-id}@#@{data-id}
 
 > config-manager-server
 

@@ -32,30 +32,29 @@
     <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
         INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type, encryption, create_time)
-        VALUES (
-        #{dto.id},
-        #{dto.dataId},
-        #{dto.groupId},
-        #{dto.namespaceId},
-        #{dto.content},
-        #{dto.type},
-        #{dto.encryption},
-        #{dto.createTime});
+        VALUES (#{dto.id},
+                #{dto.dataId},
+                #{dto.groupId},
+                #{dto.namespaceId},
+                #{dto.content},
+                #{dto.type},
+                #{dto.encryption},
+                #{dto.createTime});
     </insert>
 
     <!--  save config-info-beta  -->
     <insert id="saveConfigBetaInfo">
         INSERT INTO config_info_beta(id, data_id, group_id, namespace_id, content,
-        config_type, encryption, client_ips)
-        VALUES (
-        #{dto.id},
-        #{dto.dataId},
-        #{dto.groupId},
-        #{dto.namespaceId},
-        #{dto.content},
-        #{dto.type}),
-        #{dto.encryption},
-        #{dto.clientIps};
+                                     config_type, encryption, client_ips, create_time)
+        VALUES (#{dto.id},
+                #{dto.dataId},
+                #{dto.groupId},
+                #{dto.namespaceId},
+                #{dto.content},
+                #{dto.type},
+                #{dto.encryption},
+                #{dto.clientIps},
+                #{dto.createTime});
     </insert>
 
     <!--  update config-info  -->
@@ -94,11 +93,21 @@
     </update>
 
     <delete id="removeConfigInfo">
-        DELETE from config_info where namespace_id = #{dto.namespaceId} and group_id = #{dto.groupId} and data_id = #{dto.dataId} LIMIT 1
+        DELETE
+        from config_info
+        where namespace_id = #{dto.namespaceId}
+          and group_id = #{dto.groupId}
+          and data_id = #{dto.dataId}
+        LIMIT 1
     </delete>
 
     <delete id="removeConfigBetaInfo">
-        DELETE from config_info_beta where namespace_id = #{dto.namespaceId} and group_id = #{dto.groupId} and data_id = #{dto.dataId} LIMIT 1
+        DELETE
+        from config_info_beta
+        where namespace_id = #{dto.namespaceId}
+          and group_id = #{dto.groupId}
+          and data_id = #{dto.dataId}
+        LIMIT 1
     </delete>
 
     <!--  find config-content by QueryConfigInfo  -->
@@ -108,8 +117,8 @@
         SELECT content
         FROM config_info
         WHERE namespace_id = #{query.namespaceId}
-        and group_id = #{query.groupId}
-        and data_id = #{query.dataId}
+          and group_id = #{query.groupId}
+          and data_id = #{query.dataId}
     </select>
 
     <!--  find config by QueryConfigInfo  -->
@@ -119,8 +128,9 @@
         SELECT *
         FROM config_info
         WHERE namespace_id = #{query.namespaceId}
-        and group_id = #{query.groupId}
-        and data_id = #{query.dataId} limit 1
+          and group_id = #{query.groupId}
+          and data_id = #{query.dataId}
+        limit 1
     </select>
 
     <!--  find min and max id from config-info  -->
@@ -158,8 +168,8 @@
         SELECT *
         FROM config_info_beta
         WHERE namespace_id = #{query.namespaceId}
-        and group_id like CONCAT('%', #{query.groupId}, '%')
-        and data_id like CONCAT('%', #{query.dataId}, '%')
+          and group_id like CONCAT('%', #{query.groupId}, '%')
+          and data_id like CONCAT('%', #{query.dataId}, '%')
     </select>
 
 </mapper>
