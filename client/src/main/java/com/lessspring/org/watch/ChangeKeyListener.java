@@ -34,13 +34,6 @@ public abstract class ChangeKeyListener extends AbstractListener {
 
 	private CacheConfigManager configManager;
 
-	/**
-	 * @param configManager the configManager to set
-	 */
-	void setConfigManager(CacheConfigManager configManager) {
-		this.configManager = configManager;
-	}
-
 	@Override
 	public void onReceive(ConfigInfo configInfo) {
 		ConfigInfo oldInfo = configManager.query(configInfo.getGroupId(),
@@ -63,7 +56,7 @@ public abstract class ChangeKeyListener extends AbstractListener {
 	 * @param oldInfo old config-info
 	 * @return save the key has changed
 	 */
-	Map<String, Object> doCompare(ConfigInfo newInfo, ConfigInfo oldInfo) {
+	private Map<String, Object> doCompare(ConfigInfo newInfo, ConfigInfo oldInfo) {
 		ParserChain chain = ParserChain.getInstance();
 		Map<String, Object> oldMap = chain.toMap(oldInfo);
 		Map<String, Object> newMap = chain.toMap(newInfo);

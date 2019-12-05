@@ -23,7 +23,7 @@ package com.lessspring.org.raft.pojo;
 public class TransactionId {
 
 	private final String bz;
-	private Long id;
+	private Long id = 0L;
 
 	public TransactionId(String bz) {
 		this.bz = bz;
@@ -31,6 +31,10 @@ public class TransactionId {
 
 	public String getBz() {
 		return bz;
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	public synchronized Long increaseAndObtain() {

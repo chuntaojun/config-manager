@@ -36,7 +36,7 @@ public interface AuthHandler {
 	Mono<ServerResponse> createAuth(ServerRequest request);
 
 	/**
-	 * remove user auth
+	 * clean user auth
 	 *
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}

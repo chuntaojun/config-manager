@@ -53,16 +53,13 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_REFRESH;
 @Component
 public class JwtBuildFactory {
 
+	private final Algorithm algorithm;
 	@Value("${com.lessspring.org.config-manger.jwt.survival.time.second}")
 	private int tokenSurvival;
-
 	@Value("${com.lessspring.org.config-manger.jwt.signature}")
 	private String signature;
-
 	@Resource
 	private NamespacePermissionsMapper permissionsMapper;
-
-	private final Algorithm algorithm;
 
 	public JwtBuildFactory(@Qualifier(value = "JwtTokenAlgorithm") Algorithm algorithm) {
 		this.algorithm = algorithm;

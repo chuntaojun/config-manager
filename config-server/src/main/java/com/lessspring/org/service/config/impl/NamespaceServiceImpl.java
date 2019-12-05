@@ -16,22 +16,10 @@
  */
 package com.lessspring.org.service.config.impl;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.lessspring.org.IDUtils;
 import com.lessspring.org.db.dto.NamespaceDTO;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.NamespaceRequest;
@@ -47,14 +35,24 @@ import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.service.security.AuthorityProcessor;
 import com.lessspring.org.utils.GsonUtils;
-import com.lessspring.org.utils.IDUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
 import com.lessspring.org.utils.vo.NamespaceVOUtils;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -64,18 +62,15 @@ import org.springframework.stereotype.Service;
 @Service(value = "namespaceService")
 public class NamespaceServiceImpl implements NamespaceService {
 
-	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
-
 	private final String createNamespace = "CREATE_NAMESPACE";
 	private final String deleteNamespace = "DELETE_NAMESPACE";
 	private final String createAuth4Namespace = "CREATA_AUTH_NAMESPACE";
-
-	@Resource
-	private NamespaceMapper namespaceMapper;
-
 	private final BaseTransactionCommitCallback commitCallback;
 	private final ClusterManager clusterManager;
 	private final AuthorityProcessor authorityProcessor;
+	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
+	@Resource
+	private NamespaceMapper namespaceMapper;
 	private FailCallback failCallback;
 
 	public NamespaceServiceImpl(
@@ -90,7 +85,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 	public void init() {
 		namespaceCache = CacheBuilder.newBuilder()
 				.expireAfterWrite(Duration.ofMinutes(15)).maximumSize(65535)
-				.build(new CacheLoader<>() {
+				.build(new CacheLoader<String, Optional<NamespaceDTO>>() {
 					@Override
 					public Optional<NamespaceDTO> load(String key) throws Exception {
 						return Optional

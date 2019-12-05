@@ -45,12 +45,10 @@ import static com.lessspring.org.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
 @Service
 public class SecurityServiceImpl implements SecurityService {
 
+	private final CacheOperation cacheOperation;
+	private final JwtBuildFactory jwtBuildFactory;
 	@Resource
 	private UserMapper userMapper;
-
-	private final CacheOperation cacheOperation;
-
-	private final JwtBuildFactory jwtBuildFactory;
 
 	public SecurityServiceImpl(CacheOperation cacheOperation,
 			JwtBuildFactory jwtBuildFactory) {

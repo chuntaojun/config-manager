@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.handler;
 
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -34,7 +33,6 @@ public interface UserHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> login(ServerRequest request);
 
 	/**
@@ -43,16 +41,14 @@ public interface UserHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> createUser(ServerRequest request);
 
 	/**
-	 * remove user
+	 * clean user
 	 *
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> removeUser(ServerRequest request);
 
 	/**
@@ -61,7 +57,6 @@ public interface UserHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> modifyUser(ServerRequest request);
 
 	/**
@@ -70,7 +65,6 @@ public interface UserHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> queryAll(ServerRequest request);
 
 }

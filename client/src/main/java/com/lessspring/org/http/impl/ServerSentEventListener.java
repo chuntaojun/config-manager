@@ -16,9 +16,6 @@
  */
 package com.lessspring.org.http.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.common.eventbus.EventBus;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.model.vo.ResponseData;
@@ -26,8 +23,9 @@ import com.lessspring.org.utils.GsonUtils;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -53,15 +51,15 @@ class ServerSentEventListener<T> extends EventSourceListener {
 	}
 
 	@Override
-	public void onClosed(@NotNull EventSource eventSource) {
+	public void onClosed(EventSource eventSource) {
 		super.onClosed(eventSource);
 		// When close the incident, automatic cancellation of the Receiver
 		eventBusMap.get(receiver.attention()).unregister(receiver);
 	}
 
 	@Override
-	public void onEvent(@NotNull EventSource eventSource, @Nullable String id,
-			@Nullable String type, @NotNull String data) {
+	public void onEvent(EventSource eventSource, String id,
+			String type, String data) {
 		ResponseData<String> result = GsonUtils.toObj(data,
 				new TypeToken<ResponseData<String>>() {
 				}.getType());
@@ -71,13 +69,13 @@ class ServerSentEventListener<T> extends EventSourceListener {
 	}
 
 	@Override
-	public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable t,
-			@Nullable Response response) {
+	public void onFailure(EventSource eventSource, Throwable t,
+			Response response) {
 		receiver.onError(t);
 	}
 
 	@Override
-	public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
+	public void onOpen(EventSource eventSource, Response response) {
 		super.onOpen(eventSource, response);
 	}
 

@@ -28,7 +28,7 @@ public class Constant {
 
 	static {
 		String newLine;
-		try(Formatter formatter = new Formatter()) {
+		try (Formatter formatter = new Formatter()) {
 			newLine = formatter.format("%n").toString();
 		}
 		catch (Exception e) {
@@ -48,24 +48,24 @@ public class Constant {
 	 * 
 	 */
 	public static final String PREFERRED_NETWORKS = "com.lessspring.org.config-manager.inetutils.preferred-networks";
-	
+
 	/**
 	 * 
 	 */
 	public static final String IGNORED_INTERFACES = "com.lessspring.org.config-manager.inetutils.ignored-interfaces";
-	
+
 	/**
 	 * 
 	 */
 	public static final String IP_ADDRESS = "com.lessspring.org.config-manager.inetutils.ip-address";
-	
+
 	/**
 	 * 
 	 */
 	public static final String PREFER_HOSTNAME_OVER_IP = "com.lessspring.org.config-manager.inetutils.prefer-hostname-over-ip";
-	
+
 	/**
 	 * 
 	 */
-    public static final String SYSTEM_PREFER_HOSTNAME_OVER_IP = "com.lessspring.org.config-manager.preferHostnameOverIp";
+	public static final String SYSTEM_PREFER_HOSTNAME_OVER_IP = "com.lessspring.org.config-manager.preferHostnameOverIp";
 }

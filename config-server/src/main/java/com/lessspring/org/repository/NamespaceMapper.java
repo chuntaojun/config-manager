@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.repository;
 
-import java.util.List;
-
 import com.lessspring.org.db.dto.NamespaceDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -54,7 +54,7 @@ public interface NamespaceMapper {
 	int saveNamespace(@Param(value = "dto") NamespaceDTO dto);
 
 	/**
-	 * remove namespace by namespace-name
+	 * clean namespace by namespace-name
 	 *
 	 * @param namespace namespace-name
 	 * @return affect row

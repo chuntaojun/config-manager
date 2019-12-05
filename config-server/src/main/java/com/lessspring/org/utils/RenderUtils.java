@@ -16,13 +16,18 @@
  */
 package com.lessspring.org.utils;
 
+import com.lessspring.org.context.TraceContextHolder;
 import com.lessspring.org.model.vo.ResponseData;
-import reactor.core.publisher.Mono;
-
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+
+import java.util.function.BiConsumer;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
@@ -30,14 +35,41 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public final class RenderUtils {
+
+	private static TraceContextHolder contextHolder = TraceContextHolder.getInstance();
+
+	public static Mono<ServerResponse> render(ResponseData data) {
+		return render(Mono.justOrEmpty(data));
+	}
 
 	@SuppressWarnings("all")
 	public static Mono<ServerResponse> render(Mono<?> dataMono) {
 		return ok().header("Access-Control-Allow-Origin", "*")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
-				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
+				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class))
+				.doOnSuccessOrError(new BiConsumer() {
+					@Override
+					public void accept(Object o, Object o2) {
+						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
+					}
+				});
+	}
+
+	@SuppressWarnings("all")
+	public static Mono<ServerResponse> render(Resource resource) {
+		return ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(BodyInserters.fromResource(resource))
+				.doOnSuccessOrError(new BiConsumer<ServerResponse, Throwable>() {
+					@Override
+					public void accept(ServerResponse serverResponse, Throwable throwable) {
+						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
+					}
+				});
 	}
 
 }

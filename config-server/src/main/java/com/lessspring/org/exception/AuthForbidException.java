@@ -26,11 +26,6 @@ public class AuthForbidException extends BaseException {
 
 	private static final long serialVersionUID = -5920415513080921210L;
 
-	@Override
-	public Code code() {
-		return Code.UNAUTHORIZED;
-	}
-
 	public AuthForbidException() {
 		super();
 	}
@@ -50,5 +45,10 @@ public class AuthForbidException extends BaseException {
 	protected AuthForbidException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+	}
+
+	@Override
+	public Code code() {
+		return Code.UNAUTHORIZED;
 	}
 }

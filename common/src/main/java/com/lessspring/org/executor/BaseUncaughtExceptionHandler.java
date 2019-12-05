@@ -8,8 +8,8 @@ package com.lessspring.org.executor;
  */
 public class BaseUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
+	@Override
+	public void uncaughtException(Thread t, Throwable e) {
 
-    }
+	}
 }

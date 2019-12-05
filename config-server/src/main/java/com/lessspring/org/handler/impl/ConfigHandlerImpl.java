@@ -16,19 +16,18 @@
  */
 package com.lessspring.org.handler.impl;
 
-import com.lessspring.org.InetUtils;
 import com.lessspring.org.configuration.security.NeedAuth;
+import com.lessspring.org.configuration.tps.LimitRule;
+import com.lessspring.org.configuration.tps.OpenTpsLimit;
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.service.config.OperationService;
-import com.lessspring.org.tps.LimitRule;
-import com.lessspring.org.tps.OpenTpsLimit;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -50,7 +49,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		this.operationService = operationService;
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
@@ -64,7 +62,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")
@@ -78,7 +75,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "query-config", qps = 2000)
 	@NeedAuth(argueName = "namespaceId")
@@ -88,17 +84,15 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		final String dataId = request.queryParam("dataId").orElse("");
 		final QueryConfigRequest queryRequest = QueryConfigRequest.sbuilder()
 				.groupId(groupId).dataId(dataId).build();
-		final String clientIp = request.remoteAddress().orElse(InetUtils.ALL_IP)
-				.getHostName();
+		final String clientIp = request.headers().asHttpHeaders()
+				.getFirst(StringConst.CLIENT_ID_NAME);
 		queryRequest.setAttribute("clientIp", clientIp);
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.queryConfig(namespaceId, queryRequest));
-		mono = mono.publishOn(
+		return RenderUtils.render(mono).subscribeOn(
 				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
-		return RenderUtils.render(mono);
 	}
 
-	@NotNull
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
 	@NeedAuth(argueName = "namespaceId")

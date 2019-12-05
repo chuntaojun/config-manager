@@ -50,7 +50,7 @@ public class ResponseData<T> {
 	}
 
 	public static <T> ResponseData<T> success(T data) {
-		return ResponseData.<T>builder().withCode(200).withData(data).build();
+		return ResponseData.<T> builder().withCode(200).withData(data).build();
 	}
 
 	public static ResponseData<Boolean> fail(Throwable throwable) {
@@ -59,12 +59,12 @@ public class ResponseData<T> {
 	}
 
 	public static <T> ResponseData<T> fail(Code code) {
-		return ResponseData.<T>builder().withCode(code.getCode()).withErrMsg(code.getMsg())
-				.build();
+		return ResponseData.<T> builder().withCode(code.getCode())
+				.withErrMsg(code.getMsg()).build();
 	}
 
 	public static <T> ResponseData<T> fail() {
-		return ResponseData.<T>builder().withCode(500).withErrMsg("failed").build();
+		return ResponseData.<T> builder().withCode(500).withErrMsg("failed").build();
 	}
 
 	public static <T> Builder builder() {

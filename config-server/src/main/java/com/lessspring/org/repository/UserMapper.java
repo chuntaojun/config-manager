@@ -44,7 +44,7 @@ public interface UserMapper {
 	int modifyUser(@Param(value = "dto") UserDTO dto);
 
 	/**
-	 * remove user by username
+	 * clean user by username
 	 * 
 	 * @param username username
 	 * @return affect row

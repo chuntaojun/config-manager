@@ -19,8 +19,6 @@ package com.lessspring.org.executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -36,9 +34,9 @@ public class NameThreadFactory implements ThreadFactory {
 	}
 
 	@Override
-	public Thread newThread(@NotNull Runnable r) {
+	public Thread newThread(Runnable r) {
 		String threadName = name + id.getAndDecrement();
-		Thread thread = new Thread(new WrapperRunnable(r), threadName);
+		CThread thread = new CThread(new WrapperRunnable(r), threadName);
 		thread.setUncaughtExceptionHandler(new BaseUncaughtExceptionHandler());
 		return thread;
 	}

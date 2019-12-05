@@ -19,6 +19,7 @@ package com.lessspring.org.configuration.cluster;
 import java.util.List;
 
 import com.lessspring.org.raft.SnapshotOperate;
+import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 
@@ -36,8 +37,9 @@ public class RaftNodeConfiguration {
 	@Bean
 	public ClusterManager clusterManager(
 			@Autowired List<BaseTransactionCommitCallback> commitCallbacks,
-			SnapshotOperate snapshotOperate) {
-		return new ClusterManager(commitCallbacks, snapshotOperate);
+			SnapshotOperate snapshotOperate,
+			TransactionIdManager transactionIdManager) {
+		return new ClusterManager(commitCallbacks, snapshotOperate, transactionIdManager);
 	}
 
 }

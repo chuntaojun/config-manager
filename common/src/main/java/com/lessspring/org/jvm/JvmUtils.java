@@ -99,13 +99,15 @@ public class JvmUtils {
 	 *     others
 	 */
 	@SuppressWarnings("all")
-	public static void jMap(final String outputFile, final boolean live)
+	public static File jMap(final String outputFile, final boolean live)
 			throws Exception {
 		final File file = new File(outputFile);
+		file.mkdirs();
 		if (file.exists()) {
 			file.delete();
 		}
 		MXBeanHolder.hotSpotDiagnosticMxBean.dumpHeap(outputFile, live);
+		return file;
 	}
 
 	private static class MXBeanHolder {

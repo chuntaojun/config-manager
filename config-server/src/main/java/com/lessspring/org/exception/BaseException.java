@@ -26,8 +26,6 @@ public abstract class BaseException extends RuntimeException {
 
 	private static final long serialVersionUID = -1840106883302890961L;
 
-	public abstract Code code();
-
 	public BaseException() {
 		super();
 	}
@@ -48,4 +46,6 @@ public abstract class BaseException extends RuntimeException {
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
+
+	public abstract Code code();
 }

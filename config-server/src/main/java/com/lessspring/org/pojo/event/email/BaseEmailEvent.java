@@ -16,17 +16,34 @@
  */
 package com.lessspring.org.pojo.event.email;
 
+import java.io.File;
+import java.util.Objects;
+
+import com.lessspring.org.utils.PropertiesEnum;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class BaseEmailEvent {
 
+	private PropertiesEnum.EmailType type;
 	private String eventLabel;
-	private String receiver;
+	private String title;
+	private String msg;
+	private File attachment;
 
-	public BaseEmailEvent(String eventLabel) {
-		this.eventLabel = eventLabel;
+	public BaseEmailEvent(PropertiesEnum.EmailType type) {
+		this.type = type;
+		this.eventLabel = type.getDesc();
+	}
+
+	public PropertiesEnum.EmailType getType() {
+		return type;
+	}
+
+	public void setType(PropertiesEnum.EmailType type) {
+		this.type = type;
 	}
 
 	public String getEventLabel() {
@@ -37,11 +54,31 @@ public abstract class BaseEmailEvent {
 		this.eventLabel = eventLabel;
 	}
 
-	public String getReceiver() {
-		return receiver;
+	public String getTitle() {
+		return title;
 	}
 
-	public void setReceiver(String receiver) {
-		this.receiver = receiver;
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public File getAttachment() {
+		return attachment;
+	}
+
+	public void setAttachment(File attachment) {
+		this.attachment = attachment;
+	}
+
+	public String getMsg() {
+		return msg;
+	}
+
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+
+	public boolean hasAttachment() {
+		return Objects.nonNull(attachment) && attachment.exists();
 	}
 }

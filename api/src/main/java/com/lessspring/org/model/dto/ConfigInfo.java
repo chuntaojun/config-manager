@@ -33,6 +33,7 @@ public class ConfigInfo {
 	private String type;
 	private byte[] file;
 	private transient String encryption = "";
+	private long version = 0L;
 
 	public ConfigInfo() {
 	}
@@ -114,6 +115,14 @@ public class ConfigInfo {
 		return content.getBytes(Charset.forName(StandardCharsets.UTF_8.name()));
 	}
 
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
+	}
+
 	@Override
 	public String toString() {
 		return "ConfigInfo{" + "groupId='" + groupId + '\'' + ", dataId='" + dataId + '\''
@@ -131,6 +140,7 @@ public class ConfigInfo {
 		private String type;
 		private byte[] file;
 		private String encryption;
+		private long version = 0L;
 
 		private Builder() {
 		}
@@ -165,6 +175,11 @@ public class ConfigInfo {
 			return this;
 		}
 
+		public Builder version(long version) {
+			this.version = version;
+			return this;
+		}
+
 		public ConfigInfo build() {
 			ConfigInfo configInfo = new ConfigInfo();
 			configInfo.setGroupId(groupId);
@@ -173,6 +188,7 @@ public class ConfigInfo {
 			configInfo.setType(type);
 			configInfo.setFile(file);
 			configInfo.setEncryption(encryption);
+			configInfo.setVersion(version);
 			return configInfo;
 		}
 	}

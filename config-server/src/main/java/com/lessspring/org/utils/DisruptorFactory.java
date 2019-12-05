@@ -16,34 +16,44 @@
  */
 package com.lessspring.org.utils;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.lessspring.org.executor.WrapperRunnable;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@SuppressWarnings("all")
 public final class DisruptorFactory {
 
-	public static <T> Disruptor<T> build(EventFactory<T> factory, Class name) {
+	public static <T> Disruptor<T> build(EventFactory factory, Class name) {
+		return build(factory, name, ProducerType.MULTI, new BlockingWaitStrategy());
+	}
+
+	public static <T> Disruptor<T> build(EventFactory factory, Class name, ProducerType type) {
+		return build(factory, name, type, new BlockingWaitStrategy());
+	}
+
+	public static <T> Disruptor<T> build(EventFactory factory, Class name, ProducerType type, WaitStrategy waitStrategy) {
 		int ringBufferSize = 1024;
 		return new Disruptor<>(factory, ringBufferSize, new ThreadFactory() {
 
 			private final AtomicInteger nextId = new AtomicInteger(1);
 
 			@Override
-			public Thread newThread(@NotNull Runnable r) {
+			public Thread newThread(Runnable r) {
 				String namePrefix = name.getSimpleName() + "-Disruptor" + "-";
 				String name1 = namePrefix + nextId.getAndDecrement();
-				return new Thread(r, name1);
+				return new Thread(new WrapperRunnable(r), name1);
 			}
-		}, ProducerType.MULTI, new BlockingWaitStrategy());
+		}, type, waitStrategy);
 	}
 
 }

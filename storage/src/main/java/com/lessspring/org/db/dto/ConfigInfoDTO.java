@@ -38,8 +38,9 @@ public class ConfigInfoDTO {
 	private byte[] fileSource;
 	private byte[] content;
 	private String type;
-	private String encryption;
+	private String encryption = "";
 	private Long createTime;
+	private Long version = 0L;
 
 	public static ConfigInfoDTOBuilder builder() {
 		return new ConfigInfoDTOBuilder();
@@ -55,6 +56,7 @@ public class ConfigInfoDTO {
 		private String type;
 		private String encryption;
 		private Long createTime;
+		private Long version = 0L;
 
 		private ConfigInfoDTOBuilder() {
 		}
@@ -104,6 +106,11 @@ public class ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigInfoDTOBuilder version(Long version) {
+			this.version = version;
+			return this;
+		}
+
 		public ConfigInfoDTO build() {
 			ConfigInfoDTO configInfoDTO = new ConfigInfoDTO();
 			configInfoDTO.setId(id);
@@ -115,6 +122,7 @@ public class ConfigInfoDTO {
 			configInfoDTO.setType(type);
 			configInfoDTO.setEncryption(encryption);
 			configInfoDTO.setCreateTime(createTime);
+			configInfoDTO.setVersion(version);
 			return configInfoDTO;
 		}
 	}

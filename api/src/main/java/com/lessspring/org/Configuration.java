@@ -16,10 +16,11 @@
  */
 package com.lessspring.org;
 
-import java.nio.file.Paths;
-
+import com.lessspring.org.constant.WatchType;
 import lombok.Data;
 import lombok.ToString;
+
+import java.nio.file.Paths;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -48,6 +49,8 @@ public class Configuration {
 
 	private boolean localPref = false;
 
+	private WatchType watchType = WatchType.SSE;
+
 	public static Builder builder() {
 		return new Builder();
 	}
@@ -62,6 +65,7 @@ public class Configuration {
 		private String authToken;
 		private boolean openHttps = false;
 		private boolean localPref = false;
+		private WatchType watchType = WatchType.SSE;
 
 		private Builder() {
 		}
@@ -111,6 +115,11 @@ public class Configuration {
 			return this;
 		}
 
+		public Builder watchType(WatchType watchType) {
+			this.watchType = watchType;
+			return this;
+		}
+
 		public Configuration build() {
 			Configuration configuration = new Configuration();
 			configuration.setNamespaceId(namespaceId);
@@ -122,6 +131,7 @@ public class Configuration {
 			configuration.setAuthToken(authToken);
 			configuration.setOpenHttps(openHttps);
 			configuration.setLocalPref(localPref);
+			configuration.setWatchType(watchType);
 			return configuration;
 		}
 	}

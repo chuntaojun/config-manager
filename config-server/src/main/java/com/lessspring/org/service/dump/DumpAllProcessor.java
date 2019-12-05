@@ -41,10 +41,9 @@ public class DumpAllProcessor implements DumpProcessor<DumpTask4All> {
 	private final ConfigCacheItemManager cacheItemManager;
 	private final ConfigInfoMapper configInfoMapper;
 	private final DistroRouter distroRouter = DistroRouter.getInstance();
-	private ExecutorService executor;
-
 	private final AtomicBoolean inited = new AtomicBoolean(false);
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
+	private ExecutorService executor;
 
 	public DumpAllProcessor(ConfigCacheItemManager cacheItemManager,
 			ConfigInfoMapper configInfoMapper) {

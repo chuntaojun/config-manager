@@ -1,1 +1,2 @@
 com.lessspring.org.filter.EncryptionConfigFilter
+com.lessspring.org.filter.KmsEncryptionConfigFilter

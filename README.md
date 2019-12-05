@@ -26,14 +26,15 @@
  - [x] 简单权限（暂未实现资源的权限设置）
  - [x] 采取*nacos*的文件缓存理念
  - [x] 配置文件加解密实现（参考Jasypt）
- - [ ] 配置的灰度发布（目前参考*nacos*的基于*IP*实现）
+ - [x] 配置的灰度发布（参考*nacos*的基于*IP*实现、基于*client-id*来实现：目前的实现，也是本项目采取的最终方案）
  - [x] 配置变动监听功能
  - [ ] 前端页面、可视化管理
  - [ ] 数据分片存储（摆脱单机存储的限制）
  - [ ] 支持*prometheus*数据监控
  - [ ] 详细的日志输出分类
  - [x] 邮件通知系统
- - [ ] 采用KMS的思想实现数据的加密
+ - [ ] 配置审批系统
+ - [x] 系统接口QPS限制、动态变更QPS设置完成
 
 #### 使用说明
 
@@ -59,6 +60,30 @@
 
 > Config-Manager-Client 端参数信息
 
+```java
+// 设置客户端的命名空间
+private String namespaceId = "default";
+// 设置ConF的地址
+private String servers;
+// 设置客户端相关缓存的路径
+private String cachePath = Paths
+			.get(System.getProperty("user.home"), "config_manager_client").toString();
+// 设置客户端的唯一标识
+private volatile String clientId;
+
+private String username;
+
+private String password;
+
+private String authToken;
+
+private boolean openHttps = false;
+
+private boolean localPref = false;
+
+private WatchType watchType = WatchType.SSE;
+```
+
 > Config-Manager-Server 端参数信息
 
 ###### application.properties
@@ -66,6 +91,11 @@
 ```properties
 # config-manager-server 运行模式，单机——standalone，集群——cluster，默认以单机模式启动
 com.lessspring.org.config-manager.server.mode=standalone
+# config-manager 退出时是否自动删除server相关文件，默认为false
+com.lessspring.org.config-manager.exitDeleteFile=false
+# netty相关线程参数设置
+com.lessspring.org.config-manager.netty.loopThreads=2
+com.lessspring.org.config-manager.netty.workerThreads=16
 # 缓存类型，inner为内部guava的Cache实现，redis，默认为inner
 com.lessspring.org.config-manager.cache.type=inner
 # 运行环境类型，设置为develop时，则不会开启权限验证
@@ -118,7 +148,7 @@ cluster.server.node.port.{num}=2959
 
 > config-manager-client
 
-
+配置唯一确定key={namespace-id}@#@{group-id}@#@{data-id}
 
 > config-manager-server
 

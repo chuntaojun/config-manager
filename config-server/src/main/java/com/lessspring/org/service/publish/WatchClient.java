@@ -35,6 +35,10 @@ public class WatchClient {
 	private FluxSink sink;
 	private ServerHttpResponse response;
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	public String getClientIp() {
 		return clientIp;
 	}
@@ -79,8 +83,21 @@ public class WatchClient {
 		return Objects.equals(lastMd5, checkKey.get(lastMd5));
 	}
 
-	public static Builder builder() {
-		return new Builder();
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		WatchClient client = (WatchClient) o;
+		return Objects.equals(clientIp, client.clientIp);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(clientIp);
 	}
 
 	public static final class Builder {
@@ -127,22 +144,5 @@ public class WatchClient {
 			watchClient.setResponse(response);
 			return watchClient;
 		}
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		WatchClient client = (WatchClient) o;
-		return Objects.equals(clientIp, client.clientIp);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(clientIp);
 	}
 }

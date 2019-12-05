@@ -16,13 +16,14 @@
  */
 package com.lessspring.org.service.config;
 
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.observer.Publisher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class AbstracePersistentHandler extends Publisher
+public abstract class AbstracePersistentHandler extends Publisher<ConfigInfoHistoryDTO>
 		implements PersistentHandler {
 
 }

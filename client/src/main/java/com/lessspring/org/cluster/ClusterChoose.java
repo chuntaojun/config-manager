@@ -26,7 +26,6 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -96,7 +95,8 @@ public class ClusterChoose implements Watcher, LifeCycle {
 				clusterFind = clusterInfos.iterator();
 			}
 			lastClusterIp = clusterFind.next();
-		} finally {
+		}
+		finally {
 			readLock.unlock();
 		}
 	}
@@ -109,7 +109,8 @@ public class ClusterChoose implements Watcher, LifeCycle {
 		try {
 			clusterInfos = newClusterInfo;
 			clusterFind = clusterInfos.iterator();
-		} finally {
+		}
+		finally {
 			writeLock.unlock();
 		}
 	}

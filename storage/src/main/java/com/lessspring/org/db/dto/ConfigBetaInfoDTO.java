@@ -46,8 +46,9 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
-		private String encryption;
+		private String encryption = "";
 		private Long createTime;
+		private Long version = 0L;
 
 		private ConfigBetaInfoDTOBuilder() {
 		}
@@ -102,6 +103,11 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigBetaInfoDTOBuilder version(Long version) {
+			this.version = version;
+			return this;
+		}
+
 		public ConfigBetaInfoDTO build() {
 			ConfigBetaInfoDTO configBetaInfoDTO = new ConfigBetaInfoDTO();
 			configBetaInfoDTO.setClientIps(clientIps);
@@ -114,6 +120,7 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			configBetaInfoDTO.setType(type);
 			configBetaInfoDTO.setEncryption(encryption);
 			configBetaInfoDTO.setCreateTime(createTime);
+			configBetaInfoDTO.setVersion(version);
 			return configBetaInfoDTO;
 		}
 	}

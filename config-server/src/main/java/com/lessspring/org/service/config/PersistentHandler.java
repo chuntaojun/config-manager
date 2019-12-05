@@ -66,7 +66,7 @@ public interface PersistentHandler extends Priority {
 	boolean modifyConfigInfo(String namespaceId, PublishConfigRequest request);
 
 	/**
-	 * remove config-info
+	 * clean config-info
 	 *
 	 * @param namespaceId namespaceId
 	 * @param request {@link DeleteConfigRequest}

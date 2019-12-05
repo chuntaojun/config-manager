@@ -44,7 +44,7 @@ class DefaultFilterChain implements FilterChain {
 			filters.add(filter);
 		}
 		filters.sort(Comparator.comparingInt(CustomerConfigFilter::priority));
-		filters.addFirst(configFilter);
+		filters.addLast(configFilter);
 	}
 
 	@Override

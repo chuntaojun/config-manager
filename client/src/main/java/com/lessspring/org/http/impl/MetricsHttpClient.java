@@ -28,6 +28,8 @@ import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.utils.MetricsMonitor;
+import io.prometheus.client.Histogram;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -48,25 +50,61 @@ public class MetricsHttpClient implements HttpClient {
 	@Override
 	public <T> ResponseData<T> get(String url, Header header, Query query,
 			TypeToken<ResponseData<T>> token) {
-		return client.get(url, header, query, token);
+		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("GET", url, "NA");
+		ResponseData<T> response = null;
+		try {
+			response = client.get(url, header, query, token);
+		}
+		finally {
+			timer.observeDuration();
+			timer.close();
+		}
+		return response;
 	}
 
 	@Override
 	public <T> ResponseData<T> delete(String url, Header header, Query query,
 			TypeToken<ResponseData<T>> token) {
-		return client.delete(url, header, query, token);
+		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("DELETE", url, "NA");
+		ResponseData<T> response = null;
+		try {
+			response = client.delete(url, header, query, token);
+		}
+		finally {
+			timer.observeDuration();
+			timer.close();
+		}
+		return response;
 	}
 
 	@Override
 	public <T> ResponseData<T> put(String url, Header header, Query query, Body body,
 			TypeToken<ResponseData<T>> token) {
-		return client.put(url, header, query, body, token);
+		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("PUT", url, "NA");
+		ResponseData<T> response = null;
+		try {
+			response = client.put(url, header, query, body, token);
+		}
+		finally {
+			timer.observeDuration();
+			timer.close();
+		}
+		return response;
 	}
 
 	@Override
 	public <T> ResponseData<T> post(String url, Header header, Query query, Body body,
 			TypeToken<ResponseData<T>> token) {
-		return client.post(url, header, query, body, token);
+		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("PUT", url, "NA");
+		ResponseData<T> response = null;
+		try {
+			response = client.post(url, header, query, body, token);
+		}
+		finally {
+			timer.observeDuration();
+			timer.close();
+		}
+		return response;
 	}
 
 	@SuppressWarnings("all")

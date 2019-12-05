@@ -16,15 +16,6 @@
  */
 package com.lessspring.org.configuration.db;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.sql.DataSource;
-
 import com.lessspring.org.utils.PathConstants;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -32,11 +23,18 @@ import lombok.extern.slf4j.Slf4j;
 import okio.BufferedSource;
 import okio.Okio;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -57,9 +55,11 @@ public class DataBaseConfiguration {
 
 	@Bean
 	public DataSource dataSource() {
+		String dbPath = "jdbc:h2:" + pathConstants.getParentPath() + File.separator
+				+ "db/config_manager";
+		log.info("DB Path : {}", dbPath);
 		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl("jdbc:h2:" + pathConstants.getParentPath() + File.separator
-				+ "/db/config_manager");
+		config.setJdbcUrl(dbPath);
 		config.setUsername(username);
 		config.setPassword(password);
 		config.setMaximumPoolSize(10);

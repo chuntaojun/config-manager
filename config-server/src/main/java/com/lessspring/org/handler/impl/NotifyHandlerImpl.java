@@ -21,7 +21,6 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.service.publish.WatchClientManager;
 import com.lessspring.org.utils.SseUtils;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -49,7 +48,6 @@ public class NotifyHandlerImpl implements NotifyHandler {
 	// the SSE push FluxSink, enables the Server end to independently
 	// choose the timing of the push and directional push
 
-	@NotNull
 	@Override
 	public Mono<ServerResponse> watch(ServerRequest request) {
 		return request.bodyToMono(WatchRequest.class)

@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.configuration;
 
+import com.lessspring.org.service.common.EmailNotifyProperties;
 import com.lessspring.org.utils.PathConstants;
 
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,11 @@ public class CommonConfiguration {
 	@Bean
 	public PathConstants pathConstants() {
 		return new PathConstants();
+	}
+
+	@Bean
+	public EmailNotifyProperties emailNotifyProperties() {
+		return new EmailNotifyProperties();
 	}
 
 }

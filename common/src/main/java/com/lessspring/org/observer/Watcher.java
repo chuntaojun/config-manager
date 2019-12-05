@@ -22,7 +22,7 @@ package com.lessspring.org.observer;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface Watcher {
+public interface Watcher<T> {
 
 	/**
 	 * The event, the callback listener
@@ -30,6 +30,6 @@ public interface Watcher {
 	 * @param occurrence occurrence {@link Occurrence}
 	 * @param publisher event publisher
 	 */
-	void onNotify(Occurrence occurrence, Publisher publisher);
+	void onNotify(Occurrence<T> occurrence, Publisher publisher);
 
 }

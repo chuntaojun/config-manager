@@ -16,14 +16,6 @@
  */
 package com.lessspring.org.raft;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.alipay.remoting.rpc.RpcServer;
 import com.alipay.sofa.jraft.JRaftUtils;
 import com.alipay.sofa.jraft.Node;
@@ -47,6 +39,14 @@ import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Requires user can customize the cluster parameters
@@ -158,7 +158,7 @@ class RaftServer implements LifeCycle {
 		rb.setGroupId(raftGroupId);
 		rb.setPeerId(PeerId.parsePeer(serverNode.getKey()).toString());
 		cliClientService.addPeer(leader.getEndpoint(), rb.build(),
-				new RpcResponseClosure<>() {
+				new RpcResponseClosure<CliRequests.AddPeerResponse>() {
 					@Override
 					public void setResponse(CliRequests.AddPeerResponse resp) {
 					}
@@ -180,7 +180,7 @@ class RaftServer implements LifeCycle {
 		rb.setGroupId(raftGroupId);
 		rb.setPeerId(PeerId.parsePeer(serverNode.getKey()).toString());
 		cliClientService.removePeer(leader.getEndpoint(), rb.build(),
-				new RpcResponseClosure<>() {
+				new RpcResponseClosure<CliRequests.RemovePeerResponse>() {
 					@Override
 					public void setResponse(CliRequests.RemovePeerResponse resp) {
 					}

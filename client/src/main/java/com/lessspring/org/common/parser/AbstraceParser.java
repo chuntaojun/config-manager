@@ -16,16 +16,20 @@
  */
 package com.lessspring.org.common.parser;
 
+import com.lessspring.org.model.dto.ConfigInfo;
+
 import java.util.Collections;
 import java.util.Map;
-
-import com.lessspring.org.model.dto.ConfigInfo;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class AbstraceParser implements Parser {
+
+	protected static final String DOT = ".";
+
+	protected static final String VALUE = "value";
 
 	private AbstraceParser next;
 

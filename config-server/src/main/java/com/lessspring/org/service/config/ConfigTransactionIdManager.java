@@ -16,13 +16,12 @@
  */
 package com.lessspring.org.service.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.pojo.TransactionId;
-
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Business id manager, according to the different TransactionId of business application,
@@ -58,6 +57,19 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 		String bz = transactionId.getBz();
 		synchronized (monitor) {
 			manager.remove(bz);
+		}
+	}
+
+	@Override
+	public Map<String, TransactionId> all() {
+		return new HashMap<>(manager);
+	}
+
+	@Override
+	public void snapshotLoad(Map<String, TransactionId> snapshot) {
+		synchronized (monitor) {
+			manager.clear();
+			manager.putAll(snapshot);
 		}
 	}
 }

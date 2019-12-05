@@ -16,14 +16,6 @@
  */
 package com.lessspring.org.service.publish;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Stream;
-
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
@@ -35,16 +27,22 @@ import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
-import com.lessspring.org.utils.TracerUtils;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import reactor.core.publisher.FluxSink;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import reactor.core.publisher.FluxSink;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -58,12 +56,14 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
-	private final TracerUtils tracer = TracerUtils.getSingleton();
-
-	private long clientCnt = 0;
 	private final Object monitor = new Object();
+	private long clientCnt = 0;
 	private Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
 			8);
+
+	@Autowired
+	@Lazy
+	private TraceAnalyzer tracer;
 
 	@Autowired
 	@Lazy
@@ -119,7 +119,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 			String[] info = NameUtils.splitName(key);
 			final CacheItem cacheItem = cacheItemManager
 					.queryCacheItem(watchClient.getNamespaceId(), info[0], info[1]);
-			cacheItem.executeReadWork(new ReadWork() {
+			final ReadWork readWork = new ReadWork() {
 				@Override
 				public void job() {
 					String content = cacheItemManager
@@ -134,17 +134,26 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 						}
 						content = GsonUtils.toJson(configInfo);
 					}
-					if (cacheItem.isBeta()
-							&& cacheItem.canRead(watchClient.getClientIp())) {
+					if (cacheItem.canRead(watchClient.getClientIp())) {
+						tracer.publishPublishEvent(PublishLogEvent.builder()
+								.clientIp(watchClient.getClientIp())
+								.namespaceId(watchClient.getNamespaceId())
+								.groupId(info[0])
+								.dataId(info[1])
+								.publishTime(System.currentTimeMillis())
+								.build());
 						writeResponse(watchClient, GsonUtils.toJson(content));
 					}
 				}
 
 				@Override
 				public void onError(Exception exception) {
-					log.error("[doQuickCompare] when execute read job has some error : {}", exception);
+					log.error(
+							"[doQuickCompare] when execute read job has some error : {}",
+							exception);
 				}
-			});
+			};
+			cacheItem.executeReadWork(readWork);
 		});
 	}
 
@@ -166,7 +175,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		final CacheItem cacheItem = cacheItemManager.queryCacheItem(
 				event.getNamespaceId(), event.getGroupId(), event.getDataId());
 		final String configInfoJson = cacheItemManager.readCacheFromDisk(
-				event.getNamespaceId(), event.getGroupId(), event.getDataId());
+				event.getNamespaceId(), event.getGroupId(), event.getDataId(), cacheItem.isBeta());
 		long[] finishWorks = new long[1];
 		final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
 		Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager

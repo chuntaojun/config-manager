@@ -26,11 +26,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -38,9 +38,11 @@ import java.util.logging.Logger;
  */
 public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 
-	private static final Logger logger = Logger.getLogger("com.lessspring.org.executor.BaseThreadPoolExecutor");
+	private static final Logger logger = Logger
+			.getLogger("com.lessspring.org.executor.BaseThreadPoolExecutor");
 
-	private ThreadLocal<Long> workCostTimeLocal = ThreadLocal.withInitial(System::currentTimeMillis);
+	private ThreadLocal<Long> workCostTimeLocal = ThreadLocal
+			.withInitial(System::currentTimeMillis);
 
 	private boolean openWorkCostDisplay = false;
 
@@ -49,41 +51,52 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 	}
 
 	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit) {
-		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime, unit, new LinkedBlockingQueue<>());
+		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime,
+				unit, new LinkedBlockingQueue<>());
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit, ThreadFactory factory) {
-		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime, unit, new LinkedBlockingQueue<>(), factory);
+	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit,
+			NameThreadFactory factory) {
+		this(corePoolSize, Runtime.getRuntime().availableProcessors(), keepAliveTime,
+				unit, new LinkedBlockingQueue<>(), factory);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit) {
-		this(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>());
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+			long keepAliveTime, TimeUnit unit) {
+		this(corePoolSize, maximumPoolSize, keepAliveTime, unit,
+				new LinkedBlockingQueue<>());
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-			BlockingQueue<Runnable> workQueue) {
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
+			NameThreadFactory threadFactory) {
+		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+				threadFactory);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-			BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
+			RejectedExecutionHandler handler) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
 	}
 
-	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) {
-		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
+	public BaseThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,
+			NameThreadFactory threadFactory, RejectedExecutionHandler handler) {
+		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+				threadFactory, handler);
 	}
 
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) {
 		if (openWorkCostDisplay) {
-			logger.info(MessageFormat.format("{0} start work", Thread.currentThread().getName()));
+			logger.info(MessageFormat.format("{0} start work",
+					Thread.currentThread().getName()));
 			workCostTimeLocal.get();
 		}
 	}
@@ -91,67 +104,79 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 	@Override
 	protected void afterExecute(Runnable r, Throwable t) {
 		if (openWorkCostDisplay) {
-			logger.info(MessageFormat.format("{0} end work, spend time : {1}", Thread.currentThread().getName(),
+			logger.info(MessageFormat.format("{0} end work, spend time : {1}",
+					Thread.currentThread().getName(),
 					System.currentTimeMillis() - workCostTimeLocal.get()));
 			workCostTimeLocal.remove();
+			CThread cThread = (CThread) Thread.currentThread();
+			cThread.cleanTraceContext();
 		}
 	}
 
 	@Override
 	public void execute(Runnable command) {
-		super.execute(command);
+		super.execute(new WrapperRunnable(command));
 	}
 
 	@Override
 	public boolean remove(Runnable task) {
-		return super.remove(task);
+		return super.remove(new WrapperRunnable(task));
 	}
 
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-		return super.newTaskFor(runnable, value);
+		return super.newTaskFor(new WrapperRunnable(runnable), value);
 	}
 
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-		return super.newTaskFor(callable);
+		return super.newTaskFor(new WrapperCallable<>(callable));
 	}
 
 	@Override
 	public Future<?> submit(Runnable task) {
-		return super.submit(task);
+		return super.submit(new WrapperRunnable(task));
 	}
 
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
-		return super.submit(task, result);
+		return super.submit(new WrapperRunnable(task), result);
 	}
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		return super.submit(task);
+		return super.submit(new WrapperCallable<>(task));
 	}
 
 	@Override
-	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-		return super.invokeAny(tasks);
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+			throws InterruptedException, ExecutionException {
+		return super.invokeAny(
+				tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()));
 	}
 
 	@Override
-	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout,
+			TimeUnit unit)
 			throws InterruptedException, ExecutionException, TimeoutException {
-		return super.invokeAny(tasks, timeout, unit);
+		return super.invokeAny(
+				tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()),
+				timeout, unit);
 	}
 
 	@Override
-	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-		return super.invokeAll(tasks);
-	}
-
-	@Override
-	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
 			throws InterruptedException {
-		return super.invokeAll(tasks, timeout, unit);
+		return super.invokeAll(
+				tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()));
+	}
+
+	@Override
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
+			long timeout, TimeUnit unit) throws InterruptedException {
+		return super.invokeAll(
+				tasks.stream().map(WrapperCallable::new).collect(Collectors.toList()),
+				timeout, unit);
 	}
 
 }

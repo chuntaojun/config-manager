@@ -45,7 +45,7 @@ public interface NamespaceService {
 	ResponseData<?> createNamespace(NamespaceRequest request);
 
 	/**
-	 * remove namespace request
+	 * clean namespace request
 	 *
 	 * @param request {@link NamespaceRequest}
 	 * @return operation label

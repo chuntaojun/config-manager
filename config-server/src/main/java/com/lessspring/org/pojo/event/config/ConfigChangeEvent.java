@@ -18,6 +18,8 @@ package com.lessspring.org.pojo.event.config;
 
 import com.lessspring.org.event.EventType;
 
+import java.util.Arrays;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -29,6 +31,11 @@ public class ConfigChangeEvent extends BaseEvent {
 	private String content;
 	private byte[] fileSource;
 	private String configType;
+	private Long version = 0L;
+
+	public static Builder builder() {
+		return new Builder();
+	}
 
 	public String getContent() {
 		return content;
@@ -54,13 +61,17 @@ public class ConfigChangeEvent extends BaseEvent {
 		this.fileSource = fileSource;
 	}
 
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
+	}
+
 	@Override
 	public String label() {
 		return TYPE;
-	}
-
-	public static Builder builder() {
-		return new Builder();
 	}
 
 	public static final class Builder {
@@ -76,6 +87,7 @@ public class ConfigChangeEvent extends BaseEvent {
 		private byte[] fileSource;
 		private String clientIps;
 		private boolean beta;
+		private Long version = 0L;
 
 		private Builder() {
 		}
@@ -140,6 +152,11 @@ public class ConfigChangeEvent extends BaseEvent {
 			return this;
 		}
 
+		public Builder version(Long version) {
+			this.version = version;
+			return this;
+		}
+
 		public ConfigChangeEvent build() {
 			ConfigChangeEvent configChangeEvent = new ConfigChangeEvent();
 			configChangeEvent.setSource(source);
@@ -154,7 +171,18 @@ public class ConfigChangeEvent extends BaseEvent {
 			configChangeEvent.setBeta(beta);
 			configChangeEvent.setFileSource(fileSource);
 			configChangeEvent.setClientIps(clientIps);
+			configChangeEvent.setVersion(version);
 			return configChangeEvent;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "ConfigChangeEvent{" +
+				"content='" + content + '\'' +
+				", fileSource=" + Arrays.toString(fileSource) +
+				", configType='" + configType + '\'' +
+				", version=" + version +
+				'}';
 	}
 }

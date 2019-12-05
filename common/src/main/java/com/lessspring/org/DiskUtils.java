@@ -16,6 +16,9 @@
  */
 package com.lessspring.org;
 
+import com.lessspring.org.utils.ByteUtils;
+import org.apache.commons.io.FileUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,9 +40,6 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import com.lessspring.org.utils.ByteUtils;
-import org.apache.commons.io.FileUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -124,12 +124,8 @@ public final class DiskUtils {
 		String finalPath = PathUtils.finalPath(path);
 		File file = openFile(finalPath, fileName, true);
 		try (FileChannel fileChannel = new FileOutputStream(file).getChannel()) {
-			ByteBuffer buffer = ByteBuffer.allocate(content.length);
-			buffer.flip();
-			while (buffer.hasRemaining()) {
-				fileChannel.write(buffer);
-			}
-			buffer.clear();
+			ByteBuffer buffer = ByteBuffer.wrap(content);
+			fileChannel.write(buffer);
 			return true;
 		}
 		catch (IOException ioe) {
@@ -182,6 +178,9 @@ public final class DiskUtils {
 		File file = new File(path, fileName);
 		try {
 			boolean create = true;
+			if (!file.exists()) {
+				file.createNewFile();
+			}
 			if (file.exists()) {
 				if (rewrite) {
 					file.delete();

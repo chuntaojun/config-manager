@@ -16,8 +16,6 @@
  */
 package com.lessspring.org.service.config.impl;
 
-import java.util.Objects;
-
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -36,9 +34,10 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * With the persistence of the processor cache function, for a read operation, to
@@ -80,7 +79,7 @@ public class CachePersistentHandler extends AbstracePersistentHandler {
 			@Override
 			public void job() {
 				String s = configCacheItemManager.readCacheFromDisk(namespaceId,
-						request.getGroupId(), request.getDataId());
+						request.getGroupId(), request.getDataId(), cacheItem.isBeta());
 				// Directly read cache did not read to the configuration file,
 				// read the database directly
 				if (StringUtils.isEmpty(s)) {
@@ -110,9 +109,15 @@ public class CachePersistentHandler extends AbstracePersistentHandler {
 					if (cacheItem.isBeta() && !cacheItem
 							.canRead((String) request.getAttribute("clientIp"))) {
 						configInfo[0] = null;
+						log.debug(
+								"this config-info is beta and this client : [{}] can't read",
+								(String) request.getAttribute("clientIp"));
 					}
-					log.debug("config-info : {}", configInfo[0]);
+					else {
+						log.debug("config-info : {}", configInfo[0]);
+					}
 				}
+				request.getAttributes().clear();
 			}
 
 			@Override
@@ -121,7 +126,6 @@ public class CachePersistentHandler extends AbstracePersistentHandler {
 				log.error("Has some error : {0}", exception);
 			}
 		});
-		request.getAttributes().clear();
 		return configInfo[0];
 	}
 

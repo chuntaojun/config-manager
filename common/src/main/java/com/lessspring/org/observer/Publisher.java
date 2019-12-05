@@ -18,10 +18,10 @@ package com.lessspring.org.observer;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-import com.lessspring.org.executor.BaseThreadPoolExecutor;
-import com.lessspring.org.executor.NameThreadFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 /**
  * A simple observer pattern - the publisher
@@ -29,17 +29,19 @@ import com.lessspring.org.executor.NameThreadFactory;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public abstract class Publisher {
+public abstract class Publisher<T> {
 
-	private List<Watcher> watchers = new CopyOnWriteArrayList<>();
+	private List<Watcher<T>> watchers = new CopyOnWriteArrayList<>();
 
-	private BaseThreadPoolExecutor executor = new BaseThreadPoolExecutor(1, 60, TimeUnit.SECONDS, new NameThreadFactory("com.lessspring.org.config-manager.Publisher"));
+	private FluxSink<Occurrence<T>> sink;
 
-	{
-		executor.allowCoreThreadTimeOut(true);
+	public Publisher() {
+		Flux.create((Consumer<FluxSink<Occurrence<T>>>) tFluxSink -> sink = tFluxSink)
+				.subscribe(tOccurrence -> watchers.parallelStream().forEach(
+						watcher -> watcher.onNotify(tOccurrence, Publisher.this)));
 	}
 
-	public void registerWatcher(Watcher watcher) {
+	public void registerWatcher(Watcher<T> watcher) {
 		watchers.add(watcher);
 	}
 
@@ -48,23 +50,14 @@ public abstract class Publisher {
 	}
 
 	// With correction notice the Occurrence of the result, By accessing
-	// CompleteableFuture to processing the Watcher
+	// CompletableFuture to processing the Watcher
 
-	protected void notifyAllWatcher(Occurrence event) {
-		executor.execute(() -> {
-			for (Watcher watcher : watchers) {
-				watcher.onNotify(event, this);
-			}
-		});
+	protected void notifyAllWatcher(Occurrence<T> event) {
+		sink.next(event);
 	}
 
-	protected void notifyAllWatcher(Object args) {
-		final Occurrence event = Occurrence.newInstance(args);
-		executor.execute(() -> {
-			for (Watcher watcher : watchers) {
-				watcher.onNotify(event, this);
-			}
-		});
+	protected void notifyAllWatcher(T args) {
+		notifyAllWatcher(Occurrence.newInstance(args));
 	}
 
 }

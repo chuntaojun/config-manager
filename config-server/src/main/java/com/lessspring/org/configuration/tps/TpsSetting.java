@@ -16,8 +16,11 @@
  */
 package com.lessspring.org.configuration.tps;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -28,20 +31,27 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "com.lessspring.org.config-manager.tps")
 public class TpsSetting {
 
-	private List<TpsResource> resources = new ArrayList<>();
+	private ArrayList<TpsResource> resources = new ArrayList<>();
 
 	public List<TpsResource> getResources() {
 		return resources;
 	}
 
-	public void setResources(List<TpsResource> resources) {
+	public void setResources(ArrayList<TpsResource> resources) {
 		this.resources = resources;
+	}
+
+	public void updateResource(TpsResource... _resources) {
+		List<TpsResource> resourceList = Arrays.asList(_resources);
+		resources.removeAll(resourceList);
+		resources.addAll(resourceList);
 	}
 
 	public static class TpsResource {
 
 		private String resourceName;
-		private Integer qps;
+		private Double qps = 0.0D;
+		private Duration duration = Duration.ofSeconds(1);
 
 		public String getResourceName() {
 			return resourceName;
@@ -51,12 +61,35 @@ public class TpsSetting {
 			this.resourceName = resourceName;
 		}
 
-		public Integer getQps() {
+		public Double getQps() {
 			return qps;
 		}
 
-		public void setQps(Integer qps) {
+		public void setQps(Double qps) {
 			this.qps = qps;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
+		}
+
+		@Override
+		public String toString() {
+			return "TpsResource{" + "resourceName='" + resourceName + '\'' + ", qps="
+					+ qps + ", duration=" + duration + '}';
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof TpsResource) {
+				TpsResource tr2 = (TpsResource) obj;
+				return Objects.equals(resourceName, tr2.resourceName);
+			}
+			return false;
 		}
 	}
 

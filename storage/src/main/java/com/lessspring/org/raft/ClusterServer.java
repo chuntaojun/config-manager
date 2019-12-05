@@ -56,7 +56,6 @@ public class ClusterServer implements LifeCycle {
 	private RaftServer raftServer;
 	private TransactionIdManager transactionIdManager;
 
-
 	static {
 		NodeManager nodeManager = NodeManager.getInstance();
 		try (InputStream is = Thread.currentThread().getContextClassLoader()
@@ -72,7 +71,8 @@ public class ClusterServer implements LifeCycle {
 	}
 
 	public ClusterServer(RaftServerOptions raftServerOptions) {
-		raftServerOptions = Objects.isNull(raftServerOptions) ? new RaftServerOptions() : raftServerOptions;
+		raftServerOptions = Objects.isNull(raftServerOptions) ? new RaftServerOptions()
+				: raftServerOptions;
 		raftServer = new RaftServer(raftServerOptions);
 		raftServer.init();
 	}

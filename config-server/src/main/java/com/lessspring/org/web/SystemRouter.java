@@ -16,9 +16,19 @@
  */
 package com.lessspring.org.web;
 
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.handler.SystemHandler;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -31,5 +41,37 @@ public class SystemRouter {
 
 	public SystemRouter(SystemHandler systemHandler) {
 		this.systemHandler = systemHandler;
+	}
+
+	@Bean(value = "systemRouterImpl")
+	public RouterFunction<ServerResponse> systemRouter() {
+		return route(
+				GET(StringConst.API_V1 + "sys/log/publish/analyze")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				systemHandler::publishLog)
+						.andRoute(
+								GET(StringConst.API_V1 + "sys/jvm/heapDump")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::jvmHeapDump)
+						.andRoute(
+								GET(StringConst.API_V1 + "sys/qps/setting")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::queryQpsSetting)
+						.andRoute(
+								POST(StringConst.API_V1 + "sys/qps/setting/update")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::publishQpsSetting)
+						.andRoute(
+								GET(StringConst.API_V1 + "sys/idManager/info")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::getAllTransactionIdInfo)
+						.andRoute(
+								POST(StringConst.API_V1 + "sys/logLevel/update")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::changeLogLevel)
+						.andRoute(
+								POST(StringConst.API_V1 + "sys/config/forceDump")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								systemHandler::forceDumpConfig);
 	}
 }

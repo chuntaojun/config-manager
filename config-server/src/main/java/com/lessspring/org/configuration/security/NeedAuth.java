@@ -21,6 +21,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.lessspring.org.service.security.AuthorityProcessor;
+import com.lessspring.org.service.security.impl.NameAuthorityProcessorImpl;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -35,5 +38,12 @@ public @interface NeedAuth {
 	 * @return parameter name
 	 */
 	String argueName();
+
+	/**
+	 * Return handler to execute privilege check
+	 *
+	 * @return
+	 */
+	Class<? extends AuthorityProcessor> handler() default NameAuthorityProcessorImpl.class;
 
 }

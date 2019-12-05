@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.handler;
 
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -34,7 +33,6 @@ public interface ClusterHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> joinNode(ServerRequest request);
 
 	/**
@@ -43,7 +41,6 @@ public interface ClusterHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> leaveNode(ServerRequest request);
 
 	/**
@@ -52,7 +49,6 @@ public interface ClusterHandler {
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	@NotNull
 	Mono<ServerResponse> serverNodes(ServerRequest request);
 
 }

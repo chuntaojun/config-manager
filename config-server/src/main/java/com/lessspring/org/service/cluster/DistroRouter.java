@@ -41,15 +41,15 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 		ROUTER.init();
 	}
 
+	private final NodeManager nodeManager = NodeManager.getInstance();
+	private AtomicReference<ServerNode[]> serverNodeAR = new AtomicReference<>();;
+
+	private DistroRouter() {
+	}
+
 	public static DistroRouter getInstance() {
 		return ROUTER;
 	}
-
-	private DistroRouter() {
-	};
-
-	private final NodeManager nodeManager = NodeManager.getInstance();
-	private AtomicReference<ServerNode[]> serverNodeAR = new AtomicReference<>();
 
 	@Override
 	public void init() {
@@ -80,7 +80,8 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 		ServerNode[] nodes = serverNodeAR.get();
 		int hash = distroHash(key);
 		int index = hash % nodes.length;
-		ServerNode targetNode = Objects.equals(nodeManager.getSelf(), nodes[index]) ? nodeManager.getSelf()
+		ServerNode targetNode = Objects.equals(nodeManager.getSelf(), nodes[index])
+				? nodeManager.getSelf()
 				: nodes[index];
 		log.info("[DistroRouter] has router to ServerNode : {}", targetNode);
 		return targetNode;

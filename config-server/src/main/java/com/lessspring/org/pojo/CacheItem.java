@@ -16,16 +16,14 @@
  */
 package com.lessspring.org.pojo;
 
+import com.lessspring.org.NameUtils;
+import com.lessspring.org.CasReadWriteLock;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import com.lessspring.org.NameUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -34,9 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CacheItem {
 
-	public static final short CACHE_ITEM = 0;
-	public static final short TEMP_CACHE_ITEM = 0;
-
 	private final String namespaceId;
 
 	private final String groupId;
@@ -44,22 +39,22 @@ public class CacheItem {
 	private final String dataId;
 
 	private final boolean file;
-
-	private volatile String lastMd5;
-
-	private volatile long lastUpdateTime;
-
-	private volatile boolean beta;
-
 	private final String key;
 
+	/**
+	 * 一个简单的读写锁实现
+	 */
+	private final CasReadWriteLock casReadWriteLock = new CasReadWriteLock();
+	private volatile String lastMd5;
+	private volatile long lastUpdateTime;
+	private volatile boolean beta;
+	/**
+	 * 用于控制通知客户端时的新旧版本控制，避免就=旧版本覆盖新版本
+	 */
+	private volatile long version = 0;
 	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
-
-	public CacheItem(String namespaceId, String groupId, String dataId, boolean file) {
+	public CacheItem(String namespaceId, String groupId, String dataId, boolean file, long version) {
 		this.namespaceId = namespaceId;
 		this.groupId = groupId;
 		this.dataId = dataId;
@@ -91,8 +86,21 @@ public class CacheItem {
 		return lastUpdateTime;
 	}
 
-	public void setLastUpdateTime(long lastUpdateTime) {
+	public synchronized void setLastUpdateTime(long lastUpdateTime) {
 		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	/**
+	 * 高危操作，谨慎调用
+	 *
+	 * @param version
+	 */
+	public void setVersion(long version) {
+		this.version = version;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	public boolean isBeta() {
@@ -109,7 +117,9 @@ public class CacheItem {
 
 	public void setBetaClientIps(Set<String> betaClientIps) {
 		for (String clientIp : betaClientIps) {
-			if (Objects.equals("0.0.0.0:0", clientIp)) {
+			// if beta-client-ip has contain "0.0.0.0"(IP) or "*"(ClientId)
+			// beta will be lose efficacy
+			if (Objects.equals("0.0.0.0:0", clientIp) || Objects.equals("*", clientIp)) {
 				this.betaClientIps = Collections.emptySet();
 				return;
 			}
@@ -122,46 +132,46 @@ public class CacheItem {
 	}
 
 	public boolean canRead(String clientIp) {
-		return betaClientIps.isEmpty() || !betaClientIps.contains(clientIp);
+		boolean a = betaClientIps.isEmpty();
+		boolean b = betaClientIps.contains(clientIp);
+		return a || b;
 	}
 
-	public void executeReadWork(ReadWork readWork) {
-		log.info("execute read work ");
-		try {
-			if (readLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
-				try {
-					readWork.job();
-				}
-				catch (Exception e) {
-					readWork.onError(e);
-				}
-				finally {
-					readLock.unlock();
-				}
-			}
-		}
-		catch (InterruptedException ignore) {
+	// 需要考虑清楚，如果写线程到了悲观锁，而读线程因为乐观锁而正在执行，
+	// 那么存在读写同时运行的情况，需要考虑如何避免此类现象，确保线程安全
+	// 返回值只代表任务是否被执行了
 
+	public boolean executeReadWork(ReadWork readWork) {
+		log.warn("execute read work ");
+		if (casReadWriteLock.tryReadLock()) {
+			try {
+				readWork.job();
+			} catch (Exception e) {
+				readWork.onError(e);
+			} finally {
+				casReadWriteLock.unReadLock();
+			}
+			return true;
+		} else {
+			log.warn("");
+			return false;
 		}
 	}
 
-	public void executeWriteWork(WriteWork writeWork) {
-		log.info("execute write work ");
-		try {
-			if (writeLock.tryLock(1000, TimeUnit.MILLISECONDS)) {
-				try {
-					writeWork.job();
-				}
-				catch (Exception e) {
-					writeWork.onError(e);
-				}
-				finally {
-					writeLock.unlock();
-				}
+	public boolean executeWriteWork(WriteWork writeWork) {
+		log.warn("execute write work ");
+		if (casReadWriteLock.tryWriteLock()) {
+			try {
+				writeWork.job();
+			} catch (Exception e) {
+				writeWork.onError(e);
+			} finally {
+				casReadWriteLock.unWriteLock();
 			}
-		}
-		catch (InterruptedException ignore) {
-
+			return true;
+		} else {
+			log.warn("Failed to acquire write lock, no chance to execute, exit execution");
+			return false;
 		}
 	}
 }

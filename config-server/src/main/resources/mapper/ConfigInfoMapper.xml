@@ -31,37 +31,84 @@
     <!--  save config-infog  -->
     <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
-        INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type, create_time)
-        VALUES (
-        #{dto.id},
-        #{dto.dataId},
-        #{dto.groupId},
-        #{dto.namespaceId},
-        #{dto.content},
-        #{dto.type},
-        #{dto.createTime});
+        INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type, encryption, create_time)
+        VALUES (#{dto.id},
+                #{dto.dataId},
+                #{dto.groupId},
+                #{dto.namespaceId},
+                #{dto.content},
+                #{dto.type},
+                #{dto.encryption},
+                #{dto.createTime});
     </insert>
 
     <!--  save config-info-beta  -->
     <insert id="saveConfigBetaInfo">
         INSERT INTO config_info_beta(id, data_id, group_id, namespace_id, content,
-        config_type)
-        VALUES (
-        #{dto.id},
-        #{dto.dataId},
-        #{dto.groupId},
-        #{dto.namespaceId},
-        #{dto.content},
-        #{dto.type});
+                                     config_type, encryption, client_ips, create_time)
+        VALUES (#{dto.id},
+                #{dto.dataId},
+                #{dto.groupId},
+                #{dto.namespaceId},
+                #{dto.content},
+                #{dto.type},
+                #{dto.encryption},
+                #{dto.clientIps},
+                #{dto.createTime});
     </insert>
 
     <!--  update config-info  -->
-    <update id="updateConfigInfo"></update>
+    <update id="updateConfigInfo">
+        UPDATE config_info SET
+        <if test="dto.content != null and dto.content != ''">
+            content = #{dto.content}
+        </if>
+        <if test="dto.type != null and dto.type != ''">
+            config_type = #{dto.type}
+        </if>
+        <if test="dto.encryption != null and dto.encryption != ''">
+            encryption = #{dto.encryption}
+        </if>
+        1 = 1
+        WHERE namespace_id = #{dto.namespaceId} and group_id = #{dto.groupId} and data_id = #{dto.dataId} LIMIT 1
+    </update>
 
     <!--  update config-info-beta  -->
-    <update id="updateConfigBetaInfo"></update>
-    <delete id="removeConfigInfo"></delete>
-    <delete id="removeConfigBetaInfo"></delete>
+    <update id="updateConfigBetaInfo">
+        UPDATE config_info_beta SET
+        <if test="dto.content != null and dto.content != ''">
+            content = #{dto.content}
+        </if>
+        <if test="dto.type != null and dto.type != ''">
+            config_type = #{dto.type}
+        </if>
+        <if test="dto.clientIps != null and dto.clientIps != ''">
+            client_ips = #{dto.clientIps}
+        </if>
+        <if test="dto.encryption != null and dto.encryption != ''">
+            encryption = #{dto.encryption}
+        </if>
+        1 = 1
+        WHERE namespace_id = #{dto.namespaceId} and group_id = #{dto.groupId} and data_id = #{dto.dataId} LIMIT 1
+    </update>
+
+    <delete id="removeConfigInfo">
+        DELETE
+        from config_info
+        where namespace_id = #{dto.namespaceId}
+          and group_id = #{dto.groupId}
+          and data_id = #{dto.dataId}
+        LIMIT 1
+    </delete>
+
+    <delete id="removeConfigBetaInfo">
+        DELETE
+        from config_info_beta
+        where namespace_id = #{dto.namespaceId}
+          and group_id = #{dto.groupId}
+          and data_id = #{dto.dataId}
+        LIMIT 1
+    </delete>
 
     <!--  find config-content by QueryConfigInfo  -->
     <select id="findConfigInfoContent"
@@ -70,8 +117,8 @@
         SELECT content
         FROM config_info
         WHERE namespace_id = #{query.namespaceId}
-        and group_id = #{query.groupId}
-        and data_id = #{query.dataId}
+          and group_id = #{query.groupId}
+          and data_id = #{query.dataId}
     </select>
 
     <!--  find config by QueryConfigInfo  -->
@@ -81,8 +128,9 @@
         SELECT *
         FROM config_info
         WHERE namespace_id = #{query.namespaceId}
-        and group_id like CONCAT('%', #{query.groupId}, '%')
-        and data_id like CONCAT('%', #{query.dataId}, '%')
+          and group_id = #{query.groupId}
+          and data_id = #{query.dataId}
+        limit 1
     </select>
 
     <!--  find min and max id from config-info  -->
@@ -120,8 +168,8 @@
         SELECT *
         FROM config_info_beta
         WHERE namespace_id = #{query.namespaceId}
-        and group_id like CONCAT('%', #{query.groupId}, '%')
-        and data_id like CONCAT('%', #{query.dataId}, '%')
+          and group_id like CONCAT('%', #{query.groupId}, '%')
+          and data_id like CONCAT('%', #{query.dataId}, '%')
     </select>
 
 </mapper>

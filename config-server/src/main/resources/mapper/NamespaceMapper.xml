@@ -13,32 +13,32 @@
     <!--  save namespace  -->
     <insert id="saveNamespace" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.NamespaceDTO">
-        INSERT INTO namespace(namespace_name, namespace_id) VALUE (#{dto.namespace},
+        INSERT INTO config_namespace(namespace_name, namespace_id) VALUE (#{dto.namespace},
         #{dto.namespaceId});
     </insert>
 
     <!--  save access namespace token  -->
     <update id="saveNamespaceAuthToken">
-        UPDATE namespace SET auth_token = #{token} WHERE namespace_name = #{name}
+        UPDATE config_namespace SET auth_token = #{token} WHERE namespace_name = #{name}
     </update>
 
-    <!--  remove namespace  -->
+    <!--  clean namespace  -->
     <delete id="removeNamespace">
         DELETE
-        FROM namespace
+        FROM config_namespace
         WHERE namespace_name = #{namespace}
     </delete>
 
     <!--  query all namespaces  -->
     <select id="queryAll" resultMap="NamespaceDTO">
         SELECT *
-        FROM namespace;
+        FROM config_namespace;
     </select>
 
     <!--  query single namespace by name  -->
     <select id="findNamespaceByName" resultType="java.lang.String">
         SELECT namespace_name
-        FROM namespace
+        FROM config_namespace
         WHERE namespace_name = #{name}
     </select>
 
@@ -46,7 +46,7 @@
     <select id="findNamespaceDTOByName"
             resultMap="NamespaceDTO">
         SELECT *
-        FROM namespace
+        FROM config_namespace
         WHERE namespace_name = #{name};
     </select>
 </mapper>

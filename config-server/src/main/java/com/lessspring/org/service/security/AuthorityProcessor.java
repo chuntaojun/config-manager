@@ -29,10 +29,9 @@ public interface AuthorityProcessor {
 	 * judge have auth to access this namespace
 	 *
 	 * @param privilege {@link Privilege}
-	 * @param namespaceId resource
 	 * @return has auth
 	 */
-	boolean hasAuth(Privilege privilege, String namespaceId);
+	boolean hasAuth(Privilege privilege);
 
 	/**
 	 * create namespace auth token

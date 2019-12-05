@@ -16,10 +16,6 @@
  */
 package com.lessspring.org.service.config.impl;
 
-import java.util.Objects;
-
-import javax.annotation.Resource;
-
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
@@ -41,10 +37,12 @@ import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -54,16 +52,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Component(value = "persistentHandler")
 public class ConfigPersistentHandler extends AbstracePersistentHandler {
 
+	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 	@Resource
 	private ConfigInfoMapper configInfoMapper;
-
 	@Resource
 	private ConfigInfoHistoryMapper historyMapper;
-
 	@Resource
 	private TransactionTemplate transactionTemplate;
-
-	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	@Override
 	public Publisher getPublisher() {
@@ -113,6 +108,7 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 					.clientIps(request.getClientIps())
 					.createTime(System.currentTimeMillis()).build();
 			affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
+			request.setAttribute(ConfigBetaInfoDTO.NAME, infoDTO);
 		}
 		else {
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().id(id)
@@ -120,6 +116,7 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 					.dataId(request.getDataId()).content(save).type(request.getType())
 					.createTime(System.currentTimeMillis()).build();
 			affect = configInfoMapper.saveConfigInfo(infoDTO);
+			request.setAttribute(ConfigInfoDTO.NAME, infoDTO);
 		}
 		log.debug("save config-success, affect rows is : {}, primary key is : {}", affect,
 				id);
@@ -149,7 +146,9 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 			DBUtils.changeConfigInfo2History(old, history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
-					.content(save).type(request.getType()).build();
+					.content(save).type(request.getType())
+					.version(old.getVersion() + 1)
+					.build();
 			affect = configInfoMapper.updateConfigInfo(infoDTO);
 			notifyAllWatcher(Occurrence.newInstance(history));
 		}

@@ -28,16 +28,16 @@ public class PublishConfigHistory extends PublishConfigRequest4 {
 
 	private Long lastModifyTime;
 
+	public static Builder hBuilder() {
+		return new Builder();
+	}
+
 	public Long getLastModifyTime() {
 		return lastModifyTime;
 	}
 
 	public void setLastModifyTime(Long lastModifyTime) {
 		this.lastModifyTime = lastModifyTime;
-	}
-
-	public static Builder hBuilder() {
-		return new Builder();
 	}
 
 	public static final class Builder {

@@ -25,13 +25,14 @@ import javax.annotation.PreDestroy;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.context.TraceContext;
+import com.lessspring.org.context.TraceContextHolder;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.service.security.SecurityService;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -53,11 +54,12 @@ import static com.lessspring.org.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 @Configuration
 public class ConfigWebFilter implements WebFilter {
 
-	@Value("${com.lessspring.org.config-manager.anyuri:null}")
-	private String[] anyOneUri;
+	private TraceContextHolder contextHolder = TraceContextHolder.getInstance();
 
 	private final FilterChain filterChain;
 	private final SecurityService securityService;
+	@Value("${com.lessspring.org.config-manager.anyuri:null}")
+	private String[] anyOneUri;
 
 	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
 		this.securityService = securityService;
@@ -74,21 +76,20 @@ public class ConfigWebFilter implements WebFilter {
 		filterChain.destroy();
 	}
 
-	@NotNull
 	@Override
-	public Mono<Void> filter(@NotNull ServerWebExchange exchange,
-			@NotNull WebFilterChain chain) {
+	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
 		String path = request.getPath().value();
-		// To release the URL white list
-		if (uriMatcher(path, anyOneUri)) {
-			return chain.filter(exchange);
-		}
 		// Give priority to perform user custom interceptors
 		Mono<Void> mono = filterChain.filter(exchange);
 		filterChain.destroy();
 		if (Objects.nonNull(mono)) {
 			return mono;
+		}
+		// To release the URL white list
+		openTraceContext(request);
+		if (uriMatcher(path, anyOneUri)) {
+			return chain.filter(exchange);
 		}
 		boolean hasAuth = permissionIntercept(exchange);
 		if (!hasAuth) {
@@ -96,6 +97,18 @@ public class ConfigWebFilter implements WebFilter {
 					HASH_NO_PRIVILEGE.getDescribe());
 		}
 		return chain.filter(exchange);
+	}
+
+	private void openTraceContext(ServerHttpRequest request) {
+		String traceInfo = request.getHeaders().getFirst("c-trace-info");
+		final TraceContext context;
+		if (StringUtils.isNotBlank(traceInfo)) {
+			context = GsonUtils.toObj(traceInfo, TraceContext.class);
+		} else {
+			context = new TraceContext();
+		}
+		log.info("[TraceContext Info] : {}", context);
+		contextHolder.setInvokeTraceContext(context);
 	}
 
 	private boolean permissionIntercept(ServerWebExchange exchange) {
@@ -111,6 +124,8 @@ public class ConfigWebFilter implements WebFilter {
 		result.ifPresent(decodedJWT -> exchange.getSession().subscribe(webSession -> {
 			Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(),
 					Privilege.class);
+			TraceContext context = contextHolder.getInvokeTraceContext();
+			context.setAttachment("privilege", privilege);
 			webSession.getAttributes().put("privilege", privilege);
 		}));
 		return result.isPresent();
