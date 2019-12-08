@@ -39,7 +39,6 @@ import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
 import com.lessspring.org.utils.vo.NamespaceVOUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -74,7 +73,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 	private FailCallback failCallback;
 
 	public NamespaceServiceImpl(
-			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
+			BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager, AuthorityProcessor authorityProcessor) {
 		this.commitCallback = commitCallback;
 		this.clusterManager = clusterManager;
@@ -204,7 +203,6 @@ public class NamespaceServiceImpl implements NamespaceService {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
-		datum.setBz(PropertiesEnum.Bz.NAMESPACE.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {

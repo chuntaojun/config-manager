@@ -14,21 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.distributed;
+package com.lessspring.org.service.config;
 
-import com.lessspring.org.utils.PropertiesEnum;
-
-import org.springframework.stereotype.Component;
+import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
+import com.lessspring.org.observer.Publisher;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Component(value = "configTransactionCommitCallback")
-public class ConfigTransactionCommitCallback extends BaseTransactionCommitCallback {
+public abstract class AbstractPersistentHandler extends Publisher<ConfigInfoHistoryDTO>
+		implements PersistentHandler {
 
-	@Override
-	public boolean interest(String trsKey) {
-		return trsKey.contains(PropertiesEnum.InterestKey.CONFIG_DATA.getType());
-	}
 }

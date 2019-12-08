@@ -62,4 +62,9 @@ public interface TransactionIdManager {
 	 */
 	void snapshotLoad(Map<String, TransactionId> snapshot);
 
+	/**
+	 * @return this {@link TransactionIdManager} manager ID type
+	 */
+	String label();
+
 }

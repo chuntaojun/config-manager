@@ -54,7 +54,6 @@ import com.lessspring.org.utils.TransactionUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -93,7 +92,7 @@ public class ConfigOperationService
 
 	public ConfigOperationService(PersistentHandler persistentHandler,
 			NamespaceService namespaceService,
-			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
+			BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager, WatchClientManager watchClientManager,
 			ConfigCacheItemManager configCacheItemManager) {
 		this.persistentHandler = persistentHandler;
@@ -114,6 +113,7 @@ public class ConfigOperationService
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void registerToPublisher() {
 		persistentHandler.getPublisher().registerWatcher(this);
 	}
@@ -258,7 +258,6 @@ public class ConfigOperationService
 	}
 
 	private ResponseData<?> commit(Datum datum) {
-		datum.setBz(PropertiesEnum.Bz.CONFIG.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {

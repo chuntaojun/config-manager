@@ -30,7 +30,7 @@ import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.service.config.AbstracePersistentHandler;
+import com.lessspring.org.service.config.AbstractPersistentHandler;
 import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
 import com.lessspring.org.utils.DBUtils;
@@ -50,7 +50,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component(value = "persistentHandler")
-public class ConfigPersistentHandler extends AbstracePersistentHandler {
+public class ConfigPersistentHandler extends AbstractPersistentHandler {
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 	@Resource

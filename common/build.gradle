@@ -4,5 +4,6 @@ sourceCompatibility = 1.8
 
 dependencies {
     compile(project(":api"))
+    compile group: 'org.apache.logging.log4j', name: 'log4j', version: '2.11.2', ext: 'pom'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

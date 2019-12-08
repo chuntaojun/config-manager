@@ -6,12 +6,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * 自定义的线程对象，携带{@link TraceContext}
+ *
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
  * @Created at 2019-12-01 14:52
  */
 public class CThread extends Thread {
 
-    private TraceContext traceContext = new TraceContext();
+    private TraceContext traceContext;
 
     public CThread() {
         super();
@@ -62,6 +64,6 @@ public class CThread extends Thread {
     }
 
     public void cleanTraceContext() {
-        traceContext = null;
+        traceContext.clean();
     }
 }

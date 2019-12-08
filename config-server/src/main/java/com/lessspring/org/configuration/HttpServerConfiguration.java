@@ -16,17 +16,13 @@
  */
 package com.lessspring.org.configuration;
 
-import java.util.Collections;
-import java.util.Objects;
-
 import com.google.gson.GsonBuilder;
+import com.lessspring.org.executor.NameThreadFactory;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import reactor.netty.http.server.HttpServer;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -39,6 +35,10 @@ import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.netty.http.server.HttpServer;
+
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -90,8 +90,8 @@ public class HttpServerConfiguration {
 						Objects.requireNonNull(environment.getProperty("server.port"))));
 		httpServer = httpServer
 				.tcpConfiguration(tcpServer -> tcpServer.bootstrap(serverBootstrap -> {
-					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads);
-					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads);
+					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads, new NameThreadFactory("KQueue-Loop-"));
+					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads, new NameThreadFactory("KQueue-Worker-"));
 					serverBootstrap.group(core, worker);
 					serverBootstrap.channel(NioServerSocketChannel.class)
 							.option(ChannelOption.ALLOCATOR,

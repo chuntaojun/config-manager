@@ -72,4 +72,9 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 			manager.putAll(snapshot);
 		}
 	}
+
+	@Override
+	public String label() {
+		return "transaction-id-manager/config";
+	}
 }

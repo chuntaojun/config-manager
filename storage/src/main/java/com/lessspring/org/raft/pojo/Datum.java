@@ -30,7 +30,6 @@ public class Datum {
 	private byte[] value;
 	private String className;
 	private String operation;
-	private String bz;
 
 	public Datum(String key, byte[] value, String className) {
 		this.key = key;
@@ -76,13 +75,5 @@ public class Datum {
 
 	public void setOperation(String operation) {
 		this.operation = operation;
-	}
-
-	public String getBz() {
-		return bz;
-	}
-
-	public void setBz(String bz) {
-		this.bz = bz;
 	}
 }

@@ -16,14 +16,6 @@
  */
 package com.lessspring.org.service.dump;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.Resource;
-
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.raft.exception.TransactionException;
@@ -38,10 +30,15 @@ import com.lessspring.org.service.distributed.TransactionConsumer;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RequireHelper;
 import com.lessspring.org.utils.WaitFinish;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -51,7 +48,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CleanProcessor {
 
-	@Qualifier(value = "configTransactionCommitCallback")
 	@Autowired
 	private BaseTransactionCommitCallback commitCallback;
 
@@ -102,7 +98,6 @@ public class CleanProcessor {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
-		datum.setBz(PropertiesEnum.Bz.CONFIG.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {

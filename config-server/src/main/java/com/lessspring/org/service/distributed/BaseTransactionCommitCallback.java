@@ -16,22 +16,24 @@
  */
 package com.lessspring.org.service.distributed;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.lessspring.org.exception.BaseException;
 import com.lessspring.org.raft.TransactionCommitCallback;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
-public abstract class BaseTransactionCommitCallback implements TransactionCommitCallback {
+@Component
+public class BaseTransactionCommitCallback implements TransactionCommitCallback {
 
 	private final HashMap<PropertiesEnum.Bz, Map<String, TransactionConsumer<Transaction>>> consumerMap = new HashMap<>(
 			4);
@@ -45,8 +47,8 @@ public abstract class BaseTransactionCommitCallback implements TransactionCommit
 	}
 
 	@Override
-	public void onApply(Transaction transaction) throws TransactionException {
-		PropertiesEnum.Bz bz = PropertiesEnum.Bz.valueOf(transaction.getBz());
+	public void onApply(Transaction transaction, String bzName) throws TransactionException {
+		final PropertiesEnum.Bz bz = PropertiesEnum.Bz.valueOf(bzName);
 		TransactionConsumer<Transaction> consumer = consumerMap.get(bz)
 				.get(transaction.getOperation());
 		try {
@@ -60,8 +62,19 @@ public abstract class BaseTransactionCommitCallback implements TransactionCommit
 			}
 			exception.setTransaction(transaction);
 			consumer.onError(exception);
+			consumer.rollBack();
 			throw exception;
 		}
+	}
+
+	@Override
+	public String interest(String trsKey) {
+		for (PropertiesEnum.InterestKey key : PropertiesEnum.InterestKey.values()) {
+			if (trsKey.contains(key.getType())) {
+				return key.name();
+			}
+		}
+		throw new IllegalArgumentException("Illegal transaction log, no business module to handle");
 	}
 
 }

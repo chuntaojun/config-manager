@@ -37,7 +37,6 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -68,7 +67,7 @@ public class UserServiceImpl implements UserService {
 	private UserMapper userMapper;
 
 	public UserServiceImpl(
-			@Qualifier(value = "userTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
+			BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager) {
 		this.commitCallback = commitCallback;
 		this.clusterManager = clusterManager;
@@ -194,7 +193,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
-		datum.setBz(PropertiesEnum.Bz.USER.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {
