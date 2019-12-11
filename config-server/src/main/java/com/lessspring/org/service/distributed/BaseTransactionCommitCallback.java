@@ -16,16 +16,17 @@
  */
 package com.lessspring.org.service.distributed;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.lessspring.org.exception.BaseException;
 import com.lessspring.org.raft.TransactionCommitCallback;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -47,7 +48,8 @@ public class BaseTransactionCommitCallback implements TransactionCommitCallback 
 	}
 
 	@Override
-	public void onApply(Transaction transaction, String bzName) throws TransactionException {
+	public void onApply(Transaction transaction, String bzName)
+			throws TransactionException {
 		final PropertiesEnum.Bz bz = PropertiesEnum.Bz.valueOf(bzName);
 		TransactionConsumer<Transaction> consumer = consumerMap.get(bz)
 				.get(transaction.getOperation());
@@ -74,7 +76,8 @@ public class BaseTransactionCommitCallback implements TransactionCommitCallback 
 				return key.name();
 			}
 		}
-		throw new IllegalArgumentException("Illegal transaction log, no business module to handle");
+		throw new IllegalArgumentException(
+				"Illegal transaction log, no business module to handle");
 	}
 
 }

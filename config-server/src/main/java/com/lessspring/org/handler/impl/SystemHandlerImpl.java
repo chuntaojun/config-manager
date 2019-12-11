@@ -16,6 +16,18 @@
  */
 package com.lessspring.org.handler.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import javax.annotation.PostConstruct;
+
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.configuration.tps.LimitRule;
 import com.lessspring.org.configuration.tps.OpenTpsLimit;
@@ -29,12 +41,15 @@ import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.pojo.request.PublishQpsRequest;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.service.dump.DumpService;
+import com.lessspring.org.service.publish.TraceAnalyzer;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
 import com.lessspring.org.utils.SystemEnv;
-import com.lessspring.org.service.publish.TraceAnalyzer;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -51,19 +66,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -89,9 +91,9 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 	private TpsSetting tpsSetting;
 
 	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService,
-                             TraceAnalyzer traceAnalyzer,
-                             TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor,
-                             ApplicationContext applicationContext) {
+			TraceAnalyzer traceAnalyzer,
+			TpsConfiguration.TpsAnnotationProcessor tpsAnnotationProcessor,
+			ApplicationContext applicationContext) {
 		this.loggingSystem = loggingSystem;
 		this.dumpService = dumpService;
 		this.traceAnalyzer = traceAnalyzer;
@@ -134,8 +136,7 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 
 	@Override
 	public Mono<ServerResponse> publishLog(ServerRequest request) {
-		return RenderUtils
-				.render(ResponseData.success(traceAnalyzer.analyzePublishLog()))
+		return RenderUtils.render(ResponseData.success(traceAnalyzer.analyzePublishLog()))
 				.subscribeOn(Schedulers
 						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 	}
@@ -161,7 +162,8 @@ public class SystemHandlerImpl extends Publisher<TpsSetting> implements SystemHa
 		return RenderUtils.render(callable.get()).doOnTerminate(() -> {
 			if (Objects.nonNull(files[0])) {
 				if (files[0].exists()) {
-					log.warn("[JvmDump Handler] auto delete file when this request finish");
+					log.warn(
+							"[JvmDump Handler] auto delete file when this request finish");
 					files[0].delete();
 				}
 			}

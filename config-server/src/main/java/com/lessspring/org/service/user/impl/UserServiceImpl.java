@@ -16,6 +16,15 @@
  */
 package com.lessspring.org.service.user.impl;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import com.lessspring.org.EncryptionUtils;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.exception.NoSuchRoleException;
@@ -37,15 +46,8 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.springframework.stereotype.Service;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -66,8 +68,7 @@ public class UserServiceImpl implements UserService {
 	@Resource
 	private UserMapper userMapper;
 
-	public UserServiceImpl(
-			BaseTransactionCommitCallback commitCallback,
+	public UserServiceImpl(BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager) {
 		this.commitCallback = commitCallback;
 		this.clusterManager = clusterManager;
@@ -127,7 +128,8 @@ public class UserServiceImpl implements UserService {
 						UserRequest.class);
 				try {
 					PropertiesEnum.Role.choose(request.getRole());
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new NoSuchRoleException();
 				}
 				UserDTO dto = UserDTO.builder().username(request.getUsername())
@@ -155,7 +157,8 @@ public class UserServiceImpl implements UserService {
 				}
 				try {
 					PropertiesEnum.Role.choose(request.getRole());
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					throw new NoSuchRoleException();
 				}
 				if (EncryptionUtils.matchesByBcrypt(request.getOldPassword(),

@@ -16,14 +16,14 @@
  */
 package com.lessspring.org.pojo;
 
-import com.lessspring.org.NameUtils;
-import com.lessspring.org.CasReadWriteLock;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import com.lessspring.org.CasReadWriteLock;
+import com.lessspring.org.NameUtils;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -54,7 +54,8 @@ public class CacheItem {
 	private volatile long version = 0;
 	private Set<String> betaClientIps = new CopyOnWriteArraySet<>();
 
-	public CacheItem(String namespaceId, String groupId, String dataId, boolean file, long version) {
+	public CacheItem(String namespaceId, String groupId, String dataId, boolean file,
+			long version) {
 		this.namespaceId = namespaceId;
 		this.groupId = groupId;
 		this.dataId = dataId;
@@ -90,6 +91,10 @@ public class CacheItem {
 		this.lastUpdateTime = lastUpdateTime;
 	}
 
+	public long getVersion() {
+		return version;
+	}
+
 	/**
 	 * 高危操作，谨慎调用
 	 *
@@ -97,10 +102,6 @@ public class CacheItem {
 	 */
 	public void setVersion(long version) {
 		this.version = version;
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public boolean isBeta() {
@@ -146,13 +147,16 @@ public class CacheItem {
 		if (casReadWriteLock.tryReadLock()) {
 			try {
 				readWork.job();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				readWork.onError(e);
-			} finally {
+			}
+			finally {
 				casReadWriteLock.unReadLock();
 			}
 			return true;
-		} else {
+		}
+		else {
 			log.warn("");
 			return false;
 		}
@@ -163,14 +167,18 @@ public class CacheItem {
 		if (casReadWriteLock.tryWriteLock()) {
 			try {
 				writeWork.job();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				writeWork.onError(e);
-			} finally {
+			}
+			finally {
 				casReadWriteLock.unWriteLock();
 			}
 			return true;
-		} else {
-			log.warn("Failed to acquire write lock, no chance to execute, exit execution");
+		}
+		else {
+			log.warn(
+					"Failed to acquire write lock, no chance to execute, exit execution");
 			return false;
 		}
 	}

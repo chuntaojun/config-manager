@@ -192,6 +192,31 @@ public final class PropertiesEnum {
 		}
 	}
 
+	public enum ConfigStatus {
+
+		/**
+		 * SAVE
+		 */
+		SAVE(0),
+
+		/**
+		 * PUBLISH
+		 */
+		PUBLISH(1)
+
+		;
+
+		private int status;
+
+		ConfigStatus(int status) {
+			this.status = status;
+		}
+
+		public int getStatus() {
+			return status;
+		}
+	}
+
 	public enum Hint {
 
 		/**

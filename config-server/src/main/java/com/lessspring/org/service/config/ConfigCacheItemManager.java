@@ -16,6 +16,16 @@
  */
 package com.lessspring.org.service.config;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+
 import com.lessspring.org.DiskUtils;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
@@ -30,18 +40,9 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -151,7 +152,8 @@ public class ConfigCacheItemManager {
 			item.setBeta(event.isBeta());
 			item.setBetaClientIps(betaClientIps);
 			item.setVersion(event.getVersion());
-		} else {
+		}
+		else {
 			log.info("[{}] register into configCacheItemManager", key);
 		}
 	}
@@ -185,13 +187,13 @@ public class ConfigCacheItemManager {
 	}
 
 	public String readCacheFromDisk(final String namespaceId, final String groupId,
-									final String dataId, final boolean isBeta) {
+			final String dataId, final boolean isBeta) {
 		final String key = NameUtils.buildName(groupId, dataId);
 		return _readCacheFromDisk(namespaceId, key, isBeta);
 	}
 
 	public boolean removeCacheFromDisk(final String namespaceId, final String groupId,
-									   final String dataId) {
+			final String dataId) {
 		return removeCacheFromDisk(namespaceId, groupId, dataId, false);
 	}
 
@@ -201,13 +203,15 @@ public class ConfigCacheItemManager {
 		return _removeCacheFromDisk(namespaceId, key, isBeta);
 	}
 
-	private String _readCacheFromDisk(final String namespaceId, final String key, final boolean isBeta) {
+	private String _readCacheFromDisk(final String namespaceId, final String key,
+			final boolean isBeta) {
 		String path = "config-cache" + (isBeta ? "-beta" : "");
 		final String finalPath = Paths.get(path, namespaceId).toString();
 		return DiskUtils.readFile(finalPath, key);
 	}
 
-	private boolean _removeCacheFromDisk(final String namespaceId, final String key, final boolean isBeta) {
+	private boolean _removeCacheFromDisk(final String namespaceId, final String key,
+			final boolean isBeta) {
 		String path = "config-cache" + (isBeta ? "-beta" : "");
 		final String finalPath = Paths.get(path, namespaceId).toString();
 		return DiskUtils.deleteFile(finalPath, key);

@@ -26,8 +26,8 @@ import com.lessspring.org.exception.ValidationException;
  */
 public class RequireHelper {
 
-	public static void requireEquals(int a, int b, String msg) {
-		if (a != b) {
+	public static void requireEquals(Object a, Object b, String msg) {
+		if (!Objects.equals(a, b)) {
 			throw new ValidationException(msg);
 		}
 	}

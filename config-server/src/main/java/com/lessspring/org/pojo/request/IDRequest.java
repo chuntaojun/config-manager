@@ -1,8 +1,8 @@
 package com.lessspring.org.pojo.request;
 
-import lombok.Builder;
-
 import java.util.List;
+
+import lombok.Builder;
 
 /**
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
@@ -11,23 +11,23 @@ import java.util.List;
 @Builder
 public class IDRequest {
 
-    private String localName;
+	private String localName;
 
-    private List<SubIDRequest> subIDRequests;
+	private List<SubIDRequest> subIDRequests;
 
-    public String getLocalName() {
-        return localName;
-    }
+	public String getLocalName() {
+		return localName;
+	}
 
-    public void setLocalName(String localName) {
-        this.localName = localName;
-    }
+	public void setLocalName(String localName) {
+		this.localName = localName;
+	}
 
-    public List<SubIDRequest> getSubIDRequests() {
-        return subIDRequests;
-    }
+	public List<SubIDRequest> getSubIDRequests() {
+		return subIDRequests;
+	}
 
-    public void setSubIDRequests(List<SubIDRequest> subIDRequests) {
-        this.subIDRequests = subIDRequests;
-    }
+	public void setSubIDRequests(List<SubIDRequest> subIDRequests) {
+		this.subIDRequests = subIDRequests;
+	}
 }

@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.service.config.impl;
 
+import java.util.Objects;
+
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -34,10 +36,9 @@ import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * With the persistence of the processor cache function, for a read operation, to

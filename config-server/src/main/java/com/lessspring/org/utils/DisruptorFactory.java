@@ -16,15 +16,15 @@
  */
 package com.lessspring.org.utils;
 
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.lessspring.org.executor.WrapperRunnable;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -37,11 +37,13 @@ public final class DisruptorFactory {
 		return build(factory, name, ProducerType.MULTI, new BlockingWaitStrategy());
 	}
 
-	public static <T> Disruptor<T> build(EventFactory factory, Class name, ProducerType type) {
+	public static <T> Disruptor<T> build(EventFactory factory, Class name,
+			ProducerType type) {
 		return build(factory, name, type, new BlockingWaitStrategy());
 	}
 
-	public static <T> Disruptor<T> build(EventFactory factory, Class name, ProducerType type, WaitStrategy waitStrategy) {
+	public static <T> Disruptor<T> build(EventFactory factory, Class name,
+			ProducerType type, WaitStrategy waitStrategy) {
 		int ringBufferSize = 1024;
 		return new Disruptor<>(factory, ringBufferSize, new ThreadFactory() {
 

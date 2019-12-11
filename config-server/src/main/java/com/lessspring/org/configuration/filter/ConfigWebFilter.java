@@ -54,10 +54,9 @@ import static com.lessspring.org.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 @Configuration
 public class ConfigWebFilter implements WebFilter {
 
-	private TraceContextHolder contextHolder = TraceContextHolder.getInstance();
-
 	private final FilterChain filterChain;
 	private final SecurityService securityService;
+	private TraceContextHolder contextHolder = TraceContextHolder.getInstance();
 	@Value("${com.lessspring.org.config-manager.anyuri:null}")
 	private String[] anyOneUri;
 
@@ -104,7 +103,8 @@ public class ConfigWebFilter implements WebFilter {
 		final TraceContext context;
 		if (StringUtils.isNotBlank(traceInfo)) {
 			context = GsonUtils.toObj(traceInfo, TraceContext.class);
-		} else {
+		}
+		else {
 			context = new TraceContext();
 		}
 		log.info("[TraceContext Info] : {}", context);

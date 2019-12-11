@@ -9,31 +9,31 @@ import lombok.Builder;
 @Builder
 public class SubIDRequest {
 
-    private String label;
-    private Long start;
-    private Long end;
+	private String label;
+	private Long start;
+	private Long end;
 
-    public String getLabel() {
-        return label;
-    }
+	public String getLabel() {
+		return label;
+	}
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+	public void setLabel(String label) {
+		this.label = label;
+	}
 
-    public Long getStart() {
-        return start;
-    }
+	public Long getStart() {
+		return start;
+	}
 
-    public void setStart(Long start) {
-        this.start = start;
-    }
+	public void setStart(Long start) {
+		this.start = start;
+	}
 
-    public Long getEnd() {
-        return end;
-    }
+	public Long getEnd() {
+		return end;
+	}
 
-    public void setEnd(Long end) {
-        this.end = end;
-    }
+	public void setEnd(Long end) {
+		this.end = end;
+	}
 }

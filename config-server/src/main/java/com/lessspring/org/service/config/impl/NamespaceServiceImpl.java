@@ -16,6 +16,19 @@
  */
 package com.lessspring.org.service.config.impl;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -39,19 +52,8 @@ import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
 import com.lessspring.org.utils.vo.NamespaceVOUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import org.springframework.stereotype.Service;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -72,8 +74,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 	private NamespaceMapper namespaceMapper;
 	private FailCallback failCallback;
 
-	public NamespaceServiceImpl(
-			BaseTransactionCommitCallback commitCallback,
+	public NamespaceServiceImpl(BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager, AuthorityProcessor authorityProcessor) {
 		this.commitCallback = commitCallback;
 		this.clusterManager = clusterManager;

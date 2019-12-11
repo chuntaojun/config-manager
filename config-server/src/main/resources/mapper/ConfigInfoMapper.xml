@@ -116,7 +116,8 @@
             resultType="java.lang.String">
         SELECT content
         FROM config_info
-        WHERE namespace_id = #{query.namespaceId}
+        WHERE status = 1
+          and namespace_id = #{query.namespaceId}
           and group_id = #{query.groupId}
           and data_id = #{query.dataId}
     </select>
@@ -127,7 +128,8 @@
             resultMap="ConfigInfoDTO">
         SELECT *
         FROM config_info
-        WHERE namespace_id = #{query.namespaceId}
+        WHERE status = 1
+          and namespace_id = #{query.namespaceId}
           and group_id = #{query.groupId}
           and data_id = #{query.dataId}
         limit 1
@@ -141,7 +143,7 @@
 
     <!--  batch find config-info  -->
     <select id="batchFindConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
-        SELECT * FROM config_info WHERE id in
+        SELECT * FROM config_info WHERE status = 1 and id in
         <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
@@ -156,7 +158,7 @@
     <!--  batch find config-beta-info  -->
     <select id="batchFindConfigInfo4Beta"
             resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO">
-        SELECT * FROM config_info_beta WHERE id in
+        SELECT * FROM config_info_beta WHERE status = 1 and id in
         <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
@@ -167,9 +169,11 @@
             resultMap="ConfigBetaInfoDTO">
         SELECT *
         FROM config_info_beta
-        WHERE namespace_id = #{query.namespaceId}
+        WHERE status = 1
+          and namespace_id = #{query.namespaceId}
           and group_id like CONCAT('%', #{query.groupId}, '%')
           and data_id like CONCAT('%', #{query.dataId}, '%')
+        limit 1
     </select>
 
 </mapper>

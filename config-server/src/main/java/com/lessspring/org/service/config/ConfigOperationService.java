@@ -92,8 +92,8 @@ public class ConfigOperationService
 
 	public ConfigOperationService(PersistentHandler persistentHandler,
 			NamespaceService namespaceService,
-			BaseTransactionCommitCallback commitCallback,
-			ClusterManager clusterManager, WatchClientManager watchClientManager,
+			BaseTransactionCommitCallback commitCallback, ClusterManager clusterManager,
+			WatchClientManager watchClientManager,
 			ConfigCacheItemManager configCacheItemManager) {
 		this.persistentHandler = persistentHandler;
 		this.namespaceService = namespaceService;
@@ -283,8 +283,9 @@ public class ConfigOperationService
 							NamespaceRequest.builder().namespace(namespace).build());
 				}
 				request4.setAttribute("id", transaction.getId());
-				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(),
-						request4)) {
+				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)
+						&& request4.getStatus() == PropertiesEnum.ConfigStatus.PUBLISH
+								.getStatus()) {
 					ConfigChangeEvent event = ConfigOperationService.this
 							.buildConfigChangeEvent(request4.getNamespaceId(), request4,
 									request4.getContent(), request4.getEncryption(),
