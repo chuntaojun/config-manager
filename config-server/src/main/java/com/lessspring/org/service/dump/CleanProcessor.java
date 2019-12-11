@@ -16,16 +16,9 @@
  */
 package com.lessspring.org.service.dump;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.Resource;
-
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
@@ -35,23 +28,29 @@ import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RequireHelper;
-import com.lessspring.org.utils.WaitFinish;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@WaitFinish
 @Component
+@Slf4j
 public class CleanProcessor {
 
-	@Qualifier(value = "configTransactionCommitCallback")
 	@Autowired
 	private BaseTransactionCommitCallback commitCallback;
 
@@ -61,7 +60,9 @@ public class CleanProcessor {
 	@Resource
 	private ConfigInfoHistoryMapper historyMapper;
 
-	private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+	private ScheduledThreadPoolExecutor cleanMaster;
+
+	private ScheduledThreadPoolExecutor cleanWorker;
 
 	private FailCallback failCallback;
 
@@ -70,20 +71,42 @@ public class CleanProcessor {
 				batchCleanHistoryConsumer(), OperationEnum.BATCH_DELETE.name());
 		failCallback = throwable -> null;
 
-		scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(4,
-				new NameThreadFactory(
-						"com.lessspring.org.config-manager.config.history.cleaner-"));
-		scheduledThreadPoolExecutor.allowCoreThreadTimeOut(true);
-		scheduledThreadPoolExecutor.setKeepAliveTime(60, TimeUnit.SECONDS);
+		cleanMaster = new ScheduledThreadPoolExecutor(1, new NameThreadFactory(
+				"com.lessspring.org.config-manager.config.history.cleaner"));
+
+		// open auto clean config-history work
+		cleanMaster.scheduleAtFixedRate(this::autoRemoveHistoryConfig, 15L, 30L,
+				TimeUnit.MINUTES);
+
+		cleanWorker = new ScheduledThreadPoolExecutor(4, new NameThreadFactory(
+				"com.lessspring.org.config-manager.config.history.cleanWorker-"));
+
+		cleanWorker.allowCoreThreadTimeOut(true);
+		cleanWorker.setKeepAliveTime(60, TimeUnit.SECONDS);
 	}
 
 	private void autoRemoveHistoryConfig() {
+		// only server-cluster leader can open clean config-history work
 		if (clusterManager.isLeader()) {
 			Long[] ids = historyMapper.findMinAndMaxId().toArray(new Long[0]);
 			RequireHelper.requireNotNull(ids, "Min and Max id not null");
-			RequireHelper.requireEquals(ids.length, 2, "should be retuen two id num");
+			RequireHelper.requireEquals(ids.length, 2, "should be return two id num");
 			Long minId = ids[0];
 			Long maxId = ids[1];
+			for (long index = minId; index <= maxId; index++) {
+				final long loc = index;
+				cleanWorker.execute(() -> {
+					final Datum datum = Datum.builder()
+							.key("delete_config_history_id_" + loc)
+							.value(GsonUtils.toJsonBytes(
+									DeleteConfigHistory.dBuild().id(loc).build()))
+							.operation(OperationEnum.BATCH_DELETE.name())
+							.className(DeleteConfigHistory.CLASS_NAME).build();
+					ResponseData<Boolean> result = commit(datum);
+					log.info("[CleanProcessor] auto clean config-history result : {}",
+							result);
+				});
+			}
 		}
 	}
 
@@ -91,17 +114,19 @@ public class CleanProcessor {
 		return new TransactionConsumer<Transaction>() {
 			@Override
 			public void accept(Transaction transaction) throws Throwable {
-
+				DeleteConfigHistory request = GsonUtils.toObj(transaction.getData(),
+						DeleteConfigHistory.class);
+				historyMapper.batchDelete(Collections.singletonList(request.getId()));
 			}
 
 			@Override
 			public void onError(TransactionException te) {
-
+				log.error("[CleanConfigHistory Worker] error : {}", te);
 			}
 		};
 	}
 
-	private ResponseData<?> commit(Datum datum) {
+	private ResponseData<Boolean> commit(Datum datum) {
 		datum.setBz(PropertiesEnum.Bz.CONFIG.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);

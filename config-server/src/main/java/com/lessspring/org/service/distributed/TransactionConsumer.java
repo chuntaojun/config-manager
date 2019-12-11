@@ -43,6 +43,8 @@ public interface TransactionConsumer<T> {
 	 *
 	 * @param te {@link TransactionException}
 	 */
-	void onError(TransactionException te);
+	default void onError(TransactionException te) {
+
+	}
 
 }

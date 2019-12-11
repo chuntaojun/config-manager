@@ -9,6 +9,7 @@ create TABLE config_info
     file_source  binary,
     encryption   varchar(128) not null default '',
     create_time  bigint       not null,
+    status       int          not null default 0 comment '配置状态，0为保存，1为发布',
     version      bigint       not null default 0,
     primary key (id),
     unique (namespace_id, group_id, data_id)
@@ -26,6 +27,7 @@ create TABLE config_info_beta
     encryption   varchar(128)  not null default '',
     create_time  bigint        not null,
     client_ips   varchar(1024) not null,
+    status       int          not null default 0 comment '配置状态，0为保存，1为发布',
     version      bigint       not null default 0,
     primary key (id),
     unique (namespace_id, group_id, data_id)

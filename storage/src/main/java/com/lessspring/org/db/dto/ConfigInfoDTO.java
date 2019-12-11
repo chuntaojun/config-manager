@@ -40,6 +40,7 @@ public class ConfigInfoDTO {
 	private String type;
 	private String encryption = "";
 	private Long createTime;
+	private Integer status = 0;
 	private Long version = 0L;
 
 	public static ConfigInfoDTOBuilder builder() {
@@ -56,6 +57,7 @@ public class ConfigInfoDTO {
 		private String type;
 		private String encryption;
 		private Long createTime;
+		private Integer status = 0;
 		private Long version = 0L;
 
 		private ConfigInfoDTOBuilder() {
@@ -106,6 +108,11 @@ public class ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigInfoDTOBuilder status(Integer status) {
+			this.status = status;
+			return this;
+		}
+
 		public ConfigInfoDTOBuilder version(Long version) {
 			this.version = version;
 			return this;
@@ -123,6 +130,7 @@ public class ConfigInfoDTO {
 			configInfoDTO.setEncryption(encryption);
 			configInfoDTO.setCreateTime(createTime);
 			configInfoDTO.setVersion(version);
+			configInfoDTO.setStatus(status);
 			return configInfoDTO;
 		}
 	}

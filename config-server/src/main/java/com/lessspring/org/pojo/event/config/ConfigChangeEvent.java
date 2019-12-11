@@ -16,9 +16,9 @@
  */
 package com.lessspring.org.pojo.event.config;
 
-import com.lessspring.org.event.EventType;
-
 import java.util.Arrays;
+
+import com.lessspring.org.event.EventType;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -72,6 +72,13 @@ public class ConfigChangeEvent extends BaseEvent {
 	@Override
 	public String label() {
 		return TYPE;
+	}
+
+	@Override
+	public String toString() {
+		return "ConfigChangeEvent{" + "content='" + content + '\'' + ", fileSource="
+				+ Arrays.toString(fileSource) + ", configType='" + configType + '\''
+				+ ", version=" + version + '}';
 	}
 
 	public static final class Builder {
@@ -174,15 +181,5 @@ public class ConfigChangeEvent extends BaseEvent {
 			configChangeEvent.setVersion(version);
 			return configChangeEvent;
 		}
-	}
-
-	@Override
-	public String toString() {
-		return "ConfigChangeEvent{" +
-				"content='" + content + '\'' +
-				", fileSource=" + Arrays.toString(fileSource) +
-				", configType='" + configType + '\'' +
-				", version=" + version +
-				'}';
 	}
 }

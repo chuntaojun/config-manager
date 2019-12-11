@@ -23,7 +23,7 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
-import com.lessspring.org.service.config.AbstracePersistentHandler;
+import com.lessspring.org.service.config.AbstractPersistentHandler;
 import com.lessspring.org.service.encryption.EncryptionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +37,14 @@ import org.springframework.stereotype.Service;
  */
 @Primary
 @Service(value = "encryptionPersistentHandler")
-public class EncryptionPersistentHandler extends AbstracePersistentHandler {
+public class EncryptionPersistentHandler extends AbstractPersistentHandler {
 
 	@Autowired
 	private EncryptionService encryptionService;
 
 	@Autowired
 	@Qualifier(value = "cachePersistentHandler")
-	private AbstracePersistentHandler persistentHandler;
+	private AbstractPersistentHandler persistentHandler;
 
 	public EncryptionPersistentHandler() {
 	}

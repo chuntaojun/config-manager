@@ -16,6 +16,21 @@
  */
 package com.lessspring.org.service.cluster;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.zip.ZipOutputStream;
+
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
@@ -28,25 +43,12 @@ import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.utils.ServerStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.zip.ZipOutputStream;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -145,15 +147,17 @@ public class H2SnapshotOperateImpl implements SnapshotOperate {
 				sql = String.format(sql, tableInfo[1], file);
 				sqls.add(sql);
 			}
-			return batchExec(sqls, "Snapshot load");
+			boolean result = batchExec(sqls, "Snapshot load");
+			if (result) {
+				nodeManager.getSelf().setServerStatus(ServerStatus.HEALTH);
+			}
+			return result;
 		}
 		catch (final Throwable t) {
 			log.error("Fail to load snapshot, path={}, file list={}, {}.", readerPath,
 					reader.listFiles(), t);
+			nodeManager.getSelf().setServerStatus(ServerStatus.ONLY_READ);
 			return false;
-		}
-		finally {
-			nodeManager.getSelf().setServerStatus(ServerStatus.HEALTH);
 		}
 	}
 

@@ -29,16 +29,17 @@ public interface TransactionCommitCallback {
 	 * When raft transaction is completed, triggered the callback achieve business
 	 *
 	 * @param transaction {@link Transaction}
+	 * @param bzName bzName
 	 * @throws TransactionException
 	 */
-	void onApply(Transaction transaction) throws TransactionException;
+	void onApply(Transaction transaction, String bzName) throws TransactionException;
 
 	/**
-	 * To determine transaction key, if interested
+	 * To determine transaction key which bz interest it
 	 *
 	 * @param trsKey Transaction key
-	 * @return is interest
+	 * @return bz name
 	 */
-	boolean interest(String trsKey);
+	String interest(String trsKey);
 
 }

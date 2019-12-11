@@ -48,6 +48,7 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 		private String type;
 		private String encryption = "";
 		private Long createTime;
+		private Integer status = 0;
 		private Long version = 0L;
 
 		private ConfigBetaInfoDTOBuilder() {
@@ -103,6 +104,11 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigBetaInfoDTOBuilder status(Integer status) {
+			this.status = status;
+			return this;
+		}
+
 		public ConfigBetaInfoDTOBuilder version(Long version) {
 			this.version = version;
 			return this;
@@ -121,6 +127,7 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			configBetaInfoDTO.setEncryption(encryption);
 			configBetaInfoDTO.setCreateTime(createTime);
 			configBetaInfoDTO.setVersion(version);
+			configBetaInfoDTO.setStatus(status);
 			return configBetaInfoDTO;
 		}
 	}

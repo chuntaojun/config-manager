@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 import com.google.gson.GsonBuilder;
+import com.lessspring.org.executor.NameThreadFactory;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -90,8 +91,10 @@ public class HttpServerConfiguration {
 						Objects.requireNonNull(environment.getProperty("server.port"))));
 		httpServer = httpServer
 				.tcpConfiguration(tcpServer -> tcpServer.bootstrap(serverBootstrap -> {
-					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads);
-					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads);
+					EventLoopGroup core = new KQueueEventLoopGroup(loopThreads,
+							new NameThreadFactory("KQueue-Loop-"));
+					EventLoopGroup worker = new KQueueEventLoopGroup(workerThreads,
+							new NameThreadFactory("KQueue-Worker-"));
 					serverBootstrap.group(core, worker);
 					serverBootstrap.channel(NioServerSocketChannel.class)
 							.option(ChannelOption.ALLOCATOR,

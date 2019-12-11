@@ -16,6 +16,14 @@
  */
 package com.lessspring.org.service.publish;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
+
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
@@ -30,19 +38,12 @@ import com.lessspring.org.utils.SystemEnv;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import reactor.core.publisher.FluxSink;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
-import reactor.core.publisher.FluxSink;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -138,10 +139,8 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 						tracer.publishPublishEvent(PublishLogEvent.builder()
 								.clientIp(watchClient.getClientIp())
 								.namespaceId(watchClient.getNamespaceId())
-								.groupId(info[0])
-								.dataId(info[1])
-								.publishTime(System.currentTimeMillis())
-								.build());
+								.groupId(info[0]).dataId(info[1])
+								.publishTime(System.currentTimeMillis()).build());
 						writeResponse(watchClient, GsonUtils.toJson(content));
 					}
 				}
@@ -175,7 +174,8 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		final CacheItem cacheItem = cacheItemManager.queryCacheItem(
 				event.getNamespaceId(), event.getGroupId(), event.getDataId());
 		final String configInfoJson = cacheItemManager.readCacheFromDisk(
-				event.getNamespaceId(), event.getGroupId(), event.getDataId(), cacheItem.isBeta());
+				event.getNamespaceId(), event.getGroupId(), event.getDataId(),
+				cacheItem.isBeta());
 		long[] finishWorks = new long[1];
 		final String key = NameUtils.buildName(event.getGroupId(), event.getDataId());
 		Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager

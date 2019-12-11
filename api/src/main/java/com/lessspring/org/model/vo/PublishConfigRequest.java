@@ -31,6 +31,7 @@ public class PublishConfigRequest extends BaseConfigRequest {
 	private boolean isFile = false;
 	private byte[] file;
 	private String encryption = StringUtils.EMPTY;
+	private Integer status = 0;
 	private boolean requiresEncryption = false;
 
 	public String getContent() {
@@ -63,6 +64,14 @@ public class PublishConfigRequest extends BaseConfigRequest {
 
 	public void setClientIps(String clientIps) {
 		this.clientIps = clientIps;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 
 	public String getEncryption() {

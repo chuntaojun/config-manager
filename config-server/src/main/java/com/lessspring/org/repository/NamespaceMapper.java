@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.repository;
 
+import java.util.List;
+
 import com.lessspring.org.db.dto.NamespaceDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

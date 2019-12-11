@@ -16,18 +16,19 @@
  */
 package com.lessspring.org.utils;
 
+import java.util.function.BiConsumer;
+
 import com.lessspring.org.context.TraceContextHolder;
 import com.lessspring.org.model.vo.ResponseData;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
-
-import java.util.function.BiConsumer;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
@@ -53,7 +54,8 @@ public final class RenderUtils {
 				.doOnSuccessOrError(new BiConsumer() {
 					@Override
 					public void accept(Object o, Object o2) {
-						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
+						log.info("Trace Info : {}",
+								contextHolder.getInvokeTraceContext());
 					}
 				});
 	}
@@ -66,8 +68,10 @@ public final class RenderUtils {
 				.body(BodyInserters.fromResource(resource))
 				.doOnSuccessOrError(new BiConsumer<ServerResponse, Throwable>() {
 					@Override
-					public void accept(ServerResponse serverResponse, Throwable throwable) {
-						log.info("Trace Info : {}", contextHolder.getInvokeTraceContext());
+					public void accept(ServerResponse serverResponse,
+							Throwable throwable) {
+						log.info("Trace Info : {}",
+								contextHolder.getInvokeTraceContext());
 					}
 				});
 	}

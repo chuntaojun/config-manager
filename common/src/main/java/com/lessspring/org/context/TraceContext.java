@@ -34,9 +34,10 @@ public final class TraceContext {
 
     private static final TraceContextHolder INSTANCE = TraceContextHolder.getInstance();
 
-    private final TraceContext parentTraceContext;
-    private final String traceId = "TraceId-" + IDUtils.generateUuid();
     private final Map<String, Object> attachments = new HashMap<>();
+
+    private TraceContext parentTraceContext;
+    private String traceId = "TraceId-" + IDUtils.generateUuid();
     private LinkedList<TraceContext> subContexts;
 
     public TraceContext() {
@@ -84,8 +85,12 @@ public final class TraceContext {
     }
 
     public void clean() {
+        parentTraceContext = null;
+        traceId = "TraceId-" + IDUtils.generateUuid();
         attachments.clear();
-        subContexts.clear();
+        if (Objects.nonNull(subContexts)) {
+            subContexts.clear();
+        }
     }
 
     public synchronized TraceContext createSubContext() {

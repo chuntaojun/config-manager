@@ -54,7 +54,6 @@ import com.lessspring.org.utils.TransactionUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -93,8 +92,8 @@ public class ConfigOperationService
 
 	public ConfigOperationService(PersistentHandler persistentHandler,
 			NamespaceService namespaceService,
-			@Qualifier(value = "configTransactionCommitCallback") BaseTransactionCommitCallback commitCallback,
-			ClusterManager clusterManager, WatchClientManager watchClientManager,
+			BaseTransactionCommitCallback commitCallback, ClusterManager clusterManager,
+			WatchClientManager watchClientManager,
 			ConfigCacheItemManager configCacheItemManager) {
 		this.persistentHandler = persistentHandler;
 		this.namespaceService = namespaceService;
@@ -114,6 +113,7 @@ public class ConfigOperationService
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void registerToPublisher() {
 		persistentHandler.getPublisher().registerWatcher(this);
 	}
@@ -283,8 +283,9 @@ public class ConfigOperationService
 							NamespaceRequest.builder().namespace(namespace).build());
 				}
 				request4.setAttribute("id", transaction.getId());
-				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(),
-						request4)) {
+				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)
+						&& request4.getStatus() == PropertiesEnum.ConfigStatus.PUBLISH
+								.getStatus()) {
 					ConfigChangeEvent event = ConfigOperationService.this
 							.buildConfigChangeEvent(request4.getNamespaceId(), request4,
 									request4.getContent(), request4.getEncryption(),
@@ -316,6 +317,7 @@ public class ConfigOperationService
 					throw new NotThisResourceException(
 							"No resources in the namespace ：" + namespace);
 				}
+				request4.setAttribute("isLeader", clusterManager.isLeader());
 				if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(),
 						request4)) {
 					ConfigChangeEvent event = buildConfigChangeEvent(

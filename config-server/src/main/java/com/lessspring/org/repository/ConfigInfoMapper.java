@@ -16,14 +16,14 @@
  */
 package com.lessspring.org.repository;
 
+import java.util.List;
+
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.pojo.query.QueryConfigInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

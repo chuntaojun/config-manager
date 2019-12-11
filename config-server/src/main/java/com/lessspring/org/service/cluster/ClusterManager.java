@@ -89,6 +89,7 @@ public class ClusterManager {
 			clusterServer.registerSnapshotOperator(snapshotOperate);
 			clusterServer.initTransactionIdManger(transactionIdManager);
 			clusterServer.init();
+			transactionIdManager.init(0);
 			eventBus.register(this);
 			eventBus.register(clusterServer);
 		}

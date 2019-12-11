@@ -26,8 +26,21 @@ public class DeleteConfigHistory extends BaseRequest4 {
 
 	public static final String CLASS_NAME = DeleteConfigHistory.class.getCanonicalName();
 
+	private Long id;
 	private String namespaceId = "default";
 	private Long lastModifyTime;
+
+	public static Builder dBuild() {
+		return new Builder();
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getNamespaceId() {
 		return namespaceId;
@@ -46,6 +59,7 @@ public class DeleteConfigHistory extends BaseRequest4 {
 	}
 
 	public static final class Builder {
+		private Long id;
 		private String namesapceId = "default";
 		private String dataId;
 		private String groupId;
@@ -53,6 +67,11 @@ public class DeleteConfigHistory extends BaseRequest4 {
 		private Map<String, Object> attribute;
 
 		private Builder() {
+		}
+
+		public Builder id(Long id) {
+			this.id = id;
+			return this;
 		}
 
 		public Builder namespaceId(String namesapceId) {
@@ -82,6 +101,7 @@ public class DeleteConfigHistory extends BaseRequest4 {
 
 		public DeleteConfigHistory build() {
 			DeleteConfigHistory deleteConfigHistory = new DeleteConfigHistory();
+			deleteConfigHistory.setId(id);
 			deleteConfigHistory.setNamespaceId(namesapceId);
 			deleteConfigHistory.setDataId(dataId);
 			deleteConfigHistory.setGroupId(groupId);

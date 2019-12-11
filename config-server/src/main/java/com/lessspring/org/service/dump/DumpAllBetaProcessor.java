@@ -16,18 +16,20 @@
  */
 package com.lessspring.org.service.dump;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.executor.NameThreadFactory;
+import com.lessspring.org.executor.ThreadPoolHelper;
 import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.cluster.DistroRouter;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4Beta;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -39,6 +41,9 @@ public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 	private final ConfigInfoMapper configInfoMapper;
 	private final DistroRouter distroRouter = DistroRouter.getInstance();
 	private ExecutorService executor;
+
+	private final AtomicBoolean inited = new AtomicBoolean(false);
+	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 	public DumpAllBetaProcessor(ConfigCacheItemManager cacheItemManager,
 			ConfigInfoMapper configInfoMapper) {
@@ -62,22 +67,26 @@ public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 
 	@Override
 	public void init() {
-		this.executor = Executors.newFixedThreadPool(4,
-				new NameThreadFactory("com.lessspring.org.config.DumpAllBeta-"));
+		if (inited.compareAndSet(false, true)) {
+			this.executor = Executors.newFixedThreadPool(4,
+					new NameThreadFactory("com.lessspring.org.config.DumpAllBeta-"));
+		}
 	}
 
 	@Override
 	public void destroy() {
-		this.executor.shutdown();
+		if (isInited() && destroyed.compareAndSet(false, true)) {
+			ThreadPoolHelper.invokeShutdown(this.executor);
+		}
 	}
 
 	@Override
 	public boolean isInited() {
-		return false;
+		return inited.get();
 	}
 
 	@Override
 	public boolean isDestroyed() {
-		return false;
+		return destroyed.get();
 	}
 }

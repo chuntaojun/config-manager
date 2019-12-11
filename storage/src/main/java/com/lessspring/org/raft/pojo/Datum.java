@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.raft.pojo;
 
+import lombok.Builder;
 import lombok.ToString;
 
 /**
@@ -23,6 +24,7 @@ import lombok.ToString;
  * @since 0.0.1
  */
 @ToString
+@Builder
 public class Datum {
 
 	private long id;

@@ -27,6 +27,11 @@ import java.util.Map;
 public interface TransactionIdManager {
 
 	/**
+	 * init
+	 */
+	void init(int retry);
+
+	/**
 	 * query {@link TransactionId} by bz
 	 *
 	 * @param bz bussiness
@@ -61,5 +66,12 @@ public interface TransactionIdManager {
 	 * @param snapshot
 	 */
 	void snapshotLoad(Map<String, TransactionId> snapshot);
+
+	/**
+	 * this {@link TransactionIdManager} manager ID type
+	 *
+	 * @return label name
+	 */
+	String label();
 
 }

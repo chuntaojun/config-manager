@@ -41,13 +41,23 @@ public class BaseThreadPoolExecutor extends ThreadPoolExecutor {
 	private static final Logger logger = Logger
 			.getLogger("com.lessspring.org.executor.BaseThreadPoolExecutor");
 
-	private ThreadLocal<Long> workCostTimeLocal = ThreadLocal
+	private static final ThreadLocal<Long> workCostTimeLocal = ThreadLocal
 			.withInitial(System::currentTimeMillis);
 
 	private boolean openWorkCostDisplay = false;
 
 	public void setOpenWorkCostDisplay(boolean openWorkCostDisplay) {
 		this.openWorkCostDisplay = openWorkCostDisplay;
+	}
+
+	public BaseThreadPoolExecutor(int corePoolSize) {
+		this(corePoolSize, Runtime.getRuntime().availableProcessors(), 60,
+				TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+	}
+
+	public BaseThreadPoolExecutor(int corePoolSize, NameThreadFactory threadFactory) {
+		this(corePoolSize, Runtime.getRuntime().availableProcessors(), 60,
+				TimeUnit.SECONDS, new LinkedBlockingQueue<>(), threadFactory);
 	}
 
 	public BaseThreadPoolExecutor(int corePoolSize, long keepAliveTime, TimeUnit unit) {

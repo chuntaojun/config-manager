@@ -1,6 +1,8 @@
 package com.lessspring.org.context;
 
 import com.lessspring.org.executor.CForkJoinThread;
+import com.lessspring.org.executor.CThread;
+import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 
@@ -32,13 +34,19 @@ public class PassThrough {
     }
 
     protected void transfer() {
+        MDC.put("traceId", context.getTraceId());
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof CForkJoinThread) {
             CForkJoinThread joinThread = (CForkJoinThread) currentThread;
             joinThread.setTraceContext(context);
-        } else {
-            swapThreadLocal(currentThread, source);
+            return;
         }
+        if (currentThread instanceof CThread) {
+            CThread cThread = (CThread) currentThread;
+            cThread.setTraceContext(context);
+            return;
+        }
+        swapThreadLocal(currentThread, source);
     }
 
     protected void clean() {
@@ -46,6 +54,10 @@ public class PassThrough {
         if (currentThread instanceof CForkJoinThread) {
             CForkJoinThread joinThread = (CForkJoinThread) currentThread;
             joinThread.cleanTraceContext();
+        }
+        if (currentThread instanceof CThread) {
+            CThread cThread = (CThread) currentThread;
+            cThread.cleanTraceContext();
         }
     }
 

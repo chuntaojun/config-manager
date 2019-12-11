@@ -16,6 +16,11 @@
  */
 package com.lessspring.org.service.config.impl;
 
+import java.util.Collections;
+import java.util.Objects;
+
+import javax.annotation.Resource;
+
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
@@ -30,19 +35,17 @@ import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.repository.ConfigInfoMapper;
-import com.lessspring.org.service.config.AbstracePersistentHandler;
+import com.lessspring.org.service.config.AbstractPersistentHandler;
 import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.utils.ConfigRequestUtils;
 import com.lessspring.org.utils.DBUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.annotation.Resource;
-import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -50,7 +53,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component(value = "persistentHandler")
-public class ConfigPersistentHandler extends AbstracePersistentHandler {
+public class ConfigPersistentHandler extends AbstractPersistentHandler {
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 	@Resource
@@ -105,7 +108,7 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 			ConfigBetaInfoDTO infoDTO = ConfigBetaInfoDTO.sbuilder().id(id)
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
-					.clientIps(request.getClientIps())
+					.clientIps(request.getClientIps()).status(request.getStatus())
 					.createTime(System.currentTimeMillis()).build();
 			affect = configInfoMapper.saveConfigBetaInfo(infoDTO);
 			request.setAttribute(ConfigBetaInfoDTO.NAME, infoDTO);
@@ -114,7 +117,8 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().id(id)
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).content(save).type(request.getType())
-					.createTime(System.currentTimeMillis()).build();
+					.status(request.getStatus()).createTime(System.currentTimeMillis())
+					.build();
 			affect = configInfoMapper.saveConfigInfo(infoDTO);
 			request.setAttribute(ConfigInfoDTO.NAME, infoDTO);
 		}
@@ -142,15 +146,17 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).build();
 			ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
-			ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
-			DBUtils.changeConfigInfo2History(old, history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
-					.content(save).type(request.getType())
-					.version(old.getVersion() + 1)
+					.content(save).type(request.getType()).version(old.getVersion() + 1)
 					.build();
 			affect = configInfoMapper.updateConfigInfo(infoDTO);
-			notifyAllWatcher(Occurrence.newInstance(history));
+			// only one node can send config-history save event
+			if (request.getAttribute("isLeader")) {
+				ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
+				DBUtils.changeConfigInfo2History(old, history);
+				notifyAllWatcher(Occurrence.newInstance(history));
+			}
 		}
 		log.debug("modify config-success, affect rows is : {}", affect);
 		return true;
@@ -170,13 +176,22 @@ public class ConfigPersistentHandler extends AbstracePersistentHandler {
 	@Override
 	public boolean saveConfigHistory(String namespaceId,
 			PublishConfigHistory publishConfigHistory) {
-		return false;
+		ConfigInfoHistoryDTO historyDTO = ConfigInfoHistoryDTO.sbuilder()
+				.namespaceId(namespaceId).groupId(publishConfigHistory.getGroupId())
+				.dataId(publishConfigHistory.getDataId())
+				.fileSource(publishConfigHistory.getFile())
+				.encryption(publishConfigHistory.getEncryption())
+				.id(publishConfigHistory.getAttribute("id"))
+				.lastModifyTime(publishConfigHistory.getLastModifyTime())
+				.content(ByteUtils.toBytes(publishConfigHistory.getContent())).build();
+		return historyMapper.save(historyDTO) != 0;
 	}
 
 	@Override
 	public boolean removeConfigHistory(String namespaceId,
 			DeleteConfigHistory deleteConfigHistory) {
-		return false;
+		return historyMapper
+				.batchDelete(Collections.singletonList(deleteConfigHistory.getId())) > 0;
 	}
 
 	@Override

@@ -42,7 +42,12 @@ public final class PropertiesEnum {
 		/**
 		 * 
 		 */
-		SETTING
+		SETTING,
+
+		/**
+		 *
+		 */
+		ID
 
 	}
 
@@ -184,6 +189,31 @@ public final class PropertiesEnum {
 
 		public String getType() {
 			return type;
+		}
+	}
+
+	public enum ConfigStatus {
+
+		/**
+		 * SAVE
+		 */
+		SAVE(0),
+
+		/**
+		 * PUBLISH
+		 */
+		PUBLISH(1)
+
+		;
+
+		private int status;
+
+		ConfigStatus(int status) {
+			this.status = status;
+		}
+
+		public int getStatus() {
+			return status;
 		}
 	}
 

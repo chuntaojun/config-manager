@@ -37,8 +37,7 @@ public class RaftNodeConfiguration {
 	@Bean
 	public ClusterManager clusterManager(
 			@Autowired List<BaseTransactionCommitCallback> commitCallbacks,
-			SnapshotOperate snapshotOperate,
-			TransactionIdManager transactionIdManager) {
+			SnapshotOperate snapshotOperate, TransactionIdManager transactionIdManager) {
 		return new ClusterManager(commitCallbacks, snapshotOperate, transactionIdManager);
 	}
 

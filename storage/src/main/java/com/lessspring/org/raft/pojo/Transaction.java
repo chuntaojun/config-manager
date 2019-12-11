@@ -26,11 +26,9 @@ public class Transaction {
 	private final String key;
 	private final String operation;
 	private final byte[] data;
-	private final String bz;
 
-	public Transaction(long id, String bz, String key, byte[] data, String operation) {
+	public Transaction(long id, String key, byte[] data, String operation) {
 		this.id = id;
-		this.bz = bz;
 		this.key = key;
 		this.operation = operation;
 		this.data = data;
@@ -52,7 +50,4 @@ public class Transaction {
 		return key;
 	}
 
-	public String getBz() {
-		return bz;
-	}
 }

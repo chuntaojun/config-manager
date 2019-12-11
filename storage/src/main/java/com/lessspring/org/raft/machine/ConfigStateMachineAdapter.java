@@ -16,12 +16,6 @@
  */
 package com.lessspring.org.raft.machine;
 
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
@@ -38,6 +32,11 @@ import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.pojo.TransactionId;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -45,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 
-	private final List<TransactionCommitCallback> callbacks = new LinkedList<>();
+	private TransactionCommitCallback callback;
 	private final SerializerUtils serializer = SerializerUtils.getInstance();
 	private final Object monitor = new Object();
 
@@ -79,24 +78,20 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 							transactionId.setId(id);
 						}
 					}
-					final Transaction transaction = new Transaction(id, datum.getBz(),
+					final Transaction transaction = new Transaction(id,
 							datum.getKey(), datum.getValue(), datum.getOperation());
 					// For each transaction, according to the different processing of
 					// the key to the callback interface
-					for (TransactionCommitCallback commitCallback : callbacks) {
-						if (commitCallback.interest(transaction.getKey())) {
-							try {
-								commitCallback.onApply(transaction);
-							}
-							catch (TransactionException e) {
-								status = new Status(RaftError.UNKNOWN,
-										"Exception handling within a transaction : %s",
-										e.getErrorCode());
-								log.error(
-										"TransactionCommitCallback when onApply has some error",
-										e);
-							}
-						}
+					String bzName = callback.interest(transaction.getKey());
+					try {
+						callback.onApply(transaction, bzName);
+					}
+					catch (TransactionException e) {
+						status = new Status(RaftError.UNKNOWN,
+								"Exception handling within a transaction : %s",
+								e.getErrorCode());
+						log.error("TransactionCommitCallback when onApply has some error",
+								e);
 					}
 				}
 				catch (Throwable e) {
@@ -137,8 +132,12 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 	@Override
 	public void registerTransactionCommitCallback(
 			TransactionCommitCallback commitCallback) {
-		synchronized (monitor) {
-			callbacks.add(commitCallback);
+		if (callback != null) {
+			synchronized (monitor) {
+				if (callback != null) {
+					callback = commitCallback;
+				}
+			}
 		}
 	}
 

@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.service.config.impl;
 
+import java.util.Objects;
+
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -28,16 +30,15 @@ import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.pojo.WriteWork;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
-import com.lessspring.org.service.config.AbstracePersistentHandler;
+import com.lessspring.org.service.config.AbstractPersistentHandler;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * With the persistence of the processor cache function, for a read operation, to
@@ -49,15 +50,15 @@ import java.util.Objects;
  */
 @Slf4j
 @Component(value = "cachePersistentHandler")
-public class CachePersistentHandler extends AbstracePersistentHandler {
+public class CachePersistentHandler extends AbstractPersistentHandler {
 
 	private final SystemEnv systemEnv = SystemEnv.getSingleton();
 
 	private final ConfigCacheItemManager configCacheItemManager;
-	private final AbstracePersistentHandler persistentHandler;
+	private final AbstractPersistentHandler persistentHandler;
 
 	public CachePersistentHandler(ConfigCacheItemManager configCacheItemManager,
-			@Qualifier(value = "persistentHandler") AbstracePersistentHandler persistentHandler) {
+			@Qualifier(value = "persistentHandler") AbstractPersistentHandler persistentHandler) {
 		this.configCacheItemManager = configCacheItemManager;
 		this.persistentHandler = persistentHandler;
 	}

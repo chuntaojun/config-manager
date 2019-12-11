@@ -23,24 +23,25 @@ package com.lessspring.org.context;
  */
 public final class TraceContextHolder {
 
-    private final InheritableThreadLocal<TraceContext> contextInheritableThreadLocal = new InheritableThreadLocal<>();
+	private final ThreadLocal<TraceContext> contextThreadLocal = ThreadLocal
+			.<TraceContext> withInitial(TraceContext::new);
 
-    private static final TraceContextHolder INSTANCE = new TraceContextHolder();
+	private static final TraceContextHolder INSTANCE = new TraceContextHolder();
 
-    public static TraceContextHolder getInstance() {
-        return INSTANCE;
-    }
+	public static TraceContextHolder getInstance() {
+		return INSTANCE;
+	}
 
-    public TraceContext getInvokeTraceContext() {
-        return INSTANCE.contextInheritableThreadLocal.get();
-    }
+	public TraceContext getInvokeTraceContext() {
+		return INSTANCE.contextThreadLocal.get();
+	}
 
-    public void setInvokeTraceContext(TraceContext context) {
-        INSTANCE.contextInheritableThreadLocal.set(context);
-    }
+	public void setInvokeTraceContext(TraceContext context) {
+		INSTANCE.contextThreadLocal.set(context);
+	}
 
-    public void removeInvokeTraceContext() {
-        INSTANCE.contextInheritableThreadLocal.remove();
-    }
+	public void removeInvokeTraceContext() {
+		INSTANCE.contextThreadLocal.remove();
+	}
 
 }
