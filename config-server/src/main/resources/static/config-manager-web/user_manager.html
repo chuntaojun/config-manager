@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Home</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<!-- VENDOR CSS -->
+	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="assets/vendor/linearicons/style.css">
+	<link rel="stylesheet" href="assets/vendor/chartist/css/chartist-custom.css">
+	<!-- MAIN CSS -->
+	<link rel="stylesheet" href="assets/css/main.css">
+	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+	<link rel="stylesheet" href="assets/css/demo.css">
+	<!-- GOOGLE FONTS -->
+	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
+	<!-- ICONS -->
+	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
+</head>
+
+<body>
+	<!-- MAIN -->
+	<div class="main">
+		<!-- MAIN CONTENT -->
+		<div class="page-container" style="margin-top:30px">
+			<div class="col-lg-12">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<div id="toolbar_seller" class="btn-group">
+							<button id="btn_delete" type="button" class="btn btn-default" onclick="selectRequireItem($('#require-table'))">
+								<span class="glyphicon glyphicon-add" aria-hidden="true"></span>添加用户
+							</button>
+						</div>
+						<table id="user_table"></table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- END MAIN CONTENT -->
+	</div>
+	<!-- END MAIN -->
+	<div class="clearfix"></div>
+	<footer>
+		<div class="container-fluid">
+		</div>
+	</footer>
+
+	<!-- start 模态框 -->
+	<div class="modal fade" id="vue-require-detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">采购需求详细</h4>
+				</div>
+				<div class="modal-body" style="height:420px">
+					<div class="form-group col-md-12">
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="department-name">需求部门名称</label>
+								<input type="text" class="form-control" id="department-name" v-model=department_name disabled placeholder="需求部门">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="item-number">需求物品编号</label>
+								<input type="text" class="form-control" id="item-number" v-model=item_number disabled placeholder="需求物品编号">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="require-num">需求数量</label>
+								<input type="text" class="form-control" id="require-num" v-model=require_num placeholder="需求数量">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="write-date">填写日期</label>
+								<input type="text" class="form-control" id="write-date" v-model=write_date disabled placeholder="填写日期">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="signed">填写人</label>
+								<input type="text" class="form-control" id="signed" v-model=signed disabled placeholder="填写人">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" onclick="update()">更新</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+
+	<div class="modal fade" id="vue-require2plan" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:900px">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">采购需求详细</h4>
+				</div>
+				<div class="modal-body">
+					<table id="temp-order-view">
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button class="btn btn-success" onclick="finalOrder()">提交</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+	<!-- end 模态框 -->
+
+	<!-- Javascript -->
+	<script src="assets/vendor/jquery/jquery.min.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+	<script src="assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
+	<script src="assets/vendor/chartist/js/chartist.min.js"></script>
+	<script src="assets/scripts/klorofil-common.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-table.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-editable.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-table-editable.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-dialog.js"></script>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="assets/scripts/utils.js"></script>
+	<script src="assets/scripts/user_table.js"></script>
+	<script>
+		$(function() {
+			$("input[name='btSelectAll']").attr("style","display:none;")
+		})
+
+		function submitRequireOrder() {
+
+		}
+
+		function update() {
+
+		}
+	</script>
+</body>
+
+</html>

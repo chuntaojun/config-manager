@@ -142,15 +142,18 @@ public class ConfigPersistentHandler extends AbstractPersistentHandler {
 					.namespaceId(namespaceId).groupId(request.getGroupId())
 					.dataId(request.getDataId()).build();
 			ConfigInfoDTO old = configInfoMapper.findConfigInfo(queryConfigInfo);
-			ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
-			DBUtils.changeConfigInfo2History(old, history);
 			ConfigInfoDTO infoDTO = ConfigInfoDTO.builder().namespaceId(namespaceId)
 					.groupId(request.getGroupId()).dataId(request.getDataId())
 					.content(save).type(request.getType())
 					.version(old.getVersion() + 1)
 					.build();
 			affect = configInfoMapper.updateConfigInfo(infoDTO);
-			notifyAllWatcher(Occurrence.newInstance(history));
+			// only one node can send config-history save event
+			if (request.getAttribute("isLeader")) {
+				ConfigInfoHistoryDTO history = new ConfigInfoHistoryDTO();
+				DBUtils.changeConfigInfo2History(old, history);
+				notifyAllWatcher(Occurrence.newInstance(history));
+			}
 		}
 		log.debug("modify config-success, affect rows is : {}", affect);
 		return true;

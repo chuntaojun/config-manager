@@ -203,6 +203,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
+		datum.setBz(PropertiesEnum.Bz.NAMESPACE.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {

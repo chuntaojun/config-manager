@@ -258,6 +258,7 @@ public class ConfigOperationService
 	}
 
 	private ResponseData<?> commit(Datum datum) {
+		datum.setBz(PropertiesEnum.Bz.CONFIG.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {
@@ -315,6 +316,7 @@ public class ConfigOperationService
 					throw new NotThisResourceException(
 							"No resources in the namespace ：" + namespace);
 				}
+				request4.setAttribute("isLeader", clusterManager.isLeader());
 				if (persistentHandler.modifyConfigInfo(request4.getNamespaceId(),
 						request4)) {
 					ConfigChangeEvent event = buildConfigChangeEvent(

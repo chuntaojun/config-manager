@@ -42,7 +42,12 @@ public final class PropertiesEnum {
 		/**
 		 * 
 		 */
-		SETTING
+		SETTING,
+
+		/**
+		 *
+		 */
+		ID
 
 	}
 

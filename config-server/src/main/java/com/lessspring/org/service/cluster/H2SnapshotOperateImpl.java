@@ -145,15 +145,17 @@ public class H2SnapshotOperateImpl implements SnapshotOperate {
 				sql = String.format(sql, tableInfo[1], file);
 				sqls.add(sql);
 			}
-			return batchExec(sqls, "Snapshot load");
+			boolean result = batchExec(sqls, "Snapshot load");
+			if (result) {
+				nodeManager.getSelf().setServerStatus(ServerStatus.HEALTH);
+			}
+			return result;
 		}
 		catch (final Throwable t) {
 			log.error("Fail to load snapshot, path={}, file list={}, {}.", readerPath,
 					reader.listFiles(), t);
+			nodeManager.getSelf().setServerStatus(ServerStatus.ONLY_READ);
 			return false;
-		}
-		finally {
-			nodeManager.getSelf().setServerStatus(ServerStatus.HEALTH);
 		}
 	}
 

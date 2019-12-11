@@ -16,6 +16,9 @@
  */
 package com.lessspring.org.raft;
 
+import com.alipay.sofa.jraft.entity.PeerId;
+import com.lessspring.org.raft.vo.ServerNode;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -25,9 +28,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
-
-import com.alipay.sofa.jraft.entity.PeerId;
-import com.lessspring.org.raft.vo.ServerNode;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -49,6 +49,10 @@ public class NodeManager implements LeaderStatusListener {
 
 	public synchronized void registerListener(NodeChangeListener listener) {
 		listeners.add(listener);
+	}
+
+	public boolean isSelf(String key) {
+		return Objects.equals(self.getKey(), key);
 	}
 
 	public ServerNode getSelf() {

@@ -1,0 +1,47 @@
+/* =========================================================
+ * bootstrap-editable.css version 0.0.0
+ * https://github.com/vitalets/bootstrap-editable
+ * ========================================================= */
+
+a.editable, a.editable:hover {
+    text-decoration: none;
+    border-bottom: dashed 1px #0088cc;
+}
+
+a.editable-open, a.editable-open:hover {
+
+}
+
+a.editable-empty {
+    font-style: italic;
+    color: #DD1144;
+}
+
+a.editable-changed {
+    font-weight: bold;
+}
+
+.editable-loading {
+    background: url('../images/loading.gif') center center no-repeat;
+    height: 20px;
+}
+
+.popover.editable-popover {
+    width: auto; /*for bootstrap 2.1.1*/
+}
+
+.popover.editable-popover .popover-inner {
+    width: auto;
+    max-width: 410px;  /* should be enough for span4 */
+}
+
+.popover.editable-popover div.control-group,
+.popover.editable-popover form,
+.popover.editable-popover span.help-block {
+    margin-bottom: 0;
+}
+
+.popover.editable-popover .form-inline textarea {
+    vertical-align: top;
+}
+

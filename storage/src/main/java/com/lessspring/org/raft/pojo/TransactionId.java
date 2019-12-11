@@ -20,13 +20,31 @@ package com.lessspring.org.raft.pojo;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class TransactionId {
+public class TransactionId implements Cloneable {
 
+	private Long start = 0L;
+	private Long end = 10000L;
 	private final String bz;
 	private Long id = 0L;
 
 	public TransactionId(String bz) {
 		this.bz = bz;
+	}
+
+	public Long getStart() {
+		return start;
+	}
+
+	public void setStart(Long start) {
+		this.start = start;
+	}
+
+	public Long getEnd() {
+		return end;
+	}
+
+	public void setEnd(Long end) {
+		this.end = end;
 	}
 
 	public String getBz() {
@@ -50,5 +68,13 @@ public class TransactionId {
 
 	public synchronized void setId(Long id) {
 		this.id = id;
+	}
+
+	public TransactionId saveOld() {
+		TransactionId old = new TransactionId(bz);
+		old.setStart(start);
+		old.setEnd(end);
+		old.setId(id);
+		return old;
 	}
 }

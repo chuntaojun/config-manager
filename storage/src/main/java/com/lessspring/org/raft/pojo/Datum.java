@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.raft.pojo;
 
+import lombok.Builder;
 import lombok.ToString;
 
 /**
@@ -23,6 +24,7 @@ import lombok.ToString;
  * @since 0.0.1
  */
 @ToString
+@Builder
 public class Datum {
 
 	private long id;
@@ -30,6 +32,7 @@ public class Datum {
 	private byte[] value;
 	private String className;
 	private String operation;
+	private String bz;
 
 	public Datum(String key, byte[] value, String className) {
 		this.key = key;
@@ -75,5 +78,13 @@ public class Datum {
 
 	public void setOperation(String operation) {
 		this.operation = operation;
+	}
+
+	public String getBz() {
+		return bz;
+	}
+
+	public void setBz(String bz) {
+		this.bz = bz;
 	}
 }

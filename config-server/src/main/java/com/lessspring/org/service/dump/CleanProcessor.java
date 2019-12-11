@@ -98,6 +98,7 @@ public class CleanProcessor {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
+		datum.setBz(PropertiesEnum.Bz.CONFIG.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {

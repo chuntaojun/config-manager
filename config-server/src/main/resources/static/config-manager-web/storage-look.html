@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Home</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<!-- VENDOR CSS -->
+	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="assets/vendor/linearicons/style.css">
+	<link rel="stylesheet" href="assets/vendor/chartist/css/chartist-custom.css">
+	<!-- MAIN CSS -->
+	<link rel="stylesheet" href="assets/css/main.css">
+	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+	<link rel="stylesheet" href="assets/css/demo.css">
+	<!-- GOOGLE FONTS -->
+	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
+	<!-- ICONS -->
+	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
+</head>
+
+<body>
+	<div class="main">
+		<!-- MAIN CONTENT -->
+		<div class="page-container" style="margin-top:30px">
+			<div class="col-lg-12">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<table id="storage-table"></table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- END MAIN CONTENT -->
+	</div>
+	<!-- start modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:900px">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">采购订单</h4>
+				</div>
+				<div class="modal-body" style="height:610px">
+					<div id="order_detail_info" class="form-group col-md-12">
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="department-name">采购订单编号</label>
+								<input type="text" class="form-control" disabled v-model="order_id" id="order_id" placeholder="采购订单编号">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="item_id">物品编号</label>
+								<input type="text" class="form-control" disabled v-model="item_id" id="item_id" placeholder="物品编号">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="item_name">物品名称</label>
+								<input type="text" class="form-control" disabled v-model="item_name" id="item_name" placeholder="物品名称">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="unit_price">单价</label>
+								<input type="text" class="form-control" disabled v-model="unit_price" id="unit_price" placeholder="单价">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="total_price">总价</label>
+								<input type="text" class="form-control" disabled v-model="total_price" id="total_price" placeholder="总价">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="pruchase_count">采购数量</label>
+								<input type="text" class="form-control" disabled v-model="pruchase_count" id="pruchase_count" placeholder="采购数量">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="state">订单状态</label>
+								<input type="text" class="form-control" disabled v-model="state" id="state" placeholder="订单状态">
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="supplier_id">供应商编号</label>
+								<input type="text" class="form-control" disabled v-model="supplier_id" id="supplier_id" placeholder="供应商编号">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+	<!-- end modal -->
+	<!-- END MAIN -->
+	<div class="clearfix"></div>
+	<!-- Javascript -->
+	<script src="assets/vendor/jquery/jquery.min.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+	<script src="assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
+	<script src="assets/vendor/chartist/js/chartist.min.js"></script>
+	<script src="assets/scripts/klorofil-common.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-table.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-editable.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-table-editable.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap-dialog.js"></script>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="assets/scripts/utils.js"></script>
+	<script src="assets/scripts/storage_table.js"></script>
+</body>
+
+</html>

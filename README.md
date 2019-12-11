@@ -70,17 +70,17 @@ private String cachePath = Paths
 			.get(System.getProperty("user.home"), "config_manager_client").toString();
 // 设置客户端的唯一标识
 private volatile String clientId;
-
+// 用户登陆名
 private String username;
-
+// 用户密码
 private String password;
-
+// 用户在某一命名空间下的授权token
 private String authToken;
-
+// 是否启用 https
 private boolean openHttps = false;
-
+// 是否开启本地配置优先模式
 private boolean localPref = false;
-
+// 监听方式（SSE：主动推，LONG：HTTP长轮训）
 private WatchType watchType = WatchType.SSE;
 ```
 

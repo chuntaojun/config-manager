@@ -193,6 +193,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private ResponseData<?> commit(Datum datum) {
+		datum.setBz(PropertiesEnum.Bz.USER.name());
 		CompletableFuture<ResponseData<Boolean>> future = clusterManager.commit(datum,
 				failCallback);
 		try {
