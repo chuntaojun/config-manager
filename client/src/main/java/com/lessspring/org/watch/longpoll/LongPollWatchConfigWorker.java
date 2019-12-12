@@ -8,6 +8,7 @@ import com.lessspring.org.watch.AbstractWatchWorker;
 
 /**
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @since 0.0.1
  * @Created at 2019-12-01 13:21
  */
 public class LongPollWatchConfigWorker extends AbstractWatchWorker {
@@ -51,4 +52,22 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 	public boolean isDestroyed() {
 		return false;
 	}
+
+	private static class SubWorker implements Runnable {
+
+        /**
+         *
+         */
+	    private final int index;
+
+        public SubWorker(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public void run() {
+
+        }
+    }
+
 }
