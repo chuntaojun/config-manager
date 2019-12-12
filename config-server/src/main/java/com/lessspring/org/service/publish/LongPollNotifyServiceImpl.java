@@ -14,39 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+
+package com.lessspring.org.service.publish;
+
+import com.lessspring.org.pojo.event.config.NotifyEventHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.omg.CORBA.ServerRequest;
+import org.springframework.stereotype.Service;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @Created at 2019/12/12 12:26 上午
  */
-public interface LifeCycle {
+@Slf4j
+@Service
+public class LongPollNotifyServiceImpl implements NotifyService {
 
-	/**
-	 * init
-	 */
-	void init();
+    public void createWatchClient(ServerRequest request) {
 
-	/**
-	 * destroy
-	 */
-	void destroy();
+    }
 
-	/**
-	 * is already init
-	 *
-	 * @return init label
-	 */
-	default boolean isInited() {
-		return true;
-	}
+    @Override
+    public void doQuickCompare(WatchClient watchClient) {
 
-	/**
-	 * is already destroy
-	 *
-	 * @return destroy label
-	 */
-	default boolean isDestroyed() {
-		return true;
-	}
+    }
+
+    @Override
+    public void onEvent(NotifyEventHandler event) throws Exception {
+
+    }
 }

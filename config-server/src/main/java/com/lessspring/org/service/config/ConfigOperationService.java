@@ -45,7 +45,7 @@ import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
-import com.lessspring.org.service.publish.WatchClientManager;
+import com.lessspring.org.service.publish.NotifyService;
 import com.lessspring.org.utils.BzConstants;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
@@ -58,6 +58,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -91,10 +92,10 @@ public class ConfigOperationService
 	private ConfigCacheItemManager configCacheItemManager;
 
 	public ConfigOperationService(PersistentHandler persistentHandler,
-			NamespaceService namespaceService,
-			BaseTransactionCommitCallback commitCallback, ClusterManager clusterManager,
-			WatchClientManager watchClientManager,
-			ConfigCacheItemManager configCacheItemManager) {
+								  NamespaceService namespaceService,
+								  BaseTransactionCommitCallback commitCallback, ClusterManager clusterManager,
+								  List<NotifyService> notifyServices,
+								  ConfigCacheItemManager configCacheItemManager) {
 		this.persistentHandler = persistentHandler;
 		this.namespaceService = namespaceService;
 		this.clusterManager = clusterManager;
@@ -106,7 +107,7 @@ public class ConfigOperationService
 		changeEventDisruptor.start();
 		notifyEventDisruptor = DisruptorFactory.build(NotifyEventHandler::new,
 				NotifyEvent.class);
-		notifyEventDisruptor.handleEventsWithWorkerPool(watchClientManager);
+		notifyEventDisruptor.handleEventsWithWorkerPool(notifyServices.toArray(new NotifyService[0]));
 		notifyEventDisruptor.start();
 
 		registerToPublisher();

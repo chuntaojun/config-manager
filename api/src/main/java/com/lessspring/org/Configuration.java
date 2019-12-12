@@ -21,6 +21,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.nio.file.Paths;
+import java.time.Duration;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -49,6 +50,8 @@ public class Configuration {
 
 	private boolean localPref = false;
 
+	private Duration longPollTime = Duration.ofSeconds(60);
+
 	private WatchType watchType = WatchType.SSE;
 
 	public static Builder builder() {
@@ -63,6 +66,7 @@ public class Configuration {
 		private String username;
 		private String password;
 		private String authToken;
+		private Duration longPollTime = Duration.ofSeconds(60);
 		private boolean openHttps = false;
 		private boolean localPref = false;
 		private WatchType watchType = WatchType.SSE;
@@ -100,6 +104,11 @@ public class Configuration {
 			return this;
 		}
 
+		public Builder longPollTime(Duration longPollTime) {
+			this.longPollTime = longPollTime;
+			return this;
+		}
+
 		public Builder authToken(String authToken) {
 			this.authToken = authToken;
 			return this;
@@ -128,6 +137,7 @@ public class Configuration {
 			configuration.setClientId(clientId);
 			configuration.setUsername(username);
 			configuration.setPassword(password);
+			configuration.setLongPollTime(longPollTime);
 			configuration.setAuthToken(authToken);
 			configuration.setOpenHttps(openHttps);
 			configuration.setLocalPref(localPref);

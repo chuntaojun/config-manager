@@ -14,39 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+
+package com.lessspring.org.service.publish;
+
+import com.lessspring.org.pojo.event.config.NotifyEventHandler;
+import com.lmax.disruptor.WorkHandler;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @Created at 2019/12/12 12:27 上午
  */
-public interface LifeCycle {
+public interface NotifyService extends WorkHandler<NotifyEventHandler> {
 
 	/**
-	 * init
+	 * when watch-client register, make a quick comparison to see if anything has changed
+	 * 
+	 * @param watchClient {@link WatchClient}
 	 */
-	void init();
+	void doQuickCompare(WatchClient watchClient);
 
-	/**
-	 * destroy
-	 */
-	void destroy();
-
-	/**
-	 * is already init
-	 *
-	 * @return init label
-	 */
-	default boolean isInited() {
-		return true;
-	}
-
-	/**
-	 * is already destroy
-	 *
-	 * @return destroy label
-	 */
-	default boolean isDestroyed() {
-		return true;
-	}
 }

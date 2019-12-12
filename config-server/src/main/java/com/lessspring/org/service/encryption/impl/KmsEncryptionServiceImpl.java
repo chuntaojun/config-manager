@@ -21,7 +21,7 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.service.encryption.EncryptionService;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-23 21:07
  */
 public class KmsEncryptionServiceImpl implements EncryptionService {

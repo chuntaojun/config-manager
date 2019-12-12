@@ -23,6 +23,7 @@ import com.lessspring.org.http.param.Body;
 import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
+import okhttp3.OkHttpClient;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -79,6 +80,20 @@ public interface HttpClient extends LifeCycle {
 	 */
 	<T> ResponseData<T> post(String url, Header header, Query query, Body body,
 			TypeToken<ResponseData<T>> token);
+
+	/**
+	 * http post
+	 *
+	 * @param client {@link OkHttpClient}
+	 * @param url url
+	 * @param header http header param
+	 * @param query http query param
+	 * @param body http body param
+	 * @param token return type
+	 * @return {@link ResponseData}
+	 */
+	<T> ResponseData<T> post(OkHttpClient client, String url, Header header, Query query,
+			Body body, TypeToken<ResponseData<T>> token);
 
 	/**
 	 * server send event

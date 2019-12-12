@@ -16,14 +16,6 @@
  */
 package com.lessspring.org.service.publish;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Stream;
-
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
@@ -35,15 +27,21 @@ import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
-import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import reactor.core.publisher.FluxSink;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import reactor.core.publisher.FluxSink;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -51,7 +49,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
  */
 @Slf4j
 @Component
-public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
+public class SseNotifyServiceImpl implements NotifyService {
 
 	private final long parallelThreshold = 100;
 
@@ -114,7 +112,8 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		doQuickCompare(client);
 	}
 
-	private void doQuickCompare(WatchClient watchClient) {
+	@Override
+	public void doQuickCompare(WatchClient watchClient) {
 		Map<String, String> checkMd5 = watchClient.getCheckKey();
 		checkMd5.forEach((key, value) -> {
 			String[] info = NameUtils.splitName(key);

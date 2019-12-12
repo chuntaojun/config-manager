@@ -19,6 +19,6 @@ package com.lessspring.org.function;
 /**
  * 该包下的函数式接口是可以支持 {@link com.lessspring.org.context.TraceContext} 透传的
  *
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-28 16:43
  */

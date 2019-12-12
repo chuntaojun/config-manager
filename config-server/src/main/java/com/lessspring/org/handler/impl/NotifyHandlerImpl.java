@@ -19,7 +19,7 @@ package com.lessspring.org.handler.impl;
 import com.lessspring.org.handler.NotifyHandler;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
-import com.lessspring.org.service.publish.WatchClientManager;
+import com.lessspring.org.service.publish.SseNotifyServiceImpl;
 import com.lessspring.org.utils.SseUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,10 +39,10 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @Service(value = "notifyHandler")
 public class NotifyHandlerImpl implements NotifyHandler {
 
-	private final WatchClientManager watchClientManager;
+	private final SseNotifyServiceImpl sseNotifyServiceImpl;
 
-	public NotifyHandlerImpl(WatchClientManager watchClientManager) {
-		this.watchClientManager = watchClientManager;
+	public NotifyHandlerImpl(SseNotifyServiceImpl sseNotifyServiceImpl) {
+		this.sseNotifyServiceImpl = sseNotifyServiceImpl;
 	}
 
 	// the SSE push FluxSink, enables the Server end to independently
@@ -51,7 +51,7 @@ public class NotifyHandlerImpl implements NotifyHandler {
 	@Override
 	public Mono<ServerResponse> watch(ServerRequest request) {
 		return request.bodyToMono(WatchRequest.class)
-				.map(watchRequest -> Flux.create(fluxSink -> watchClientManager
+				.map(watchRequest -> Flux.create(fluxSink -> sseNotifyServiceImpl
 						.createWatchClient(watchRequest, fluxSink, request)))
 				.flatMap(objectFlux -> {
 					return ok().contentType(MediaType.TEXT_EVENT_STREAM)

@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Builder;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019/12/8 10:43 上午
  */
 @Builder

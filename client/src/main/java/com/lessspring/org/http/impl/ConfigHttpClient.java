@@ -16,15 +16,6 @@
  */
 package com.lessspring.org.http.impl;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.time.Duration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.auth.AuthHolder;
@@ -50,6 +41,15 @@ import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.time.Duration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.lessspring.org.constant.Code.SERVER_BUSY;
 import static com.lessspring.org.constant.Code.UNAUTHORIZED;
@@ -179,6 +179,11 @@ class ConfigHttpClient implements HttpClient {
 	@Override
 	public <T> ResponseData<T> post(String url, Header header, Query query, Body body,
 			TypeToken<ResponseData<T>> token) {
+		return post(client, url, header, query, body, token);
+	}
+
+	@Override
+	public <T> ResponseData<T> post(OkHttpClient client, String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token) {
 		Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
 			@Override
 			protected ResponseData<T> run() throws Exception {

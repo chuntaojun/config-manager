@@ -19,6 +19,7 @@ package com.lessspring.org.watch.sse;
 import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycleHelper;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.http.impl.EventReceiver;
@@ -28,7 +29,6 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.model.vo.WatchResponse;
 import com.lessspring.org.pojo.CacheItem;
-import com.lessspring.org.utils.MD5Utils;
 import com.lessspring.org.watch.AbstractWatchWorker;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,7 +50,7 @@ public class SseWatchConfigWorker extends AbstractWatchWorker {
 
 	public SseWatchConfigWorker(HttpClient httpClient, Configuration configuration,
 			ConfigFilterManager configFilterManager) {
-		super(httpClient, configuration, configFilterManager);
+		super(httpClient, configuration, configFilterManager, WatchType.SSE);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class SseWatchConfigWorker extends AbstractWatchWorker {
 			receiver.cancle();
 			receiver = null;
 		}
-		EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
+		executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
 	}
 
 	private void onError(Throwable throwable) {
