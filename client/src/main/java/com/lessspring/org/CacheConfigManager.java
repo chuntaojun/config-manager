@@ -16,6 +16,7 @@
  */
 package com.lessspring.org;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.constant.WatchType;
@@ -35,9 +36,10 @@ import com.lessspring.org.watch.ChangeKeyListener;
 import com.lessspring.org.watch.WrapperListener;
 import com.lessspring.org.watch.longpoll.LongPollWatchConfigWorker;
 import com.lessspring.org.watch.sse.SseWatchConfigWorker;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,6 +57,8 @@ public class CacheConfigManager implements LifeCycle {
 
 	private SerializerUtils serializer = SerializerUtils.getInstance();
 
+	private ImmutableMap<String, CacheItem> itemImmutableMap;
+
 	private HttpClient httpClient;
 	private AbstractWatchWorker watchWorker;
 
@@ -71,7 +75,8 @@ public class CacheConfigManager implements LifeCycle {
 		this.namespaceId = configuration.getNamespaceId();
 		this.configFilterManager = configFilterManager;
 		this.localPref = configuration.isLocalPref();
-		this.watchWorker = buildWatchWorker(httpClient, configuration, configFilterManager);
+		this.watchWorker = buildWatchWorker(httpClient, configuration,
+				configFilterManager);
 		this.cacheItemMap = new ConcurrentHashMap<>(16);
 	}
 
@@ -82,8 +87,8 @@ public class CacheConfigManager implements LifeCycle {
 		}
 	}
 
-	private AbstractWatchWorker buildWatchWorker(HttpClient httpClient, Configuration configuration,
-												 ConfigFilterManager configFilterManager) {
+	private AbstractWatchWorker buildWatchWorker(HttpClient httpClient,
+			Configuration configuration, ConfigFilterManager configFilterManager) {
 		if (configuration.getWatchType() == WatchType.SSE) {
 			return new SseWatchConfigWorker(httpClient, configuration,
 					configFilterManager);
@@ -97,19 +102,21 @@ public class CacheConfigManager implements LifeCycle {
 		cacheItem.removeListener(new WrapperListener(listener, ""));
 	}
 
-	private CacheItem computeIfAbsentCacheItem(String groupId, String dataId) {
+	private Tuple2<Boolean, CacheItem> computeIfAbsentCacheItem(String groupId,
+			String dataId, String encryption) {
 		final String key = NameUtils.buildName(groupId, dataId);
 		final boolean[] add = new boolean[] { false };
 		Supplier<CacheItem> supplier = () -> {
 			add[0] = true;
 			return CacheItem.builder().withGroupId(groupId).withDataId(dataId)
-					.withLastMd5("").build();
+					.withLastMd5("").withToken(encryption).build();
 		};
 		cacheItemMap.computeIfAbsent(key, s -> supplier.get());
 		if (add[0]) {
-			watchWorker.onChange();
+			// update cacheItemMap snapshot
+			itemImmutableMap = null;
 		}
-		return cacheItemMap.get(key);
+		return Tuples.of(add[0], cacheItemMap.get(key));
 	}
 
 	public List<AbstractListener> allListener(String key) {
@@ -119,7 +126,8 @@ public class CacheConfigManager implements LifeCycle {
 
 	public void registerListener(String groupId, String dataId, String encryption,
 			AbstractListener listener) {
-		CacheItem cacheItem = computeIfAbsentCacheItem(groupId, dataId);
+		Tuple2<Boolean, CacheItem> tuple2 = computeIfAbsentCacheItem(groupId, dataId,
+				encryption);
 
 		// if listener instance of ChangeKeyListener, should set CacheConfigManager into
 		// Listener
@@ -127,11 +135,19 @@ public class CacheConfigManager implements LifeCycle {
 		if (listener instanceof ChangeKeyListener) {
 			ReflectUtils.inject(listener, this, "configManager");
 		}
-		cacheItem.addListener(new WrapperListener(listener, encryption));
+		tuple2.getT2().addListener(new WrapperListener(listener, encryption));
+		if (tuple2.getT1()) {
+			watchWorker.onChange();
+		}
 	}
 
 	public Map<String, CacheItem> copy() {
-		return new HashMap<>(cacheItemMap);
+		if (Objects.isNull(itemImmutableMap)) {
+			synchronized (this) {
+				itemImmutableMap = ImmutableMap.copyOf(cacheItemMap);
+			}
+		}
+		return itemImmutableMap;
 	}
 
 	private void removeCacheItem(String groupId, String dataId) {
@@ -198,8 +214,8 @@ public class CacheConfigManager implements LifeCycle {
 	private ConfigInfo localPreference(String groupId, String dataId) {
 		final String parenPath = PathUtils.finalPath(PathConstants.FILE_LOCAL_PREF_PATH,
 				namespaceId);
-		final String fileName = NameUtils.buildName(groupId, dataId);
-		final byte[] content = DiskUtils.readFileBytes(parenPath, fileName);
+		final byte[] content = DiskUtils.readFileBytes(parenPath,
+				NameUtils.buildName(groupId, dataId));
 		if (Objects.nonNull(content) && content.length > 0) {
 			return serializer.deserialize(content, ConfigInfo.class);
 		}

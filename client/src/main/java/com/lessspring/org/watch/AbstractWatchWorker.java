@@ -1,9 +1,27 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.lessspring.org.watch;
 
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.ClassLoaderSwitchUtils;
 import com.lessspring.org.Configuration;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
@@ -19,7 +37,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-12-01 13:22
  */
 public abstract class AbstractWatchWorker implements WatchWorker {
@@ -29,21 +47,22 @@ public abstract class AbstractWatchWorker implements WatchWorker {
     protected final Configuration configuration;
     protected final ConfigFilterManager configFilterManager;
 
-    protected static final ScheduledThreadPoolExecutor EXECUTOR = new ScheduledThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors(),
-            new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-"));
+    protected final ScheduledThreadPoolExecutor executor;
 
     public AbstractWatchWorker(HttpClient httpClient, Configuration configuration,
-                               ConfigFilterManager configFilterManager) {
+                               ConfigFilterManager configFilterManager, WatchType watchType) {
         this.httpClient = httpClient;
         this.configuration = configuration;
         this.configFilterManager = configFilterManager;
+        this.executor = new ScheduledThreadPoolExecutor(
+                Runtime.getRuntime().availableProcessors(),
+                new NameThreadFactory("com.lessspring.org.config-manager.client.watcher-[" + watchType.name() + "]-"));
     }
 
     @Override
     public void setConfigManager(CacheConfigManager configManager) {
         this.configManager = configManager;
-        EXECUTOR.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
+        executor.schedule(this::createWatcher, 1000, TimeUnit.MILLISECONDS);
     }
 
     @Override

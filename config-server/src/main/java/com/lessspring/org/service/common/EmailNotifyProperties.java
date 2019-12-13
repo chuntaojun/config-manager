@@ -25,7 +25,7 @@ import com.lessspring.org.utils.PropertiesEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-25 08:57
  */
 @ConfigurationProperties(prefix = "com.lessspring.org.config-manager.email.notify")

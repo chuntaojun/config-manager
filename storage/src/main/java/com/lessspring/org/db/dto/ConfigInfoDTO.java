@@ -38,6 +38,7 @@ public class ConfigInfoDTO {
 	private byte[] fileSource;
 	private byte[] content;
 	private String type;
+	private String remark;
 	private String encryption = "";
 	private Long createTime;
 	private Integer status = 0;
@@ -55,6 +56,7 @@ public class ConfigInfoDTO {
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
+		private String remark;
 		private String encryption;
 		private Long createTime;
 		private Integer status = 0;
@@ -103,6 +105,11 @@ public class ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigInfoDTOBuilder remark(String remark) {
+			this.remark = remark;
+			return this;
+		}
+
 		public ConfigInfoDTOBuilder createTime(Long createTime) {
 			this.createTime = createTime;
 			return this;
@@ -121,6 +128,7 @@ public class ConfigInfoDTO {
 		public ConfigInfoDTO build() {
 			ConfigInfoDTO configInfoDTO = new ConfigInfoDTO();
 			configInfoDTO.setId(id);
+			configInfoDTO.setRemark(remark);
 			configInfoDTO.setNamespaceId(namespaceId);
 			configInfoDTO.setGroupId(groupId);
 			configInfoDTO.setDataId(dataId);

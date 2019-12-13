@@ -3,7 +3,7 @@ package com.lessspring.org.executor;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-12-01 14:33
  */
 public class CForkJoinPool extends ForkJoinPool {

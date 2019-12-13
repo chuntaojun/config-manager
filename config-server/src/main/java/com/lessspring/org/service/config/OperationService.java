@@ -22,6 +22,8 @@ import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
+import com.lessspring.org.pojo.vo.ConfigDetailVO;
+import com.lessspring.org.pojo.vo.ConfigListVO;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -29,15 +31,76 @@ import com.lessspring.org.pojo.request.PublishConfigHistory;
  */
 public interface OperationService {
 
+	/**
+	 * query {@link com.lessspring.org.model.dto.ConfigInfo} to client
+	 *
+	 * @param namespaceId namespaceId
+	 * @param request {@link QueryConfigRequest}
+	 * @return ResponseData<?>
+	 */
 	ResponseData<?> queryConfig(String namespaceId, QueryConfigRequest request);
 
+	/**
+	 * publish config
+	 *
+	 * @param namespaceId namespaceId
+	 * @param request {@link PublishConfigRequest}
+	 * @return ResponseData<?>
+	 */
 	ResponseData<?> publishConfig(String namespaceId, PublishConfigRequest request);
 
+	/**
+	 * update config
+	 *
+	 * @param namespaceId namespaceId
+	 * @param request {@link PublishConfigRequest}
+	 * @return ResponseData<?>
+	 */
 	ResponseData<?> modifyConfig(String namespaceId, PublishConfigRequest request);
 
+	/**
+	 * delete config
+	 *
+	 * @param namespaceId namespaceId
+	 * @param request {@link DeleteConfigRequest}
+	 * @return ResponseData<?>
+	 */
 	ResponseData<?> removeConfig(String namespaceId, DeleteConfigRequest request);
 
+	/**
+	 * save config-history
+	 *
+	 * @param namespaceId namespaceId
+	 * @param request {@link PublishConfigHistory}
+	 * @return ResponseData<?>
+	 */
 	ResponseData<?> saveConfigHistory(String namespaceId, PublishConfigHistory request);
 
+	/**
+	 * delete config-history
+	 *
+	 * @param namespaceId namespaceId
+	 * @param request {@link DeleteConfigHistory}
+	 * @return ResponseData<?>
+	 */
 	ResponseData<?> removeConfigHistory(String namespaceId, DeleteConfigHistory request);
+
+	/**
+	 * show config-list to server-page
+	 *
+	 * @param namespaceId namespaceId
+	 * @param page page index
+	 * @param pageSize page size
+	 * @return {@link ResponseData<ConfigListVO>}
+	 */
+	ResponseData<ConfigListVO> configList(String namespaceId, long page, long pageSize);
+
+	/**
+	 *
+	 * @param namespaceId namespaceId
+	 * @param groupId groupId
+	 * @param dataId dataId
+	 * @return {@link ResponseData<ConfigDetailVO>}
+	 */
+	ResponseData<ConfigDetailVO> configDetail(String namespaceId, String groupId, String dataId);
 }

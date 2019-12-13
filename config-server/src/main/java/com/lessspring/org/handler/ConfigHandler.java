@@ -59,4 +59,20 @@ public interface ConfigHandler {
 	 */
 	Mono<ServerResponse> removeConfig(ServerRequest request);
 
+	/**
+	 * show config list by namespace to server-page
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	Mono<ServerResponse> configList(ServerRequest request);
+
+	/**
+	 * show config detail to server-page
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	Mono<ServerResponse> configDetail(ServerRequest request);
+
 }

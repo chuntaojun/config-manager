@@ -16,16 +16,17 @@
  */
 package com.lessspring.org.service.cluster;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.lessspring.org.HashUtils;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.raft.NodeChangeListener;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.vo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -78,21 +79,16 @@ public class DistroRouter implements NodeChangeListener, LifeCycle {
 
 	public ServerNode route(String key) {
 		ServerNode[] nodes = serverNodeAR.get();
-		int hash = distroHash(key);
-		int index = hash % nodes.length;
+		int index = HashUtils.distroHash(key, nodes.length);
 		ServerNode targetNode = Objects.equals(nodeManager.getSelf(), nodes[index])
 				? nodeManager.getSelf()
 				: nodes[index];
-		log.info("[DistroRouter] has router to ServerNode : {}", targetNode);
+		log.warn("[DistroRouter] has router to ServerNode : {}", targetNode);
 		return targetNode;
 	}
 
 	public boolean isPrincipal(String key) {
 		return Objects.equals(route(key).getKey(), nodeManager.getSelf().getKey());
-	}
-
-	private int distroHash(String key) {
-		return Math.abs(key.hashCode() % Integer.MAX_VALUE);
 	}
 
 	public String self() {

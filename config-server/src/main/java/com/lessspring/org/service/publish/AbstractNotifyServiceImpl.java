@@ -1,19 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.lessspring.org.service.publish;
 
 import java.util.Collections;
@@ -26,84 +10,55 @@ import java.util.stream.Stream;
 
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.ReadWork;
 import com.lessspring.org.pojo.event.config.NotifyEvent;
 import com.lessspring.org.pojo.event.config.NotifyEventHandler;
 import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
+import com.lessspring.org.service.publish.client.SseWatchClient;
+import com.lessspring.org.service.publish.client.WatchClient;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import reactor.core.publisher.FluxSink;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @Created at 2019/12/13 2:50 下午
  */
 @Slf4j
-@Component
-public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
+public abstract class AbstractNotifyServiceImpl
+		implements NotifyService, WorkHandler<NotifyEventHandler> {
 
+	protected final SystemEnv systemEnv = SystemEnv.getSingleton();
+	protected final Object monitor = new Object();
 	private final long parallelThreshold = 100;
-
-	private final SystemEnv systemEnv = SystemEnv.getSingleton();
-
-	private final Object monitor = new Object();
-	private long clientCnt = 0;
-	private Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
+	protected long clientCnt = 0;
+	protected Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
 			8);
 
 	@Autowired
 	@Lazy
-	private TraceAnalyzer tracer;
+	protected TraceAnalyzer tracer;
 
 	@Autowired
 	@Lazy
-	private ConfigCacheItemManager cacheItemManager;
+	protected ConfigCacheItemManager cacheItemManager;
 
-	// Build with the Client corresponds to a monitored object is
-	// used to monitor configuration changes
-
-	public void createWatchClient(WatchRequest request, FluxSink<?> sink,
-			ServerRequest serverRequest) {
-		WatchClient client = WatchClient.builder()
-				.clientIp(Objects
-						.requireNonNull(
-								serverRequest.exchange().getRequest().getRemoteAddress())
-						.getHostString())
-				.checkKey(request.getWatchKey()).namespaceId(request.getNamespaceId())
-				.response(serverRequest.exchange().getResponse()).sink(sink).build();
-		// When event creation is cancelled, automatic cancellation of client
-		// on the server side corresponding to monitor object
-		sink.onDispose(() -> {
-			synchronized (monitor) {
-				clientCnt--;
-			}
-			// For in the form of the key : NameUtils.buildName(groupId, dataId)
-			Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
-					.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
-			for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher
-					.entrySet()) {
-				entry.getValue().remove(client);
-			}
-		});
-		Map<String, String> listenKeys = client.getCheckKey();
+	protected void createWatchClient(WatchClient watchClient) {
+		Map<String, String> listenKeys = watchClient.getCheckKey();
 		// According to the monitoring configuration key, registered to a
 		// different key corresponding to the listener list
 		listenKeys.forEach((key, value) -> {
 			Map<String, Set<WatchClient>> clientsMap = watchClientManager.computeIfAbsent(
-					client.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
+					watchClient.getNamespaceId(), s -> new ConcurrentHashMap<>(4));
 			clientsMap.computeIfAbsent(key, s -> new CopyOnWriteArraySet<>());
-			clientsMap.get(key).add(client);
+			clientsMap.get(key).add(watchClient);
 		});
 		synchronized (monitor) {
 			clientCnt++;
@@ -111,10 +66,11 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		}
 		// A quick comparison, listens for client direct access to the latest
 		// configuration when registering for the first time
-		doQuickCompare(client);
+		doQuickCompare(watchClient);
 	}
 
-	private void doQuickCompare(WatchClient watchClient) {
+	@Override
+	public void doQuickCompare(WatchClient watchClient) {
 		Map<String, String> checkMd5 = watchClient.getCheckKey();
 		checkMd5.forEach((key, value) -> {
 			String[] info = NameUtils.splitName(key);
@@ -156,13 +112,6 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 		});
 	}
 
-	// Send the event to the client
-
-	@SuppressWarnings("unchecked")
-	private void writeResponse(WatchClient client, Object data) {
-		client.getSink().next(data);
-	}
-
 	// Use the event framework, receiving NotifyEvent events, the
 	// configuration changes on delivery to the client
 
@@ -198,7 +147,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 						}
 					}
 					try {
-						writeResponse(client, configInfoJson);
+						writeResponse((SseWatchClient) client, configInfoJson);
 						finishWorks[0]++;
 						tracer.publishPublishEvent(PublishLogEvent.builder()
 								.namespaceId(event.getNamespaceId())
@@ -212,5 +161,7 @@ public class WatchClientManager implements WorkHandler<NotifyEventHandler> {
 				});
 		log.info("total notify clients finish success is : {}", finishWorks[0]);
 	}
+
+	protected abstract void writeResponse(WatchClient client, Object data);
 
 }

@@ -14,39 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+
+package com.lessspring.org.watch.longpoll;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @Created at 2019/12/13 2:14 下午
  */
-public interface LifeCycle {
+public enum WorkerState {
 
-	/**
-	 * init
-	 */
-	void init();
+    /**
+     * 暂停
+     */
+    SUSPEND,
 
-	/**
-	 * destroy
-	 */
-	void destroy();
+    /**
+     * 关闭
+     */
+    SHUTDOWN,
 
-	/**
-	 * is already init
-	 *
-	 * @return init label
-	 */
-	default boolean isInited() {
-		return true;
-	}
+    /**
+     * 运行
+     */
+    RUNNING,
 
-	/**
-	 * is already destroy
-	 *
-	 * @return destroy label
-	 */
-	default boolean isDestroyed() {
-		return true;
-	}
+    /**
+     * 空闲
+     */
+    FREE
+
 }

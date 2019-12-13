@@ -46,6 +46,7 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
+		private String remark;
 		private String encryption;
 		private Long createTime;
 		private Long lastModifyTime;
@@ -93,6 +94,11 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigInfoHistoryDTOBuilder remark(String remark) {
+			this.remark = remark;
+			return this;
+		}
+
 		public ConfigInfoHistoryDTOBuilder createTime(Long createTime) {
 			this.createTime = createTime;
 			return this;
@@ -107,6 +113,7 @@ public class ConfigInfoHistoryDTO extends ConfigInfoDTO {
 			ConfigInfoHistoryDTO configInfoHistoryDTO = new ConfigInfoHistoryDTO();
 			configInfoHistoryDTO.setId(id);
 			configInfoHistoryDTO.setNamespaceId(namespaceId);
+			configInfoHistoryDTO.setRemark(remark);
 			configInfoHistoryDTO.setGroupId(groupId);
 			configInfoHistoryDTO.setDataId(dataId);
 			configInfoHistoryDTO.setFileSource(fileSource);

@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.service.publish;
+package com.lessspring.org.service.publish.client;
 
 import java.util.Map;
 import java.util.Objects;
-
-import reactor.core.publisher.FluxSink;
 
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
@@ -27,17 +25,12 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class WatchClient {
+public abstract class WatchClient {
 
-	private String clientIp;
-	private String namespaceId;
-	private Map<String, String> checkKey;
-	private FluxSink sink;
-	private ServerHttpResponse response;
-
-	public static Builder builder() {
-		return new Builder();
-	}
+	protected String clientIp;
+	protected String namespaceId;
+	protected Map<String, String> checkKey;
+	protected ServerHttpResponse response;
 
 	public String getClientIp() {
 		return clientIp;
@@ -71,14 +64,6 @@ public class WatchClient {
 		this.response = response;
 	}
 
-	public FluxSink getSink() {
-		return sink;
-	}
-
-	private void setSink(FluxSink sink) {
-		this.sink = sink;
-	}
-
 	public boolean isChange(String key, String lastMd5) {
 		return Objects.equals(lastMd5, checkKey.get(lastMd5));
 	}
@@ -100,49 +85,4 @@ public class WatchClient {
 		return Objects.hash(clientIp);
 	}
 
-	public static final class Builder {
-		private String clientIp;
-		private String namespaceId;
-		private Map<String, String> checkKey;
-		private FluxSink<?> sink;
-		private ServerHttpResponse response;
-
-		private Builder() {
-		}
-
-		public Builder clientIp(String clientIp) {
-			this.clientIp = clientIp;
-			return this;
-		}
-
-		public Builder namespaceId(String namespaceId) {
-			this.namespaceId = namespaceId;
-			return this;
-		}
-
-		public Builder checkKey(Map<String, String> checkKey) {
-			this.checkKey = checkKey;
-			return this;
-		}
-
-		public Builder sink(FluxSink<?> sink) {
-			this.sink = sink;
-			return this;
-		}
-
-		public Builder response(ServerHttpResponse response) {
-			this.response = response;
-			return this;
-		}
-
-		public WatchClient build() {
-			WatchClient watchClient = new WatchClient();
-			watchClient.setClientIp(clientIp);
-			watchClient.setNamespaceId(namespaceId);
-			watchClient.setCheckKey(checkKey);
-			watchClient.setSink(sink);
-			watchClient.setResponse(response);
-			return watchClient;
-		}
-	}
 }

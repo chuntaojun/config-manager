@@ -18,7 +18,7 @@
 package com.lessspring.org;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-23 14:33
  */
 public final class ThreadUtils {

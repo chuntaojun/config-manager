@@ -14,39 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.lessspring.org;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface LifeCycle {
+public final class StrackTracekUtils {
 
-	/**
-	 * init
-	 */
-	void init();
+    public static String stackTrace(final Throwable t) {
+        if (t == null) {
+            return "";
+        }
 
-	/**
-	 * destroy
-	 */
-	void destroy();
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream(); final PrintStream ps = new PrintStream(out)) {
+            t.printStackTrace(ps);
+            ps.flush();
+            return new String(out.toByteArray());
+        } catch (final IOException ignored) {
+            // ignored
+        }
+        return "";
+    }
 
-	/**
-	 * is already init
-	 *
-	 * @return init label
-	 */
-	default boolean isInited() {
-		return true;
-	}
-
-	/**
-	 * is already destroy
-	 *
-	 * @return destroy label
-	 */
-	default boolean isDestroyed() {
-		return true;
-	}
 }

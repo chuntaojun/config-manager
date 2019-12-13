@@ -34,7 +34,9 @@ public class ApiConstant {
 
 	public static final String QUERY_CONFIG = StringConst.API_V1 + "query/config";
 
-	public static final String WATCH_CONFIG = StringConst.API_V1 + "watch";
+	public static final String WATCH_CONFIG = StringConst.API_V1 + "watch/sse";
+
+	public static final String WATCH_CONFIG_LONG_POLL = StringConst.API_V1 + "watch/longPoll";
 
 	public static final String CLUSTER_NODE_JOIN = StringConst.API_V1 + "cluster/join";
 

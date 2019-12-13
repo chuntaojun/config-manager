@@ -15,31 +15,21 @@
  * limitations under the License.
  */
 
-package com.lessspring.org;
+package com.lessspring.org.service.publish;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import com.lessspring.org.service.publish.client.WatchClient;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @Created at 2019/12/12 12:27 上午
  */
-public final class StracTracekUtils {
+public interface NotifyService<T extends WatchClient> {
 
-    public static String stackTrace(final Throwable t) {
-        if (t == null) {
-            return "";
-        }
-
-        try (final ByteArrayOutputStream out = new ByteArrayOutputStream(); final PrintStream ps = new PrintStream(out)) {
-            t.printStackTrace(ps);
-            ps.flush();
-            return new String(out.toByteArray());
-        } catch (final IOException ignored) {
-            // ignored
-        }
-        return "";
-    }
+	/**
+	 * when watch-client register, make a quick comparison to see if anything has changed
+	 * 
+	 * @param watchClient {@link WatchClient}
+	 */
+	void doQuickCompare(T watchClient);
 
 }

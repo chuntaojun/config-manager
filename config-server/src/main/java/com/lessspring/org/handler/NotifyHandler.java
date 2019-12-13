@@ -28,11 +28,19 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public interface NotifyHandler {
 
 	/**
-	 * Monitor configuration file information changes
+	 * Monitor configuration file information changes by server-send-event
 	 *
 	 * @param request {@link ServerRequest}
 	 * @return {@link Mono<ServerResponse>}
 	 */
-	Mono<ServerResponse> watch(ServerRequest request);
+	Mono<ServerResponse> watchSse(ServerRequest request);
+
+	/**
+	 * Monitor configuration file information changes by long-poll
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	Mono<ServerResponse> watchLongPoll(ServerRequest request);
 
 }

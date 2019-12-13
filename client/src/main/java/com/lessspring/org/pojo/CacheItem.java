@@ -33,6 +33,7 @@ public class CacheItem {
 	private String dataId;
 	private String lastMd5 = "";
 	private ConfigInfo oldInfo;
+	private String token = "";
 	private CopyOnWriteArrayList<AbstractListener> listeners;
 
 	public String getGroupId() {
@@ -65,6 +66,14 @@ public class CacheItem {
 
 	public ConfigInfo getConfigInfo() {
 		return oldInfo;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 	public void addListener(AbstractListener listener) {
@@ -122,6 +131,7 @@ public class CacheItem {
 		private String groupId;
 		private String dataId;
 		private String lastMd5 = "";
+		private String token = "";
 
 		private CacheItemBuilder() {
 		}
@@ -141,11 +151,17 @@ public class CacheItem {
 			return this;
 		}
 
+		public CacheItemBuilder withToken(String token) {
+			this.token = token;
+			return this;
+		}
+
 		public CacheItem build() {
 			CacheItem cacheItem = new CacheItem();
 			cacheItem.setGroupId(groupId);
 			cacheItem.setDataId(dataId);
 			cacheItem.setLastMd5(lastMd5);
+			cacheItem.setToken(token);
 			return cacheItem;
 		}
 	}

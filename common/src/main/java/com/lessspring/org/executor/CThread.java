@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * 自定义的线程对象，携带{@link TraceContext}
  *
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-12-01 14:52
  */
 public class CThread extends Thread {

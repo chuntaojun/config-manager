@@ -16,11 +16,17 @@
  */
 package com.lessspring.org.utils;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.lessspring.org.InetUtils;
+import com.lessspring.org.model.vo.ResponseData;
+import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
@@ -33,8 +39,21 @@ public final class ReactiveWebUtils {
 		return request.attribute(name);
 	}
 
-	private static Supplier<String> getselfIp() {
+	private static Supplier<String> getSelfIp() {
 		return InetUtils::getSelfIp;
+	}
+
+	public static Mono<Void> filterResponse(ServerHttpResponse response, String s) {
+		return response.writeWith(Mono.just(response.bufferFactory()
+				.wrap(s.getBytes(Charset.forName(StandardCharsets.UTF_8.name())))));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Mono<Void> filterResponse(ServerHttpResponse response,
+			HttpStatus status, String s) {
+		return response.writeWith(Mono.just(response.bufferFactory()
+				.wrap(GsonUtils.toJsonBytes(ResponseData.<String> builder()
+						.withCode(status.value()).withData(s).build()))));
 	}
 
 }

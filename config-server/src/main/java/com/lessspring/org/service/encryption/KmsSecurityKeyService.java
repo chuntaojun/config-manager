@@ -22,7 +22,7 @@ import com.lessspring.org.model.vo.KmsKeyResponse;
 import com.lessspring.org.model.vo.ResponseData;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-23 21:08
  */
 public interface KmsSecurityKeyService {

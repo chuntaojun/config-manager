@@ -5,7 +5,7 @@ import com.lessspring.org.context.PassThrough;
 import java.util.function.Consumer;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-28 16:58
  */
 public class CConsumer<T> extends PassThrough implements Consumer<T> {

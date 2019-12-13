@@ -14,39 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.lessspring.org;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @Created at 2019/12/12 11:07 下午
  */
-public interface LifeCycle {
+public final class HashUtils {
 
-	/**
-	 * init
-	 */
-	void init();
+    public static int distroHash(String key, int length) {
+        int a = Math.abs(key.hashCode() % Integer.MAX_VALUE);
+        return a % length;
+    }
 
-	/**
-	 * destroy
-	 */
-	void destroy();
-
-	/**
-	 * is already init
-	 *
-	 * @return init label
-	 */
-	default boolean isInited() {
-		return true;
-	}
-
-	/**
-	 * is already destroy
-	 *
-	 * @return destroy label
-	 */
-	default boolean isDestroyed() {
-		return true;
-	}
 }
