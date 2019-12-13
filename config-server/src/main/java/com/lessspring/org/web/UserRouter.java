@@ -25,7 +25,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -45,7 +48,23 @@ public class UserRouter {
 	@Bean(value = "userRouterImpl")
 	public RouterFunction<ServerResponse> userRouterImpl() {
 		return route(POST(StringConst.API_V1 + "login")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8)), userHandler::login);
+				.and(accept(MediaType.APPLICATION_JSON_UTF8)), userHandler::login)
+						.andRoute(
+								PUT(StringConst.API_V1 + "createUser")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								userHandler::createUser)
+						.andRoute(
+								DELETE(StringConst.API_V1 + "removeUser")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								userHandler::removeUser)
+						.andRoute(
+								POST(StringConst.API_V1 + "modifyUser")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								userHandler::modifyUser)
+						.andRoute(
+								GET(StringConst.API_V1 + "allUser")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								userHandler::queryAll);
 	}
 
 }

@@ -16,9 +16,11 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.handler.ClusterHandler;
 import com.lessspring.org.pojo.request.NodeChangeRequest;
 import com.lessspring.org.service.cluster.ClusterManager;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RenderUtils;
 import reactor.core.publisher.Mono;
 
@@ -27,6 +29,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 /**
+ * 集群管理接口
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
@@ -40,18 +44,21 @@ public class ClusterHandlerImpl implements ClusterHandler {
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> joinNode(ServerRequest request) {
 		return request.bodyToMono(NodeChangeRequest.class).map(clusterManager::nodeAdd)
 				.flatMap(RenderUtils::render);
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> leaveNode(ServerRequest request) {
 		return request.bodyToMono(NodeChangeRequest.class).map(clusterManager::nodeRemove)
 				.flatMap(RenderUtils::render);
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> serverNodes(ServerRequest request) {
 		return RenderUtils.render(Mono.just(clusterManager.listNodes()));
 	}

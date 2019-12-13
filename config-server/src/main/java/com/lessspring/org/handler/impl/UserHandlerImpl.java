@@ -16,12 +16,14 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.handler.UserHandler;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.request.UserRequest;
 import com.lessspring.org.service.security.SecurityService;
 import com.lessspring.org.service.user.UserService;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RenderUtils;
 import reactor.core.publisher.Mono;
 
@@ -52,12 +54,14 @@ public class UserHandlerImpl implements UserHandler {
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> createUser(ServerRequest request) {
 		return request.bodyToMono(UserRequest.class).map(userService::createUser)
 				.map(Mono::just).flatMap(RenderUtils::render);
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> removeUser(ServerRequest request) {
 		return request.bodyToMono(UserRequest.class).map(userService::removeUser)
 				.map(Mono::just).flatMap(RenderUtils::render);
@@ -70,6 +74,7 @@ public class UserHandlerImpl implements UserHandler {
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> queryAll(ServerRequest request) {
 		return RenderUtils.render(Mono.just(userService.queryAll()));
 	}

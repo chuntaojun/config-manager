@@ -18,6 +18,7 @@ package com.lessspring.org.service.security;
 
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.utils.PropertiesEnum;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -31,7 +32,7 @@ public interface AuthorityProcessor {
 	 * @param privilege {@link Privilege}
 	 * @return has auth
 	 */
-	boolean hasAuth(Privilege privilege);
+	boolean hasAuth(Privilege privilege, PropertiesEnum.Role role);
 
 	/**
 	 * create namespace auth token
@@ -39,6 +40,6 @@ public interface AuthorityProcessor {
 	 * @param namespaceId namespace-id
 	 * @return create result
 	 */
-	ResponseData<?> createAuth(String namespaceId);
+	ResponseData<?> createAuth(String namespaceId, PropertiesEnum.Role role);
 
 }

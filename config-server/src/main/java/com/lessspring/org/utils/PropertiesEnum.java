@@ -90,7 +90,7 @@ public final class PropertiesEnum {
 		/**
 		 * admin
 		 */
-		ADMIN((short) 0),
+		ADMIN((short) 10),
 
 		/**
 		 * user
@@ -100,12 +100,7 @@ public final class PropertiesEnum {
 		/**
 		 * developer
 		 */
-		DEVELOPER((short) 2),
-
-		/**
-		 * tester
-		 */
-		TESTER((short) 3);
+		DEVELOPER((short) 2);
 
 		private short type;
 
@@ -114,17 +109,10 @@ public final class PropertiesEnum {
 		}
 
 		public static Role choose(short type) {
-			if (type == (short) 0) {
-				return Role.ADMIN;
-			}
-			if (type == (short) 1) {
-				return Role.CUSTOMER;
-			}
-			if (type == (short) 2) {
-				return Role.DEVELOPER;
-			}
-			if (type == (short) 3) {
-				return Role.TESTER;
+			for (Role role : values()) {
+				if (role.type == type) {
+					return role;
+				}
 			}
 			throw new IllegalArgumentException("Illegal user roles");
 		}

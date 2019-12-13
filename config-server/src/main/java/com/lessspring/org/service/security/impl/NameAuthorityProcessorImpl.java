@@ -16,19 +16,19 @@
  */
 package com.lessspring.org.service.security.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.Resource;
-
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.Privilege;
 import com.lessspring.org.repository.NamespacePermissionsMapper;
+import com.lessspring.org.repository.UserMapper;
 import com.lessspring.org.service.security.AuthorityProcessor;
+import com.lessspring.org.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -42,20 +42,31 @@ public class NameAuthorityProcessorImpl implements AuthorityProcessor {
 	@Resource
 	private NamespacePermissionsMapper permissionsMapper;
 
+	@Resource
+	private UserMapper userMapper;
+
 	@Override
-	public boolean hasAuth(Privilege privilege) {
+	public boolean hasAuth(Privilege privilege, PropertiesEnum.Role role) {
 		final String namespaceId = privilege.getAttachment("namespaceId");
 		Set<String> namespaceIds = new HashSet<>(privilege.getOwnerNamespaces());
 		if (namespaceIds.contains(namespaceId)) {
 			return true;
 		}
-		namespaceIds = new HashSet<>(
-				permissionsMapper.findNamespaceIdByUserId(privilege.getUserId()));
-		return namespaceIds.contains(namespaceId);
+		// verify role
+		boolean hasRole = role.equals(privilege.getRole());
+		boolean hasResource = false;
+		// If not an administrator, you need to validate namespace rights
+		if (hasRole && !PropertiesEnum.Role.ADMIN.equals(privilege.getRole())) {
+			// verify resource
+			namespaceIds = new HashSet<>(
+					permissionsMapper.findNamespaceIdByUserId(privilege.getUserId()));
+			hasResource = namespaceIds.contains(namespaceId);
+		}
+		return hasRole && hasResource;
 	}
 
 	@Override
-	public ResponseData<?> createAuth(String namespaceId) {
+	public ResponseData<?> createAuth(String namespaceId, PropertiesEnum.Role role) {
 		return null;
 	}
 }

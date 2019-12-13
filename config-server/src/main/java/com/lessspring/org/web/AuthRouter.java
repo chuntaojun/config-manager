@@ -32,4 +32,6 @@ public class AuthRouter {
 	public AuthRouter(AuthHandler authHandler) {
 		this.authHandler = authHandler;
 	}
+
+
 }

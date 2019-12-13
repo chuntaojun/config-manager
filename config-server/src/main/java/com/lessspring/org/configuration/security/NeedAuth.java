@@ -16,13 +16,14 @@
  */
 package com.lessspring.org.configuration.security;
 
+import com.lessspring.org.service.security.AuthorityProcessor;
+import com.lessspring.org.service.security.impl.NameAuthorityProcessorImpl;
+import com.lessspring.org.utils.PropertiesEnum;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import com.lessspring.org.service.security.AuthorityProcessor;
-import com.lessspring.org.service.security.impl.NameAuthorityProcessorImpl;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -37,7 +38,7 @@ public @interface NeedAuth {
 	 *
 	 * @return parameter name
 	 */
-	String argueName();
+	String argueName() default "";
 
 	/**
 	 * Return handler to execute privilege check
@@ -45,5 +46,12 @@ public @interface NeedAuth {
 	 * @return
 	 */
 	Class<? extends AuthorityProcessor> handler() default NameAuthorityProcessorImpl.class;
+
+	/**
+	 * this resource can access user role
+	 *
+	 * @return default type is {@link PropertiesEnum.Role#CUSTOMER}
+	 */
+	PropertiesEnum.Role role() default PropertiesEnum.Role.CUSTOMER;
 
 }

@@ -28,6 +28,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.pojo.vo.ConfigDetailVO;
 import com.lessspring.org.pojo.vo.ConfigListVO;
 import com.lessspring.org.service.config.OperationService;
+import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
 import reactor.core.publisher.Mono;
@@ -38,6 +39,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 /**
+ * 配置管理接口
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
@@ -53,7 +56,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
-	@NeedAuth(argueName = "namespaceId")
+	@NeedAuth(argueName = "namespaceId", role = PropertiesEnum.Role.DEVELOPER)
 	public Mono<ServerResponse> publishConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
@@ -66,7 +69,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
-	@NeedAuth(argueName = "namespaceId")
+	@NeedAuth(argueName = "namespaceId", role = PropertiesEnum.Role.DEVELOPER)
 	public Mono<ServerResponse> modifyConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
@@ -97,7 +100,7 @@ public class ConfigHandlerImpl implements ConfigHandler {
 
 	@Override
 	@LimitRule(resource = "publish-config", qps = 500)
-	@NeedAuth(argueName = "namespaceId")
+	@NeedAuth(argueName = "namespaceId", role = PropertiesEnum.Role.DEVELOPER)
 	public Mono<ServerResponse> removeConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");

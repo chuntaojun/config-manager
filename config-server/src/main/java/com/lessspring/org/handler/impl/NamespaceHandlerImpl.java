@@ -16,8 +16,10 @@
  */
 package com.lessspring.org.handler.impl;
 
+import com.lessspring.org.configuration.security.NeedAuth;
 import com.lessspring.org.handler.NamespaceHandler;
 import com.lessspring.org.service.config.NamespaceService;
+import com.lessspring.org.utils.PropertiesEnum;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 /**
+ * 命名空间管理接口
+ *
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
@@ -38,11 +42,13 @@ public class NamespaceHandlerImpl implements NamespaceHandler {
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> createNamespace(ServerRequest request) {
 		return null;
 	}
 
 	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> deleteNamespace(ServerRequest request) {
 		return null;
 	}

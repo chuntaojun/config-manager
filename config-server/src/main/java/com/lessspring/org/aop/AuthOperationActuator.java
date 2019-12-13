@@ -16,32 +16,29 @@
  */
 package com.lessspring.org.aop;
 
+import com.lessspring.org.configuration.security.NeedAuth;
+import com.lessspring.org.exception.AuthForbidException;
+import com.lessspring.org.pojo.Privilege;
+import com.lessspring.org.service.security.AuthorityProcessor;
+import com.lessspring.org.utils.PropertiesEnum;
+import com.lessspring.org.utils.RequireHelper;
+import com.lessspring.org.utils.SpringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.ServerRequest;
+
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.lessspring.org.configuration.security.NeedAuth;
-import com.lessspring.org.context.TraceContextHolder;
-import com.lessspring.org.exception.AuthForbidException;
-import com.lessspring.org.pojo.Privilege;
-import com.lessspring.org.service.security.AuthorityProcessor;
-import com.lessspring.org.utils.PropertiesEnum;
-import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
  * Authority inspection actuators
@@ -52,11 +49,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 @Slf4j
 @Aspect
 @Component
-public class AuthOperationActuator implements ApplicationContextAware, PriorityOrdered {
+public class AuthOperationActuator implements PriorityOrdered {
 
 	private final Map<String, Optional<NeedAuth>> cache = new ConcurrentHashMap<>(8);
-
-	private ApplicationContext applicationContext;
 
 	@Value("${com.lessspring.org.config-manager.environment}")
 	private String developEnv;
@@ -85,19 +80,19 @@ public class AuthOperationActuator implements ApplicationContextAware, PriorityO
 			Optional<NeedAuth> optionalNeedAuth = cache.getOrDefault(methodName,
 					Optional.empty());
 			optionalNeedAuth.ifPresent(authMethod -> {
+				RequireHelper.requireEquals(pjp.getArgs().length, 1,
+						"The method takes only one argument");
 				ServerRequest request = (ServerRequest) pjp.getArgs()[0];
-				boolean[] throwables = new boolean[] { false };
-				log.info("[Current TraceContext] : {}",
-						TraceContextHolder.getInstance().getInvokeTraceContext());
+				boolean[] throwable = new boolean[] { false };
 				request.exchange().getSession().subscribe(webSession -> {
 					String namespaceId = request.queryParam(authMethod.argueName())
 							.orElse("default");
 					Privilege privilege = webSession.getAttribute("privilege");
 					log.info("privilege info : {}", privilege);
-					AuthorityProcessor authorityProcessor = applicationContext
+					AuthorityProcessor authorityProcessor = SpringUtils
 							.getBean(authMethod.handler());
 					if (Objects.isNull(privilege)
-							|| !authorityProcessor.hasAuth(privilege)) {
+							|| !authorityProcessor.hasAuth(privilege, authMethod.role())) {
 						log.error(
 								"No permission to access this resource, target namespaceId : {}, owner namespaceId : {}, "
 										+ "role : {}",
@@ -106,10 +101,10 @@ public class AuthOperationActuator implements ApplicationContextAware, PriorityO
 										: privilege.getOwnerNamespaces(),
 								privilege == null ? PropertiesEnum.Role.CUSTOMER
 										: privilege.getRole());
-						throwables[0] = true;
+						throwable[0] = true;
 					}
 				});
-				if (throwables[0]) {
+				if (throwable[0]) {
 					throw new AuthForbidException(
 							"No permission to access this resource");
 				}
@@ -119,13 +114,7 @@ public class AuthOperationActuator implements ApplicationContextAware, PriorityO
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
-	}
-
-	@Override
 	public int getOrder() {
-		return LOWEST_PRECEDENCE << 2;
+		return LOWEST_PRECEDENCE >> 2;
 	}
 }
