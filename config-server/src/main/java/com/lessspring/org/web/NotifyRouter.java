@@ -45,9 +45,13 @@ public class NotifyRouter {
 	@Bean(value = "notifyRouterImpl")
 	public RouterFunction<ServerResponse> notifyRouter() {
 		return route(
-				POST(StringConst.API_V1 + "watch")
+				POST(StringConst.API_V1 + "watch/sse")
 						.and(contentType(MediaType.APPLICATION_JSON_UTF8)),
-				notifyHandler::watch);
+				notifyHandler::watchSse)
+						.andRoute(
+								POST(StringConst.API_V1 + "watch/longPoll").and(
+										contentType(MediaType.APPLICATION_JSON_UTF8)),
+								notifyHandler::watchLongPoll);
 	}
 
 }

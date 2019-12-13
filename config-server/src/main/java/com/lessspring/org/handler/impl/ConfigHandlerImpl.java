@@ -25,6 +25,8 @@ import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.pojo.vo.ConfigDetailVO;
+import com.lessspring.org.pojo.vo.ConfigListVO;
 import com.lessspring.org.service.config.OperationService;
 import com.lessspring.org.utils.RenderUtils;
 import com.lessspring.org.utils.SchedulerUtils;
@@ -106,8 +108,28 @@ public class ConfigHandlerImpl implements ConfigHandler {
 				.beta(isBeta).groupId(groupId).dataId(dataId).build();
 		Mono<ResponseData<?>> mono = Mono
 				.just(operationService.removeConfig(namespaceId, deleteRequest));
-		mono = mono.publishOn(
-				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+		return RenderUtils.render(mono);
+	}
+
+	@Override
+	@NeedAuth(argueName = "namespaceId")
+	public Mono<ServerResponse> configList(ServerRequest request) {
+		final String namespaceId = request.queryParam("namespaceId").orElse("default");
+		final long page = Long.parseLong(request.queryParam("page").orElse("1"));
+		final long pageSize = Long.parseLong(request.queryParam("pageSize").orElse("10"));
+		Mono<ResponseData<ConfigListVO>> mono = Mono
+				.just(operationService.configList(namespaceId, page, pageSize));
+		return RenderUtils.render(mono);
+	}
+
+	@Override
+	@NeedAuth(argueName = "namespaceId")
+	public Mono<ServerResponse> configDetail(ServerRequest request) {
+		final String namespaceId = request.queryParam("namespaceId").orElse("default");
+		final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
+		final String dataId = request.queryParam("dataId").orElse("");
+		Mono<ResponseData<ConfigDetailVO>> mono = Mono
+				.just(operationService.configDetail(namespaceId, groupId, dataId));
 		return RenderUtils.render(mono);
 	}
 }

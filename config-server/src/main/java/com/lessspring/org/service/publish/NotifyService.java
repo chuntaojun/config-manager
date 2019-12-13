@@ -17,20 +17,19 @@
 
 package com.lessspring.org.service.publish;
 
-import com.lessspring.org.pojo.event.config.NotifyEventHandler;
-import com.lmax.disruptor.WorkHandler;
+import com.lessspring.org.service.publish.client.WatchClient;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019/12/12 12:27 上午
  */
-public interface NotifyService extends WorkHandler<NotifyEventHandler> {
+public interface NotifyService<T extends WatchClient> {
 
 	/**
 	 * when watch-client register, make a quick comparison to see if anything has changed
 	 * 
 	 * @param watchClient {@link WatchClient}
 	 */
-	void doQuickCompare(WatchClient watchClient);
+	void doQuickCompare(T watchClient);
 
 }

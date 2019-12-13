@@ -315,12 +315,12 @@ class ConfigHttpClient implements HttpClient {
 
 	private void initHeader(final Header header, Request.Builder builder) {
 		Iterator<Map.Entry<String, String>> iterator = header.iterator();
+		builder.addHeader(StringConst.CLIENT_ID_NAME, configuration.getClientId());
+		builder.addHeader(StringConst.TOKEN_HEADER_NAME, authHolder.getToken());
 		while (iterator.hasNext()) {
 			Map.Entry<String, String> entry = iterator.next();
 			builder.addHeader(entry.getKey(), entry.getValue());
 		}
-		builder.addHeader(StringConst.CLIENT_ID_NAME, configuration.getClientId());
-		builder.addHeader(StringConst.TOKEN_HEADER_NAME, authHolder.getToken());
 	}
 
 	private String getServerIp() {

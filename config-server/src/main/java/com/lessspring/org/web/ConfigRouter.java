@@ -62,6 +62,14 @@ public class ConfigRouter {
 						.andRoute(
 								GET(StringConst.API_V1 + "query/config")
 										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								configHandler::queryConfig);
+								configHandler::queryConfig)
+						.andRoute(
+								GET(StringConst.API_V1 + "config/list")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								configHandler::configList)
+						.andRoute(
+								GET(StringConst.API_V1 + "config/detail")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								configHandler::configDetail);
 	}
 }

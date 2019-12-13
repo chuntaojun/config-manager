@@ -23,6 +23,7 @@ import com.lessspring.org.Configuration;
 import com.lessspring.org.HashUtils;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
@@ -42,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -52,22 +52,29 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 
 	private List<SubWorker> workers = new ArrayList<>(8);
 
-	/**
-	 * -1 onChange -2 destroy -3 free
-	 */
-	private int sign = -3;
+	private WorkerState workerState = WorkerState.FREE;
+
+	private long longPollTime;
+
+	private final OkHttpClient okHttpClient;
 
 	public LongPollWatchConfigWorker(HttpClient httpClient, Configuration configuration,
 			ConfigFilterManager configFilterManager) {
 		super(httpClient, configuration, configFilterManager, WatchType.LONG_POLL);
+		longPollTime = configuration.getLongPollTime().getSeconds();
+		this.okHttpClient = new OkHttpClient.Builder()
+				.connectTimeout(Duration.ofMillis(20_000))
+				.readTimeout(Duration.ofSeconds(longPollTime)).build();
 	}
 
 	@Override
 	public void onChange() {
-		sign = -1;
+		// 运行 => 暂停
+		workerState = WorkerState.SUSPEND;
 		destroy();
 		init();
-		sign = -3;
+		// 暂停 => 运行
+		workerState = WorkerState.RUNNING;
 	}
 
 	@Override
@@ -96,8 +103,9 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 	public void destroy() {
 		// If you are in a free state, call the destroy callback and end the task
 		// directly
-		if (sign == -3) {
-			sign = -2;
+		if (WorkerState.RUNNING.equals(workerState)
+				|| WorkerState.FREE.equals(workerState)) {
+			workerState = WorkerState.SHUTDOWN;
 		}
 		for (SubWorker worker : workers) {
 			worker.destroy();
@@ -113,24 +121,23 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 		private final HttpClient client;
 		private final CacheConfigManager configManager = LongPollWatchConfigWorker.this.configManager;
 		private final Map<String, CacheItem> observerMap = new HashMap<>();
-		private final OkHttpClient okHttpClient;
-		private final long longPollTime = configuration.getLongPollTime().getSeconds();
 		private final Object monitor = new Object();
+		private final long longPollTime = LongPollWatchConfigWorker.this.longPollTime;
 
 		SubWorker(int index, HttpClient client) {
 			this.index = index;
 			this.client = client;
-			this.okHttpClient = new OkHttpClient.Builder()
-					.connectTimeout(Duration.ofMillis(20_000))
-					.readTimeout(Duration.ofSeconds(longPollTime)).build();
 		}
 
 		@Override
 		public void run() {
-			if (sign == -2) {
+			if (WorkerState.SHUTDOWN.equals(workerState)) {
 				return;
 			}
-			if (sign == -1) {
+
+			// Wait for the rebuild listener action to complete
+
+			if (WorkerState.SUSPEND.equals(workerState)) {
 				synchronized (monitor) {
 					try {
 						monitor.wait();
@@ -147,8 +154,11 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 					watchInfo);
 			final Body body = Body.objToBody(request);
 
-			final Header header = Header.newInstance().addParam("hold-time",
-					longPollTime + "s");
+			// Make a request to compute a ClientId listener
+			final Header header = Header.newInstance()
+					.addParam("hold-time", longPollTime + "s")
+					.addParam(StringConst.CLIENT_ID_NAME,
+							configuration.getClientId() + ":" + index);
 
 			ResponseData<List<String>> responseData = client.post(okHttpClient,
 					ApiConstant.WATCH_CONFIG_LONG_POLL, header, Query.EMPTY, body,
@@ -159,7 +169,8 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 				List<String> changeDataId = responseData.getData();
 				for (String s : changeDataId) {
 					String[] infos = NameUtils.splitName(s);
-					ConfigInfo configInfo = configManager.query(infos[0], infos[1], observerMap.get(s).getToken());
+					ConfigInfo configInfo = configManager.query(infos[0], infos[1],
+							observerMap.get(s).getToken());
 					notifyWatcher(configInfo);
 				}
 			}
@@ -172,7 +183,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 		}
 
 		public void init() {
-			boolean needWeakUp = sign == -1;
+			boolean needWeakUp = WorkerState.SUSPEND.equals(workerState);
 			Map<String, CacheItem> cacheItemMap = configManager.copy();
 			for (Map.Entry<String, CacheItem> entry : cacheItemMap.entrySet()) {
 				if (HashUtils.distroHash(entry.getKey(), 8) == index) {

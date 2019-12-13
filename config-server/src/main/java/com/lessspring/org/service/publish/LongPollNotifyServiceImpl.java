@@ -17,30 +17,78 @@
 
 package com.lessspring.org.service.publish;
 
-import com.lessspring.org.pojo.event.config.NotifyEventHandler;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import com.lessspring.org.StrackTracekUtils;
+import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.service.publish.client.LpWatchClient;
+import com.lessspring.org.service.publish.client.WatchClient;
+import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.omg.CORBA.ServerRequest;
+import org.apache.commons.lang.StringUtils;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @since 0.0.1
  * @Created at 2019/12/12 12:26 上午
  */
 @Slf4j
 @Service
-public class LongPollNotifyServiceImpl implements NotifyService {
+public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 
-    public void createWatchClient(ServerRequest request) {
+	@SuppressWarnings("unchecked")
+	public void createWatchClient(WatchRequest request, ServerRequest serverRequest,
+			MonoSink monoSink, Mono mono) {
+		String s = serverRequest.headers().asHttpHeaders().getFirst("hold-time");
+		if (StringUtils.isEmpty(s)) {
+			monoSink.success("Invalid long polling request: please set hold-time");
+			return;
+		}
+		long holdTimeOut = Long.parseLong(s);
+		WatchClient client = LpWatchClient.builder()
+				.clientIp(Objects
+						.requireNonNull(
+								serverRequest.exchange().getRequest().getRemoteAddress())
+						.getHostString())
+				.checkKey(request.getWatchKey()).namespaceId(request.getNamespaceId())
+				.holdTime(holdTimeOut).response(serverRequest.exchange().getResponse())
+				.build();
+		createWatchClient(client);
+		mono.timeout(Duration.ofSeconds(holdTimeOut - 1)).subscribe(o -> {
+		}, throwable -> {
+			if (throwable instanceof TimeoutException) {
+				doQuickCompare(client);
+				return;
+			}
+			log.error("error : {}", StrackTracekUtils.stackTrace((Throwable) throwable));
+			monoSink.success("");
+		});
+	}
 
-    }
+	@Override
+	protected void writeResponse(WatchClient client, Object data) {
+		LpWatchClient watchClient = (LpWatchClient) client;
+		if (watchClient.isActive()) {
+			watchClient.send(GsonUtils.toJson(data));
+			watchClient.shutdown();
+			Map<String, Set<WatchClient>> clients = watchClientManager
+					.get(client.getNamespaceId());
+			for (Map.Entry<String, Set<WatchClient>> entry : clients.entrySet()) {
+				entry.getValue().remove(client);
+			}
+		}
+		else {
+			log.warn("[LongPollNotifyServiceImpl] This polling task for the client ends");
+		}
+	}
 
-    @Override
-    public void doQuickCompare(WatchClient watchClient) {
-
-    }
-
-    @Override
-    public void onEvent(NotifyEventHandler event) throws Exception {
-
-    }
 }

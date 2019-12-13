@@ -14,33 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.handler;
 
-import reactor.core.publisher.Mono;
+package com.lessspring.org;
 
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public interface NotifyHandler {
+public final class StrackTracekUtils {
 
-	/**
-	 * Monitor configuration file information changes by server-send-event
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	Mono<ServerResponse> watchSse(ServerRequest request);
+    public static String stackTrace(final Throwable t) {
+        if (t == null) {
+            return "";
+        }
 
-	/**
-	 * Monitor configuration file information changes by long-poll
-	 *
-	 * @param request {@link ServerRequest}
-	 * @return {@link Mono<ServerResponse>}
-	 */
-	Mono<ServerResponse> watchLongPoll(ServerRequest request);
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream(); final PrintStream ps = new PrintStream(out)) {
+            t.printStackTrace(ps);
+            ps.flush();
+            return new String(out.toByteArray());
+        } catch (final IOException ignored) {
+            // ignored
+        }
+        return "";
+    }
 
 }

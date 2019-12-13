@@ -16,19 +16,19 @@
  */
 package com.lessspring.org.utils;
 
-import java.util.function.BiConsumer;
-
 import com.lessspring.org.context.TraceContextHolder;
 import com.lessspring.org.model.vo.ResponseData;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.function.BiConsumer;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
@@ -47,6 +47,8 @@ public final class RenderUtils {
 
 	@SuppressWarnings("all")
 	public static Mono<ServerResponse> render(Mono<?> dataMono) {
+		dataMono = dataMono.publishOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 		return ok().header("Access-Control-Allow-Origin", "*")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())

@@ -19,10 +19,12 @@ package com.lessspring.org.handler.impl;
 import com.lessspring.org.handler.NotifyHandler;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.service.publish.LongPollNotifyServiceImpl;
 import com.lessspring.org.service.publish.SseNotifyServiceImpl;
 import com.lessspring.org.utils.SseUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -39,19 +41,22 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @Service(value = "notifyHandler")
 public class NotifyHandlerImpl implements NotifyHandler {
 
-	private final SseNotifyServiceImpl sseNotifyServiceImpl;
+	private final SseNotifyServiceImpl sseNotifyService;
+	private final LongPollNotifyServiceImpl longPollNotifyService;
 
-	public NotifyHandlerImpl(SseNotifyServiceImpl sseNotifyServiceImpl) {
-		this.sseNotifyServiceImpl = sseNotifyServiceImpl;
+	public NotifyHandlerImpl(SseNotifyServiceImpl sseNotifyServiceImpl,
+			LongPollNotifyServiceImpl longPollNotifyService) {
+		this.sseNotifyService = sseNotifyServiceImpl;
+		this.longPollNotifyService = longPollNotifyService;
 	}
 
 	// the SSE push FluxSink, enables the Server end to independently
 	// choose the timing of the push and directional push
 
 	@Override
-	public Mono<ServerResponse> watch(ServerRequest request) {
+	public Mono<ServerResponse> watchSse(ServerRequest request) {
 		return request.bodyToMono(WatchRequest.class)
-				.map(watchRequest -> Flux.create(fluxSink -> sseNotifyServiceImpl
+				.map(watchRequest -> Flux.create(fluxSink -> sseNotifyService
 						.createWatchClient(watchRequest, fluxSink, request)))
 				.flatMap(objectFlux -> {
 					return ok().contentType(MediaType.TEXT_EVENT_STREAM)
@@ -60,6 +65,20 @@ public class NotifyHandlerImpl implements NotifyHandler {
 										.createServerSentEvent(ResponseData.success(o));
 							}), ServerSentEvent.class);
 				});
+	}
+
+	// the long-poll push MonoSink, enables the Server end to independently
+	// choose the timing of the push and directional push
+
+	@Override
+	public Mono<ServerResponse> watchLongPoll(ServerRequest request) {
+		MonoSink[] sink = new MonoSink[] { null };
+		return request.bodyToMono(WatchRequest.class).map(watchRequest -> {
+			Mono mono = Mono.create(monoSink -> sink[0] = monoSink);
+			longPollNotifyService.createWatchClient(watchRequest, request, sink[0], mono);
+			return mono;
+		}).flatMap(mono -> ok().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.body(mono.map(ResponseData::success), ResponseData.class));
 	}
 
 }

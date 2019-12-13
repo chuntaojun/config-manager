@@ -46,6 +46,7 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 		private byte[] fileSource;
 		private byte[] content;
 		private String type;
+		private String remark;
 		private String encryption = "";
 		private Long createTime;
 		private Integer status = 0;
@@ -114,10 +115,16 @@ public class ConfigBetaInfoDTO extends ConfigInfoDTO {
 			return this;
 		}
 
+		public ConfigBetaInfoDTOBuilder remark(String remark) {
+			this.remark = remark;
+			return this;
+		}
+
 		public ConfigBetaInfoDTO build() {
 			ConfigBetaInfoDTO configBetaInfoDTO = new ConfigBetaInfoDTO();
 			configBetaInfoDTO.setClientIps(clientIps);
 			configBetaInfoDTO.setId(id);
+			configBetaInfoDTO.setRemark(remark);
 			configBetaInfoDTO.setNamespaceId(namespaceId);
 			configBetaInfoDTO.setGroupId(groupId);
 			configBetaInfoDTO.setDataId(dataId);

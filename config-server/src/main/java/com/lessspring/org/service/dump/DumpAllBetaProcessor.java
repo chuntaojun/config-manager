@@ -16,6 +16,12 @@
  */
 package com.lessspring.org.service.dump;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.executor.NameThreadFactory;
@@ -24,12 +30,6 @@ import com.lessspring.org.repository.ConfigInfoMapper;
 import com.lessspring.org.service.cluster.DistroRouter;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
 import com.lessspring.org.service.dump.task.DumpTask4Beta;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -40,10 +40,9 @@ public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 	private final ConfigCacheItemManager cacheItemManager;
 	private final ConfigInfoMapper configInfoMapper;
 	private final DistroRouter distroRouter = DistroRouter.getInstance();
-	private ExecutorService executor;
-
 	private final AtomicBoolean inited = new AtomicBoolean(false);
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
+	private ExecutorService executor;
 
 	public DumpAllBetaProcessor(ConfigCacheItemManager cacheItemManager,
 			ConfigInfoMapper configInfoMapper) {

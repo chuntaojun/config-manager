@@ -15,31 +15,32 @@
  * limitations under the License.
  */
 
-package com.lessspring.org;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+package com.lessspring.org.watch.longpoll;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @Created at 2019/12/13 2:14 下午
  */
-public final class StracTracekUtils {
+public enum WorkerState {
 
-    public static String stackTrace(final Throwable t) {
-        if (t == null) {
-            return "";
-        }
+    /**
+     * 暂停
+     */
+    SUSPEND,
 
-        try (final ByteArrayOutputStream out = new ByteArrayOutputStream(); final PrintStream ps = new PrintStream(out)) {
-            t.printStackTrace(ps);
-            ps.flush();
-            return new String(out.toByteArray());
-        } catch (final IOException ignored) {
-            // ignored
-        }
-        return "";
-    }
+    /**
+     * 关闭
+     */
+    SHUTDOWN,
+
+    /**
+     * 运行
+     */
+    RUNNING,
+
+    /**
+     * 空闲
+     */
+    FREE
 
 }

@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.service.config.impl;
 
+import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
@@ -30,6 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -52,6 +56,16 @@ public class EncryptionPersistentHandler extends AbstractPersistentHandler {
 	@Override
 	public Publisher getPublisher() {
 		return persistentHandler;
+	}
+
+	@Override
+	public ConfigInfoDTO configDetail(String namespaceId, String groupId, String dataId) {
+		return persistentHandler.configDetail(namespaceId, groupId, dataId);
+	}
+
+	@Override
+	public List<Map<String, String>> configList(String namespaceId, long page, long pageSize) {
+		return persistentHandler.configList(namespaceId, page, pageSize);
 	}
 
 	@Override

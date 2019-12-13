@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.service.config;
 
+import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
+import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.exception.NotThisResourceException;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -36,6 +38,8 @@ import com.lessspring.org.pojo.request.DeleteConfigRequest4;
 import com.lessspring.org.pojo.request.NamespaceRequest;
 import com.lessspring.org.pojo.request.PublishConfigHistory;
 import com.lessspring.org.pojo.request.PublishConfigRequest4;
+import com.lessspring.org.pojo.vo.ConfigDetailVO;
+import com.lessspring.org.pojo.vo.ConfigListVO;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
@@ -45,12 +49,13 @@ import com.lessspring.org.service.cluster.ClusterManager;
 import com.lessspring.org.service.cluster.FailCallback;
 import com.lessspring.org.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.service.distributed.TransactionConsumer;
-import com.lessspring.org.service.publish.NotifyService;
+import com.lessspring.org.service.publish.AbstractNotifyServiceImpl;
 import com.lessspring.org.utils.BzConstants;
 import com.lessspring.org.utils.DisruptorFactory;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.PropertiesEnum;
 import com.lessspring.org.utils.TransactionUtils;
+import com.lessspring.org.utils.vo.ConfigDetailVOUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +64,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -92,10 +98,10 @@ public class ConfigOperationService
 	private ConfigCacheItemManager configCacheItemManager;
 
 	public ConfigOperationService(PersistentHandler persistentHandler,
-								  NamespaceService namespaceService,
-								  BaseTransactionCommitCallback commitCallback, ClusterManager clusterManager,
-								  List<NotifyService> notifyServices,
-								  ConfigCacheItemManager configCacheItemManager) {
+			NamespaceService namespaceService,
+			BaseTransactionCommitCallback commitCallback, ClusterManager clusterManager,
+			List<AbstractNotifyServiceImpl> notifyServices,
+			ConfigCacheItemManager configCacheItemManager) {
 		this.persistentHandler = persistentHandler;
 		this.namespaceService = namespaceService;
 		this.clusterManager = clusterManager;
@@ -107,7 +113,8 @@ public class ConfigOperationService
 		changeEventDisruptor.start();
 		notifyEventDisruptor = DisruptorFactory.build(NotifyEventHandler::new,
 				NotifyEvent.class);
-		notifyEventDisruptor.handleEventsWithWorkerPool(notifyServices.toArray(new NotifyService[0]));
+		notifyEventDisruptor.handleEventsWithWorkerPool(
+				notifyServices.toArray(new AbstractNotifyServiceImpl[0]));
 		notifyEventDisruptor.start();
 
 		registerToPublisher();
@@ -239,6 +246,30 @@ public class ConfigOperationService
 				DeleteConfigHistory.CLASS_NAME);
 		datum.setOperation(deleteConfigHistory);
 		return commit(datum);
+	}
+
+	@Override
+	public ResponseData<ConfigListVO> configList(String namespaceId, long page,
+			long pageSize) {
+		List<Map<String, String>> list = persistentHandler.configList(namespaceId, page,
+				pageSize);
+		return ResponseData.success(ConfigDetailVOUtils.convertToConfigListVO(list));
+	}
+
+	@Override
+	public ResponseData<ConfigDetailVO> configDetail(String namespaceId, String groupId,
+			String dataId) {
+		ConfigInfoDTO configInfoDTO = persistentHandler.configDetail(namespaceId, groupId,
+				dataId);
+		if (configInfoDTO != null) {
+			if (configInfoDTO instanceof ConfigBetaInfoDTO) {
+				return ResponseData.success(ConfigDetailVOUtils
+						.convertToConfigDetailVO((ConfigBetaInfoDTO) configInfoDTO));
+			}
+			return ResponseData
+					.success(ConfigDetailVOUtils.convertToConfigDetailVO(configInfoDTO));
+		}
+		throw new NotThisResourceException();
 	}
 
 	private void publishEvent(ConfigChangeEvent source) {
