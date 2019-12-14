@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 public final class CStreamBuilder {
 
     private static final Logger logger = Logger
-            .getLogger("com.lessspring.org.utils.StreamUtils");
+            .getLogger("com.lessspring.org.server.utils.StreamUtils");
 
 
     private static final ForkJoinPool myPool = new CForkJoinPool(Runtime.getRuntime().availableProcessors());

@@ -33,7 +33,7 @@ public final class TimerContext {
 	private static class TimerContextNoArgsNoResult {
 
 		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.utils.TimerContextNoArgsNoResult");
+				.getLogger("com.lessspring.org.server.utils.TimerContextNoArgsNoResult");
 
 		private final Runnable target;
 
@@ -55,7 +55,7 @@ public final class TimerContext {
 	private static class TimerContextWithArgsNoResult<A> {
 
 		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.utils.TimerContextWithArgsNoResult");
+				.getLogger("com.lessspring.org.server.utils.TimerContextWithArgsNoResult");
 
 		private final Consumer<A> consumer;
 
@@ -76,7 +76,7 @@ public final class TimerContext {
 	private static class TimerContextNoArgsWithResult<R> {
 
 		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.utils.TimerContextNoArgsWithResult");
+				.getLogger("com.lessspring.org.server.utils.TimerContextNoArgsWithResult");
 
 		private final Supplier<R> supplier;
 
@@ -99,7 +99,7 @@ public final class TimerContext {
 	private static class TimerContextWithArgsAndResult<A, R> {
 
 		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.utils.TimerContextWithArgsAndResult");
+				.getLogger("com.lessspring.org.server.utils.TimerContextWithArgsAndResult");
 
 		private final Function<A, R> function;
 

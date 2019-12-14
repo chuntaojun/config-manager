@@ -16,9 +16,12 @@
  */
 package com.lessspring.org;
 
-import java.util.UUID;
+import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.server.utils.MD5Utils;
+import com.lessspring.org.server.utils.StringUtils;
 
-import com.lessspring.org.utils.MD5Utils;
+import java.util.Base64;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -39,6 +42,11 @@ public final class IDUtils {
 
 	public static String generateMd5(String name) {
 		return MD5Utils.md5Hex(name);
+	}
+
+	public static String generateBase64(String name) {
+		Base64.Encoder encoder = Base64.getEncoder();
+		return StringUtils.newString4UTF8(encoder.encode(ByteUtils.toBytes(name)));
 	}
 
 }

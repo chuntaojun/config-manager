@@ -31,7 +31,7 @@ import com.lessspring.org.http.param.Header;
 import com.lessspring.org.http.param.HttpMethod;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.utils.HttpUtils;
+import com.lessspring.org.server.utils.HttpUtils;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;

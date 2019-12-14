@@ -16,7 +16,7 @@
  */
 package com.lessspring.org.model.vo;
 
-import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.server.utils.GsonUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

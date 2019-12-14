@@ -33,7 +33,7 @@ import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
-import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.watch.AbstractWatchWorker;
 import com.sun.org.slf4j.internal.Logger;
 import com.sun.org.slf4j.internal.LoggerFactory;

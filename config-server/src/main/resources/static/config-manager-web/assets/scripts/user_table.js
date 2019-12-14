@@ -1,6 +1,6 @@
 function requireBtn(value, row, index) {
     return [
-        '<button class="LookDetail btn btn-info" data-toggle="modal" data-target="#vue-require-detail" style="margin-right:15px;">查看详细</button>'
+        '<button class="LookDetail btn btn-info" data-toggle="modal" data-target="#vue-require-detail" style="margin-right:15px;">可访问资源</button>'
     ].join('');
 }
 
@@ -34,8 +34,8 @@ $(function () {
             field: 'role',
             title: '角色',
         }, {
-            field: 'userDetail',
-            title: '详细',
+            field: 'enableResource',
+            title: '可访问资源',
             events: operateEvents,
             formatter: requireBtn,
         }],

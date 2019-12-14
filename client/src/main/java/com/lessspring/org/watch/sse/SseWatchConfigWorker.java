@@ -28,7 +28,7 @@ import com.lessspring.org.http.param.Header;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.model.vo.WatchResponse;
-import com.lessspring.org.pojo.CacheItem;
+import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.watch.AbstractWatchWorker;
 import org.apache.commons.lang3.StringUtils;
 

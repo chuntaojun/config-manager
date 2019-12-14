@@ -26,8 +26,8 @@ import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.pojo.CacheItem;
-import com.lessspring.org.utils.MD5Utils;
+import com.lessspring.org.server.pojo.CacheItem;
+import com.lessspring.org.server.utils.MD5Utils;
 
 import java.util.List;
 import java.util.Objects;

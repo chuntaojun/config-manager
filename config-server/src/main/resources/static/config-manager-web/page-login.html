@@ -31,7 +31,6 @@
 						<div class="content">
 							<div class="header">
 								<div class="logo text-center"><img src="assets/img/logo-dark.png" alt="Klorofil Logo"></div>
-								<p class="lead">Conf</p>
 							</div>
 							<div class="form-auth-small">
 								<div class="form-group">
@@ -73,25 +72,25 @@
 		function login() {
 			var account = $("#signin-account").val()
 			var password = $("#signin-password").val()
-			$.ajax({
-				url: HTTP_REQUEST_API_URL + '/api/login',
-				type: 'POST',
-				data: JSON.stringify({
-					"user_id": account,
-					"user_passwd": password
-				}),
-				success: function (result) {
-					result = JSON.parse(result)
-					if (result['state']) {
-						sessionStorage.setItem("access_token", result['token']);
-						sessionStorage.setItem("staff_id", result['staff_id']);
-						sessionStorage.setItem("canView", result['job'] == 4);
-						window.location.href = "index.html"
-					} else {
-						alert(result.msg)
-					}
-				}
-			})
+			window.location.href = "index.html"
+			// $.ajax({
+			// 	url: HTTP_REQUEST_API_URL + '/api/login',
+			// 	type: 'POST',
+			// 	data: JSON.stringify({
+			// 		"user_id": account,
+			// 		"user_passwd": password
+			// 	}),
+			// 	success: function (result) {
+			// 		result = JSON.parse(result)
+			// 		if (result['state']) {
+			// 			sessionStorage.setItem("access_token", result['token']);
+			// 			sessionStorage.setItem("staff_id", result['staff_id']);
+			// 			sessionStorage.setItem("canView", result['job'] == 4);
+			// 		} else {
+			// 			alert(result.msg)
+			// 		}
+			// 	}
+			// })
 		}
 
 		function check(account, password) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lessspring.org.repository.ConfigInfoMapper">
+<mapper namespace="com.lessspring.org.server.repository.ConfigInfoMapper">
 
     <resultMap type="com.lessspring.org.db.dto.ConfigInfoDTO" id="ConfigInfoDTO">
         <id column="id" property="id"/>
@@ -112,7 +112,7 @@
 
     <!--  find config-content by QueryConfigInfo  -->
     <select id="findConfigInfoContent"
-            parameterType="com.lessspring.org.pojo.query.QueryConfigInfo"
+            parameterType="com.lessspring.org.server.pojo.query.QueryConfigInfo"
             resultType="java.lang.String">
         SELECT content
         FROM config_info
@@ -124,7 +124,7 @@
 
     <!--  find config by QueryConfigInfo  -->
     <select id="findConfigInfo"
-            parameterType="com.lessspring.org.pojo.query.QueryConfigInfo"
+            parameterType="com.lessspring.org.server.pojo.query.QueryConfigInfo"
             resultMap="ConfigInfoDTO">
         SELECT *
         FROM config_info
