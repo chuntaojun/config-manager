@@ -16,13 +16,6 @@
  */
 package com.lessspring.org.server.configuration.filter;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.context.TraceContext;
@@ -33,8 +26,6 @@ import com.lessspring.org.server.service.security.SecurityService;
 import com.lessspring.org.server.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -43,6 +34,13 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.lessspring.org.server.utils.PropertiesEnum.Hint.HASH_NO_PRIVILEGE;
 
@@ -57,7 +55,7 @@ public class ConfigWebFilter implements WebFilter {
 	private final FilterChain filterChain;
 	private final SecurityService securityService;
 	private TraceContextHolder contextHolder = TraceContextHolder.getInstance();
-	@Value("${com.lessspring.org.config-manager.anyuri:null}")
+	@Value("${com.lessspring.org.config-manager.anyuri:/}")
 	private String[] anyOneUri;
 
 	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
@@ -107,7 +105,6 @@ public class ConfigWebFilter implements WebFilter {
 		else {
 			context = new TraceContext();
 		}
-		log.info("[TraceContext Info] : {}", context);
 		contextHolder.setInvokeTraceContext(context);
 	}
 

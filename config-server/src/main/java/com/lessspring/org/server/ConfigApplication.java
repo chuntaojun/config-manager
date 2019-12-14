@@ -17,15 +17,18 @@
 package com.lessspring.org.server;
 
 import com.lessspring.org.admin.AdminServerApplication;
+import com.lessspring.org.server.utils.ByteUtils;
 import de.codecentric.boot.admin.server.config.AdminServerAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerCloudFoundryAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerHazelcastAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerNotifierAutoConfiguration;
-
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.ResourceBanner;
+import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
+import org.springframework.boot.actuate.health.ReactiveHealthEndpointWebExtension;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.core.io.ByteArrayResource;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -35,20 +38,30 @@ import org.springframework.core.env.ConfigurableEnvironment;
 		AdminServerCloudFoundryAutoConfiguration.class,
 		AdminServerNotifierAutoConfiguration.class,
 		AdminServerHazelcastAutoConfiguration.class,
-		SpringApplicationAdminJmxAutoConfiguration.class
+		ThymeleafAutoConfiguration.class
 })
 public class ConfigApplication {
 
 	public static void main(String[] args) {
-		ConfigurableEnvironment environment = SpringApplication
-				.run(ConfigApplication.class, args).getEnvironment();
 		try {
-			AdminServerApplication.injectEnvironment(environment);
 			AdminServerApplication.main(args);
 		}
 		catch (Exception ignore) {
-
 		}
+		SpringApplicationBuilder builder = new SpringApplicationBuilder();
+		builder.main(ConfigApplication.class)
+				.sources(ConfigApplication.class)
+				.banner(new ResourceBanner(new ByteArrayResource(bannerText())))
+				.run(args);
+	}
+
+	public static byte[] bannerText() {
+		return ByteUtils.toBytes("_________               ___________\n" +
+				"\\_   ___ \\  ____   ____ \\_   _____/\n" +
+				"/    \\  \\/ /  _ \\ /    \\ |    __)  \n" +
+				"\\     \\___(  <_> )   |  \\|     \\   \n" +
+				" \\______  /\\____/|___|  /\\___  /   \n" +
+				"        \\/            \\/     \\/    ");
 	}
 
 }
