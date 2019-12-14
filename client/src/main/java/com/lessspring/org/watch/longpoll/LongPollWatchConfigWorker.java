@@ -35,6 +35,8 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.watch.AbstractWatchWorker;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 import okhttp3.OkHttpClient;
 
 import java.time.Duration;
@@ -50,18 +52,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 
+	private static final Logger logger = LoggerFactory.getLogger(LongPollWatchConfigWorker.class);
+
 	private List<SubWorker> workers = new ArrayList<>(8);
 
-	private WorkerState workerState = WorkerState.FREE;
+	private volatile WorkerState workerState = WorkerState.FREE;
 
-	private long longPollTime;
+	private final long longPollTime;
 
 	private final OkHttpClient okHttpClient;
 
 	public LongPollWatchConfigWorker(HttpClient httpClient, Configuration configuration,
 			ConfigFilterManager configFilterManager) {
 		super(httpClient, configuration, configFilterManager, WatchType.LONG_POLL);
-		longPollTime = configuration.getLongPollTime().getSeconds();
+		this.longPollTime = configuration.getLongPollTime().getSeconds();
 		this.okHttpClient = new OkHttpClient.Builder()
 				.connectTimeout(Duration.ofMillis(20_000))
 				.readTimeout(Duration.ofSeconds(longPollTime)).build();
@@ -72,9 +76,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 		// 运行 => 暂停
 		workerState = WorkerState.SUSPEND;
 		destroy();
-		init();
-		// 暂停 => 运行
-		workerState = WorkerState.RUNNING;
+		createWatcher();
 	}
 
 	@Override
@@ -87,16 +89,12 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 			for (SubWorker worker : workers) {
 				worker.init();
 			}
+			workerState = WorkerState.RUNNING;
 		}, 5, TimeUnit.SECONDS);
 	}
 
 	@Override
 	public void init() {
-		executor.schedule(() -> {
-			for (SubWorker worker : workers) {
-				worker.init();
-			}
-		}, 5, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -115,7 +113,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 	private class SubWorker implements Runnable {
 
 		/**
-		 * 通过index分发data-id监听，如果index为-1，则关闭任务执行
+		 * 通过index分发data-id监听
 		 */
 		private int index;
 		private final HttpClient client;
@@ -158,7 +156,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 			final Header header = Header.newInstance()
 					.addParam("hold-time", longPollTime + "s")
 					.addParam(StringConst.CLIENT_ID_NAME,
-							configuration.getClientId() + ":" + index);
+							configuration.getClientId() + ":sub_" + index);
 
 			ResponseData<List<String>> responseData = client.post(okHttpClient,
 					ApiConstant.WATCH_CONFIG_LONG_POLL, header, Query.EMPTY, body,
@@ -176,6 +174,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 			}
 			else {
 				// TODO print error log
+				logger.error("[LongPoll] has some error : {}", responseData);
 			}
 
 			executor.execute(this);

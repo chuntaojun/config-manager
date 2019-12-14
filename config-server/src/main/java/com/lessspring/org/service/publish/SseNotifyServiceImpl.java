@@ -16,19 +16,18 @@
  */
 package com.lessspring.org.service.publish;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.service.publish.client.SseWatchClient;
 import com.lessspring.org.service.publish.client.WatchClient;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.FluxSink;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import reactor.core.publisher.FluxSink;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -73,6 +72,11 @@ public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 	@SuppressWarnings("unchecked")
 	protected void writeResponse(WatchClient client, Object data) {
 		((SseWatchClient) client).getSink().next(data);
+	}
+
+	@Override
+	protected boolean compareConfigSign(String oldSign, String newSign) {
+		return true;
 	}
 
 }

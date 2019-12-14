@@ -1,14 +1,7 @@
 package com.lessspring.org.service.publish;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Stream;
-
 import com.lessspring.org.NameUtils;
+import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.pojo.CacheItem;
 import com.lessspring.org.pojo.ReadWork;
@@ -16,16 +9,22 @@ import com.lessspring.org.pojo.event.config.NotifyEvent;
 import com.lessspring.org.pojo.event.config.NotifyEventHandler;
 import com.lessspring.org.pojo.event.config.PublishLogEvent;
 import com.lessspring.org.service.config.ConfigCacheItemManager;
-import com.lessspring.org.service.publish.client.SseWatchClient;
 import com.lessspring.org.service.publish.client.WatchClient;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.utils.SystemEnv;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
@@ -36,10 +35,9 @@ public abstract class AbstractNotifyServiceImpl
 		implements NotifyService, WorkHandler<NotifyEventHandler> {
 
 	protected final SystemEnv systemEnv = SystemEnv.getSingleton();
-	protected final Object monitor = new Object();
-	private final long parallelThreshold = 100;
-	protected long clientCnt = 0;
-	protected Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
+	final Object monitor = new Object();
+	long clientCnt = 0;
+	Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
 			8);
 
 	@Autowired
@@ -72,10 +70,14 @@ public abstract class AbstractNotifyServiceImpl
 	@Override
 	public void doQuickCompare(WatchClient watchClient) {
 		Map<String, String> checkMd5 = watchClient.getCheckKey();
+		// groupId@#@dataId => md5Sign
 		checkMd5.forEach((key, value) -> {
 			String[] info = NameUtils.splitName(key);
 			final CacheItem cacheItem = cacheItemManager
 					.queryCacheItem(watchClient.getNamespaceId(), info[0], info[1]);
+			if (!compareConfigSign(value, cacheItem.getLastMd5())) {
+				return;
+			}
 			final ReadWork readWork = new ReadWork() {
 				@Override
 				public void job() {
@@ -105,7 +107,7 @@ public abstract class AbstractNotifyServiceImpl
 				public void onError(Exception exception) {
 					log.error(
 							"[doQuickCompare] when execute read job has some error : {}",
-							exception);
+							StrackTracekUtils.stackTrace(exception));
 				}
 			};
 			cacheItem.executeReadWork(readWork);
@@ -130,6 +132,7 @@ public abstract class AbstractNotifyServiceImpl
 		Set<Map.Entry<String, Set<WatchClient>>> set = watchClientManager
 				.getOrDefault(event.getNamespaceId(), Collections.emptyMap()).entrySet();
 		Stream<Map.Entry<String, Set<WatchClient>>> stream;
+		long parallelThreshold = 100;
 		if (clientCnt >= parallelThreshold) {
 			stream = set.parallelStream();
 		}
@@ -146,8 +149,13 @@ public abstract class AbstractNotifyServiceImpl
 							return;
 						}
 					}
+					//
+					if (!compareConfigSign(cacheItem.getLastMd5(),
+							client.getCheckKey().get(key))) {
+						return;
+					}
 					try {
-						writeResponse((SseWatchClient) client, configInfoJson);
+						writeResponse(client, configInfoJson);
 						finishWorks[0]++;
 						tracer.publishPublishEvent(PublishLogEvent.builder()
 								.namespaceId(event.getNamespaceId())
@@ -162,6 +170,20 @@ public abstract class AbstractNotifyServiceImpl
 		log.info("total notify clients finish success is : {}", finishWorks[0]);
 	}
 
+	/**
+	 * 将数据响应给客户端
+	 *
+	 * @param client {@link WatchClient}
+	 * @param data data
+	 */
 	protected abstract void writeResponse(WatchClient client, Object data);
 
+	/**
+	 * 比较配置签名是否发生变更
+	 *
+	 * @param oldSign client端的配置签名
+	 * @param newSign server端的配置签名
+	 * @return 比较结果
+	 */
+	protected abstract boolean compareConfigSign(String oldSign, String newSign);
 }

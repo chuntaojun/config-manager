@@ -17,12 +17,6 @@
 
 package com.lessspring.org.service.publish;
 
-import java.time.Duration;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
 import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.service.publish.client.LpWatchClient;
@@ -30,11 +24,16 @@ import com.lessspring.org.service.publish.client.WatchClient;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.server.ServerRequest;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -89,6 +88,11 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 		else {
 			log.warn("[LongPollNotifyServiceImpl] This polling task for the client ends");
 		}
+	}
+
+	@Override
+	protected boolean compareConfigSign(String oldSign, String newSign) {
+		return false;
 	}
 
 }
