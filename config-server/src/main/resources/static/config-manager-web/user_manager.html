@@ -31,9 +31,8 @@
 				<div class="panel panel-default">
 					<div class="panel-body">
 						<div id="toolbar_seller" class="btn-group">
-							<button id="btn_delete" type="button" class="btn btn-default" onclick="selectRequireItem($('#require-table'))">
-								<span class="glyphicon glyphicon-add" aria-hidden="true"></span>添加用户
-							</button>
+							<button class="LookDetail btn btn-default" data-toggle="modal" data-target="#add_user"
+								style="margin-right:15px;">添加用户</button>
 						</div>
 						<table id="user_table"></table>
 					</div>
@@ -49,75 +48,53 @@
 		</div>
 	</footer>
 
-	<!-- start 模态框 -->
-	<div class="modal fade" id="vue-require-detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
+	<!-- start modal -->
+	<div class="modal fade" id="add_user" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width:400px">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">采购需求详细</h4>
+					<h4 class="modal-title" id="myModalLabel">添加用户</h4>
 				</div>
-				<div class="modal-body" style="height:420px">
+				<div class="modal-body" style="height:350px;">
 					<div class="form-group col-md-12">
 						<div class="row">
 							<div class="form-group col-md-12">
-								<label for="department-name">需求部门名称</label>
-								<input type="text" class="form-control" id="department-name" v-model=department_name disabled placeholder="需求部门">
+								<label for="item-name">用户名称</label>
+								<input type="text" class="form-control" id="item-username" placeholder="用户名称">
 							</div>
 						</div>
 						<div class="row">
 							<div class="form-group col-md-12">
-								<label for="item-number">需求物品编号</label>
-								<input type="text" class="form-control" id="item-number" v-model=item_number disabled placeholder="需求物品编号">
+								<label for="item-name">用户密码</label>
+								<input type="text" class="form-control" id="item-password" placeholder="用户密码">
 							</div>
 						</div>
 						<div class="row">
 							<div class="form-group col-md-12">
-								<label for="require-num">需求数量</label>
-								<input type="text" class="form-control" id="require-num" v-model=require_num placeholder="需求数量">
+								<label for="item-name">所属部门</label>
+								<input type="" class="form-control" id="item-department" placeholder="所属部门">
 							</div>
 						</div>
 						<div class="row">
 							<div class="form-group col-md-12">
-								<label for="write-date">填写日期</label>
-								<input type="text" class="form-control" id="write-date" v-model=write_date disabled placeholder="填写日期">
-							</div>
-						</div>
-						<div class="row">
-							<div class="form-group col-md-12">
-								<label for="signed">填写人</label>
-								<input type="text" class="form-control" id="signed" v-model=signed disabled placeholder="填写人">
+								<label for="item-name">角色</label>
+								<select class="form-control" id="item-role" placeholder="角色">
+									<option value="develop">DEVELOPER</option>
+									<option value="customer">CUSTOMER</option>
+									<option value="admin">ADMIN</option>
+								</select>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-success" onclick="update()">更新</button>
-					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button id="submit-item" class="btn btn-success" onclick="submitItem()">提交</button>
 				</div>
 			</div><!-- /.modal-content -->
 		</div><!-- /.modal -->
 	</div>
-
-	<div class="modal fade" id="vue-require2plan" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog" style="width:900px">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">采购需求详细</h4>
-				</div>
-				<div class="modal-body">
-					<table id="temp-order-view">
-					</table>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button class="btn btn-success" onclick="finalOrder()">提交</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal -->
-	</div>
-	<!-- end 模态框 -->
+	<!-- end modal -->
 
 	<!-- Javascript -->
 	<script src="assets/vendor/jquery/jquery.min.js"></script>
@@ -134,8 +111,8 @@
 	<script src="assets/scripts/utils.js"></script>
 	<script src="assets/scripts/user_table.js"></script>
 	<script>
-		$(function() {
-			$("input[name='btSelectAll']").attr("style","display:none;")
+		$(function () {
+			$("input[name='btSelectAll']").attr("style", "display:none;")
 		})
 
 		function submitRequireOrder() {

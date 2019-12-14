@@ -11,26 +11,18 @@ $(function(){
             checkbox: true
         }, {
             field: 'groupId',
-            title: 'groupId',
+            title: 'GroupId',
         }, {
             field: 'dataId',
-            title: 'dataId',
+            title: 'DataId',
         }, {
             field: 'type',
-            title: 'type',
+            title: 'ConfigType',
         }, {
-            field: 'content',
-            title: 'content',
-            editable: {
-                type:  'text',
-                value: 'content',
-                title: 'content',
-                validate: function (v) {
-                    if ($.trim(v) == '') {
-                        return 'content!';
-                    }
-                }
-            }
+            field: 'details',
+            title: '详细',
+            events: operateEvents,
+            formatter: requireFileBtn,
         }],
         data:[],
         method: 'get',

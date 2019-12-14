@@ -40,6 +40,15 @@ public class Datum {
 		this.className = className;
 	}
 
+	public Datum(long id, String key, byte[] value, String className, String operation, String bz) {
+		this.id = id;
+		this.key = key;
+		this.value = value;
+		this.className = className;
+		this.operation = operation;
+		this.bz = bz;
+	}
+
 	public long getId() {
 		return id;
 	}

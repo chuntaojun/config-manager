@@ -32,7 +32,7 @@
 					<div class="panel-body">
 						<div id="toolbar_seller" class="btn-group">
 							<button class="LookDetail btn btn-default" data-toggle="modal"
-								data-target="#vue-require-file-detail" style="margin-right:15px;">查看详细</button>
+								data-target="#vue-require-file-detail" style="margin-right:15px;">添加命名空间</button>
 						</div>
 						<table id="namespace-table"></table>
 					</div>
@@ -45,24 +45,30 @@
 	<!-- start modal -->
 	<div class="modal fade" id="vue-require-file-detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
 		aria-hidden="true">
-		<div class="modal-dialog" style="width:900px">
+		<div class="modal-dialog" style="width:400px">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 					<h4 class="modal-title" id="myModalLabel">命名空间修改</h4>
 				</div>
-				<div class="modal-body" style="height:680px">
+				<div class="modal-body" style="height:200px;">
 					<div class="form-group col-md-12">
 						<div class="row">
 							<div class="form-group col-md-12">
-								<label for="item-name">采购需求文件</label>
-								<div id=context>
-								</div>
+								<label for="item-name">命名空间ID</label>
+								<input type="text" class="form-control" id="item-namespaceId" placeholder="命名空间ID">
 							</div>
-						</div><!-- /.modal-content -->
-					</div><!-- /.modal -->
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<label for="item-name">命名空间名称</label>
+								<input type="text" class="form-control" id="item-namespace" placeholder="命名空间名称">
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="modal-footer">
+					<button id="submit-item" class="btn btn-success" onclick="submitItem()">提交</button>
 				</div>
 			</div><!-- /.modal-content -->
 		</div><!-- /.modal -->

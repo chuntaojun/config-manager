@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import com.lessspring.org.AbstractListener;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.utils.PlaceholderProcessor;
+import com.lessspring.org.server.utils.PlaceholderProcessor;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

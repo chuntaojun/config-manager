@@ -24,7 +24,7 @@ import com.lessspring.org.AbstractListener;
 import com.lessspring.org.CacheConfigManager;
 import com.lessspring.org.common.parser.ParserChain;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.pojo.ChangekeyEvent;
+import com.lessspring.org.server.pojo.ChangekeyEvent;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

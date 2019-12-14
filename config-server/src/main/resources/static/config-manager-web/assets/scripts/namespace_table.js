@@ -45,7 +45,7 @@ $(function(){
             return params;
         },
         pagination: true,
-        sidePagination: 'client', // client or server
+        sidePagination: 'server', // client or server
         pageNumber: 1,
         pageSize: 10,
         pageList: [10, 25, 50, 100],

@@ -30,6 +30,7 @@ import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.pojo.TransactionId;
+import com.lessspring.org.server.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
@@ -80,6 +81,7 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 					}
 					final Transaction transaction = new Transaction(id,
 							datum.getKey(), datum.getValue(), datum.getOperation());
+					log.info("[Transaction info] : {}", GsonUtils.toJson(transaction));
 					// For each transaction, according to the different processing of
 					// the key to the callback interface
 					String bzName = callback.interest(transaction.getKey());
@@ -96,7 +98,7 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 				}
 				catch (Throwable e) {
 					index++;
-					throw new RuntimeException("Decode operation error", e);
+					throw e;
 				}
 				if (Objects.nonNull(closure)) {
 					closure.run(status);
@@ -107,6 +109,7 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 			}
 		}
 		catch (Throwable t) {
+			t.printStackTrace();
 			iter.setErrorAndRollback(index - applied, new Status(RaftError.ESTATEMACHINE,
 					"StateMachine meet critical error: %s.", t.getMessage()));
 		}
@@ -132,9 +135,9 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 	@Override
 	public void registerTransactionCommitCallback(
 			TransactionCommitCallback commitCallback) {
-		if (callback != null) {
+		if (callback == null) {
 			synchronized (monitor) {
-				if (callback != null) {
+				if (callback == null) {
 					callback = commitCallback;
 				}
 			}

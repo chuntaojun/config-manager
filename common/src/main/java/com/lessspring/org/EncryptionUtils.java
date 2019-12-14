@@ -31,7 +31,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
-import com.lessspring.org.utils.ByteUtils;
+import com.lessspring.org.server.utils.ByteUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
