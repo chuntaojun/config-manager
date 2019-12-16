@@ -18,14 +18,15 @@ package com.lessspring.org.server.web;
 
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.server.handler.NotifyHandler;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RequestPredicates.contentType;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -34,7 +35,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class NotifyRouter {
+public class NotifyRouter extends BaseRouter {
 
 	private final NotifyHandler notifyHandler;
 
@@ -44,14 +45,19 @@ public class NotifyRouter {
 
 	@Bean(value = "notifyRouterImpl")
 	public RouterFunction<ServerResponse> notifyRouter() {
-		return route(
+		RouterFunction<ServerResponse> function = route(
 				POST(StringConst.API_V1 + "watch/sse")
 						.and(contentType(MediaType.APPLICATION_JSON_UTF8)),
 				notifyHandler::watchSse)
 						.andRoute(
 								POST(StringConst.API_V1 + "watch/longPoll").and(
 										contentType(MediaType.APPLICATION_JSON_UTF8)),
-								notifyHandler::watchLongPoll);
+								notifyHandler::watchLongPoll)
+						.andRoute(
+								GET(StringConst.API_V1 + "config/watchClient")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								notifyHandler::watchClients);
+		return function;
 	}
 
 }

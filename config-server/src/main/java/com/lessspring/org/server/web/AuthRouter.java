@@ -25,13 +25,12 @@ import org.springframework.context.annotation.Configuration;
  * @since 0.0.1
  */
 @Configuration
-public class AuthRouter {
+public class AuthRouter extends BaseRouter {
 
 	private final AuthHandler authHandler;
 
 	public AuthRouter(AuthHandler authHandler) {
 		this.authHandler = authHandler;
 	}
-
 
 }

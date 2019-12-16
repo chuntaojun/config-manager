@@ -17,6 +17,7 @@
 package com.lessspring.org.server.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
@@ -71,6 +72,17 @@ public interface ConfigInfoMapper {
 	 * @return {@link List<ConfigInfoDTO>}
 	 */
 	List<ConfigInfoDTO> batchFindConfigInfo(@Param("ids") List<Long> ids);
+
+	/**
+	 * select list by page
+	 *
+	 * @param namespace namespace-id
+	 * @param page page
+	 * @param pageSize pageSize
+	 * @return {@link List<Map<String, String>}
+	 */
+	List<Map<String, String>> configList(@Param("namespaceId") String namespace,
+			@Param("page") long page, @Param("pageSize") long pageSize);
 
 	/**
 	 * find min and max id

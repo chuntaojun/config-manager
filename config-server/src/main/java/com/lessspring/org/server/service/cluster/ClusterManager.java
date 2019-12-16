@@ -16,31 +16,35 @@
  */
 package com.lessspring.org.server.service.cluster;
 
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.pojo.request.NodeChangeRequest;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
-import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.raft.pojo.ServerNode;
+import com.lessspring.org.raft.vo.ServerNodeVO;
+import com.lessspring.org.server.pojo.request.NodeChangeRequest;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.server.utils.PathConstants;
 import com.lessspring.org.server.utils.SpringUtils;
+import com.lessspring.org.server.utils.VOUtils;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.PostConstruct;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -71,8 +75,8 @@ public class ClusterManager {
 	@PostConstruct
 	public void init() {
 		if (initialize.compareAndSet(false, true)) {
-			final String raftCacheDir = Paths.get(pathConstants.getParentPath(), "raft-data")
-					.toString();
+			final String raftCacheDir = Paths
+					.get(pathConstants.getParentPath(), "raft-data").toString();
 			final RaftServerOptions configuration = RaftServerOptions.builder()
 					.cacheDir(raftCacheDir)
 					.electionTimeoutMs(SpringUtils.getEnvironment().getProperty(
@@ -124,9 +128,14 @@ public class ClusterManager {
 		publishEvent(event);
 	}
 
-	public ResponseData<List<ServerNode>> listNodes() {
-		List<ServerNode> nodes = new ArrayList<>(nodeManager.serverNodes());
-		return ResponseData.builder().withCode(200).withData(nodes).build();
+	public ResponseData<List<ServerNodeVO>> listNodes() {
+		Collection<ServerNode> nodes = nodeManager.serverNodes();
+		List<ServerNodeVO> vos = new ArrayList<>();
+		long id = 0;
+		for (ServerNode node : nodes) {
+			vos.add(VOUtils.convertServerNodeVO(id++, node));
+		}
+		return ResponseData.builder().withCode(200).withData(vos).build();
 	}
 
 	public CompletableFuture<ResponseData<Boolean>> commit(Datum datum,

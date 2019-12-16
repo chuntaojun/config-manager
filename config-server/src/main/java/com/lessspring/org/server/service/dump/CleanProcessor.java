@@ -27,11 +27,11 @@ import javax.annotation.Resource;
 
 import com.lessspring.org.executor.NameThreadFactory;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.utils.OperationEnum;
+import com.lessspring.org.server.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.server.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.cluster.FailCallback;

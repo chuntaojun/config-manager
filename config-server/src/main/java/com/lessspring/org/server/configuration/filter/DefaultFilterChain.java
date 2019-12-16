@@ -36,6 +36,8 @@ class DefaultFilterChain implements FilterChain {
 
 	private ThreadLocal<LinkedList<CustomerConfigFilter>> filterLocal;
 
+	private String[] anyOneUri;
+
 	DefaultFilterChain(@Autowired DistroServerConfigFilter configFilter) {
 		ServiceLoader<CustomerConfigFilter> loader = ServiceLoader
 				.load(CustomerConfigFilter.class);
@@ -47,7 +49,8 @@ class DefaultFilterChain implements FilterChain {
 	}
 
 	@Override
-	public void init() {
+	public void init(String[] anyOneUri) {
+		this.anyOneUri = anyOneUri;
 		// Each thread a copy interceptors
 		filterLocal = ThreadLocal.withInitial(() -> new LinkedList<>(filters));
 	}

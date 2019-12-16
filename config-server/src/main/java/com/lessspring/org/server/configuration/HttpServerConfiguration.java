@@ -32,11 +32,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import reactor.netty.http.server.HttpServer;
 
 import java.util.Collections;
@@ -68,20 +66,16 @@ public class HttpServerConfiguration {
 	}
 
 	@Bean
+	public ZConfMappingDescriptionProvider zconFMappingDescriptionProvider() {
+		return new ZConfMappingDescriptionProvider();
+	}
+
+	@Bean
 	public HttpMessageConverters httpMessageConverters() {
 		GsonHttpMessageConverter gsonHttpMessageConverter = new GsonHttpMessageConverter();
 		gsonHttpMessageConverter.setGson(new GsonBuilder().create());
 		return new HttpMessageConverters(true,
 				Collections.singletonList(gsonHttpMessageConverter));
-	}
-
-	@Bean
-	public RequestMappingHandlerMapping adminHandlerMapping(
-			RequestedContentTypeResolver webFluxContentTypeResolver) {
-		RequestMappingHandlerMapping mapping = new ConfRequestMappingHandlerMapping();
-		mapping.setOrder(0);
-		mapping.setContentTypeResolver(webFluxContentTypeResolver);
-		return mapping;
 	}
 
 	/**

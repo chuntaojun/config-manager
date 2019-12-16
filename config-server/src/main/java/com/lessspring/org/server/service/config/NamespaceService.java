@@ -67,4 +67,12 @@ public interface NamespaceService {
 	 */
 	ResponseData<List<NamespaceVO>> queryAll();
 
+	/**
+	 * this namespace all owner
+	 *
+	 * @param namespaceId namespaceId
+	 * @return {@link ResponseData<List<String>>}
+	 */
+	ResponseData<List<String>> allOwnerByNamespace(String namespaceId);
+
 }

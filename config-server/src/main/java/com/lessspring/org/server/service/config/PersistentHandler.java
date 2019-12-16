@@ -16,6 +16,9 @@
  */
 package com.lessspring.org.server.service.config;
 
+import java.util.List;
+import java.util.Map;
+
 import com.lessspring.org.Priority;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
@@ -25,9 +28,6 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.server.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.server.pojo.request.PublishConfigHistory;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -58,9 +58,11 @@ public interface PersistentHandler extends Priority {
 	 * @param namespaceId namespaceId
 	 * @param page page
 	 * @param pageSize pageSize
+	 * @param lastId las query id
 	 * @return {@link List<Map<String, String>>}
 	 */
-	List<Map<String, String>> configList(String namespaceId, long page, long pageSize);
+	List<Map<String, String>> configList(String namespaceId, long page, long pageSize,
+			long lastId);
 
 	/**
 	 * read config-info

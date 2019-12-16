@@ -30,7 +30,6 @@ import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.pojo.TransactionId;
-import com.lessspring.org.server.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
@@ -81,7 +80,6 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 					}
 					final Transaction transaction = new Transaction(id,
 							datum.getKey(), datum.getValue(), datum.getOperation());
-					log.info("[Transaction info] : {}", GsonUtils.toJson(transaction));
 					// For each transaction, according to the different processing of
 					// the key to the callback interface
 					String bzName = callback.interest(transaction.getKey());

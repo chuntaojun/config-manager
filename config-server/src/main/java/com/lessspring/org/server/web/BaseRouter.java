@@ -15,17 +15,12 @@
  * limitations under the License.
  */
 
-package com.lessspring.org;
+package com.lessspring.org.server.web;
 
 /**
- * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
- * @Created at 2019/12/12 11:07 下午
+ * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @Created at 2019/12/16 7:48 下午
  */
-public final class HashUtils {
-
-    public static int distroHash(String key, int length) {
-        int a = Math.abs(key.hashCode() % Integer.MAX_VALUE);
-        return a % length;
-    }
+public abstract class BaseRouter {
 
 }

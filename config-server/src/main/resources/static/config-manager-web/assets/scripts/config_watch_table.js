@@ -1,13 +1,30 @@
-var data = {
-    context: ""
-}
-
-var harvestApp = new Vue({
-    el: '#harvest-context',
-    data: data
-})
-
 $(function(){
+
+    $.ajax({
+        url: '/api/v1/namespace/all',
+        type: 'GET',
+        headers: {
+            "Content-Type": 'application/json;charset=utf-8',
+            "config-manager-token": sessionStorage.getItem("access_token")
+        },
+        contentType: 'application/json;charset=utf-8',
+        success: function(response) {
+            let item;
+            if (response['code'] === 200) {
+                const namespaces = response['data']
+                let html = "";
+                for (let i = 0; i < namespaces.length; i++) {
+                    item = namespaces[i]
+                    html += "<option value='" + item['namespaceId'] + "'>" + item['namespaceId'] + "</option>"
+                }
+                $('#select-item-namespace').append(html)
+            } else {
+                alert(response['errMsg'])
+                window.location.href = '/'
+            }
+        }
+    })
+
     $('#config_watch_table').bootstrapTable({
         classes: 'table table-hover',
         height: undefined,
@@ -34,13 +51,19 @@ $(function(){
             field: 'watchType',
             title: '监听方式'
         }],
-        data:[],
+        data:[{
+            'id': '-',
+            'clientId': '-',
+            'address': '-',
+            'lastMd5': '-',
+            'watchType': '-'
+        }],
         method: 'get',
         url: HTTP_REQUEST_API_URL + '/api/get/receive_file',
         cache: true,
         contentType: 'application/json',
         ajaxOptions:{
-            headers: {"token": sessionStorage.getItem("access_token")}
+            headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
         queryParams: function (params) {
             return params;
@@ -49,8 +72,8 @@ $(function(){
         sidePagination: 'client', // client or server
         pageNumber: 1,
         pageSize: 10,
-        pageList: [10, 25, 50, 100],
-        search: true,
+        pageList: [10, 25, 50],
+        search: false,
         selectItemName: 'btSelectItem',
         showHeader: true,
         showColumns: false,
@@ -63,11 +86,9 @@ $(function(){
         cardView: false,
         clickToSelect: false,
         singleSelect: false,
-        toolbar: '#toolbar',
+        toolbar: '#toolbar_seller',
         checkboxHeader: true,
         sortable: true,
         maintainSelected: false,
-        onEditableSave: function (field, row, oldValue, $el) {
-        }
     })
 })

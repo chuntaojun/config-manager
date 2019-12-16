@@ -36,7 +36,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class ClusterRouter {
+public class ClusterRouter extends BaseRouter {
 
 	private final ClusterHandler clusterHandler;
 
@@ -46,7 +46,7 @@ public class ClusterRouter {
 
 	@Bean(value = "clusterRouterImpl")
 	public RouterFunction<ServerResponse> clusterRouter() {
-		return route(
+		RouterFunction<ServerResponse> function = route(
 				PUT(ApiConstant.CLUSTER_NODE_JOIN)
 						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
 				clusterHandler::joinNode)
@@ -58,6 +58,7 @@ public class ClusterRouter {
 								DELETE(ApiConstant.CLUSTER_NODE_LEAVE)
 										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
 								clusterHandler::leaveNode);
+		return function;
 	}
 
 }

@@ -119,7 +119,7 @@ public final class PropertiesEnum {
 					return role;
 				}
 			}
-			throw new IllegalArgumentException("Illegal user roles");
+			return CUSTOMER;
 		}
 
 		public short getType() {

@@ -38,7 +38,7 @@ import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Response;
 import com.lessspring.org.raft.pojo.TransactionId;
-import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.raft.pojo.ServerNode;
 import lombok.extern.slf4j.Slf4j;
 
 /**

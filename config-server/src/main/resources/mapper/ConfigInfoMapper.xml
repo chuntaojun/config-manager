@@ -149,6 +149,10 @@
         </foreach>
     </select>
 
+    <select id="configList" resultType="map">
+        select * from config_info where namespace_id = #{namespaceId} limit #{page} offset #{pageSize}
+    </select>
+
     <!--  find min and max id from config-beta-info  -->
     <select id="findMinAndMaxId4Beta" resultType="java.lang.Long">
         SELECT MIN(id), MAX(id)

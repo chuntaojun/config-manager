@@ -16,10 +16,10 @@
  */
 package com.lessspring.org.server.handler.impl;
 
-import com.lessspring.org.server.configuration.security.NeedAuth;
-import com.lessspring.org.server.handler.UserHandler;
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.server.configuration.security.NeedAuth;
+import com.lessspring.org.server.handler.UserHandler;
 import com.lessspring.org.server.pojo.request.UserRequest;
 import com.lessspring.org.server.service.security.SecurityService;
 import com.lessspring.org.server.service.user.UserService;
@@ -76,6 +76,8 @@ public class UserHandlerImpl implements UserHandler {
 	@Override
 	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> queryAll(ServerRequest request) {
-		return RenderUtils.render(Mono.just(userService.queryAll()));
+		final long limit = Long.parseLong(request.queryParam("limit").orElse("10"));
+		final long offset = Long.parseLong(request.queryParam("offset").orElse("0"));
+		return RenderUtils.render(Mono.just(userService.queryAll(limit, offset)));
 	}
 }

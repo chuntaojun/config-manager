@@ -16,6 +16,11 @@
  */
 package com.lessspring.org.server.service.security.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.Resource;
+
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.pojo.Privilege;
 import com.lessspring.org.server.repository.NamespacePermissionsMapper;
@@ -23,12 +28,9 @@ import com.lessspring.org.server.repository.UserMapper;
 import com.lessspring.org.server.service.security.AuthorityProcessor;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

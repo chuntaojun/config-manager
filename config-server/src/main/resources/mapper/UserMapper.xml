@@ -12,7 +12,8 @@
 
     <!--  save user  -->
     <insert id="saveUser">
-        INSERT INTO user(user_name, password, role_type) VALUE (#{dto.username}, #{dto.password}, #{roleType})
+        INSERT INTO user(user_name, password, role_type)
+        VALUES (#{dto.username}, #{dto.password}, #{roleType})
     </insert>
 
     <!--  modify user info  -->
@@ -30,10 +31,20 @@
         WHERE user_name = #{username}
     </delete>
 
-    <select id="findUserByName" resultType="com.lessspring.org.db.dto.UserDTO">
+    <select id="findUserByName" resultMap="UserDTO">
         select *
-        from user
+        from user u
+                 join user_role ur on u.id = ur.user_id
         where user_name = #{username}
+    </select>
+
+    <select id="queryAll" resultMap="UserDTO">
+        select *
+        from user u
+                 join user_role ur on u.id = ur.user_id
+        limit #{limit}
+        offset
+        #{offset}
     </select>
 
 </mapper>

@@ -36,7 +36,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class NamespaceRouter {
+public class NamespaceRouter extends BaseRouter {
 
 	private final NamespaceHandler namespaceHandler;
 
@@ -46,7 +46,7 @@ public class NamespaceRouter {
 
 	@Bean(value = "namespaceRouterImpl")
 	public RouterFunction<ServerResponse> namespaceRouter() {
-		return route(
+		RouterFunction<ServerResponse> function = route(
 				PUT(StringConst.API_V1 + "namespace/create")
 						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
 				namespaceHandler::createNamespace)
@@ -57,6 +57,11 @@ public class NamespaceRouter {
 						.andRoute(
 								GET(StringConst.API_V1 + "namespace/all")
 										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								namespaceHandler::queryAll);
+								namespaceHandler::queryAll)
+						.andRoute(
+								GET(StringConst.API_V1 + "namespace/owner")
+										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+								namespaceHandler::namespaceOwner);
+		return function;
 	}
 }

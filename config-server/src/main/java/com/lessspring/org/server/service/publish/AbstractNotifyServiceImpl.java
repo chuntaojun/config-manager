@@ -3,31 +3,38 @@ package com.lessspring.org.server.service.publish;
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.server.metrics.MetricsHelper;
 import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.server.pojo.ReadWork;
 import com.lessspring.org.server.pojo.event.config.NotifyEvent;
 import com.lessspring.org.server.pojo.event.config.NotifyEventHandler;
 import com.lessspring.org.server.pojo.event.config.PublishLogEvent;
+import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.config.ConfigCacheItemManager;
 import com.lessspring.org.server.service.publish.client.WatchClient;
 import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.SystemEnv;
+import com.lessspring.org.server.utils.VOUtils;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019/12/13 2:50 下午
  */
 @Slf4j
@@ -36,19 +43,28 @@ public abstract class AbstractNotifyServiceImpl
 
 	protected final SystemEnv systemEnv = SystemEnv.getSingleton();
 	final Object monitor = new Object();
-	long clientCnt = 0;
-	Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
-			8);
-
 	@Autowired
 	@Lazy
 	protected TraceAnalyzer tracer;
-
 	@Autowired
 	@Lazy
 	protected ConfigCacheItemManager cacheItemManager;
 
+	// 每种监听类别的客户端数量
+
+	long clientCnt = 0;
+	Map<String, Map<String, Set<WatchClient>>> watchClientManager = new ConcurrentHashMap<>(
+			8);
+
+	private static LongAdder totalClient = new LongAdder();
+
+	@PostConstruct
+	public void init() {
+		MetricsHelper.builderGauge("totalWatchClientCnt", totalClient, LongAdder::sum);
+	}
+
 	protected void createWatchClient(WatchClient watchClient) {
+		watchClient.setManager(this);
 		Map<String, String> listenKeys = watchClient.getCheckKey();
 		// According to the monitoring configuration key, registered to a
 		// different key corresponding to the listener list
@@ -60,6 +76,7 @@ public abstract class AbstractNotifyServiceImpl
 		});
 		synchronized (monitor) {
 			clientCnt++;
+			totalClient.increment();
 			log.info("【WatchClientManager】now watchClient count is : {}", clientCnt);
 		}
 		// A quick comparison, listens for client direct access to the latest
@@ -99,6 +116,7 @@ public abstract class AbstractNotifyServiceImpl
 								.namespaceId(watchClient.getNamespaceId())
 								.groupId(info[0]).dataId(info[1])
 								.publishTime(System.currentTimeMillis()).build());
+						watchClient.onChangeMd5(key, cacheItem.getLastMd5());
 						writeResponse(watchClient, GsonUtils.toJson(content));
 					}
 				}
@@ -155,6 +173,7 @@ public abstract class AbstractNotifyServiceImpl
 						return;
 					}
 					try {
+						client.onChangeMd5(key, cacheItem.getLastMd5());
 						writeResponse(client, configInfoJson);
 						finishWorks[0]++;
 						tracer.publishPublishEvent(PublishLogEvent.builder()
@@ -186,4 +205,32 @@ public abstract class AbstractNotifyServiceImpl
 	 * @return 比较结果
 	 */
 	protected abstract boolean compareConfigSign(String oldSign, String newSign);
+
+	public final void onWatchClientDeregister() {
+		totalClient.decrement();
+	}
+
+	/**
+	 * 根据 namespaceId、groupId、dataId 查询监听客户端
+	 *
+	 * @param namespaceId namespaceId
+	 * @param groupId groupId
+	 * @param dataId dataId
+	 * @return
+	 */
+	public List<WatchClientVO> queryWatchClient(String namespaceId, String groupId,
+			String dataId) {
+		Map<String, Set<WatchClient>> clients = watchClientManager.get(namespaceId);
+		if (Objects.isNull(clients)) {
+			return Collections.emptyList();
+		}
+		final String key = NameUtils.buildName(groupId, dataId);
+		Set<WatchClient> target = clients.getOrDefault(key, Collections.emptySet());
+		List<WatchClientVO> vos = new ArrayList<>();
+		for (WatchClient client : target) {
+			WatchClientVO vo = VOUtils.convertWatchClientVO(client);
+			vo.setLastMd5(client.getCheckKey().get(key));
+		}
+		return vos;
+	}
 }

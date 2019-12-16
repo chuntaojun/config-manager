@@ -23,12 +23,13 @@ import de.codecentric.boot.admin.server.config.AdminServerCloudFoundryAutoConfig
 import de.codecentric.boot.admin.server.config.AdminServerHazelcastAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerNotifierAutoConfiguration;
 import org.springframework.boot.ResourceBanner;
-import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
-import org.springframework.boot.actuate.health.ReactiveHealthEndpointWebExtension;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.core.io.ByteArrayResource;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -37,31 +38,31 @@ import org.springframework.core.io.ByteArrayResource;
 @SpringBootApplication(exclude = { AdminServerAutoConfiguration.class,
 		AdminServerCloudFoundryAutoConfiguration.class,
 		AdminServerNotifierAutoConfiguration.class,
-		AdminServerHazelcastAutoConfiguration.class,
-		ThymeleafAutoConfiguration.class
+		AdminServerHazelcastAutoConfiguration.class, ThymeleafAutoConfiguration.class,
 })
 public class ConfigApplication {
 
 	public static void main(String[] args) {
-		try {
-			AdminServerApplication.main(args);
-		}
-		catch (Exception ignore) {
+		String openConfAdmin = Optional.ofNullable(System.getProperty("conf.admin")).orElse("false");
+		if (Objects.equals(Boolean.TRUE.toString(), openConfAdmin)) {
+			try {
+				AdminServerApplication.main(args);
+			} catch (Exception ignore) {
+			}
 		}
 		SpringApplicationBuilder builder = new SpringApplicationBuilder();
-		builder.main(ConfigApplication.class)
-				.sources(ConfigApplication.class)
+		builder.main(ConfigApplication.class).sources(ConfigApplication.class)
 				.banner(new ResourceBanner(new ByteArrayResource(bannerText())))
 				.run(args);
 	}
 
 	public static byte[] bannerText() {
-		return ByteUtils.toBytes("_________               ___________\n" +
-				"\\_   ___ \\  ____   ____ \\_   _____/\n" +
-				"/    \\  \\/ /  _ \\ /    \\ |    __)  \n" +
-				"\\     \\___(  <_> )   |  \\|     \\   \n" +
-				" \\______  /\\____/|___|  /\\___  /   \n" +
-				"        \\/            \\/     \\/    ");
+		return ByteUtils.toBytes("_________               ___________\n"
+				+ "\\_   ___ \\  ____   ____ \\_   _____/\n"
+				+ "/    \\  \\/ /  _ \\ /    \\ |    __)  \n"
+				+ "\\     \\___(  <_> )   |  \\|     \\   \n"
+				+ " \\______  /\\____/|___|  /\\___  /   \n"
+				+ "        \\/            \\/     \\/    ");
 	}
 
 }

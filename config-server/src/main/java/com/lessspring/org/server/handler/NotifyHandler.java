@@ -43,4 +43,12 @@ public interface NotifyHandler {
 	 */
 	Mono<ServerResponse> watchLongPoll(ServerRequest request);
 
+	/**
+	 * all watch client
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	Mono<ServerResponse> watchClients(ServerRequest request);
+
 }

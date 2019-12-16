@@ -67,6 +67,10 @@ public class ResponseData<T> {
 		return ResponseData.<T> builder().withCode(500).withErrMsg("failed").build();
 	}
 
+	public static <T> ResponseData<T> fail(String errMsg) {
+		return ResponseData.<T> builder().withCode(500).withErrMsg(errMsg).build();
+	}
+
 	public static <T> Builder builder() {
 		return new Builder();
 	}

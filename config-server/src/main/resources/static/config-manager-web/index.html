@@ -2,134 +2,133 @@
 <html lang="en">
 
 <head>
-	<title>Home</title>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-	<!-- VENDOR CSS -->
-	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
-	<link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
-	<link rel="stylesheet" href="assets/vendor/linearicons/style.css">
-	<link rel="stylesheet" href="assets/vendor/chartist/css/chartist-custom.css">
-	<!-- MAIN CSS -->
-	<link rel="stylesheet" href="assets/css/main.css">
-	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
-	<link rel="stylesheet" href="assets/css/demo.css">
-	<!-- GOOGLE FONTS -->
-	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
-	<!-- ICONS -->
-	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
-	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
-	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <title>Home</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <!-- VENDOR CSS -->
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/linearicons/style.css">
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/chartist/css/chartist-custom.css">
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="/config-manager-web/assets/css/main.css">
+    <!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+    <link rel="stylesheet" href="/config-manager-web/assets/css/demo.css">
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
+    <!-- ICONS -->
+    <link rel="apple-touch-icon" sizes="76x76" href="/config-manager-web/assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/config-manager-web/assets/img/favicon.png">
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
 </head>
 
 <body>
-	<!-- WRAPPER -->
-	<div id="wrapper">
-		<!-- NAVBAR -->
-		<nav class="navbar navbar-default navbar-fixed-top">
-			<div class="brand">
-				<a href="index.html">ConF</a>
-			</div>
-			<div class="container-fluid">
-				<div class="navbar-btn">
-					<button type="button" class="btn-toggle-fullwidth"><i
-							class="lnr lnr-arrow-left-circle"></i></button>
-				</div>
-				<div id="navbar-menu">
-					<ul class="nav navbar-nav navbar-right">
-						<!-- <li class="dropdown">
-							<a href="#" class="dropdown-toggle icon-menu" data-toggle="dropdown">
-								<i class="lnr lnr-alarm"></i>
-								<span class="badge bg-danger">5</span>
-							</a>
-							<ul class="dropdown-menu notifications">
-								<li><a href="#" class="notification-item"><span class="dot bg-warning"></span>System space is almost full</a></li>
-								<li><a href="#" class="notification-item"><span class="dot bg-danger"></span>You have 9 unfinished tasks</a></li>
-								<li><a href="#" class="notification-item"><span class="dot bg-success"></span>Monthly report is available</a></li>
-								<li><a href="#" class="notification-item"><span class="dot bg-warning"></span>Weekly meeting in 1 hour</a></li>
-								<li><a href="#" class="notification-item"><span class="dot bg-success"></span>Your request has been approved</a></li>
-								<li><a href="#" class="more">See all notifications</a></li>
-							</ul>
-						</li> -->
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="assets/img/user.png"
-									class="img-circle" alt="Avatar">
-								<span>{{staffId}}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
-							<ul class="dropdown-menu">
-								<li><a href="javascript:logout()"><i class="lnr lnr-exit"></i> <span>登出</span></a></li>
-							</ul>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</nav>
-		<!-- END NAVBAR -->
-		<!-- LEFT SIDEBAR -->
-		<div id="sidebar-nav" class="sidebar">
-			<div class="sidebar-scroll">
-				<nav>
-					<ul class="nav">
-						<li><a href="namespace_manager.html" target="iframe" class=""><i class="lnr lnr-inbox"></i>
-								<span>命名空间</span></a></li>
-						<li><a href="config_manager.html" target="iframe" class=""><i class="lnr lnr-book"></i>
-								<span>配置管理</span></a></li>
-						<li><a href="config_watch_manager.html" target="iframe" class=""><i class="lnr lnr-eye"></i>
-								<span>配置监听</span></a></li>
-						<li><a href="node_manager.html" target="iframe" class=""><i class="lnr lnr-tag"></i>
-								<span>节点管理</span></a></li>
-						<li><a href="user_manager.html" target="iframe" class=""><i class="lnr lnr-users"></i>
-								<span>人员管理</span></a></li>
-					</ul>
-				</nav>
-			</div>
-		</div>
-		<!-- END LEFT SIDEBAR -->
-		<!-- MAIN -->
-		<div class="main">
-			<iframe id="frame" style="width:100%; height:973px" name="iframe" src="namespace_manager.html"></iframe>
-		</div>
-		<!-- END MAIN -->
-		<div class="clearfix"></div>
+<!-- WRAPPER -->
+<div id="wrapper">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="brand">
+            <a href="/page/index">ConF</a>
+        </div>
+        <div class="container-fluid">
+            <div class="navbar-btn">
+                <button type="button" class="btn-toggle-fullwidth"><i
+                        class="lnr lnr-arrow-left-circle"></i></button>
+            </div>
+            <div id="navbar-menu">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle icon-menu" data-toggle="dropdown">
+                            <i class="lnr lnr-alarm"></i>
+                            <span class="badge bg-danger">5</span>
+                        </a>
+                        <ul id="server_notify" class="dropdown-menu notifications">
+<!--                            <li><a href="#" class="notification-item"><span class="dot bg-warning"></span>System space-->
+<!--                                is almost full</a></li>-->
+<!--                            <li><a href="#" class="notification-item"><span class="dot bg-danger"></span>You have 9-->
+<!--                                unfinished tasks</a></li>-->
+<!--                            <li><a href="#" class="notification-item"><span class="dot bg-success"></span>Monthly report-->
+<!--                                is available</a></li>-->
+<!--                            <li><a href="#" class="notification-item"><span class="dot bg-warning"></span>Weekly meeting-->
+<!--                                in 1 hour</a></li>-->
+<!--                            <li><a href="#" class="notification-item"><span class="dot bg-success"></span>Your request-->
+<!--                                has been approved</a></li>-->
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><img
+                                src="/config-manager-web/assets/img/user.png"
+                                class="img-circle" alt="Avatar">
+                            <span>{{userName}}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="javascript:logout()"><i class="lnr lnr-exit"></i> <span>登出</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- END NAVBAR -->
+    <!-- LEFT SIDEBAR -->
+    <div id="sidebar-nav" class="sidebar">
+        <div class="sidebar-scroll">
+            <nav>
+                <ul class="nav">
+                    <li><a href="/page/namespace" target="iframe" class=""><i class="lnr lnr-inbox"></i>
+                        <span>命名空间</span></a></li>
+                    <li><a href="/page/config" target="iframe" class=""><i class="lnr lnr-book"></i>
+                        <span>配置管理</span></a></li>
+                    <li><a href="/page/configWatch" target="iframe" class=""><i class="lnr lnr-eye"></i>
+                        <span>配置监听</span></a></li>
+                    <li><a href="/page/node" target="iframe" class=""><i class="lnr lnr-tag"></i>
+                        <span>节点管理</span></a></li>
+                    <li><a href="/page/user" target="iframe" class=""><i class="lnr lnr-users"></i>
+                        <span>人员管理</span></a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- END LEFT SIDEBAR -->
+    <!-- MAIN -->
+    <div class="main">
+        <iframe id="frame" style="width:100%; height:973px" name="iframe" src="/page/namespace"></iframe>
+    </div>
+    <!-- END MAIN -->
+    <div class="clearfix"></div>
 
-	</div>
-	<!-- END WRAPPER -->
-	<!-- Javascript -->
-	<script src="assets/vendor/jquery/jquery.min.js"></script>
-	<script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
-	<script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
-	<script src="assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
-	<script src="assets/vendor/chartist/js/chartist.min.js"></script>
-	<script src="assets/scripts/klorofil-common.js"></script>
-	<script src="assets/scripts/utils.js"></script>
-	<!-- <script src="assets/scripts/login_verify.js"></script> -->
-	<script>
-		var data = {
-			canView: sessionStorage.getItem('canView')
-		}
+</div>
+<!-- END WRAPPER -->
+<!-- Javascript -->
+<script src="/config-manager-web/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/config-manager-web/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="/config-manager-web/assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<script src="/config-manager-web/assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
+<script src="/config-manager-web/assets/vendor/chartist/js/chartist.min.js"></script>
+<script src="/config-manager-web/assets/scripts/klorofil-common.js"></script>
+<script src="/config-manager-web/assets/scripts/utils.js"></script>
+<script src="/config-manager-web/assets/scripts/vue.js"></script>
+<script src="/config-manager-web/assets/scripts/login_verify.js"></script>
+<script>
 
-		var employee = {
-			staffId: sessionStorage.getItem('staff_id')
-		}
+    const employee = {
+        userName: sessionStorage.getItem('userName')
+    };
 
-		var myNav = new Vue({
-			el: '#sidebar-nav',
-			data: data
-		})
+    const crm = new Vue({
+        el: '#navbar-menu',
+        data: employee
+    });
 
-		var crm = new Vue({
-			el: '#navbar-menu',
-			data: employee
-		})
+    function logout() {
+        sessionStorage.removeItem("access_token")
+        window.location.href = "/"
+    }
 
-		function logout() {
-			sessionStorage.removeItem("canView")
-			sessionStorage.removeItem("staff_id")
-			sessionStorage.removeItem("access_token")
-			window.location.href = "page-login.html"
-		}
+    $(function () {
+    })
 
-	</script>
+</script>
 </body>
 
 </html>

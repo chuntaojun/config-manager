@@ -16,15 +16,15 @@
  */
 package com.lessspring.org.server.handler.impl;
 
-import com.lessspring.org.server.configuration.security.NeedAuth;
-import com.lessspring.org.server.configuration.tps.LimitRule;
-import com.lessspring.org.server.configuration.tps.OpenTpsLimit;
 import com.lessspring.org.constant.StringConst;
-import com.lessspring.org.server.handler.ConfigHandler;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.server.configuration.security.NeedAuth;
+import com.lessspring.org.server.configuration.tps.LimitRule;
+import com.lessspring.org.server.configuration.tps.OpenTpsLimit;
+import com.lessspring.org.server.handler.ConfigHandler;
 import com.lessspring.org.server.pojo.vo.ConfigDetailVO;
 import com.lessspring.org.server.pojo.vo.ConfigListVO;
 import com.lessspring.org.server.service.config.OperationService;
@@ -120,8 +120,9 @@ public class ConfigHandlerImpl implements ConfigHandler {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		final long page = Long.parseLong(request.queryParam("page").orElse("1"));
 		final long pageSize = Long.parseLong(request.queryParam("pageSize").orElse("10"));
+		final long lastId = Long.parseLong(request.queryParam("lastId").orElse("0"));
 		Mono<ResponseData<ConfigListVO>> mono = Mono
-				.just(operationService.configList(namespaceId, page, pageSize));
+				.just(operationService.configList(namespaceId, page, pageSize, lastId));
 		return RenderUtils.render(mono);
 	}
 

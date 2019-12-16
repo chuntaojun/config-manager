@@ -37,7 +37,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class UserRouter {
+public class UserRouter extends BaseRouter {
 
 	private final UserHandler userHandler;
 
@@ -47,7 +47,7 @@ public class UserRouter {
 
 	@Bean(value = "userRouterImpl")
 	public RouterFunction<ServerResponse> userRouterImpl() {
-		return route(POST(StringConst.API_V1 + "login")
+		RouterFunction<ServerResponse> function = route(POST(StringConst.API_V1 + "login")
 				.and(accept(MediaType.APPLICATION_JSON_UTF8)), userHandler::login)
 						.andRoute(
 								PUT(StringConst.API_V1 + "createUser")
@@ -65,6 +65,7 @@ public class UserRouter {
 								GET(StringConst.API_V1 + "allUser")
 										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
 								userHandler::queryAll);
+		return function;
 	}
 
 }

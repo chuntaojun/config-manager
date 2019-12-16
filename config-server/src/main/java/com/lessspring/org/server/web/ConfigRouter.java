@@ -37,7 +37,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class ConfigRouter {
+public class ConfigRouter extends BaseRouter {
 
 	private final ConfigHandler configHandler;
 
@@ -47,7 +47,7 @@ public class ConfigRouter {
 
 	@Bean(value = "configRouterImpl")
 	public RouterFunction<ServerResponse> configRouter() {
-		return route(
+		RouterFunction<ServerResponse> function = route(
 				PUT(StringConst.API_V1 + "publish/config")
 						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
 				configHandler::publishConfig)
@@ -71,5 +71,6 @@ public class ConfigRouter {
 								GET(StringConst.API_V1 + "config/detail")
 										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
 								configHandler::configDetail);
+		return function;
 	}
 }

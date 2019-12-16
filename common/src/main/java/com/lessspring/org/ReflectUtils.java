@@ -17,6 +17,7 @@
 
 package com.lessspring.org;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 /**
@@ -39,12 +40,22 @@ public final class ReflectUtils {
 	public static Field getFied(Class<?> cls, String fieldName) {
 		Field field = null;
 		try {
-			field = cls.getField(fieldName);
+			field = cls.getDeclaredField(fieldName);
 			field.setAccessible(true);
 			return field;
 		}
 		catch (NoSuchFieldException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static <T> T newInstance(Class<T> cls, Class[] type, Object... param) {
+		try {
+			Constructor<T> constructor = cls.getDeclaredConstructor(type);
+			constructor.setAccessible(true);
+			return constructor.newInstance(param);
+		} catch (Exception ignore) {
+			return null;
 		}
 	}
 

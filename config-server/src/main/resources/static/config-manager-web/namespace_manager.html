@@ -2,111 +2,171 @@
 <html lang="en">
 
 <head>
-	<title>Item</title>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-	<!-- VENDOR CSS -->
-	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
-	<link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
-	<link rel="stylesheet" href="assets/vendor/linearicons/style.css">
-	<link rel="stylesheet" href="assets/vendor/chartist/css/chartist-custom.css">
-	<!-- MAIN CSS -->
-	<link rel="stylesheet" href="assets/css/main.css">
-	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
-	<link rel="stylesheet" href="assets/css/demo.css">
-	<!-- GOOGLE FONTS -->
-	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
-	<!-- ICONS -->
-	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
-	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
+    <title>Item</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <!-- VENDOR CSS -->
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/linearicons/style.css">
+    <link rel="stylesheet" href="/config-manager-web/assets/vendor/chartist/css/chartist-custom.css">
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="/config-manager-web/assets/css/main.css">
+    <!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+    <link rel="stylesheet" href="/config-manager-web/assets/css/demo.css">
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
+    <!-- ICONS -->
+    <link rel="apple-touch-icon" sizes="76x76" href="/config-manager-web/assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/config-manager-web/assets/img/favicon.png">
 </head>
 
 <body>
-	<!-- WRAPPER -->
-	<div class="main">
-		<!-- MAIN CONTENT -->
-		<div class="page-container" style="margin-top:30px">
-			<div class="col-lg-12">
-				<div class="panel panel-default">
-					<div class="panel-body">
-						<div id="toolbar_seller" class="btn-group">
-							<button class="LookDetail btn btn-default" data-toggle="modal"
-								data-target="#vue-require-file-detail" style="margin-right:15px;">添加命名空间</button>
-						</div>
-						<table id="namespace-table"></table>
-					</div>
-				</div>
+<!-- WRAPPER -->
+<div class="main">
+    <!-- MAIN CONTENT -->
+    <div class="page-container" style="margin-top:30px">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="toolbar_seller" class="btn-group">
+                        <button class="LookDetail btn btn-default" data-toggle="modal"
+                                data-target="#vue-require-file-detail" style="margin-right:15px;">添加命名空间
+                        </button>
+                    </div>
+                    <table id="namespace-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END MAIN CONTENT -->
+</div>
+
+<!-- start modal -->
+<div class="modal fade" id="vue-require-file-detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width:400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">命名空间修改</h4>
+            </div>
+            <div class="modal-body" style="height:200px;">
+                <div class="form-group col-md-12">
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="item-namespaceId">命名空间ID</label>
+                            <input type="text" class="form-control" id="item-namespaceId" placeholder="命名空间ID">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="item-namespace">命名空间名称</label>
+                            <input type="text" class="form-control" id="item-namespace" placeholder="命名空间名称">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="namespaceChange()">提交</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- end modal -->
+
+<!-- start modal -->
+<div class="modal fade" id="namespace_detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width:400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="access_user">可访问用户</h4>
+            </div>
+            <div class="modal-body" style="height:200px;">
+                <div class="form-group col-md-12">
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="owners">Access this resource users</label>
+                            <textarea id="owners" rows="5" cols="8" class="form-control" contenteditable='true'></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			<div class="modal-footer" style="">
+				<button class="btn btn-success" onclick="addPermission()">提交</button>
 			</div>
-		</div>
-		<!-- END MAIN CONTENT -->
-	</div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- end modal -->
 
-	<!-- start modal -->
-	<div class="modal fade" id="vue-require-file-detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-		aria-hidden="true">
-		<div class="modal-dialog" style="width:400px">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="myModalLabel">命名空间修改</h4>
-				</div>
-				<div class="modal-body" style="height:200px;">
-					<div class="form-group col-md-12">
-						<div class="row">
-							<div class="form-group col-md-12">
-								<label for="item-name">命名空间ID</label>
-								<input type="text" class="form-control" id="item-namespaceId" placeholder="命名空间ID">
-							</div>
-						</div>
-						<div class="row">
-							<div class="form-group col-md-12">
-								<label for="item-name">命名空间名称</label>
-								<input type="text" class="form-control" id="item-namespace" placeholder="命名空间名称">
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button id="submit-item" class="btn btn-success" onclick="submitItem()">提交</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal -->
-	</div>
-	<!-- end modal -->
+<!-- END MAIN -->
+<div class="clearfix"></div>
+<footer>
+    <div class="container-fluid">
+    </div>
+</footer>
+</div>
+<!-- END WRAPPER -->
+<!-- Javascript -->
+<script src="/config-manager-web/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/config-manager-web/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="/config-manager-web/assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<script src="/config-manager-web/assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
+<script src="/config-manager-web/assets/vendor/chartist/js/chartist.min.js"></script>
+<script src="/config-manager-web/assets/scripts/klorofil-common.js"></script>
+<script src="/config-manager-web/assets/vendor/bootstrap/js/bootstrap-table.js"></script>
+<script src="/config-manager-web/assets/vendor/bootstrap/js/bootstrap-editable.js"></script>
+<script src="/config-manager-web/assets/vendor/bootstrap/js/bootstrap-table-editable.js"></script>
+<script src="/config-manager-web/assets/vendor/bootstrap/js/bootstrap-dialog.js"></script>
+<script src="/config-manager-web/assets/scripts/vue.js"></script>
+<script src="/config-manager-web/assets/scripts/wangEditor.min.js"></script>
+<script src="/config-manager-web/assets/scripts/utils.js"></script>
+<script src="/config-manager-web/assets/scripts/namespace_table.js"></script>
+<script>
+    var E = window.wangEditor
+    var editor = new E('#context')
+    editor.customConfig.menus = []
+    editor.create()
+    editor.$textElem.attr('contenteditable', true)
 
-	<!-- END MAIN -->
-	<div class="clearfix"></div>
-	<footer>
-		<div class="container-fluid">
-		</div>
-	</footer>
-	</div>
-	<!-- END WRAPPER -->
-	<!-- Javascript -->
-	<script src="assets/vendor/jquery/jquery.min.js"></script>
-	<script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
-	<script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
-	<script src="assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
-	<script src="assets/vendor/chartist/js/chartist.min.js"></script>
-	<script src="assets/scripts/klorofil-common.js"></script>
-	<script src="assets/vendor/bootstrap/js/bootstrap-table.js"></script>
-	<script src="assets/vendor/bootstrap/js/bootstrap-editable.js"></script>
-	<script src="assets/vendor/bootstrap/js/bootstrap-table-editable.js"></script>
-	<script src="assets/vendor/bootstrap/js/bootstrap-dialog.js"></script>
-	<script src="https://unpkg.com/vue/dist/vue.js"></script>
-	<script src="assets/scripts/wangEditor.min.js"></script>
-	<script src="assets/scripts/utils.js"></script>
-	<script>
-		var E = window.wangEditor
-		var editor = new E('#context')
-		editor.customConfig.menus = []
-		editor.create()
-		editor.$textElem.attr('contenteditable', true)
+    $(".w-e-text-container").height(630);
+    
+    function addPermission() {
+		
+	}
 
-		$(".w-e-text-container").height(630);
-	</script>
-	<script src="assets/scripts/namespace_table.js"></script>
+	function namespaceChange() {
+        const namespaceId = $('#item-namespaceId').val()
+        const namespaceName = $('#item-namespace').val()
+        $.ajax({
+            url: HTTP_REQUEST_API_URL + '/api/v1/namespace/create',
+            type: 'POST',
+            dataType: 'json',
+            processData: false,
+            headers: {
+                "Content-Type": 'application/json;charset=utf-8'
+            },
+            contentType: 'application/json;charset=utf-8',
+            data: JSON.stringify({
+                "namespaceId": namespaceId,
+                "namespace": namespaceName
+            }),
+            success: function (response) {
+                const result = response
+                if (Number(result['code']) === 200) {
+                    alert('success')
+                } else {
+                    alert(result['errMsg'])
+                }
+            }
+        })
+    }
+    
+</script>
 </body>
 
 </html>

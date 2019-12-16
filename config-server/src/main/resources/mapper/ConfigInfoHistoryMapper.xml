@@ -4,21 +4,41 @@
 <mapper namespace="com.lessspring.org.server.repository.ConfigInfoHistoryMapper">
 
     <resultMap id="ConfigInfoHistoryDTO" type="com.lessspring.org.db.dto.ConfigInfoHistoryDTO">
-        <id column="id" property="id" />
-        <result column="namespace_id" property="namespaceId" />
-        <result column="group_id" property="groupId" />
-        <result column="data_id" property="dataId" />
-        <result column="content" property="content" />
-        <result column="config_type" property="type" />
-        <result column="last_modify_time" property="lastModifyTime" />
+        <id column="id" property="id"/>
+        <result column="namespace_id" property="namespaceId"/>
+        <result column="group_id" property="groupId"/>
+        <result column="data_id" property="dataId"/>
+        <result column="content" property="content"/>
+        <result column="config_type" property="type"/>
+        <result column="create_time" property="createTime"/>
+        <result column="last_modify_time" property="lastModifyTime"/>
     </resultMap>
 
     <!--  save config-info-history  -->
-    <insert id="save"></insert>
+    <insert id="save" parameterType="com.lessspring.org.db.dto.ConfigInfoHistoryDTO">
+        insert into config_info_history(id, namespace_id, group_id, data_id, content, config_type, create_time,
+                                        last_modify_time)
+        values (#{historyDTO.id},
+                #{historyDTO.namespaceId},
+                #{historyDTO.groupId},
+                #{historyDTO.dataId},
+                #{historyDTO.content},
+                #{historyDTO.type},
+                #{historyDTO.createTime},
+                #{historyDTO.lastModifyTime})
+    </insert>
 
     <!--  batch delete config-info  -->
-    <delete id="batchDelete"></delete>
+    <delete id="batchDelete">
+        delete FROM config_info_history WHERE id in
+        <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
 
     <!--  find max and min id  -->
-    <select id="findMinAndMaxId" resultType="java.lang.Long"></select>
+    <select id="findMinAndMaxId" resultType="java.lang.Long">
+        SELECT MIN(id), MAX(id)
+        FROM config_info_history
+    </select>
 </mapper>

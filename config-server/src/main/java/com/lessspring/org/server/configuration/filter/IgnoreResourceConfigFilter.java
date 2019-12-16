@@ -17,9 +17,8 @@
 
 package com.lessspring.org.server.configuration.filter;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -27,11 +26,22 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class IgnoreResourceConfigFilter implements CustomerConfigFilter {
 
-	private String ignore = "/favicon.ico";
+	private String[] ignores = new String[]{
+			"/favicon.ico",
+			"/config-manager-web/assets/vendor/chartist/js/chartist.min.js.map",
+			"/config-manager-web/assets/vendor/bootstrap/css/bootstrap.min.css.map",
+			"/config-manager-web/assets/scripts/wangEditor.min.js.map"
+	};
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, FilterChain chain) {
-		return null;
+		String path = exchange.getRequest().getPath().value();
+		for (String ignore : ignores) {
+			if (path.contains(ignore)) {
+				return Mono.empty();
+			}
+		}
+		return chain.filter(exchange);
 	}
 
 	@Override

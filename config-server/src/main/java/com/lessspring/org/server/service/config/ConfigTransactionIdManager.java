@@ -16,16 +16,21 @@
  */
 package com.lessspring.org.server.service.config;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import com.lessspring.org.IDUtils;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.pojo.request.IDRequest;
-import com.lessspring.org.server.pojo.request.SubIDRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.pojo.TransactionId;
+import com.lessspring.org.server.pojo.request.IDRequest;
+import com.lessspring.org.server.pojo.request.SubIDRequest;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.server.service.distributed.TransactionConsumer;
@@ -34,14 +39,10 @@ import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Business id manager, according to the different TransactionId of business application,

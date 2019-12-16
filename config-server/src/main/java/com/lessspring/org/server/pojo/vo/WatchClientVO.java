@@ -15,17 +15,26 @@
  * limitations under the License.
  */
 
-package com.lessspring.org;
+package com.lessspring.org.server.pojo.vo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
- * @Created at 2019/12/12 11:07 下午
+ * @Created at 2019/12/15 11:06 下午
  */
-public final class HashUtils {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class WatchClientVO {
 
-    public static int distroHash(String key, int length) {
-        int a = Math.abs(key.hashCode() % Integer.MAX_VALUE);
-        return a % length;
-    }
+	private String clientId;
+	private String clientIp;
+	private String watchType;
+	private String lastMd5;
 
 }

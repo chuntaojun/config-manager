@@ -8,6 +8,16 @@
         <result column="user_id" property="userId"/>
     </resultMap>
 
-    <select id="findNamespaceIdByUserId" resultType="java.lang.String">
+    <select id="findNamespaceIdByUserId" resultType="string">
+        select namespace_id
+        from namespace_permissions
+        where user_id = #{userId}
+    </select>
+
+    <select id="findUsersByNamespaceId" resultType="string">
+        select user_name
+        from namespace_permissions np
+                 join user u on np.user_id = u.id
+        where namespace_id = #{namespaceId}
     </select>
 </mapper>

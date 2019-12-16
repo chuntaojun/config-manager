@@ -20,6 +20,8 @@ import com.lessspring.org.db.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -58,5 +60,15 @@ public interface UserMapper {
 	 * @return {@link UserDTO}
 	 */
 	UserDTO findUserByName(@Param(value = "username") String username);
+
+	/**
+	 * find all user by page
+	 *
+	 * @param limit limit
+	 * @param offset offset
+	 * @return {@link List<UserDTO>}
+	 */
+	List<UserDTO> queryAll(@Param(value = "limit") long limit,
+			@Param(value = "offset") long offset);
 
 }

@@ -17,7 +17,7 @@
 package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.entity.PeerId;
-import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.raft.pojo.ServerNode;
 
 import java.util.Collection;
 import java.util.HashMap;

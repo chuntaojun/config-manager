@@ -51,4 +51,12 @@ public interface NamespaceHandler {
 	 */
 	Mono<ServerResponse> queryAll(ServerRequest request);
 
+	/**
+	 * query this namespace owner
+	 *
+	 * @param request {@link ServerRequest}
+	 * @return {@link Mono<ServerResponse>}
+	 */
+	Mono<ServerResponse> namespaceOwner(ServerRequest request);
+
 }

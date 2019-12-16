@@ -65,7 +65,7 @@ public class ConfigWebFilter implements WebFilter {
 
 	@PostConstruct
 	public void init() {
-		filterChain.init();
+		filterChain.init(anyOneUri);
 	}
 
 	@PreDestroy
@@ -77,6 +77,10 @@ public class ConfigWebFilter implements WebFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
 		String path = request.getPath().value();
+		// Filter ahead of time by URL whitelist
+		if (uriMatcher(path, anyOneUri)) {
+			return chain.filter(exchange);
+		}
 		// Give priority to perform user custom interceptors
 		Mono<Void> mono = filterChain.filter(exchange);
 		filterChain.destroy();
@@ -85,9 +89,6 @@ public class ConfigWebFilter implements WebFilter {
 		}
 		// To release the URL white list
 		openTraceContext(request);
-		if (uriMatcher(path, anyOneUri)) {
-			return chain.filter(exchange);
-		}
 		boolean hasAuth = permissionIntercept(exchange);
 		if (!hasAuth) {
 			return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,

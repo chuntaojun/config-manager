@@ -16,14 +16,14 @@
  */
 package com.lessspring.org.server.configuration.security;
 
-import com.lessspring.org.server.service.security.AuthorityProcessor;
-import com.lessspring.org.server.service.security.impl.NameAuthorityProcessorImpl;
-import com.lessspring.org.server.utils.PropertiesEnum;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.lessspring.org.server.service.security.AuthorityProcessor;
+import com.lessspring.org.server.service.security.impl.NameAuthorityProcessorImpl;
+import com.lessspring.org.server.utils.PropertiesEnum;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

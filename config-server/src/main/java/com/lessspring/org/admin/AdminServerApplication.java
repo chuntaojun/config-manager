@@ -14,7 +14,7 @@ import org.springframework.core.io.ByteArrayResource;
 import java.util.Properties;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019/12/14 4:56 下午
  */
 @EnableAdminServer
@@ -32,8 +32,7 @@ public class AdminServerApplication {
 				.addFirst(new PropertiesPropertySource("spring.admin", webServer));
 
 		SpringApplicationBuilder builder = new SpringApplicationBuilder();
-		builder.main(AdminServerApplication.class)
-				.sources(AdminServerApplication.class)
+		builder.main(AdminServerApplication.class).sources(AdminServerApplication.class)
 				.banner(new ResourceBanner(new ByteArrayResource(bannerText())))
 				.environment(environment);
 		builder.run(args);
@@ -44,12 +43,13 @@ public class AdminServerApplication {
 	}
 
 	public static byte[] bannerText() {
-		return ByteUtils.toBytes("_________               ________________       .___      .__        \n" +
-				"\\_   ___ \\  ____   ____ \\_   _____/  _  \\    __| _/_____ |__| ____  \n" +
-				"/    \\  \\/ /  _ \\ /    \\ |    __)/  /_\\  \\  / __ |/     \\|  |/    \\ \n" +
-				"\\     \\___(  <_> )   |  \\|     \\/    |    \\/ /_/ |  Y Y  \\  |   |  \\\n" +
-				" \\______  /\\____/|___|  /\\___  /\\____|__  /\\____ |__|_|  /__|___|  /\n" +
-				"        \\/            \\/     \\/         \\/      \\/     \\/        \\/ ");
+		return ByteUtils.toBytes(
+				"_________               ________________       .___      .__        \n"
+						+ "\\_   ___ \\  ____   ____ \\_   _____/  _  \\    __| _/_____ |__| ____  \n"
+						+ "/    \\  \\/ /  _ \\ /    \\ |    __)/  /_\\  \\  / __ |/     \\|  |/    \\ \n"
+						+ "\\     \\___(  <_> )   |  \\|     \\/    |    \\/ /_/ |  Y Y  \\  |   |  \\\n"
+						+ " \\______  /\\____/|___|  /\\___  /\\____|__  /\\____ |__|_|  /__|___|  /\n"
+						+ "        \\/            \\/     \\/         \\/      \\/     \\/        \\/ ");
 	}
 
 }
