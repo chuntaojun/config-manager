@@ -16,7 +16,10 @@
  */
 package com.lessspring.org.server.service.publish;
 
+import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.client.SseWatchClient;
 import com.lessspring.org.server.service.publish.client.WatchClient;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.FluxSink;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -43,6 +47,8 @@ public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 	public void createWatchClient(WatchRequest request, FluxSink<?> sink,
 			ServerRequest serverRequest) {
 		WatchClient client = SseWatchClient.builder()
+				.clientId(serverRequest.headers().asHttpHeaders()
+						.getFirst(StringConst.CLIENT_ID_NAME))
 				.clientIp(Objects
 						.requireNonNull(
 								serverRequest.exchange().getRequest().getRemoteAddress())
@@ -52,6 +58,7 @@ public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 		// When event creation is cancelled, automatic cancellation of client
 		// on the server side corresponding to monitor object
 		sink.onDispose(() -> {
+			client.onClose();
 			synchronized (monitor) {
 				clientCnt--;
 			}
@@ -77,6 +84,16 @@ public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 	@Override
 	protected boolean compareConfigSign(String oldSign, String newSign) {
 		return true;
+	}
+
+	@Override
+	public List<WatchClientVO> queryWatchClient(String namespaceId, String groupId,
+			String dataId) {
+		List<WatchClientVO> target = super.queryWatchClient(namespaceId, groupId, dataId);
+		for (WatchClientVO client : target) {
+			client.setWatchType(WatchType.SSE.name());
+		}
+		return target;
 	}
 
 }

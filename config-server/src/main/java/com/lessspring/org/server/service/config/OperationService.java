@@ -91,9 +91,11 @@ public interface OperationService {
 	 * @param namespaceId namespaceId
 	 * @param page page index
 	 * @param pageSize page size
+	 * @param lastId last query id
 	 * @return {@link ResponseData<ConfigListVO>}
 	 */
-	ResponseData<ConfigListVO> configList(String namespaceId, long page, long pageSize);
+	ResponseData<ConfigListVO> configList(String namespaceId, long page, long pageSize,
+			long lastId);
 
 	/**
 	 *
@@ -102,5 +104,6 @@ public interface OperationService {
 	 * @param dataId dataId
 	 * @return {@link ResponseData<ConfigDetailVO>}
 	 */
-	ResponseData<ConfigDetailVO> configDetail(String namespaceId, String groupId, String dataId);
+	ResponseData<ConfigDetailVO> configDetail(String namespaceId, String groupId,
+			String dataId);
 }

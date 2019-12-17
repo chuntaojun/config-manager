@@ -11,10 +11,11 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.DiskUtils;
-import com.lessspring.org.server.pojo.ClusterMeta;
+import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.pojo.TransactionId;
+import com.lessspring.org.server.pojo.ClusterMeta;
 import com.lessspring.org.server.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -57,7 +58,7 @@ public class TransactionIdSnapshotOperateImpl implements SnapshotOperate {
 		catch (Exception e) {
 			log.error(
 					"[TransactionIdSnapshotOperateImpl onSnapshotSave] has some error : {}",
-					e);
+					StrackTracekUtils.stackTrace(e));
 		}
 	}
 

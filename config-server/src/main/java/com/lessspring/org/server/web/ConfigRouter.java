@@ -18,11 +18,17 @@ package com.lessspring.org.server.web;
 
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.server.handler.ConfigHandler;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.HandlerFunction;
+import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
@@ -37,7 +43,8 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class ConfigRouter {
+@SuppressWarnings("all")
+public class ConfigRouter extends BaseRouter {
 
 	private final ConfigHandler configHandler;
 
@@ -47,29 +54,75 @@ public class ConfigRouter {
 
 	@Bean(value = "configRouterImpl")
 	public RouterFunction<ServerResponse> configRouter() {
-		return route(
+
+		Tuple2<RequestPredicate, HandlerFunction> creatcC = Tuples.of(
 				PUT(StringConst.API_V1 + "publish/config")
 						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-				configHandler::publishConfig)
-						.andRoute(
-								POST(StringConst.API_V1 + "update/config")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								configHandler::modifyConfig)
-						.andRoute(
-								DELETE(StringConst.API_V1 + "delete/config")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								configHandler::removeConfig)
-						.andRoute(
-								GET(StringConst.API_V1 + "query/config")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								configHandler::queryConfig)
-						.andRoute(
-								GET(StringConst.API_V1 + "config/list")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								configHandler::configList)
-						.andRoute(
-								GET(StringConst.API_V1 + "config/detail")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								configHandler::configDetail);
+				new HandlerFunction<ServerResponse>() {
+					@Override
+					public Mono<ServerResponse> handle(ServerRequest request) {
+						return configHandler.publishConfig(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> updateC = Tuples.of(
+				POST(StringConst.API_V1 + "update/config")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				new HandlerFunction<ServerResponse>() {
+					@Override
+					public Mono<ServerResponse> handle(ServerRequest request) {
+						return configHandler.modifyConfig(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> deleteC = Tuples.of(
+				DELETE(StringConst.API_V1 + "delete/config")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				new HandlerFunction<ServerResponse>() {
+					@Override
+					public Mono<ServerResponse> handle(ServerRequest request) {
+						return configHandler.removeConfig(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> queryC = Tuples.of(
+				GET(StringConst.API_V1 + "query/config")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				new HandlerFunction<ServerResponse>() {
+					@Override
+					public Mono<ServerResponse> handle(ServerRequest request) {
+						return configHandler.queryConfig(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> listC = Tuples.of(
+				GET(StringConst.API_V1 + "config/list")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				new HandlerFunction<ServerResponse>() {
+					@Override
+					public Mono<ServerResponse> handle(ServerRequest request) {
+						return configHandler.configList(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> detailC = Tuples.of(
+				GET(StringConst.API_V1 + "config/detail")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
+				new HandlerFunction<ServerResponse>() {
+					@Override
+					public Mono<ServerResponse> handle(ServerRequest request) {
+						return configHandler.configDetail(request);
+					}
+				});
+
+		registerVisitor(creatcC, updateC, deleteC, queryC, listC, detailC);
+
+		RouterFunction<ServerResponse> function = route(creatcC.getT1(), creatcC.getT2())
+				.andRoute(updateC.getT1(), creatcC.getT2())
+				.andRoute(deleteC.getT1(), deleteC.getT2())
+				.andRoute(queryC.getT1(), queryC.getT2())
+				.andRoute(listC.getT1(), listC.getT2())
+				.andRoute(detailC.getT1(), detailC.getT2());
+		return function;
 	}
 }

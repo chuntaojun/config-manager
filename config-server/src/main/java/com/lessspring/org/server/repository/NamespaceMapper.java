@@ -30,6 +30,14 @@ import org.apache.ibatis.annotations.Param;
 public interface NamespaceMapper {
 
 	/**
+	 * count namespace by namespace-id
+	 *
+	 * @param namespaceId namespaceId
+	 * @return total
+	 */
+	Integer countById(@Param(value = "namespaceId") String namespaceId);
+
+	/**
 	 * find namespace by name
 	 *
 	 * @param name namespace-name

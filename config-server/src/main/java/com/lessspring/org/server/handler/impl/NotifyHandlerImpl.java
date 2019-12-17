@@ -16,21 +16,26 @@
  */
 package com.lessspring.org.server.handler.impl;
 
-import com.lessspring.org.server.handler.NotifyHandler;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.server.handler.NotifyHandler;
+import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.LongPollNotifyServiceImpl;
 import com.lessspring.org.server.service.publish.SseNotifyServiceImpl;
+import com.lessspring.org.server.utils.RenderUtils;
 import com.lessspring.org.server.utils.SseUtils;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
-
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
@@ -81,6 +86,24 @@ public class NotifyHandlerImpl implements NotifyHandler {
 			return mono;
 		}).flatMap(mono -> ok().contentType(MediaType.APPLICATION_JSON_UTF8)
 				.body(mono.map(ResponseData::success), ResponseData.class));
+	}
+
+	@Override
+	public Mono<ServerResponse> watchClients(ServerRequest request) {
+		final String namespaceId = request.queryParam("namespaceId").orElse("default");
+		final String groupId = request.queryParam("groupId").orElse("DEFAULT_GROUP");
+		final String dataId = request.queryParam("dataId").get();
+		if (StringUtils.isEmpty(dataId)) {
+			return RenderUtils.render(ResponseData.fail("Illegal query param"));
+		}
+		List<WatchClientVO> lps = longPollNotifyService.queryWatchClient(namespaceId,
+				groupId, dataId);
+		List<WatchClientVO> sses = sseNotifyService.queryWatchClient(namespaceId, groupId,
+				dataId);
+		List<WatchClientVO> clients = new ArrayList<>();
+		clients.addAll(lps);
+		clients.addAll(sses);
+		return RenderUtils.render(ResponseData.success(clients));
 	}
 
 }

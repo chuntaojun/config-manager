@@ -1,4 +1,4 @@
-var HTTP_REQUEST_API_URL = "http://115.159.3.213:5000"
+var HTTP_REQUEST_API_URL = ""
 
 function getDate() {
     var date = new Date();

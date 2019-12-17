@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.server.service.user;
 
-import java.util.List;
-
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.pojo.request.UserRequest;
 import com.lessspring.org.server.pojo.vo.UserVO;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -53,10 +53,12 @@ public interface UserService {
 	ResponseData<?> removeUser(UserRequest request);
 
 	/**
-	 * query all user info
+	 * query all user info by page
 	 *
+	 * @param limit limit
+	 * @param offset offset
 	 * @return {@link List<UserVO>}
 	 */
-	ResponseData<List<UserVO>> queryAll();
+	ResponseData<List<UserVO>> queryAll(long limit, long offset);
 
 }

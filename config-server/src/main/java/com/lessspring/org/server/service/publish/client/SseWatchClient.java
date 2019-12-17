@@ -1,13 +1,12 @@
 package com.lessspring.org.server.service.publish.client;
 
-import java.util.Map;
-
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import reactor.core.publisher.FluxSink;
 
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import java.util.Map;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019/12/13 2:52 下午
  */
 public class SseWatchClient extends WatchClient {
@@ -26,7 +25,13 @@ public class SseWatchClient extends WatchClient {
 		this.sink = sink;
 	}
 
+	@Override
+	public void onChangeMd5(String key, String lastMd5) {
+		checkKey.put(key, lastMd5);
+	}
+
 	public static final class SseWatchClientBuilder {
+		protected String clientId;
 		private FluxSink sink;
 		private String clientIp;
 		private String namespaceId;
@@ -34,6 +39,11 @@ public class SseWatchClient extends WatchClient {
 		private ServerHttpResponse response;
 
 		private SseWatchClientBuilder() {
+		}
+
+		public SseWatchClientBuilder clientId(String clientId) {
+			this.clientId = clientId;
+			return this;
 		}
 
 		public SseWatchClientBuilder sink(FluxSink sink) {
@@ -64,6 +74,7 @@ public class SseWatchClient extends WatchClient {
 		public SseWatchClient build() {
 			SseWatchClient sseWatchClient = new SseWatchClient();
 			sseWatchClient.setSink(sink);
+			sseWatchClient.setClientId(clientId);
 			sseWatchClient.response = this.response;
 			sseWatchClient.clientIp = this.clientIp;
 			sseWatchClient.namespaceId = this.namespaceId;

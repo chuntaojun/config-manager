@@ -35,12 +35,13 @@ import com.google.common.cache.LoadingCache;
 import com.lessspring.org.IDUtils;
 import com.lessspring.org.db.dto.NamespaceDTO;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.pojo.request.NamespaceRequest;
-import com.lessspring.org.server.pojo.vo.NamespaceVO;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
+import com.lessspring.org.server.pojo.request.NamespaceRequest;
+import com.lessspring.org.server.pojo.vo.NamespaceVO;
 import com.lessspring.org.server.repository.NamespaceMapper;
+import com.lessspring.org.server.repository.NamespacePermissionsMapper;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.cluster.FailCallback;
 import com.lessspring.org.server.service.config.NamespaceService;
@@ -50,10 +51,12 @@ import com.lessspring.org.server.service.security.AuthorityProcessor;
 import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
-import com.lessspring.org.server.utils.vo.NamespaceVOUtils;
+import com.lessspring.org.server.utils.VOUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -72,6 +75,8 @@ public class NamespaceServiceImpl implements NamespaceService {
 	private LoadingCache<String, Optional<NamespaceDTO>> namespaceCache;
 	@Resource
 	private NamespaceMapper namespaceMapper;
+	@Resource
+	private NamespacePermissionsMapper permissionsMapper;
 	private FailCallback failCallback;
 
 	public NamespaceServiceImpl(BaseTransactionCommitCallback commitCallback,
@@ -111,6 +116,15 @@ public class NamespaceServiceImpl implements NamespaceService {
 
 	@Override
 	public ResponseData<?> createNamespace(NamespaceRequest request) {
+		if (StringUtils.isEmpty(request.getNamespaceId())) {
+			request.setNamespaceId(IDUtils.generateUuid(request.getNamespace()));
+		}
+		else {
+			Integer count = namespaceMapper.countById(request.getNamespaceId());
+			if (count > 0) {
+				return ResponseData.fail("this namespace-id already exist");
+			}
+		}
 		String key = TransactionUtils.buildTransactionKey(
 				PropertiesEnum.InterestKey.CONFIG_DATA, request.getNamespace());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
@@ -145,10 +159,17 @@ public class NamespaceServiceImpl implements NamespaceService {
 				.ofNullable(namespaceMapper.queryAll());
 		List<NamespaceVO> vos = new ArrayList<>();
 		for (NamespaceDTO dto : dtos.orElse(Collections.emptyList())) {
-			NamespaceVO vo = NamespaceVOUtils.change(dto);
+			NamespaceVO vo = VOUtils.convertNamespaceVO(dto);
 			vos.add(vo);
 		}
 		return ResponseData.success(vos);
+	}
+
+	@Override
+	public ResponseData<List<String>> allOwnerByNamespace(String namespaceId) {
+		List<String> result = permissionsMapper.findUsersByNamespaceId(namespaceId);
+		return ResponseData.success(
+				CollectionUtils.isEmpty(result) ? Collections.emptyList() : result);
 	}
 
 	private TransactionConsumer<Transaction> createNamespaceConsumer() {
@@ -159,8 +180,7 @@ public class NamespaceServiceImpl implements NamespaceService {
 						NamespaceRequest.class);
 				NamespaceDTO dto = NamespaceDTO.builder()
 						.namespace(request.getNamespace())
-						.namespaceId(IDUtils.generateUuid(request.getNamespace()))
-						.build();
+						.namespaceId(request.getNamespaceId()).build();
 				namespaceMapper.saveNamespace(dto);
 			}
 

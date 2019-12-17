@@ -16,6 +16,13 @@
  */
 package com.lessspring.org.server.aop;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.lessspring.org.server.configuration.security.NeedAuth;
 import com.lessspring.org.server.exception.AuthForbidException;
 import com.lessspring.org.server.pojo.Privilege;
@@ -28,17 +35,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Authority inspection actuators
@@ -91,8 +92,8 @@ public class AuthOperationActuator implements PriorityOrdered {
 					log.info("privilege info : {}", privilege);
 					AuthorityProcessor authorityProcessor = SpringUtils
 							.getBean(authMethod.handler());
-					if (Objects.isNull(privilege)
-							|| !authorityProcessor.hasAuth(privilege, authMethod.role())) {
+					if (Objects.isNull(privilege) || !authorityProcessor
+							.hasAuth(privilege, authMethod.role())) {
 						log.error(
 								"No permission to access this resource, target namespaceId : {}, owner namespaceId : {}, "
 										+ "role : {}",

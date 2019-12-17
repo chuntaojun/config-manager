@@ -36,4 +36,12 @@ public interface NamespacePermissionsMapper {
 	 */
 	List<String> findNamespaceIdByUserId(@Param(value = "userId") Long userId);
 
+	/**
+	 * find this namespaceId all owners
+	 *
+	 * @param namespaceId namespaceId
+	 * @return owners
+	 */
+	List<String> findUsersByNamespaceId(@Param(value = "namespaceId") String namespaceId);
+
 }

@@ -1,7 +1,5 @@
 package com.lessspring.org.server.pojo.request;
 
-import java.util.List;
-
 import lombok.Builder;
 
 /**
@@ -13,7 +11,9 @@ public class IDRequest {
 
 	private String localName;
 
-	private List<SubIDRequest> subIDRequests;
+	private String label;
+	private Long start;
+	private Long end;
 
 	public String getLocalName() {
 		return localName;
@@ -23,11 +23,27 @@ public class IDRequest {
 		this.localName = localName;
 	}
 
-	public List<SubIDRequest> getSubIDRequests() {
-		return subIDRequests;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setSubIDRequests(List<SubIDRequest> subIDRequests) {
-		this.subIDRequests = subIDRequests;
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public Long getStart() {
+		return start;
+	}
+
+	public void setStart(Long start) {
+		this.start = start;
+	}
+
+	public Long getEnd() {
+		return end;
+	}
+
+	public void setEnd(Long end) {
+		this.end = end;
 	}
 }

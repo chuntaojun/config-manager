@@ -1,6 +1,6 @@
 function storageBtn(value, row, index) {
     return [
-        '<a class="LookDetail btn btn-info" href="' + row['remote'] + '" style="margin-right:15px;">对应采购订单</a>'
+        '<a class="LookDetail btn btn-info" href="' + row['remote'] + '" style="margin-right:15px;">对应控制台</a>'
     ].join('');
 }
 
@@ -40,13 +40,11 @@ $(function () {
         }],
         data: [],
         method: 'get',
-        url: HTTP_REQUEST_API_URL + '/api/get/entry',
+        url: HTTP_REQUEST_API_URL + '/api/v1/cluster/all',
         cache: true,
         contentType: 'application/json',
-        ajaxOptions: {
-            headers: {
-                "token": sessionStorage.getItem("access_token")
-            }
+        ajaxOptions:{
+            headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
         queryParams: function (params) {
             return params;
@@ -55,7 +53,7 @@ $(function () {
         sidePagination: 'client', // client or server
         pageNumber: 1,
         pageSize: 10,
-        pageList: [10, 25, 50, 100],
+        pageList: [10, 25],
         search: true,
         selectItemName: 'btSelectItem',
         showHeader: true,
@@ -69,7 +67,7 @@ $(function () {
         cardView: false,
         clickToSelect: false,
         singleSelect: false,
-        toolbar: '#toolbar',
+        toolbar: '#toolbar_seller',
         checkboxHeader: true,
         sortable: true,
         maintainSelected: false,

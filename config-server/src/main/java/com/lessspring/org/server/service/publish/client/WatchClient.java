@@ -16,10 +16,11 @@
  */
 package com.lessspring.org.server.service.publish.client;
 
+import com.lessspring.org.server.service.publish.AbstractNotifyServiceImpl;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+
 import java.util.Map;
 import java.util.Objects;
-
-import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -27,10 +28,21 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  */
 public abstract class WatchClient {
 
+	protected String clientId;
 	protected String clientIp;
 	protected String namespaceId;
 	protected Map<String, String> checkKey;
 	protected ServerHttpResponse response;
+	protected String watchType;
+	private AbstractNotifyServiceImpl manager;
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
 
 	public String getClientIp() {
 		return clientIp;
@@ -68,6 +80,22 @@ public abstract class WatchClient {
 		return Objects.equals(lastMd5, checkKey.get(lastMd5));
 	}
 
+	public String getWatchType() {
+		return watchType;
+	}
+
+	public void setWatchType(String watchType) {
+		this.watchType = watchType;
+	}
+
+	public AbstractNotifyServiceImpl getManager() {
+		return manager;
+	}
+
+	public void setManager(AbstractNotifyServiceImpl manager) {
+		this.manager = manager;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -84,5 +112,17 @@ public abstract class WatchClient {
 	public int hashCode() {
 		return Objects.hash(clientIp);
 	}
+
+	public void onClose() {
+		manager.onWatchClientDeregister();
+	}
+
+	/**
+	 * 监听配置的md5改变时触发回调
+	 *
+	 * @param key
+	 * @param lastMd5
+	 */
+	public abstract void onChangeMd5(String key, String lastMd5);
 
 }

@@ -16,8 +16,8 @@
  */
 package com.lessspring.org.server.configuration.tps;
 
-import com.lessspring.org.server.exception.TpsLimitException;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.server.exception.TpsLimitException;
 import lombok.extern.slf4j.Slf4j;
 
 /**

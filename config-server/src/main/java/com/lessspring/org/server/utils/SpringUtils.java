@@ -205,12 +205,6 @@ public class SpringUtils implements ApplicationContextInitializer {
 		return applicationContext.getClassLoader();
 	}
 
-	@Override
-	public void initialize(ConfigurableApplicationContext context) {
-		applicationContext = context;
-		environment = context.getEnvironment();
-	}
-
 	public static ApplicationContext getApplicationContext() {
 		return applicationContext;
 	}
@@ -219,5 +213,10 @@ public class SpringUtils implements ApplicationContextInitializer {
 		return environment;
 	}
 
+	@Override
+	public void initialize(ConfigurableApplicationContext context) {
+		applicationContext = context;
+		environment = context.getEnvironment();
+	}
 
 }

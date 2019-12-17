@@ -16,23 +16,17 @@
  */
 package com.lessspring.org.server.configuration;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
 import com.lessspring.org.PathUtils;
-import com.lessspring.org.server.exception.BaseException;
 import com.lessspring.org.jvm.JvmUtils;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.server.exception.BaseException;
+import com.lessspring.org.server.metrics.MetricsHelper;
 import com.lessspring.org.server.pojo.event.email.ErrorEmailEvent;
 import com.lessspring.org.server.service.common.EmailService;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.RenderUtils;
+import io.micrometer.core.instrument.DistributionSummary;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
@@ -47,6 +41,12 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -58,6 +58,8 @@ public class GlobalErrorWebExceptionConfiguration {
 
 	@Autowired
 	private EmailService emailService;
+
+	private DistributionSummary summary;
 
 	@Component
 	@Order(-2)
@@ -74,6 +76,8 @@ public class GlobalErrorWebExceptionConfiguration {
 
 		@PostConstruct
 		public void init() {
+			summary = MetricsHelper.builderSummary("totalError",
+					"Record the number of errors during run time");
 		}
 
 		@Override
@@ -126,6 +130,7 @@ public class GlobalErrorWebExceptionConfiguration {
 						.withErrMsg("Inner Error").withData(errorMap.get("trace"))
 						.build());
 			}
+			summary.record(1.0D);
 			return RenderUtils.render(errMono);
 		}
 

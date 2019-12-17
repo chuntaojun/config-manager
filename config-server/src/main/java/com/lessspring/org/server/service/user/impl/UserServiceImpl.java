@@ -16,26 +16,17 @@
  */
 package com.lessspring.org.server.service.user.impl;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import com.lessspring.org.EncryptionUtils;
 import com.lessspring.org.db.dto.UserDTO;
-import com.lessspring.org.server.exception.NoSuchRoleException;
-import com.lessspring.org.server.exception.NotThisResourceException;
-import com.lessspring.org.server.exception.ValidationException;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.pojo.request.UserRequest;
-import com.lessspring.org.server.pojo.vo.UserVO;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
+import com.lessspring.org.server.exception.NoSuchRoleException;
+import com.lessspring.org.server.exception.NotThisResourceException;
+import com.lessspring.org.server.exception.ValidationException;
+import com.lessspring.org.server.pojo.request.UserRequest;
+import com.lessspring.org.server.pojo.vo.UserVO;
 import com.lessspring.org.server.repository.UserMapper;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.cluster.FailCallback;
@@ -45,9 +36,20 @@ import com.lessspring.org.server.service.user.UserService;
 import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
+import com.lessspring.org.server.utils.VOUtils;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -116,8 +118,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseData<List<UserVO>> queryAll() {
-		return null;
+	public ResponseData<List<UserVO>> queryAll(long limit, long offset) {
+		List<UserDTO> dtos = userMapper.queryAll(limit, offset);
+		dtos = CollectionUtils.isEmpty(dtos) ? Collections.emptyList() : dtos;
+		List<UserVO> vos = new ArrayList<>();
+		for (UserDTO dto : dtos) {
+			UserVO vo = VOUtils.convertUserVo(dto);
+			vos.add(vo);
+		}
+		return ResponseData.success(vos);
 	}
 
 	private TransactionConsumer<Transaction> createUserConsumer() {

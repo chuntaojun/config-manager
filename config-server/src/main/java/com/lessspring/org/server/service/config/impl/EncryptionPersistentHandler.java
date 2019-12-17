@@ -16,6 +16,9 @@
  */
 package com.lessspring.org.server.service.config.impl;
 
+import java.util.List;
+import java.util.Map;
+
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
@@ -31,9 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -64,8 +64,9 @@ public class EncryptionPersistentHandler extends AbstractPersistentHandler {
 	}
 
 	@Override
-	public List<Map<String, String>> configList(String namespaceId, long page, long pageSize) {
-		return persistentHandler.configList(namespaceId, page, pageSize);
+	public List<Map<String, String>> configList(String namespaceId, long page,
+			long pageSize, long lastId) {
+		return persistentHandler.configList(namespaceId, page, pageSize, lastId);
 	}
 
 	@Override

@@ -14,23 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils.vo;
 
-import com.lessspring.org.db.dto.NamespaceDTO;
-import com.lessspring.org.server.pojo.vo.NamespaceVO;
+package com.lessspring.org.raft.vo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
- * @since 0.0.1
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @Created at 2019/12/15 2:48 下午
  */
-public final class NamespaceVOUtils {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ServerNodeVO {
 
-	private NamespaceVOUtils() {
-	}
-
-	public static NamespaceVO change(NamespaceDTO dto) {
-		return NamespaceVO.builder().namespaceName(dto.getNamespace())
-				.namespaceId(dto.getNamespaceId()).build();
-	}
+    private Long id;
+    private String ip;
+    private String status;
+    private String role;
+    private String remote;
 
 }

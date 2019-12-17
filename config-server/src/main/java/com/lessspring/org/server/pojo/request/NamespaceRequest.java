@@ -31,6 +31,7 @@ public class NamespaceRequest {
 
 	public static final String CLASS_NAME = NamespaceRequest.class.getCanonicalName();
 
+	private String namespaceId;
 	private String namespace;
 
 	public String getNamespace() {
@@ -39,5 +40,13 @@ public class NamespaceRequest {
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
+	}
+
+	public String getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(String namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

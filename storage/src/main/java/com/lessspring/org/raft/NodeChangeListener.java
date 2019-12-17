@@ -18,7 +18,7 @@ package com.lessspring.org.raft;
 
 import java.util.Collection;
 
-import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.raft.pojo.ServerNode;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

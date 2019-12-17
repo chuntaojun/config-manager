@@ -16,17 +16,17 @@
  */
 package com.lessspring.org.server.service.cluster;
 
-import com.lessspring.org.HashUtils;
-import com.lessspring.org.LifeCycle;
-import com.lessspring.org.raft.NodeChangeListener;
-import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.raft.vo.ServerNode;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.lessspring.org.HashUtils;
+import com.lessspring.org.LifeCycle;
+import com.lessspring.org.raft.NodeChangeListener;
+import com.lessspring.org.raft.NodeManager;
+import com.lessspring.org.raft.pojo.ServerNode;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

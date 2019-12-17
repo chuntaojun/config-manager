@@ -10,10 +10,14 @@
         <result column="auth_token" property="authToken"/>
     </resultMap>
 
+    <select id="countById" resultType="integer">
+        select count(1) from config_namespace where namespace_id = #{namespaceId}
+    </select>
+
     <!--  save namespace  -->
     <insert id="saveNamespace" keyColumn="id"
             parameterType="com.lessspring.org.db.dto.NamespaceDTO">
-        INSERT INTO config_namespace(namespace_name, namespace_id) VALUE (#{dto.namespace},
+        INSERT INTO config_namespace(namespace_name, namespace_id) VALUES (#{dto.namespace},
         #{dto.namespaceId});
     </insert>
 

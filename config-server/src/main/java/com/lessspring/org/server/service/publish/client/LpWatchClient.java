@@ -7,7 +7,7 @@ import reactor.core.publisher.MonoSink;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * @author <a href="mailto:liaochuntao@youzan.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019/12/13 2:53 下午
  */
 public class LpWatchClient extends WatchClient {
@@ -46,7 +46,13 @@ public class LpWatchClient extends WatchClient {
 		this.monoSink = monoSink;
 	}
 
+	@Override
+	public void onChangeMd5(String key, String lastMd5) {
+
+	}
+
 	public static final class LpWatchClientBuilder {
+		protected String clientId;
 		protected String clientIp;
 		protected String namespaceId;
 		protected Map<String, String> checkKey;
@@ -55,6 +61,11 @@ public class LpWatchClient extends WatchClient {
 		private MonoSink<?> monoSink;
 
 		private LpWatchClientBuilder() {
+		}
+
+		public LpWatchClientBuilder clientId(String clientId) {
+			this.clientId = clientId;
+			return this;
 		}
 
 		public LpWatchClientBuilder holdTime(long holdTime) {
@@ -89,6 +100,7 @@ public class LpWatchClient extends WatchClient {
 
 		public LpWatchClient build() {
 			LpWatchClient lpWatchClient = new LpWatchClient();
+			lpWatchClient.setClientId(clientId);
 			lpWatchClient.setHoldTime(holdTime);
 			lpWatchClient.response = this.response;
 			lpWatchClient.clientIp = this.clientIp;

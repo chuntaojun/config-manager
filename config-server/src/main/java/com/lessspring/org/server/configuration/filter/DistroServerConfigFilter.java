@@ -16,15 +16,10 @@
  */
 package com.lessspring.org.server.configuration.filter;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import com.lessspring.org.raft.vo.ServerNode;
+import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.raft.pojo.ServerNode;
 import com.lessspring.org.server.service.cluster.DistroRouter;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,6 +32,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Data fragmentation intercept processor
@@ -56,31 +56,35 @@ public class DistroServerConfigFilter implements CustomerConfigFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, FilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		String shareId = request.getQueryParams().getFirst("shareId");
-		if (StringUtils.isEmpty(shareId)) {
-			return filterResponse(response, HttpStatus.BAD_REQUEST, "Illegal request");
+		final String apiUrl = request.getURI().getRawPath();
+		if (apiUrl.startsWith(StringConst.API_V1)) {
+			String shareId = request.getQueryParams().getFirst("shareId");
+			if (StringUtils.isEmpty(shareId)) {
+				return filterResponse(response, HttpStatus.BAD_REQUEST, "Illegal request");
+			}
+			final HttpMethod method = Optional.ofNullable(request.getMethod())
+					.orElse(HttpMethod.GET);
+			final String reqPath = router(shareId) + apiUrl + "?"
+					+ request.getURI().getRawQuery();
+			log.info("http request redirect : source {} => target {}",
+					distroRouter.self() + "?" + request.getURI().getRawQuery(), reqPath);
+			if (distroRouter.isPrincipal(shareId)) {
+				return chain.filter(exchange);
+			}
+			// Forward requests to different nodes
+			Mono<ClientResponse> clientResponseMono = client.method(method).uri(reqPath)
+					.contentType(MediaType.APPLICATION_JSON_UTF8).headers(httpHeaders -> {
+						HttpHeaders rawHeaders = request.getHeaders();
+						for (Map.Entry<String, List<String>> entry : rawHeaders.entrySet()) {
+							httpHeaders.addAll(entry.getKey(), entry.getValue());
+						}
+					}).body(request.getBody(), DataBuffer.class).exchange();
+			return clientResponseMono
+					.flatMap(clientResponse -> clientResponse.toEntity(String.class))
+					.flatMap(entity -> filterResponse(response,
+							entity.hasBody() ? "" : entity.getBody()));
 		}
-		final HttpMethod method = Optional.ofNullable(request.getMethod())
-				.orElse(HttpMethod.GET);
-		final String reqPath = router(shareId) + request.getURI().getRawPath() + "?"
-				+ request.getURI().getRawQuery();
-		log.info("http request redirect : source {} => target {}",
-				distroRouter.self() + "?" + request.getURI().getRawQuery(), reqPath);
-		if (distroRouter.isPrincipal(shareId)) {
-			return chain.filter(exchange);
-		}
-		// Forward requests to different nodes
-		Mono<ClientResponse> clientResponseMono = client.method(method).uri(reqPath)
-				.contentType(MediaType.APPLICATION_JSON_UTF8).headers(httpHeaders -> {
-					HttpHeaders rawHeaders = request.getHeaders();
-					for (Map.Entry<String, List<String>> entry : rawHeaders.entrySet()) {
-						httpHeaders.addAll(entry.getKey(), entry.getValue());
-					}
-				}).body(request.getBody(), DataBuffer.class).exchange();
-		return clientResponseMono
-				.flatMap(clientResponse -> clientResponse.toEntity(String.class))
-				.flatMap(entity -> filterResponse(response,
-						entity.hasBody() ? "" : entity.getBody()));
+		return null;
 	}
 
 	private String router(String key) {

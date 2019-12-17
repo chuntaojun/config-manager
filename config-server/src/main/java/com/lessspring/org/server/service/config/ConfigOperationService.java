@@ -19,7 +19,6 @@ package com.lessspring.org.server.service.config;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
-import com.lessspring.org.server.exception.NotThisResourceException;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
@@ -29,6 +28,10 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
+import com.lessspring.org.raft.exception.TransactionException;
+import com.lessspring.org.raft.pojo.Datum;
+import com.lessspring.org.raft.pojo.Transaction;
+import com.lessspring.org.server.exception.NotThisResourceException;
 import com.lessspring.org.server.pojo.event.config.ConfigChangeEvent;
 import com.lessspring.org.server.pojo.event.config.ConfigChangeEventHandler;
 import com.lessspring.org.server.pojo.event.config.NotifyEvent;
@@ -40,11 +43,6 @@ import com.lessspring.org.server.pojo.request.PublishConfigHistory;
 import com.lessspring.org.server.pojo.request.PublishConfigRequest4;
 import com.lessspring.org.server.pojo.vo.ConfigDetailVO;
 import com.lessspring.org.server.pojo.vo.ConfigListVO;
-import com.lessspring.org.raft.TransactionIdManager;
-import com.lessspring.org.raft.exception.TransactionException;
-import com.lessspring.org.raft.pojo.Datum;
-import com.lessspring.org.raft.pojo.Transaction;
-import com.lessspring.org.raft.pojo.TransactionId;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.cluster.FailCallback;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
@@ -55,14 +53,16 @@ import com.lessspring.org.server.utils.DisruptorFactory;
 import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
-import com.lessspring.org.server.utils.vo.ConfigDetailVOUtils;
+import com.lessspring.org.server.utils.VOUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -128,10 +128,6 @@ public class ConfigOperationService
 
 	@PostConstruct
 	public void init() {
-		TransactionIdManager manager = clusterManager.getTransactionIdManager();
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO));
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA));
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY));
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, publishConsumer(),
 				createConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, modifyConsumer(),
@@ -250,10 +246,11 @@ public class ConfigOperationService
 
 	@Override
 	public ResponseData<ConfigListVO> configList(String namespaceId, long page,
-			long pageSize) {
+			long pageSize, long lastId) {
 		List<Map<String, String>> list = persistentHandler.configList(namespaceId, page,
-				pageSize);
-		return ResponseData.success(ConfigDetailVOUtils.convertToConfigListVO(list));
+				pageSize, lastId);
+		list = CollectionUtils.isEmpty(list) ? Collections.emptyList() : list;
+		return ResponseData.success(VOUtils.convertToConfigListVO(list));
 	}
 
 	@Override
@@ -263,11 +260,10 @@ public class ConfigOperationService
 				dataId);
 		if (configInfoDTO != null) {
 			if (configInfoDTO instanceof ConfigBetaInfoDTO) {
-				return ResponseData.success(ConfigDetailVOUtils
+				return ResponseData.success(VOUtils
 						.convertToConfigDetailVO((ConfigBetaInfoDTO) configInfoDTO));
 			}
-			return ResponseData
-					.success(ConfigDetailVOUtils.convertToConfigDetailVO(configInfoDTO));
+			return ResponseData.success(VOUtils.convertToConfigDetailVO(configInfoDTO));
 		}
 		throw new NotThisResourceException();
 	}

@@ -20,6 +20,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.ServerWebExchange;
 
+import java.util.Arrays;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -29,7 +31,7 @@ public interface FilterChain {
 	/**
 	 * init filter resources
 	 */
-	void init();
+	void init(String[] anyOneUri);
 
 	/**
 	 * Intercept request processing

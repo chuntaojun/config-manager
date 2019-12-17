@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.configuration;
+package com.lessspring.org.server.configuration.http;
 
 import com.google.gson.GsonBuilder;
 import com.lessspring.org.executor.NameThreadFactory;
@@ -32,11 +32,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import reactor.netty.http.server.HttpServer;
 
 import java.util.Collections;
@@ -73,15 +71,6 @@ public class HttpServerConfiguration {
 		gsonHttpMessageConverter.setGson(new GsonBuilder().create());
 		return new HttpMessageConverters(true,
 				Collections.singletonList(gsonHttpMessageConverter));
-	}
-
-	@Bean
-	public RequestMappingHandlerMapping adminHandlerMapping(
-			RequestedContentTypeResolver webFluxContentTypeResolver) {
-		RequestMappingHandlerMapping mapping = new ConfRequestMappingHandlerMapping();
-		mapping.setOrder(0);
-		mapping.setContentTypeResolver(webFluxContentTypeResolver);
-		return mapping;
 	}
 
 	/**

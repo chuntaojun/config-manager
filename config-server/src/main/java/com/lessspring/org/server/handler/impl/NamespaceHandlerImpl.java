@@ -16,10 +16,14 @@
  */
 package com.lessspring.org.server.handler.impl;
 
+import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.configuration.security.NeedAuth;
 import com.lessspring.org.server.handler.NamespaceHandler;
+import com.lessspring.org.server.pojo.request.NamespaceRequest;
 import com.lessspring.org.server.service.config.NamespaceService;
 import com.lessspring.org.server.utils.PropertiesEnum;
+import com.lessspring.org.server.utils.RenderUtils;
+import org.apache.commons.lang.StringUtils;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
@@ -44,17 +48,29 @@ public class NamespaceHandlerImpl implements NamespaceHandler {
 	@Override
 	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> createNamespace(ServerRequest request) {
-		return null;
+		return request.bodyToMono(NamespaceRequest.class)
+				.map(namespaceService::createNamespace).flatMap(RenderUtils::render);
 	}
 
 	@Override
 	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
 	public Mono<ServerResponse> deleteNamespace(ServerRequest request) {
-		return null;
+		final String namespaceId = request.queryParam("namespaceId").orElse(null);
+		if (StringUtils.isEmpty(namespaceId)) {
+			return RenderUtils.render(ResponseData.fail("缺少「namespaceId」参数信息"));
+		}
+		return RenderUtils.render(namespaceService.removeNamespace(
+				NamespaceRequest.builder().namespace(namespaceId).build()));
 	}
 
 	@Override
 	public Mono<ServerResponse> queryAll(ServerRequest request) {
-		return null;
+		return RenderUtils.render(namespaceService.queryAll());
+	}
+
+	@Override
+	public Mono<ServerResponse> namespaceOwner(ServerRequest request) {
+		final String namespaceId = request.queryParam("namespaceId").orElse("default");
+		return RenderUtils.render(namespaceService.allOwnerByNamespace(namespaceId));
 	}
 }

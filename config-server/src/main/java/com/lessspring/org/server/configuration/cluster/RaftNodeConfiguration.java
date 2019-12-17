@@ -16,16 +16,17 @@
  */
 package com.lessspring.org.server.configuration.cluster;
 
+import java.util.List;
+
 import com.lessspring.org.raft.SnapshotOperate;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.server.utils.PathConstants;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

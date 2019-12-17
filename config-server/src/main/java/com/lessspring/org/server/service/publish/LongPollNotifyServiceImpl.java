@@ -18,7 +18,10 @@
 package com.lessspring.org.server.service.publish;
 
 import com.lessspring.org.StrackTracekUtils;
+import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.client.LpWatchClient;
 import com.lessspring.org.server.service.publish.client.WatchClient;
 import com.lessspring.org.server.utils.GsonUtils;
@@ -30,6 +33,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -54,6 +58,8 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 		}
 		long holdTimeOut = Long.parseLong(s);
 		WatchClient client = LpWatchClient.builder()
+				.clientId(serverRequest.headers().asHttpHeaders()
+						.getFirst(StringConst.CLIENT_ID_NAME))
 				.clientIp(Objects
 						.requireNonNull(
 								serverRequest.exchange().getRequest().getRemoteAddress())
@@ -64,6 +70,7 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 		createWatchClient(client);
 		mono.timeout(Duration.ofSeconds(holdTimeOut - 1)).subscribe(o -> {
 		}, throwable -> {
+			client.onClose();
 			if (throwable instanceof TimeoutException) {
 				doQuickCompare(client);
 				return;
@@ -93,6 +100,16 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 	@Override
 	protected boolean compareConfigSign(String oldSign, String newSign) {
 		return false;
+	}
+
+	@Override
+	public List<WatchClientVO> queryWatchClient(String namespaceId, String groupId,
+			String dataId) {
+		List<WatchClientVO> target = super.queryWatchClient(namespaceId, groupId, dataId);
+		for (WatchClientVO client : target) {
+			client.setWatchType(WatchType.LONG_POLL.name());
+		}
+		return target;
 	}
 
 }

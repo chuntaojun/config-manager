@@ -18,11 +18,17 @@ package com.lessspring.org.server.web;
 
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.server.handler.NamespaceHandler;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.HandlerFunction;
+import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
@@ -36,7 +42,8 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
-public class NamespaceRouter {
+@SuppressWarnings("all")
+public class NamespaceRouter extends BaseRouter {
 
 	private final NamespaceHandler namespaceHandler;
 
@@ -46,17 +53,49 @@ public class NamespaceRouter {
 
 	@Bean(value = "namespaceRouterImpl")
 	public RouterFunction<ServerResponse> namespaceRouter() {
-		return route(
-				PUT(StringConst.API_V1 + "namespace/create")
-						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-				namespaceHandler::createNamespace)
-						.andRoute(
-								DELETE(StringConst.API_V1 + "namespace/delete")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								namespaceHandler::deleteNamespace)
-						.andRoute(
-								GET(StringConst.API_V1 + "namespace/all")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								namespaceHandler::queryAll);
+
+		Tuple2<RequestPredicate, HandlerFunction> createNp = Tuples
+				.of(PUT(StringConst.API_V1 + "namespace/create").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return namespaceHandler.createNamespace(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> deleteNp = Tuples
+				.of(DELETE(StringConst.API_V1 + "namespace/delete").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return namespaceHandler.createNamespace(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> allNp = Tuples
+				.of(GET(StringConst.API_V1 + "namespace/all").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return namespaceHandler.queryAll(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> owner = Tuples
+				.of(GET(StringConst.API_V1 + "namespace/owner").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return namespaceHandler.namespaceOwner(request);
+							}
+						});
+
+		registerVisitor(createNp, deleteNp, allNp, owner);
+
+		RouterFunction<ServerResponse> function = route(createNp.getT1(),
+				createNp.getT2()).andRoute(deleteNp.getT1(), deleteNp.getT2())
+						.andRoute(allNp.getT1(), allNp.getT2())
+						.andRoute(owner.getT1(), owner.getT2());
+		return function;
 	}
 }

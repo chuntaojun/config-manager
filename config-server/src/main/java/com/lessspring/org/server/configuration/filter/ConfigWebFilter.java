@@ -21,9 +21,11 @@ import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.context.TraceContext;
 import com.lessspring.org.context.TraceContextHolder;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.server.metrics.MetricsHelper;
 import com.lessspring.org.server.pojo.Privilege;
 import com.lessspring.org.server.service.security.SecurityService;
 import com.lessspring.org.server.utils.GsonUtils;
+import io.micrometer.core.instrument.DistributionSummary;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +59,7 @@ public class ConfigWebFilter implements WebFilter {
 	private TraceContextHolder contextHolder = TraceContextHolder.getInstance();
 	@Value("${com.lessspring.org.config-manager.anyuri:/}")
 	private String[] anyOneUri;
+	private DistributionSummary httpTrace;
 
 	public ConfigWebFilter(SecurityService securityService, FilterChain filterChain) {
 		this.securityService = securityService;
@@ -65,7 +68,8 @@ public class ConfigWebFilter implements WebFilter {
 
 	@PostConstruct
 	public void init() {
-		filterChain.init();
+		httpTrace = MetricsHelper.builderSummary("conf-http-trace", "conf-http-trace");
+		filterChain.init(anyOneUri);
 	}
 
 	@PreDestroy
@@ -75,8 +79,13 @@ public class ConfigWebFilter implements WebFilter {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+		httpTrace.record(1.0D);
 		ServerHttpRequest request = exchange.getRequest();
 		String path = request.getPath().value();
+		// Filter ahead of time by URL whitelist
+		if (uriMatcher(path, anyOneUri)) {
+			return chain.filter(exchange);
+		}
 		// Give priority to perform user custom interceptors
 		Mono<Void> mono = filterChain.filter(exchange);
 		filterChain.destroy();
@@ -85,15 +94,14 @@ public class ConfigWebFilter implements WebFilter {
 		}
 		// To release the URL white list
 		openTraceContext(request);
-		if (uriMatcher(path, anyOneUri)) {
-			return chain.filter(exchange);
-		}
 		boolean hasAuth = permissionIntercept(exchange);
 		if (!hasAuth) {
 			return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
 					HASH_NO_PRIVILEGE.getDescribe());
 		}
-		return chain.filter(exchange);
+		Mono<Void> result = chain.filter(exchange);
+		httpTrace.record(-1.0D);
+		return result;
 	}
 
 	private void openTraceContext(ServerHttpRequest request) {

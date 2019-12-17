@@ -16,20 +16,19 @@
  */
 package com.lessspring.org.server.service.config;
 
+import com.lessspring.org.AsyncCallback;
 import com.lessspring.org.IDUtils;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.pojo.request.IDRequest;
-import com.lessspring.org.server.pojo.request.SubIDRequest;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.raft.pojo.TransactionId;
+import com.lessspring.org.server.pojo.request.IDRequest;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.server.service.distributed.TransactionConsumer;
-import com.lessspring.org.server.utils.BzConstants;
 import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
@@ -38,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +64,7 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 	private BaseTransactionCommitCallback commitCallback;
 
 	@Override
-	public void init(int retry) {
+	public void init() {
 
 		commitCallback.registerConsumer(PropertiesEnum.Bz.TRANSACTION_ID_MANAGER,
 				new TransactionConsumer<Transaction>() {
@@ -78,36 +76,32 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 						IDRequest request = GsonUtils.toObj(transaction.getData(),
 								IDRequest.class);
 						final String self = request.getLocalName();
-						for (SubIDRequest request1 : request.getSubIDRequests()) {
-							final TransactionId transactionId;
-							// 如果不存在
-							if (!manager.containsKey(request1.getLabel())) {
-								transactionId = new TransactionId(request1.getLabel());
-								transactionId.setStart(request1.getStart());
-								transactionId.setEnd(request1.getEnd());
+						final TransactionId transactionId;
+						if (!manager.containsKey(request.getLabel())) {
+							transactionId = new TransactionId(request.getLabel(), ConfigTransactionIdManager.this);
+							transactionId.setStart(request.getStart());
+							transactionId.setEnd(request.getEnd());
+							if (nodeManager.isSelf(self)) {
+								transactionId.setId(request.getStart());
+							}
+							manager.put(request.getLabel(), transactionId);
+							oldMap.put((byte) -1, transactionId.saveOld());
+						}
+						else {
+							// 如果当前申请ID序列的可以进入
+							transactionId = manager.get(request.getLabel());
+							oldMap.put((byte) 1, transactionId.saveOld());
+							long originEnd = transactionId.getEnd();
+							if (originEnd < request.getStart()) {
+								transactionId.setStart(request.getStart());
+								transactionId.setEnd(request.getEnd());
 								if (nodeManager.isSelf(self)) {
-									transactionId.setId(request1.getStart());
+									transactionId.setId(request.getStart());
 								}
-								manager.put(request1.getLabel(), transactionId);
-								oldMap.put((byte) -1, transactionId.saveOld());
+								manager.put(request.getLabel(), transactionId);
 							}
-							else {
-								// 如果当前申请ID序列的可以进入
-								transactionId = manager.get(request1.getLabel());
-								oldMap.put((byte) 1, transactionId.saveOld());
-								long originEnd = transactionId.getEnd();
-								if (originEnd < request1.getStart()) {
-									transactionId.setStart(request1.getStart());
-									transactionId.setEnd(request1.getEnd());
-									if (nodeManager.isSelf(self)) {
-										transactionId.setId(request1.getStart());
-									}
-									manager.put(request1.getLabel(), transactionId);
-									continue;
-								}
-								throw new TransactionException("[{" + request1.getLabel()
-										+ "}] ID application conflict");
-							}
+							throw new TransactionException("[{" + request.getLabel()
+									+ "}] ID application conflict");
 						}
 					}
 
@@ -124,24 +118,18 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 					}
 				}, "apply");
 
-		long start = retry * 10000L + (retry == 0 ? 0 : 1);
+		manager.forEach((s, transactionId) -> applyId(transactionId, 0, AsyncCallback.DEFAULT_ASYNC_CALLBACK));
+
+	}
+
+	@Override
+	public void applyId(TransactionId transactionId, long retry, AsyncCallback callback) {
+		int maxRetry = 3;
+		long start = transactionId.getStart() + retry * 10000L + (retry == 0 ? 0 : 1);
 		long end = start + 10000L;
-
-		final SubIDRequest configInfoId = SubIDRequest.builder()
-				.label(BzConstants.CONFIG_INFO).start(start).end(end).build();
-
-		final SubIDRequest betaInfoId = SubIDRequest.builder()
-				.label(BzConstants.CONFIG_INFO_BETA).start(start).end(end).build();
-
-		final SubIDRequest historyId = SubIDRequest.builder()
-				.label(BzConstants.CONFIG_INFO_HISTORY).start(start).end(end).build();
-
-		IDRequest request = IDRequest.builder().localName(nodeManager.getSelf().getKey())
-				.subIDRequests(Arrays.asList(configInfoId, betaInfoId, historyId))
-				.build();
-
-		log.info("[TransactionIdManager] init : {}", GsonUtils.toJson(request));
-
+		final IDRequest request = IDRequest.builder()
+				.label(transactionId.getBz()).start(start).end(end).build();
+		log.info("[TransactionIdManager] init : \n{}", GsonUtils.toJson(request));
 		String key = TransactionUtils.buildTransactionKey(
 				PropertiesEnum.InterestKey.TRANSACTION_ID_MANAGER,
 				IDUtils.generateBase64(GsonUtils.toJson(request)));
@@ -154,7 +142,14 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 
 		future.thenAccept(booleanResponseData -> {
 			if (!booleanResponseData.getData()) {
-				init(retry + 1);
+				long tmpRetry = retry + 1;
+				if (tmpRetry == maxRetry) {
+					callback.onFail();
+					return;
+				}
+				applyId(transactionId,retry + 1, callback);
+			} else {
+				callback.onSuccess();
 			}
 		});
 	}
