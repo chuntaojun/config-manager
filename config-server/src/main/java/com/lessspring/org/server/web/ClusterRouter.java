@@ -18,10 +18,13 @@ package com.lessspring.org.server.web;
 
 import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.server.handler.ClusterHandler;
+import reactor.util.function.Tuples;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.HandlerFunction;
+import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -36,6 +39,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
+@SuppressWarnings("all")
 public class ClusterRouter extends BaseRouter {
 
 	private final ClusterHandler clusterHandler;
@@ -46,18 +50,25 @@ public class ClusterRouter extends BaseRouter {
 
 	@Bean(value = "clusterRouterImpl")
 	public RouterFunction<ServerResponse> clusterRouter() {
-		RouterFunction<ServerResponse> function = route(
-				PUT(ApiConstant.CLUSTER_NODE_JOIN)
-						.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-				clusterHandler::joinNode)
-						.andRoute(
-								GET(ApiConstant.REFRESH_CLUSTER_NODE_INFO)
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								clusterHandler::serverNodes)
-						.andRoute(
-								DELETE(ApiConstant.CLUSTER_NODE_LEAVE)
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								clusterHandler::leaveNode);
+
+		RequestPredicate nodeJoin = PUT(ApiConstant.CLUSTER_NODE_JOIN)
+				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+
+		RequestPredicate allNodes = GET(ApiConstant.REFRESH_CLUSTER_NODE_INFO)
+				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+
+		RequestPredicate removeNode = DELETE(ApiConstant.CLUSTER_NODE_LEAVE)
+				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+
+		HandlerFunction<ServerResponse> nodeJoinHF = clusterHandler::joinNode;
+		HandlerFunction<ServerResponse> serverNodesHF = clusterHandler::serverNodes;
+		HandlerFunction<ServerResponse> removeNodeHF = clusterHandler::leaveNode;
+
+		registerVisitor(Tuples.of(nodeJoin, nodeJoinHF),
+				Tuples.of(allNodes, serverNodesHF), Tuples.of(removeNode, removeNodeHF));
+
+		RouterFunction<ServerResponse> function = route(nodeJoin, nodeJoinHF)
+				.andRoute(allNodes, serverNodesHF).andRoute(removeNode, removeNodeHF);
 		return function;
 	}
 

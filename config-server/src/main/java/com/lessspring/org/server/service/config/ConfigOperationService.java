@@ -16,19 +16,6 @@
  */
 package com.lessspring.org.server.service.config;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
@@ -41,11 +28,9 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
-import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
-import com.lessspring.org.raft.pojo.TransactionId;
 import com.lessspring.org.server.exception.NotThisResourceException;
 import com.lessspring.org.server.pojo.event.config.ConfigChangeEvent;
 import com.lessspring.org.server.pojo.event.config.ConfigChangeEventHandler;
@@ -72,9 +57,20 @@ import com.lessspring.org.server.utils.VOUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -132,10 +128,6 @@ public class ConfigOperationService
 
 	@PostConstruct
 	public void init() {
-		TransactionIdManager manager = clusterManager.getTransactionIdManager();
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO));
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA));
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY));
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, publishConsumer(),
 				createConfig);
 		commitCallback.registerConsumer(PropertiesEnum.Bz.CONFIG, modifyConsumer(),

@@ -16,11 +16,11 @@
  */
 package com.lessspring.org.server.utils;
 
-import java.lang.reflect.Type;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -28,7 +28,9 @@ import com.google.gson.reflect.TypeToken;
  */
 public final class GsonUtils {
 
-	private static final Gson GSON = new GsonBuilder().setLenient().create();
+	private static final Gson GSON = new GsonBuilder()
+			.setPrettyPrinting()
+			.setLenient().create();
 
 	public static String toJson(Object obj) {
 		return GSON.toJson(obj);

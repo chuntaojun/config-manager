@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.raft;
 
+import com.lessspring.org.AsyncCallback;
 import com.lessspring.org.raft.pojo.TransactionId;
 
 import java.util.Map;
@@ -29,12 +30,21 @@ public interface TransactionIdManager {
 	/**
 	 * init
 	 */
-	void init(int retry);
+	void init();
+
+	/**
+	 * apply new ids
+	 *
+	 * @param transactionId {@link TransactionId
+	 * @param retry retry times
+	 * @param callback {@link AsyncCallback}
+	 */
+	void applyId(TransactionId transactionId, long retry, AsyncCallback callback);
 
 	/**
 	 * query {@link TransactionId} by bz
 	 *
-	 * @param bz bussiness
+	 * @param bz business
 	 * @return {@link TransactionId}
 	 */
 	TransactionId query(String bz);

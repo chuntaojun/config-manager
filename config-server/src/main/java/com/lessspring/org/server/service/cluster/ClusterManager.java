@@ -16,20 +16,13 @@
  */
 package com.lessspring.org.server.service.cluster;
 
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-
 import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 import com.lessspring.org.raft.ClusterServer;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.SnapshotOperate;
@@ -37,14 +30,24 @@ import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.ServerNode;
+import com.lessspring.org.raft.pojo.TransactionId;
 import com.lessspring.org.raft.vo.ServerNodeVO;
 import com.lessspring.org.server.pojo.request.NodeChangeRequest;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
+import com.lessspring.org.server.utils.BzConstants;
 import com.lessspring.org.server.utils.PathConstants;
 import com.lessspring.org.server.utils.SpringUtils;
 import com.lessspring.org.server.utils.VOUtils;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -52,7 +55,7 @@ import reactor.core.publisher.Mono;
  */
 @SuppressWarnings("all")
 @Slf4j
-public class ClusterManager {
+public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements Watcher<ServerNodeChangeEvent> {
 
 	private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
 	private final NodeManager nodeManager = NodeManager.getInstance();
@@ -93,10 +96,17 @@ public class ClusterManager {
 			clusterServer.registerSnapshotOperator(snapshotOperate);
 			clusterServer.initTransactionIdManger(transactionIdManager);
 			clusterServer.init();
-			transactionIdManager.init(0);
-			eventBus.register(this);
-			eventBus.register(clusterServer);
+			registerTransactionId(transactionIdManager);
+			registerWatcher(this::onNotify);
+			registerWatcher(clusterServer);
 		}
+	}
+
+	private void registerTransactionId(TransactionIdManager manager) {
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO, manager));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA, manager));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY, manager));
+		manager.init();
 	}
 
 	public void destroy() {
@@ -150,24 +160,24 @@ public class ClusterManager {
 	}
 
 	private void publishEvent(ServerNodeChangeEvent event) {
-		eventBus.post(event);
+		notifyAllWatcher(event);
 	}
 
-	@Subscribe
-	public void onChange(ServerNodeChangeEvent event) {
+	@Override
+	public void onNotify(Occurrence<ServerNodeChangeEvent> occurrence, Publisher publisher) {
+		ServerNodeChangeEvent event = occurrence.getOrigin();
 		ServerNode node = ServerNode.builder().nodeIp(event.getNodeIp())
 				.port(event.getNodePort()).build();
 		switch (event.getType()) {
-		case PUBLISH:
-			nodeManager.nodeJoin(node);
-			break;
-		case DELETE:
-			nodeManager.nodeLeave(node);
-			break;
-		default:
-			throw new IllegalArgumentException(
-					"Illegal cluster nodes transfer event type");
+			case PUBLISH:
+				nodeManager.nodeJoin(node);
+				break;
+			case DELETE:
+				nodeManager.nodeLeave(node);
+				break;
+			default:
+				throw new IllegalArgumentException(
+						"Illegal cluster nodes transfer event type");
 		}
 	}
-
 }

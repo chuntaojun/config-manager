@@ -16,15 +16,6 @@
  */
 package com.lessspring.org.raft;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.alipay.remoting.InvokeCallback;
 import com.alipay.remoting.exception.RemotingException;
 import com.alipay.sofa.jraft.entity.Task;
@@ -34,12 +25,24 @@ import com.lessspring.org.SerializerUtils;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.observer.Occurrence;
+import com.lessspring.org.observer.Publisher;
+import com.lessspring.org.observer.Watcher;
 import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Response;
-import com.lessspring.org.raft.pojo.TransactionId;
 import com.lessspring.org.raft.pojo.ServerNode;
+import com.lessspring.org.raft.pojo.TransactionId;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -47,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @SuppressWarnings("unchecked")
-public class ClusterServer implements LifeCycle {
+public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle {
 
 	private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
 	private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
@@ -179,20 +182,6 @@ public class ClusterServer implements LifeCycle {
 		return false;
 	}
 
-	@Subscribe
-	public void onChange(ServerNodeChangeEvent nodeChangeEvent) {
-		needInitialized();
-		EventType type = nodeChangeEvent.getType();
-		ServerNode serverNode = ServerNode.builder().nodeIp(nodeChangeEvent.getNodeIp())
-				.port(nodeChangeEvent.getNodePort()).build();
-		if (EventType.PUBLISH.equals(type)) {
-			raftServer.addNode(serverNode);
-		}
-		else {
-			raftServer.removeNode(serverNode);
-		}
-	}
-
 	private void needInitialized() {
 		if (!initialize.get()) {
 			throw new IllegalStateException("Uninitialized cluster");
@@ -215,4 +204,18 @@ public class ClusterServer implements LifeCycle {
 		}
 	}
 
+	@Override
+	public void onNotify(Occurrence<ServerNodeChangeEvent> occurrence, Publisher publisher) {
+		ServerNodeChangeEvent nodeChangeEvent = occurrence.getOrigin();
+		needInitialized();
+		EventType type = nodeChangeEvent.getType();
+		ServerNode serverNode = ServerNode.builder().nodeIp(nodeChangeEvent.getNodeIp())
+				.port(nodeChangeEvent.getNodePort()).build();
+		if (EventType.PUBLISH.equals(type)) {
+			raftServer.addNode(serverNode);
+		}
+		else {
+			raftServer.removeNode(serverNode);
+		}
+	}
 }

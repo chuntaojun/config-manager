@@ -45,7 +45,7 @@ public class PageRouter {
 
 	@Bean(value = "pageRouterImpl")
 	public RouterFunction<ServerResponse> notifyRouter() {
-		return route(GET("/").and(accept(MediaType.ALL)),
+		return route(GET("/page/login").and(accept(MediaType.ALL)),
 				request -> ok().syncBody(loginHtml))
 						.andRoute(GET("/page/index").and(accept(MediaType.ALL)),
 								request -> ok().syncBody(indexHtml))

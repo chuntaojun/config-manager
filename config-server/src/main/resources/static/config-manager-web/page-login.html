@@ -93,7 +93,7 @@
                     window.location.href = "/page/index"
                 } else {
                     alert(result['errMsg'])
-                    window.location.href = "/"
+                    window.location.href = "/page/login"
                 }
             }
         })
@@ -121,7 +121,7 @@
                 } else {
                     window.clearInterval(Number(sessionStorage.getItem("logout_clear")))
                     alert(result['errMsg'])
-                    window.location.href = "/"
+                    window.location.href = "/page/login"
                 }
             }
         })

@@ -16,6 +16,11 @@
  */
 package com.lessspring.org.raft.pojo;
 
+import com.lessspring.org.AsyncCallback;
+import com.lessspring.org.raft.TransactionIdManager;
+
+import java.util.Objects;
+
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -26,9 +31,12 @@ public class TransactionId implements Cloneable {
 	private Long end = 10000L;
 	private final String bz;
 	private Long id = 0L;
+	private volatile boolean inApply = false;
+	private final TransactionIdManager manager;
 
-	public TransactionId(String bz) {
+	public TransactionId(String bz, TransactionIdManager manager) {
 		this.bz = bz;
+		this.manager = manager;
 	}
 
 	public Long getStart() {
@@ -56,13 +64,25 @@ public class TransactionId implements Cloneable {
 	}
 
 	public synchronized Long increaseAndObtain() {
+		while (inApply) {
+			// await id apply
+		}
 		id += 1;
+		if (Objects.equals(id, end)) {
+			needToApply();
+		}
 		return id;
 	}
 
 	public synchronized Long obtainAndIncrease() {
+		while (inApply) {
+			// await id apply
+		}
 		Long tmp = id;
 		id += 1;
+		if (Objects.equals(id, end)) {
+			needToApply();
+		}
 		return tmp;
 	}
 
@@ -70,8 +90,18 @@ public class TransactionId implements Cloneable {
 		this.id = id;
 	}
 
+	private void needToApply() {
+		inApply = true;
+		manager.applyId(this, 0, new AsyncCallback() {
+			@Override
+			public void onSuccess() {
+				inApply = false;
+			}
+		});
+	}
+
 	public TransactionId saveOld() {
-		TransactionId old = new TransactionId(bz);
+		TransactionId old = new TransactionId(bz, manager);
 		old.setStart(start);
 		old.setEnd(end);
 		old.setId(id);

@@ -19,6 +19,8 @@ package com.lessspring.org;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
@@ -51,9 +53,28 @@ public final class ReflectUtils {
 
 	public static <T> T newInstance(Class<T> cls, Class[] type, Object... param) {
 		try {
-			Constructor<T> constructor = cls.getDeclaredConstructor(type);
+			Constructor<T> constructor;
+			if (Objects.isNull(type) || type.length < 1) {
+				constructor = (Constructor<T>) cls.getDeclaredConstructors()[0];
+			} else {
+				constructor = cls.getDeclaredConstructor(type);
+			}
 			constructor.setAccessible(true);
 			return constructor.newInstance(param);
+		} catch (Exception ignore) {
+			return null;
+		}
+	}
+
+	public static Method getMethod(Object obj, String methodName, Class... paramTypes) {
+		return getMethod(obj.getClass(), methodName, paramTypes);
+	}
+
+	public static Method getMethod(Class<?> cls, String methodName, Class... paramTypes) {
+		try {
+			Method method = cls.getDeclaredMethod(methodName, paramTypes);
+			method.setAccessible(true);
+			return method;
 		} catch (Exception ignore) {
 			return null;
 		}

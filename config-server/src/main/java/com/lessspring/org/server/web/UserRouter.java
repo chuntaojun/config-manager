@@ -18,11 +18,17 @@ package com.lessspring.org.server.web;
 
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.server.handler.UserHandler;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.HandlerFunction;
+import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
@@ -37,6 +43,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
+@SuppressWarnings("all")
 public class UserRouter extends BaseRouter {
 
 	private final UserHandler userHandler;
@@ -47,25 +54,59 @@ public class UserRouter extends BaseRouter {
 
 	@Bean(value = "userRouterImpl")
 	public RouterFunction<ServerResponse> userRouterImpl() {
-		RouterFunction<ServerResponse> function = route(POST(StringConst.API_V1 + "login")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8)), userHandler::login)
-						.andRoute(
-								PUT(StringConst.API_V1 + "createUser")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								userHandler::createUser)
-						.andRoute(
-								DELETE(StringConst.API_V1 + "removeUser")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								userHandler::removeUser)
-						.andRoute(
-								POST(StringConst.API_V1 + "modifyUser")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								userHandler::modifyUser)
-						.andRoute(
-								GET(StringConst.API_V1 + "allUser")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								userHandler::queryAll);
-		return function;
+
+		Tuple2<RequestPredicate, HandlerFunction> login = Tuples
+				.of(POST(StringConst.API_V1 + "login").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return userHandler.login(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> createUser = Tuples
+				.of(PUT(StringConst.API_V1 + "createUser").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return userHandler.createUser(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> deleteUser = Tuples
+				.of(DELETE(StringConst.API_V1 + "removeUser").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return userHandler.removeUser(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> modifyUser = Tuples
+				.of(POST(StringConst.API_V1 + "modifyUser").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return userHandler.modifyUser(request);
+							}
+						});
+
+		Tuple2<RequestPredicate, HandlerFunction> allUser = Tuples
+				.of(GET(StringConst.API_V1 + "allUser").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return userHandler.queryAll(request);
+							}
+						});
+
+		registerVisitor(login, createUser, deleteUser, modifyUser, allUser);
+
+		return route(login.getT1(), login.getT2())
+				.andRoute(createUser.getT1(), createUser.getT2())
+				.andRoute(deleteUser.getT1(), deleteUser.getT2())
+				.andRoute(modifyUser.getT1(), modifyUser.getT2())
+				.andRoute(allUser.getT1(), allUser.getT2());
 	}
 
 }

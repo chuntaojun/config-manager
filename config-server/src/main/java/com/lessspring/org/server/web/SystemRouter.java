@@ -17,13 +17,18 @@
 package com.lessspring.org.server.web;
 
 import com.lessspring.org.constant.StringConst;
-import com.lessspring.org.server.configuration.ConfVisitor;
 import com.lessspring.org.server.handler.SystemHandler;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -48,41 +53,78 @@ public class SystemRouter extends BaseRouter {
 	@Bean(value = "systemRouterImpl")
 	public RouterFunction<ServerResponse> systemRouter() {
 
-		RequestPredicate logAnalyze = GET(StringConst.API_V1 + "sys/log/publish/analyze")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> logAnalyze = Tuples
+				.of(GET(StringConst.API_V1 + "sys/log/publish/analyze").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.publishLog(request);
+							}
+						});
 
-		RequestPredicate heapDump = GET(StringConst.API_V1 + "sys/jvm/heapDump")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> heapDump = Tuples
+				.of(GET(StringConst.API_V1 + "sys/jvm/heapDump").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.jvmHeapDump(request);
+							}
+						});
 
-		RequestPredicate qps = GET(StringConst.API_V1 + "sys/qps/setting")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> qps = Tuples
+				.of(GET(StringConst.API_V1 + "sys/qps/setting").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.queryQpsSetting(request);
+							}
+						});
 
-		RequestPredicate qpsSetting = POST(StringConst.API_V1 + "sys/qps/setting/update")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> qpsSetting = Tuples
+				.of(POST(StringConst.API_V1 + "sys/qps/setting/update").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.publishQpsSetting(request);
+							}
+						});
 
-		RequestPredicate idManager = GET(StringConst.API_V1 + "sys/idManager/info")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> idManager = Tuples
+				.of(GET(StringConst.API_V1 + "sys/idManager/info").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.getAllTransactionIdInfo(request);
+							}
+						});
 
-		RequestPredicate logLevel = POST(StringConst.API_V1 + "sys/logLevel/update")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> logLevel = Tuples
+				.of(POST(StringConst.API_V1 + "sys/logLevel/update").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.changeLogLevel(request);
+							}
+						});
 
-		RequestPredicate forceDump = POST(StringConst.API_V1 + "sys/config/forceDump")
-				.and(accept(MediaType.APPLICATION_JSON_UTF8));
+		Tuple2<RequestPredicate, HandlerFunction> forceDump = Tuples
+				.of(POST(StringConst.API_V1 + "sys/config/forceDump").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return systemHandler.forceDumpConfig(request);
+							}
+						});
 
-		logAnalyze.accept(new ConfVisitor());
-		heapDump.accept(new ConfVisitor());
-		qps.accept(new ConfVisitor());
-		qpsSetting.accept(new ConfVisitor());
-		idManager.accept(new ConfVisitor());
-		logLevel.accept(new ConfVisitor());
-		forceDump.accept(new ConfVisitor());
+		registerVisitor(logAnalyze, heapDump, qps, qpsSetting, idManager, logLevel,
+				forceDump);
 
-		return route(logAnalyze,
-				systemHandler::publishLog).andRoute(heapDump, systemHandler::jvmHeapDump)
-						.andRoute(qps, systemHandler::queryQpsSetting)
-						.andRoute(qpsSetting, systemHandler::publishQpsSetting)
-						.andRoute(idManager, systemHandler::getAllTransactionIdInfo)
-						.andRoute(logLevel, systemHandler::changeLogLevel)
-						.andRoute(forceDump, systemHandler::forceDumpConfig);
+		return route(logAnalyze.getT1(), logAnalyze.getT2())
+				.andRoute(heapDump.getT1(), heapDump.getT2())
+				.andRoute(qps.getT1(), qps.getT2())
+				.andRoute(qpsSetting.getT1(), qpsSetting.getT2())
+				.andRoute(idManager.getT1(), idManager.getT2())
+				.andRoute(logLevel.getT1(), logLevel.getT2())
+				.andRoute(forceDump.getT1(), forceDump.getT2());
 	}
 }

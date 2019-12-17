@@ -18,10 +18,17 @@ package com.lessspring.org.server.web;
 
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.server.handler.NotifyHandler;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.server.HandlerFunction;
+import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -35,6 +42,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
+@SuppressWarnings("all")
 public class NotifyRouter extends BaseRouter {
 
 	private final NotifyHandler notifyHandler;
@@ -45,18 +53,41 @@ public class NotifyRouter extends BaseRouter {
 
 	@Bean(value = "notifyRouterImpl")
 	public RouterFunction<ServerResponse> notifyRouter() {
-		RouterFunction<ServerResponse> function = route(
+
+		Tuple2<RequestPredicate, HandlerFunction> watchSse = Tuples.of(
 				POST(StringConst.API_V1 + "watch/sse")
 						.and(contentType(MediaType.APPLICATION_JSON_UTF8)),
-				notifyHandler::watchSse)
-						.andRoute(
-								POST(StringConst.API_V1 + "watch/longPoll").and(
-										contentType(MediaType.APPLICATION_JSON_UTF8)),
-								notifyHandler::watchLongPoll)
-						.andRoute(
-								GET(StringConst.API_V1 + "config/watchClient")
-										.and(accept(MediaType.APPLICATION_JSON_UTF8)),
-								notifyHandler::watchClients);
+				new HandlerFunction() {
+					@Override
+					public Mono handle(ServerRequest request) {
+						return notifyHandler.watchSse(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> watchLp = Tuples.of(
+				POST(StringConst.API_V1 + "watch/longPoll")
+						.and(contentType(MediaType.APPLICATION_JSON_UTF8)),
+				new HandlerFunction() {
+					@Override
+					public Mono handle(ServerRequest request) {
+						return notifyHandler.watchLongPoll(request);
+					}
+				});
+
+		Tuple2<RequestPredicate, HandlerFunction> queryClient = Tuples
+				.of(GET(StringConst.API_V1 + "config/watchClient").and(
+						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
+							@Override
+							public Mono handle(ServerRequest request) {
+								return notifyHandler.watchClients(request);
+							}
+						});
+
+		registerVisitor(watchSse, watchLp, queryClient);
+
+		RouterFunction<ServerResponse> function = route(watchSse.getT1(),
+				watchSse.getT2()).andRoute(watchLp.getT1(), watchLp.getT2())
+						.andRoute(queryClient.getT1(), queryClient.getT2());
 		return function;
 	}
 

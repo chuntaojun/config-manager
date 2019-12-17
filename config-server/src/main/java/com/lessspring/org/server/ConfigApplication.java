@@ -23,6 +23,7 @@ import de.codecentric.boot.admin.server.config.AdminServerCloudFoundryAutoConfig
 import de.codecentric.boot.admin.server.config.AdminServerHazelcastAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerNotifierAutoConfiguration;
 import org.springframework.boot.ResourceBanner;
+import org.springframework.boot.actuate.autoconfigure.web.mappings.MappingsEndpointAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -38,18 +39,21 @@ import java.util.Optional;
 @SpringBootApplication(exclude = { AdminServerAutoConfiguration.class,
 		AdminServerCloudFoundryAutoConfiguration.class,
 		AdminServerNotifierAutoConfiguration.class,
-		AdminServerHazelcastAutoConfiguration.class, ThymeleafAutoConfiguration.class,
+		AdminServerHazelcastAutoConfiguration.class,
+		ThymeleafAutoConfiguration.class,
+		MappingsEndpointAutoConfiguration.class
 })
 public class ConfigApplication {
 
 	public static void main(String[] args) {
 		String openConfAdmin = Optional.ofNullable(System.getProperty("conf.admin")).orElse("false");
 		if (Objects.equals(Boolean.TRUE.toString(), openConfAdmin)) {
-			try {
 				AdminServerApplication.main(args);
-			} catch (Exception ignore) {
-			}
 		}
+		runApplication(args);
+	}
+
+	private static void runApplication(String[] args) {
 		SpringApplicationBuilder builder = new SpringApplicationBuilder();
 		builder.main(ConfigApplication.class).sources(ConfigApplication.class)
 				.banner(new ResourceBanner(new ByteArrayResource(bannerText())))
