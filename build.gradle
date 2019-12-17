@@ -8,6 +8,8 @@ subprojects {
     sourceCompatibility = 1.8
 
     repositories {
+        maven { url "https://maven.aliyun.com/repository/google" }
+        maven { url "https://maven.aliyun.com/repository/central" }
         mavenCentral()
     }
 

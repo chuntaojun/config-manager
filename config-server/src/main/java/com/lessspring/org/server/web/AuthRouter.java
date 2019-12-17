@@ -24,13 +24,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RequestPredicate;
 import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
-
-import javax.xml.ws.handler.Handler;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
@@ -41,6 +37,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  * @since 0.0.1
  */
 @Configuration
+@SuppressWarnings("all")
 public class AuthRouter extends BaseRouter {
 
 	private final AuthHandler authHandler;
@@ -52,17 +49,18 @@ public class AuthRouter extends BaseRouter {
 	@Bean(value = "authRouterImpl")
 	public RouterFunction<ServerResponse> authRouter() {
 
-		Tuple2<RequestPredicate, HandlerFunction<ServerResponse>> createAuth = Tuples.of(
+		Tuple2<RequestPredicate, HandlerFunction> createAuth = Tuples.of(
 				POST(StringConst.API + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::createAuth
 		);
 
-		Tuple2<RequestPredicate, HandlerFunction<ServerResponse>> removeAuth = Tuples.of(
+		Tuple2<RequestPredicate, HandlerFunction> removeAuth = Tuples.of(
 				POST(StringConst.API + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::removeAuth
 		);
 
 		registerVisitor(createAuth, removeAuth);
 
-		return route();
+		return route(createAuth.getT1(), createAuth.getT2())
+				.andRoute(removeAuth.getT1(), removeAuth.getT2());
 	}
 
 }
