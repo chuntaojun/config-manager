@@ -19,7 +19,9 @@ package com.lessspring.org.raft;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.lessspring.org.raft.pojo.ServerNode;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,10 +32,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class NodeManager implements LeaderStatusListener {
+
+	private final Comparator<ServerNode> nodeComparator = (o1, o2) -> {
+		String k1 = o1.getKey();
+		String k2 = o2.getKey();
+		return k1.compareTo(k2);
+	};
+
+	private List<ServerNode> nodeCache = new ArrayList<>();
 
 	private ServerNode self = null;
 
@@ -94,11 +104,16 @@ public class NodeManager implements LeaderStatusListener {
 	}
 
 	public synchronized Collection<ServerNode> serverNodes() {
-		return new HashMap<>(nodeMap).values();
+		if (nodeCache.isEmpty()) {
+			nodeCache = new ArrayList<>(nodeMap.values());
+			nodeCache.sort(nodeComparator);
+		}
+		return nodeCache;
 	}
 
 	private void notifyListener() {
-		Collection<ServerNode> nodes = nodeMap.values();
+		nodeCache.clear();
+		Collection<ServerNode> nodes = serverNodes();
 		for (NodeChangeListener listener : listeners) {
 			listener.onChange(nodes);
 		}

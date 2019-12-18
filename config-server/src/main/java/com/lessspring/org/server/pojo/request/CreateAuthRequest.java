@@ -30,23 +30,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils;
-
-import io.prometheus.client.Histogram;
+package com.lessspring.org.server.pojo.request;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class MetricsMonitor {
+public class CreateAuthRequest {
 
-	private static Histogram confClientRequestHistogram = Histogram.build()
-			.labelNames("module", "method", "url", "code").name("conf_client_request")
-			.help("conf_client_request").register();
+    private String namespaceId;
+    private String userName;
 
-	public static Histogram.Timer getRequestMonitor(String method, String url,
-			String code) {
-		return confClientRequestHistogram.labels("Conf", method, url, code).startTimer();
-	}
+    public String getNamespaceId() {
+        return namespaceId;
+    }
 
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 }

@@ -32,7 +32,7 @@ import com.lessspring.org.raft.TransactionCommitCallback;
 import com.lessspring.org.raft.TransactionIdManager;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
@@ -71,7 +71,7 @@ public abstract class RaftStateMachineAdaper extends StateMachineAdapter {
 	 *
 	 * @param snapshotOperate {@link SnapshotOperate}
 	 */
-	public abstract void registerSnapshotManager(SnapshotOperate snapshotOperate);
+	public abstract void registerSnapshotManager(SnapshotOperate... snapshotOperate);
 
 	@Override
 	public void onLeaderStart(final long term) {

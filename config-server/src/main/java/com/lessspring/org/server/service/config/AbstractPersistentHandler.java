@@ -20,7 +20,7 @@ import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.observer.Publisher;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class AbstractPersistentHandler extends Publisher<ConfigInfoHistoryDTO>

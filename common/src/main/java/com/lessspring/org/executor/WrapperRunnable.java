@@ -19,7 +19,7 @@ package com.lessspring.org.executor;
 import com.lessspring.org.context.PassThrough;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class WrapperRunnable extends PassThrough implements Runnable {

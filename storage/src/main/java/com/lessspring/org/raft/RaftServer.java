@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Requires user can customize the cluster parameters
  *
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
@@ -147,7 +147,7 @@ class RaftServer implements LifeCycle {
 		csm.registerTransactionCommitCallback(commitCallback);
 	}
 
-	void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
+	void registerSnapshotOperator(SnapshotOperate... snapshotOperate) {
 		csm.registerSnapshotManager(snapshotOperate);
 	}
 

@@ -21,7 +21,7 @@ import java.util.Arrays;
 import com.lessspring.org.event.EventType;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class ConfigChangeEvent extends BaseEvent {

@@ -8,6 +8,7 @@ function requireFileBtn(value, row, index) {
 window.operateEvents = {
     'click .LookDetail': function (e, value, row, index) {
         const namespaceId = row['namespaceId']
+        $('#namespace_id_holder').val(namespaceId)
         $.ajax({
             url: HTTP_REQUEST_API_URL + '/api/v1/namespace/owner?namespaceId=' + namespaceId,
             type: 'GET',

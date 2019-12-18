@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.server.web;
 
+import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.server.handler.AuthHandler;
 
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Configuration
@@ -50,11 +51,11 @@ public class AuthRouter extends BaseRouter {
 	public RouterFunction<ServerResponse> authRouter() {
 
 		Tuple2<RequestPredicate, HandlerFunction> createAuth = Tuples.of(
-				POST(StringConst.API + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::createAuth
+				POST(StringConst.API_V1 + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::createAuth
 		);
 
 		Tuple2<RequestPredicate, HandlerFunction> removeAuth = Tuples.of(
-				POST(StringConst.API + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::removeAuth
+				POST(StringConst.API_V1 + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::removeAuth
 		);
 
 		registerVisitor(createAuth, removeAuth);

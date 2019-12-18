@@ -86,18 +86,44 @@
                 <h4 class="modal-title" id="access_user">可访问用户</h4>
             </div>
             <div class="modal-body" style="height:200px;">
+                <input hidden type="text" value="" id="namespace_id_holder">
                 <div class="form-group col-md-12">
                     <div class="row">
                         <div class="form-group col-md-12">
                             <label for="owners">Access this resource users</label>
-                            <textarea id="owners" rows="5" cols="8" class="form-control" contenteditable='true'></textarea>
+                            <textarea disabled id="owners" rows="5" cols="8" class="form-control" contenteditable='true'></textarea>
                         </div>
                     </div>
                 </div>
             </div>
 			<div class="modal-footer" style="">
-				<button class="btn btn-success" onclick="addPermission()">提交</button>
+                <button class="btn btn-info" data-toggle="modal" data-target="#namespace_detail" style="margin-right:15px;">添加可访问者</button>
 			</div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<div class="modal fade" id="namespace_accessor_add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width:400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="access_user">可访问用户</h4>
+            </div>
+            <div class="modal-body" style="height:200px;">
+                <div class="form-group col-md-12">
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="owners">Access this resource users</label>
+                            <input id="add_owner" class="form-control" type="text" ></input>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="">
+                <button class="btn btn-success" onclick="addPermission()">提交</button>
+            </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal -->
 </div>
@@ -136,7 +162,7 @@
     $(".w-e-text-container").height(630);
     
     function addPermission() {
-		
+        const namespaceId = $('#namespace_id_holder').val()
 	}
 
 	function namespaceChange() {

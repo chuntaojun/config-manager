@@ -46,7 +46,7 @@ import static org.springframework.boot.context.logging.LoggingApplicationListene
 import static org.springframework.core.io.ResourceLoader.CLASSPATH_URL_PREFIX;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class LoggingSpringApplicationRunListener

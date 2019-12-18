@@ -24,7 +24,7 @@ import okhttp3.sse.EventSource;
 /**
  * For the use of user-defined SSE the receiving processor
  *
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class EventReceiver<T> {

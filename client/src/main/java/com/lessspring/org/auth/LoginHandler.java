@@ -37,7 +37,7 @@ import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class LoginHandler implements Watcher, LifeCycle {

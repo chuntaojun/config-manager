@@ -19,7 +19,7 @@ package com.lessspring.org.server.pojo.event.config;
 import java.lang.ref.SoftReference;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class NotifyEventHandler {

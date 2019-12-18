@@ -16,95 +16,39 @@
  */
 package com.lessspring.org.raft.pojo;
 
-import com.lessspring.org.AsyncCallback;
-import com.lessspring.org.raft.TransactionIdManager;
-
-import java.util.Objects;
+import com.lessspring.org.server.utils.SnakflowerIdHelper;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class TransactionId implements Cloneable {
 
-	private Long start = 0L;
-	private Long end = 10000L;
 	private final String bz;
-	private Long id = 0L;
-	private volatile boolean inApply = false;
-	private final TransactionIdManager manager;
+	private Long nowId;
+	private SnakflowerIdHelper snakflowerIdHelper;
 
-	public TransactionId(String bz, TransactionIdManager manager) {
+	public TransactionId(String bz) {
 		this.bz = bz;
-		this.manager = manager;
 	}
 
-	public Long getStart() {
-		return start;
-	}
-
-	public void setStart(Long start) {
-		this.start = start;
-	}
-
-	public Long getEnd() {
-		return end;
-	}
-
-	public void setEnd(Long end) {
-		this.end = end;
+	public void setSnakflowerIdHelper(SnakflowerIdHelper snakflowerIdHelper) {
+		this.snakflowerIdHelper = snakflowerIdHelper;
+		this.nowId = snakflowerIdHelper.nextId();
 	}
 
 	public String getBz() {
 		return bz;
 	}
 
-	public Long getId() {
-		return id;
+	public Long getNowId() {
+		return nowId;
 	}
 
 	public synchronized Long increaseAndObtain() {
-		while (inApply) {
-			// await id apply
-		}
-		id += 1;
-		if (Objects.equals(id, end)) {
-			needToApply();
-		}
-		return id;
+		long tmpId = nowId;
+		nowId = snakflowerIdHelper.nextId();
+		return tmpId;
 	}
 
-	public synchronized Long obtainAndIncrease() {
-		while (inApply) {
-			// await id apply
-		}
-		Long tmp = id;
-		id += 1;
-		if (Objects.equals(id, end)) {
-			needToApply();
-		}
-		return tmp;
-	}
-
-	public synchronized void setId(Long id) {
-		this.id = id;
-	}
-
-	private void needToApply() {
-		inApply = true;
-		manager.applyId(this, 0, new AsyncCallback() {
-			@Override
-			public void onSuccess() {
-				inApply = false;
-			}
-		});
-	}
-
-	public TransactionId saveOld() {
-		TransactionId old = new TransactionId(bz, manager);
-		old.setStart(start);
-		old.setEnd(end);
-		old.setId(id);
-		return old;
-	}
 }

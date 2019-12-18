@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Configuration
@@ -38,9 +38,9 @@ public class RaftNodeConfiguration {
 	@Bean
 	public ClusterManager clusterManager(
 			@Autowired List<BaseTransactionCommitCallback> commitCallbacks,
-			SnapshotOperate snapshotOperate, TransactionIdManager transactionIdManager,
+			List<SnapshotOperate> snapshotOperates, TransactionIdManager transactionIdManager,
 			PathConstants pathConstants) {
-		return new ClusterManager(commitCallbacks, snapshotOperate, transactionIdManager,
+		return new ClusterManager(commitCallbacks, snapshotOperates, transactionIdManager,
 				pathConstants);
 	}
 

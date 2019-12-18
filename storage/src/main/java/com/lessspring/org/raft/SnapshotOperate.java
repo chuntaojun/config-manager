@@ -24,7 +24,7 @@ import com.google.protobuf.ByteString;
 import com.lessspring.org.server.utils.GsonUtils;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public interface SnapshotOperate {

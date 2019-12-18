@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 import static com.lessspring.org.server.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j

@@ -46,7 +46,7 @@ import static com.lessspring.org.server.utils.PropertiesEnum.Jwt.TOKEN_STATUS_HE
 import static com.lessspring.org.server.utils.PropertiesEnum.Jwt.TOKEN_STATUS_REFRESH;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.`
  */
 @Slf4j

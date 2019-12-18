@@ -20,7 +20,7 @@ import com.lessspring.org.LifeCycle;
 import com.lessspring.org.server.service.dump.task.DumpTask;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public interface DumpProcessor<T extends DumpTask> extends LifeCycle {

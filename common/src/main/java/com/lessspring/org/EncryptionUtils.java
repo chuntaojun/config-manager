@@ -35,7 +35,7 @@ import com.lessspring.org.server.utils.ByteUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @SuppressWarnings("all")

@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
@@ -104,7 +104,7 @@ public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle 
 		this.raftServer.initTransactionIdManager(transactionIdManager);
 	}
 
-	public void registerSnapshotOperator(SnapshotOperate snapshotOperate) {
+	public void registerSnapshotOperator(SnapshotOperate... snapshotOperate) {
 		raftServer.registerSnapshotOperator(snapshotOperate);
 	}
 

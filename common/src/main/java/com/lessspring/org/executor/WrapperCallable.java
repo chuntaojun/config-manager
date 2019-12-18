@@ -21,7 +21,7 @@ import com.lessspring.org.context.PassThrough;
 import java.util.concurrent.Callable;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class WrapperCallable<V> extends PassThrough implements Callable<V> {

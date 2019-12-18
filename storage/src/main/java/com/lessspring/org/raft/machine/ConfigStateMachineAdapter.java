@@ -33,12 +33,13 @@ import com.lessspring.org.raft.pojo.TransactionId;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Slf4j
@@ -69,15 +70,6 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 						datum = serializer.deserialize(data.array(), Datum.class);
 					}
 					final long id = datum.getId();
-					if (!isLeader()) {
-						// Bz Id synchronization
-						final TransactionId transactionId = transactionIdManager
-								.query(datum.getKey());
-						// This business is not globally unique ID requirements, ignored
-						if (transactionId != null) {
-							transactionId.setId(id);
-						}
-					}
 					final Transaction transaction = new Transaction(id,
 							datum.getKey(), datum.getValue(), datum.getOperation());
 					// For each transaction, according to the different processing of
@@ -143,8 +135,8 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 	}
 
 	@Override
-	public void registerSnapshotManager(SnapshotOperate snapshotOperate) {
-		this.snapshotOperates.add(snapshotOperate);
+	public void registerSnapshotManager(SnapshotOperate... snapshotOperate) {
+		this.snapshotOperates.addAll(Arrays.asList(snapshotOperate));
 	}
 
 }

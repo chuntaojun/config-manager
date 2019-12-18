@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public final class StrackTracekUtils {

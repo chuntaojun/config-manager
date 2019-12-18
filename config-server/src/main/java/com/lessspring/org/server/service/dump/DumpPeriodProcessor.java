@@ -25,7 +25,7 @@ import com.lessspring.org.server.repository.ConfigInfoMapper;
 import com.lessspring.org.server.service.dump.task.DumpTask4Period;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class DumpPeriodProcessor implements DumpProcessor<DumpTask4Period> {

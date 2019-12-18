@@ -25,7 +25,7 @@ import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.observer.Publisher;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class AuthHolder extends Publisher {

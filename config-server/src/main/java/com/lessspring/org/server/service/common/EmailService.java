@@ -19,7 +19,7 @@ package com.lessspring.org.server.service.common;
 import com.lessspring.org.server.pojo.event.email.BaseEmailEvent;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public interface EmailService {

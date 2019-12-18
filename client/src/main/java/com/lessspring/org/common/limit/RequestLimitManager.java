@@ -24,7 +24,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.lessspring.org.LifeCycle;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class RequestLimitManager implements LifeCycle {

@@ -50,7 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @SuppressWarnings("all")
@@ -59,7 +59,7 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 
 	private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
 	private final NodeManager nodeManager = NodeManager.getInstance();
-	private final SnapshotOperate snapshotOperate;
+	private final List<SnapshotOperate> snapshotOperates;
 	private final List<BaseTransactionCommitCallback> commitCallbacks;
 	private final AtomicBoolean initialize = new AtomicBoolean(false);
 	private final TransactionIdManager transactionIdManager;
@@ -67,10 +67,10 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 	private ClusterServer clusterServer;
 
 	public ClusterManager(List<BaseTransactionCommitCallback> commitCallbacks,
-			SnapshotOperate snapshotOperate, TransactionIdManager transactionIdManager,
+						  List<SnapshotOperate> snapshotOperates, TransactionIdManager transactionIdManager,
 			PathConstants pathConstants) {
 		this.commitCallbacks = commitCallbacks;
-		this.snapshotOperate = snapshotOperate;
+		this.snapshotOperates = snapshotOperates;
 		this.transactionIdManager = transactionIdManager;
 		this.pathConstants = pathConstants;
 	}
@@ -93,7 +93,7 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);
 			}
-			clusterServer.registerSnapshotOperator(snapshotOperate);
+			clusterServer.registerSnapshotOperator(snapshotOperates.toArray(new SnapshotOperate[0]));
 			clusterServer.initTransactionIdManger(transactionIdManager);
 			clusterServer.init();
 			registerTransactionId(transactionIdManager);
@@ -103,9 +103,9 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 	}
 
 	private void registerTransactionId(TransactionIdManager manager) {
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO, manager));
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA, manager));
-		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY, manager));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA));
+		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY));
 		manager.init();
 	}
 

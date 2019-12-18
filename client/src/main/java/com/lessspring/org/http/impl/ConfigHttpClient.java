@@ -56,7 +56,7 @@ import static com.lessspring.org.constant.Code.UNAUTHORIZED;
 import static com.lessspring.org.http.param.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 class ConfigHttpClient implements HttpClient {

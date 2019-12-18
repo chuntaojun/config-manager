@@ -22,7 +22,7 @@ import com.lessspring.org.raft.pojo.Datum;
 /**
  * Used for processing a request from the followers
  *
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class BaseAsyncUserProcessor<T extends Datum>

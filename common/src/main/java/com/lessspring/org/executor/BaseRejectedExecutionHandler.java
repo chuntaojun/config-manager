@@ -30,7 +30,7 @@ import com.lessspring.org.jvm.JvmUtils;
 import com.lessspring.org.server.utils.ByteUtils;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public abstract class BaseRejectedExecutionHandler implements RejectedExecutionHandler {

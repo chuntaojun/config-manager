@@ -20,7 +20,7 @@ import com.lessspring.org.constant.Code;
 import com.lessspring.org.raft.pojo.Transaction;
 
 /**
- * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 public class TransactionException extends Exception {
