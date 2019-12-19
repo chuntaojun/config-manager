@@ -37,7 +37,7 @@ public class IgnoreResourceConfigFilter implements CustomerConfigFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, FilterChain chain) {
 		String path = exchange.getRequest().getPath().value();
 		for (String ignore : ignores) {
-			if (path.contains(ignore)) {
+			if (path.contains(ignore) || ignore.contains(path)) {
 				return Mono.empty();
 			}
 		}

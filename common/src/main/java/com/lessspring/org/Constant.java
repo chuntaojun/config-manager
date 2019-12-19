@@ -68,4 +68,9 @@ public class Constant {
 	 * 
 	 */
 	public static final String SYSTEM_PREFER_HOSTNAME_OVER_IP = "com.lessspring.org.config-manager.preferHostnameOverIp";
+
+	/**
+	 * 
+	 */
+	public static final String SHARE_ID_NAME = "share_id";
 }

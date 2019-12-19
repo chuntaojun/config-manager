@@ -30,7 +30,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils;
+package com.lessspring.org;
+
+import com.lessspring.org.exception.SnakflowerException;
 
 /**
  * copy from https://juejin.im/post/5a7f9176f265da4e721c73a8
@@ -114,7 +116,7 @@ public class SnakflowerIdHelper {
 
 		// 如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
 		if (timestamp < lastTimestamp) {
-			throw new RuntimeException(String.format(
+			throw new SnakflowerException(String.format(
 					"Clock moved backwards.  Refusing to generate id for %d milliseconds",
 					lastTimestamp - timestamp));
 		}

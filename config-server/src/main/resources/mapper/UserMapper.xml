@@ -42,9 +42,12 @@
         select *
         from user u
                  join user_role ur on u.id = ur.user_id
-        limit #{limit}
+        <if test="page.username != null">
+            where user_name like #{page.username}
+        </if>
+        limit #{page.limit}
         offset
-        #{offset}
+        #{page.offset}
     </select>
 
 </mapper>

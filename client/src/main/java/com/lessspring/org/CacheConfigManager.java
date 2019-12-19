@@ -19,6 +19,8 @@ package com.lessspring.org;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.api.ApiConstant;
+import com.lessspring.org.common.limit.RequestLimitManager;
+import com.lessspring.org.constant.Code;
 import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.filter.ConfigFilterManager;
 import com.lessspring.org.http.HttpClient;
@@ -30,6 +32,7 @@ import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.server.utils.MD5Utils;
 import com.lessspring.org.server.utils.PathConstants;
 import com.lessspring.org.watch.AbstractWatchWorker;
 import com.lessspring.org.watch.ChangeKeyListener;
@@ -62,6 +65,7 @@ public class CacheConfigManager implements LifeCycle {
 	private HttpClient httpClient;
 	private AbstractWatchWorker watchWorker;
 
+	private final RequestLimitManager limitManager;
 	private final Map<String, CacheItem> cacheItemMap;
 	private final String namespaceId;
 	private final boolean localPref;
@@ -72,6 +76,7 @@ public class CacheConfigManager implements LifeCycle {
 	CacheConfigManager(HttpClient client, Configuration configuration,
 			ConfigFilterManager configFilterManager) {
 		this.httpClient = client;
+		this.limitManager = new RequestLimitManager(configuration);
 		this.namespaceId = configuration.getNamespaceId();
 		this.configFilterManager = configFilterManager;
 		this.localPref = configuration.isLocalPref();
@@ -169,23 +174,32 @@ public class CacheConfigManager implements LifeCycle {
 			result = localPreference(groupId, dataId);
 		}
 		if (result == null) {
-			final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
-					.addParam("groupId", groupId).addParam("dataId", dataId);
-			ResponseData<ConfigInfo> response = httpClient.get(ApiConstant.QUERY_CONFIG,
-					Header.EMPTY, query, new TypeToken<ResponseData<ConfigInfo>>() {
-					});
-			if (response.ok()) {
-				ConfigInfo configInfo = response.getData();
-				snapshotSave(groupId, dataId, configInfo);
-				result = configInfo;
-			}
-			else {
-				// Disaster measures
-				ConfigInfo local = snapshotLoad(groupId, dataId);
-				if (Objects.nonNull(local)) {
-					result = local;
+			if (limitManager.canSendRequest(NameUtils.buildName(groupId, dataId))) {
+				final Query query = Query.newInstance()
+						.addParam("namespaceId", namespaceId).addParam("groupId", groupId)
+						.addParam("dataId", dataId).addParam(Constant.SHARE_ID_NAME,
+								ShareIdUtils.buildShareId(namespaceId, groupId, dataId));
+				ResponseData<ConfigInfo> response = httpClient.get(
+						ApiConstant.QUERY_CONFIG, Header.EMPTY, query,
+						new TypeToken<ResponseData<ConfigInfo>>() {
+						});
+				if (response.ok()) {
+					ConfigInfo configInfo = response.getData();
+					snapshotSave(groupId, dataId, configInfo);
+					result = configInfo;
+				}
+				else {
+					// Disaster measures
+					ConfigInfo local = snapshotLoad(groupId, dataId);
+					if (Objects.nonNull(local)) {
+						result = local;
+					}
 				}
 			}
+			else {
+				return null;
+			}
+
 		}
 		// Configure the decryption
 		if (result != null) {
@@ -197,18 +211,29 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	ResponseData<Boolean> removeConfig(String groupId, String dataId) {
-		final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
-				.addParam("groupId", groupId).addParam("dataId", dataId);
-		return httpClient.delete(ApiConstant.DELETE_CONFIG, Header.EMPTY, query,
-				new TypeToken<ResponseData<Boolean>>() {
-				});
+		if (limitManager.canSendRequest(NameUtils.buildName(groupId, dataId))) {
+			final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
+					.addParam("groupId", groupId).addParam("dataId", dataId)
+					.addParam(Constant.SHARE_ID_NAME,
+							ShareIdUtils.buildShareId(namespaceId, groupId, dataId));
+			return httpClient.delete(ApiConstant.DELETE_CONFIG, Header.EMPTY, query,
+					new TypeToken<ResponseData<Boolean>>() {
+					});
+		}
+		return ResponseData.fail(Code.TRIGGER_CURRENT_LIMIT);
 	}
 
 	ResponseData<Boolean> publishConfig(final PublishConfigRequest request) {
-		final Query query = Query.newInstance().addParam("namespaceId", namespaceId);
-		return httpClient.put(ApiConstant.PUBLISH_CONFIG, Header.EMPTY, query,
-				Body.objToBody(request), new TypeToken<ResponseData<Boolean>>() {
-				});
+		if (limitManager.canSendRequest(
+				NameUtils.buildName(request.getGroupId(), request.getDataId()))) {
+			final Query query = Query.newInstance().addParam("namespaceId", namespaceId)
+					.addParam(Constant.SHARE_ID_NAME, ShareIdUtils.buildShareId(
+							namespaceId, request.getGroupId(), request.getDataId()));
+			return httpClient.put(ApiConstant.PUBLISH_CONFIG, Header.EMPTY, query,
+					Body.objToBody(request), new TypeToken<ResponseData<Boolean>>() {
+					});
+		}
+		return ResponseData.fail(Code.TRIGGER_CURRENT_LIMIT);
 	}
 
 	private ConfigInfo localPreference(String groupId, String dataId) {

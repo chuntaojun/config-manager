@@ -37,6 +37,7 @@ import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.machine.ConfigStateMachineAdapter;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.ServerNode;
+import com.lessspring.org.server.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -76,6 +77,9 @@ class RaftServer implements LifeCycle {
 	}
 
 	void initRaftCluster() {
+
+		log.info("[NodeManager] info : {}", GsonUtils.toJson(nodeManager.serverNodes()));
+
 		String path = raftServerOptions.getCacheDir();
 		try {
 			FileUtils.forceMkdir(new File(path));

@@ -22,6 +22,7 @@ import java.util.Map;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.observer.Publisher;
@@ -64,9 +65,8 @@ public class EncryptionPersistentHandler extends AbstractPersistentHandler {
 	}
 
 	@Override
-	public List<Map<String, String>> configList(String namespaceId, long page,
-			long pageSize, long lastId) {
-		return persistentHandler.configList(namespaceId, page, pageSize, lastId);
+	public List<Map<String, String>> configList(ConfigQueryPage queryPage) {
+		return persistentHandler.configList(queryPage);
 	}
 
 	@Override

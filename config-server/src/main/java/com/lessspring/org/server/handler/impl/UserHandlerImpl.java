@@ -18,6 +18,7 @@ package com.lessspring.org.server.handler.impl;
 
 import com.lessspring.org.model.vo.LoginRequest;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.model.vo.UserQueryPage;
 import com.lessspring.org.server.configuration.security.NeedAuth;
 import com.lessspring.org.server.handler.UserHandler;
 import com.lessspring.org.server.pojo.request.UserRequest;
@@ -78,6 +79,11 @@ public class UserHandlerImpl implements UserHandler {
 	public Mono<ServerResponse> queryAll(ServerRequest request) {
 		final long limit = Long.parseLong(request.queryParam("limit").orElse("10"));
 		final long offset = Long.parseLong(request.queryParam("offset").orElse("0"));
-		return RenderUtils.render(Mono.just(userService.queryAll(limit, offset)));
+		final UserQueryPage queryPage = UserQueryPage.builder()
+				.username(request.queryParam("limit").orElse(null))
+				.limit(limit)
+				.offset(offset)
+				.build();
+		return RenderUtils.render(Mono.just(userService.queryAll(queryPage)));
 	}
 }

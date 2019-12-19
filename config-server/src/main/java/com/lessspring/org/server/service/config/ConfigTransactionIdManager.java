@@ -20,12 +20,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.lessspring.org.CasReadWriteLock;
 import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.pojo.ServerNode;
 import com.lessspring.org.raft.pojo.TransactionId;
-import com.lessspring.org.server.utils.SnakflowerIdHelper;
+import com.lessspring.org.SnakflowerIdHelper;
+import com.lessspring.org.server.utils.BzConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
@@ -43,10 +47,13 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 
 	private final Map<String, TransactionId> manager = new HashMap<>(8);
 
-	private final Object monitor = new Object();
 	private final NodeManager nodeManager = NodeManager.getInstance();
 	private int index = 0;
 	private int workId = 0;
+
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
 	@Override
 	public void init() {
@@ -62,39 +69,48 @@ public class ConfigTransactionIdManager implements TransactionIdManager {
 
 	@Override
 	public TransactionId query(String bz) {
-		synchronized (monitor) {
-			return manager.get(bz);
+		readLock.lock();
+		try {
+			for (String item : BzConstants.bzs()) {
+				if (bz.contains(item)) {
+					return manager.get(item);
+				}
+			}
+			return null;
+		}
+		finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
 	public void register(TransactionId transactionId) {
 		String bz = transactionId.getBz();
-		synchronized (monitor) {
-			transactionId.setSnakflowerIdHelper(new SnakflowerIdHelper(index, workId ++));
+		writeLock.lock();
+		try {
+			transactionId.setSnakflowerIdHelper(new SnakflowerIdHelper(index, workId++));
 			manager.putIfAbsent(bz, transactionId);
+		}
+		finally {
+			writeLock.unlock();
 		}
 	}
 
 	@Override
 	public void deregister(TransactionId transactionId) {
 		String bz = transactionId.getBz();
-		synchronized (monitor) {
+		writeLock.lock();
+		try {
 			manager.remove(bz);
+		}
+		finally {
+			writeLock.unlock();
 		}
 	}
 
 	@Override
 	public Map<String, TransactionId> all() {
 		return new HashMap<>(manager);
-	}
-
-	@Override
-	public void snapshotLoad(Map<String, TransactionId> snapshot) {
-		synchronized (monitor) {
-			manager.clear();
-			manager.putAll(snapshot);
-		}
 	}
 
 	@Override

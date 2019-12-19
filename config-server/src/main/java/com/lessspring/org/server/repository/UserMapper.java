@@ -17,6 +17,7 @@
 package com.lessspring.org.server.repository;
 
 import com.lessspring.org.db.dto.UserDTO;
+import com.lessspring.org.model.vo.UserQueryPage;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -64,11 +65,9 @@ public interface UserMapper {
 	/**
 	 * find all user by page
 	 *
-	 * @param limit limit
-	 * @param offset offset
+	 * @param queryPage {@link UserQueryPage}
 	 * @return {@link List<UserDTO>}
 	 */
-	List<UserDTO> queryAll(@Param(value = "limit") long limit,
-			@Param(value = "offset") long offset);
+	List<UserDTO> queryAll(@Param(value = "page") UserQueryPage queryPage);
 
 }

@@ -19,8 +19,10 @@ package com.lessspring.org.common.limit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.lessspring.org.Configuration;
 import com.lessspring.org.LifeCycle;
 
 /**
@@ -34,10 +36,30 @@ public class RequestLimitManager implements LifeCycle {
 	private final AtomicBoolean inited = new AtomicBoolean(false);
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
+	private final Configuration configuration;
+
+	public RequestLimitManager(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
 	@Override
 	public void init() {
 		if (inited.compareAndSet(false, true)) {
 			limiterMap = new ConcurrentHashMap<>(16);
+		}
+	}
+
+	public boolean canSendRequest(String key) {
+		limiterMap.computeIfAbsent(key, s -> RateLimiter.create(1000.0D));
+		RateLimiter target = limiterMap.get(key);
+		return target.tryAcquire();
+	}
+
+	public void canSendRequest(String key, Runnable runnable) {
+		limiterMap.computeIfAbsent(key, s -> RateLimiter.create(1000.0D));
+		RateLimiter target = limiterMap.get(key);
+		if (target.tryAcquire()) {
+			runnable.run();
 		}
 	}
 

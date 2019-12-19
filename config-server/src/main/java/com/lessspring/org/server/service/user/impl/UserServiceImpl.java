@@ -17,8 +17,10 @@
 package com.lessspring.org.server.service.user.impl;
 
 import com.lessspring.org.EncryptionUtils;
+import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.model.vo.ResponseData;
+import com.lessspring.org.model.vo.UserQueryPage;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
@@ -27,12 +29,14 @@ import com.lessspring.org.server.exception.NotThisResourceException;
 import com.lessspring.org.server.exception.ValidationException;
 import com.lessspring.org.server.pojo.request.UserRequest;
 import com.lessspring.org.server.pojo.vo.UserVO;
+import com.lessspring.org.server.repository.NamespacePermissionsMapper;
 import com.lessspring.org.server.repository.UserMapper;
 import com.lessspring.org.server.service.cluster.ClusterManager;
 import com.lessspring.org.server.service.cluster.FailCallback;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.server.service.distributed.TransactionConsumer;
 import com.lessspring.org.server.service.user.UserService;
+import com.lessspring.org.server.utils.BzConstants;
 import com.lessspring.org.server.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
@@ -70,6 +74,9 @@ public class UserServiceImpl implements UserService {
 	@Resource
 	private UserMapper userMapper;
 
+	@Resource
+	private NamespacePermissionsMapper permissionsMapper;
+
 	public UserServiceImpl(BaseTransactionCommitCallback commitCallback,
 			ClusterManager clusterManager) {
 		this.commitCallback = commitCallback;
@@ -90,7 +97,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ResponseData<?> createUser(UserRequest request) {
 		String key = TransactionUtils.buildTransactionKey(
-				PropertiesEnum.InterestKey.USER_DATA, request.getUsername());
+				PropertiesEnum.InterestKey.USER_DATA, BzConstants.USER_ID, request.getUsername());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				UserRequest.CLASS_NAME);
 		datum.setOperation(createUser);
@@ -118,12 +125,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseData<List<UserVO>> queryAll(long limit, long offset) {
-		List<UserDTO> dtos = userMapper.queryAll(limit, offset);
+	public ResponseData<List<UserVO>> queryAll(UserQueryPage queryPage) {
+		List<UserDTO> dtos = userMapper.queryAll(queryPage);
 		dtos = CollectionUtils.isEmpty(dtos) ? Collections.emptyList() : dtos;
 		List<UserVO> vos = new ArrayList<>();
 		for (UserDTO dto : dtos) {
 			UserVO vo = VOUtils.convertUserVo(dto);
+			vo.setResources(permissionsMapper.findNamespaceIdByUserId(dto.getId()));
 			vos.add(vo);
 		}
 		return ResponseData.success(vos);
@@ -149,7 +157,7 @@ public class UserServiceImpl implements UserService {
 
 			@Override
 			public void onError(TransactionException te) {
-				log.error("queryAll user have some error : {}", te);
+				log.error("queryAll user have some error : {}", StrackTracekUtils.stackTrace(te));
 			}
 		};
 	}
@@ -183,7 +191,7 @@ public class UserServiceImpl implements UserService {
 
 			@Override
 			public void onError(TransactionException te) {
-				log.error("queryAll user have some error : {}", te);
+				log.error("queryAll user have some error : {}", StrackTracekUtils.stackTrace(te));
 			}
 		};
 	}

@@ -16,7 +16,7 @@
  */
 package com.lessspring.org.raft.pojo;
 
-import com.lessspring.org.server.utils.SnakflowerIdHelper;
+import com.lessspring.org.SnakflowerIdHelper;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>

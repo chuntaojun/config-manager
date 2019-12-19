@@ -81,7 +81,15 @@ public enum Code {
 	 */
 	DISK_OVERFLOW(4001, "Disk Overflow"),
 
-	VERIFY_ERROR(5001, "Verify error")
+	/**
+	 * 
+	 */
+	VERIFY_ERROR(5001, "Verify error"),
+
+	/**
+	 * 
+	 */
+	TRIGGER_CURRENT_LIMIT(99999, "Trigger current limiting"),
 
 	;
 

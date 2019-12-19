@@ -6,7 +6,7 @@ function requireBtn(value, row, index) {
 
 window.operateEvents = {
     'click .LookDetail': function (e, value, row, index) {
-        editor.txt.html(row['content'])
+        editor.txt.html(row['resources'])
     },
 }
 
@@ -44,11 +44,14 @@ $(function () {
         ajaxOptions:{
             headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
+        queryParams: function (params) {
+            params['username'] = $('#user_name').val()
+            return params;
+        },
         pagination: true,
-        sidePagination: 'client', // client or server
+        sidePagination: 'server', // client or server
         pageNumber: 1,
         pageSize: 10,
-        search: true,
         selectItemName: 'btSelectItem',
         showHeader: true,
         showColumns: true,

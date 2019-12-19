@@ -56,9 +56,6 @@ public class DumpAllBetaProcessor implements DumpProcessor<DumpTask4Beta> {
 			List<ConfigBetaInfoDTO> betaInfoDTOS = configInfoMapper
 					.batchFindConfigInfo4Beta(Arrays.asList(dumpTask.getIds()));
 			betaInfoDTOS.parallelStream()
-					.filter(betaInfoDTO -> distroRouter
-							.isPrincipal(NameUtils.buildName(betaInfoDTO.getNamespaceId(),
-									betaInfoDTO.getGroupId(), betaInfoDTO.getDataId())))
 					.forEach(configInfoDTO -> cacheItemManager.dumpConfigBeta(
 							configInfoDTO.getNamespaceId(), configInfoDTO));
 		});

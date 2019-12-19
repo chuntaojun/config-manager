@@ -58,9 +58,6 @@ public class DumpAllProcessor implements DumpProcessor<DumpTask4All> {
 			List<ConfigInfoDTO> configInfoDTOS = configInfoMapper
 					.batchFindConfigInfo(Arrays.asList(dumpTask.getIds()));
 			configInfoDTOS.parallelStream()
-					.filter(configInfoDTO -> distroRouter.isPrincipal(NameUtils.buildName(
-							configInfoDTO.getNamespaceId(), configInfoDTO.getGroupId(),
-							configInfoDTO.getDataId())))
 					.forEach(configInfoDTO -> cacheItemManager
 							.dumpConfig(configInfoDTO.getNamespaceId(), configInfoDTO));
 		});

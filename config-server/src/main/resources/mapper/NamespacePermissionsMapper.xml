@@ -7,6 +7,13 @@
         <result column="namespace_id" property="namespaceId"/>
         <result column="user_id" property="userId"/>
     </resultMap>
+    <insert id="savePermission">
+        insert into namespace_permissions(user_id, namespace_id) values (#{dto.namesapceId}, #{dto.userId})
+    </insert>
+
+    <delete id="removePermissionByUserIdAndNamespaceId">
+        delete from namespace_permissions where namespace_id = #{namesapceId} and user_id = #{userId}
+    </delete>
 
     <select id="findNamespaceIdByUserId" resultType="string">
         select namespace_id

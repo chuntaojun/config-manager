@@ -97,7 +97,7 @@
                 </div>
             </div>
 			<div class="modal-footer" style="">
-                <button class="btn btn-info" data-toggle="modal" data-target="#namespace_detail" style="margin-right:15px;">添加可访问者</button>
+                <button class="btn btn-info" data-toggle="modal" data-target="#namespace_detail" style="margin-right:15px;">更改</button>
 			</div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal -->
@@ -122,7 +122,8 @@
                 </div>
             </div>
             <div class="modal-footer" style="">
-                <button class="btn btn-success" onclick="addPermission()">提交</button>
+                <button class="btn btn-success" onclick="addPermission()">添加</button>
+                <button class="btn btn-error" onclick="removePermission()">删除</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal -->
@@ -163,7 +164,59 @@
     
     function addPermission() {
         const namespaceId = $('#namespace_id_holder').val()
+        const username = $('#add_owner').val()
+
+        $.ajax({
+            url: HTTP_REQUEST_API_URL + '/api/v1/auth/create',
+            type: 'POST',
+            dataType: 'json',
+            processData: false,
+            headers: {
+                "Content-Type": 'application/json;charset=utf-8'
+            },
+            contentType: 'application/json;charset=utf-8',
+            data: JSON.stringify({
+                "namespaceId": namespaceId,
+                "nauserNamemespace": username
+            }),
+            success: function (response) {
+                const result = response
+                if (Number(result['code']) === 200) {
+                    alert('success')
+                } else {
+                    alert(result['errMsg'])
+                }
+            }
+        })
 	}
+
+    function removePermission() {
+        const namespaceId = $('#namespace_id_holder').val()
+        const username = $('#add_owner').val()
+
+        $.ajax({
+            url: HTTP_REQUEST_API_URL + '/api/v1/auth/remove',
+            type: 'POST',
+            dataType: 'json',
+            processData: false,
+            headers: {
+                "Content-Type": 'application/json;charset=utf-8'
+            },
+            contentType: 'application/json;charset=utf-8',
+            data: JSON.stringify({
+                "namespaceId": namespaceId,
+                "nauserNamemespace": username
+            }),
+            success: function (response) {
+                const result = response
+                if (Number(result['code']) === 200) {
+                    alert('success')
+                } else {
+                    alert(result['errMsg'])
+                }
+            }
+        })
+    }
 
 	function namespaceChange() {
         const namespaceId = $('#item-namespaceId').val()

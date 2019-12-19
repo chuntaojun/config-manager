@@ -14,27 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.pojo.vo;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+package com.lessspring.org.exception;
 
 /**
- * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserVO {
+public class SnakflowerException extends RuntimeException {
 
-	private String username;
-	private String role;
-	private List<String> resources;
+	public SnakflowerException() {
+		super();
+	}
 
+	public SnakflowerException(String message) {
+		super(message);
+	}
+
+	public SnakflowerException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public SnakflowerException(Throwable cause) {
+		super(cause);
+	}
+
+	protected SnakflowerException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

@@ -23,6 +23,7 @@ import com.lessspring.org.Priority;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.observer.Publisher;
@@ -55,14 +56,10 @@ public interface PersistentHandler extends Priority {
 	/**
 	 * show config-list with page
 	 *
-	 * @param namespaceId namespaceId
-	 * @param page page
-	 * @param pageSize pageSize
-	 * @param lastId las query id
+	 * @param queryPage {@link ConfigQueryPage}
 	 * @return {@link List<Map<String, String>>}
 	 */
-	List<Map<String, String>> configList(String namespaceId, long page, long pageSize,
-			long lastId);
+	List<Map<String, String>> configList(ConfigQueryPage queryPage);
 
 	/**
 	 * read config-info

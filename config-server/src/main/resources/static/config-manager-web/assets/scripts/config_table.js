@@ -37,8 +37,6 @@ window.operateEvents = {
 
 $(function(){
 
-
-
     $.ajax({
         url: '/api/v1/namespace/all',
         type: 'GET',
@@ -98,14 +96,20 @@ $(function(){
             headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
         queryParams: function (params) {
+            const selectItem = document.getElementById("select-item-namespace");
+            const namespaceId = selectItem.options[selectItem.selectedIndex].value;
+            params['namespaceId'] = namespaceId
+            params['groupId'] = $('#groupId_input').val()
+            params['dataId'] = $('#dataId_input').val()
+            console.log(JSON.stringify(params))
             return params;
         },
         pagination: true,
         sidePagination: 'server', // client or server
         pageNumber: 1,
         pageSize: 10,
-        pageList: [10, 25, 50, 100],
-        search: true,
+        pageList: [10, 25],
+        search: false,
         selectItemName: 'btSelectItem',
         showHeader: true,
         showColumns: false,

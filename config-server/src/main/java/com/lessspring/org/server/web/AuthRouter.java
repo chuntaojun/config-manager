@@ -55,7 +55,7 @@ public class AuthRouter extends BaseRouter {
 		);
 
 		Tuple2<RequestPredicate, HandlerFunction> removeAuth = Tuples.of(
-				POST(StringConst.API_V1 + "auth/create").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::removeAuth
+				POST(StringConst.API_V1 + "auth/remove").and(accept(MediaType.APPLICATION_JSON_UTF8)), authHandler::removeAuth
 		);
 
 		registerVisitor(createAuth, removeAuth);

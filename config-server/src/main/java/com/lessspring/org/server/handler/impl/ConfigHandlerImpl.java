@@ -17,6 +17,7 @@
 package com.lessspring.org.server.handler.impl;
 
 import com.lessspring.org.constant.StringConst;
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
@@ -118,11 +119,17 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	@NeedAuth(argueName = "namespaceId")
 	public Mono<ServerResponse> configList(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
-		final long page = Long.parseLong(request.queryParam("page").orElse("1"));
-		final long pageSize = Long.parseLong(request.queryParam("pageSize").orElse("10"));
-		final long lastId = Long.parseLong(request.queryParam("lastId").orElse("0"));
+		final long offset = Long.parseLong(request.queryParam("offset").orElse("1"));
+		final long limit = Long.parseLong(request.queryParam("limit").orElse("10"));
+		final ConfigQueryPage queryPage = ConfigQueryPage.builder()
+				.namespaceId(namespaceId)
+				.groupId(request.queryParam("groupId").orElse(""))
+				.dataId(request.queryParam("dataId").orElse(""))
+				.limit(limit)
+				.offset(offset)
+				.build();
 		Mono<ResponseData<ConfigListVO>> mono = Mono
-				.just(operationService.configList(namespaceId, page, pageSize, lastId));
+				.just(operationService.configList(queryPage));
 		return RenderUtils.render(mono);
 	}
 

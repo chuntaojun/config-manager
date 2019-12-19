@@ -16,10 +16,17 @@
  */
 package com.lessspring.org.db.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AuthorityDTO {
 
 	private Long id;

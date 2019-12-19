@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.server.pojo.query.QueryConfigInfo;
 import org.apache.ibatis.annotations.Mapper;
@@ -76,13 +77,10 @@ public interface ConfigInfoMapper {
 	/**
 	 * select list by page
 	 *
-	 * @param namespace namespace-id
-	 * @param page page
-	 * @param pageSize pageSize
+	 * @param page {@link ConfigQueryPage}
 	 * @return {@link List<Map<String, String>}
 	 */
-	List<Map<String, String>> configList(@Param("namespaceId") String namespace,
-			@Param("page") long page, @Param("pageSize") long pageSize);
+	List<Map<String, String>> configList(@Param(value = "queryPage") ConfigQueryPage page);
 
 	/**
 	 * find min and max id

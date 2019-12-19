@@ -14,27 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.pojo.vo;
+package com.lessspring.org;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import com.lessspring.org.server.utils.MD5Utils;
 
 /**
- * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserVO {
+public final class ShareIdUtils {
 
-	private String username;
-	private String role;
-	private List<String> resources;
+		public static String buildShareId(String namespaceId, String groupId, String dataId) {
+				return MD5Utils.md5Hex(NameUtils.buildName(namespaceId, groupId, dataId));
+		}
 
 }

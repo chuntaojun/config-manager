@@ -21,6 +21,7 @@ import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
@@ -184,12 +185,12 @@ public class ConfigOperationService
 		String key;
 		if (request.isBeta()) {
 			key = TransactionUtils.buildTransactionKey(
-					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_BETA,
+					PropertiesEnum.InterestKey.CONFIG_DATA,
 					namespaceId, request.getGroupId(), request.getDataId());
 		}
 		else {
 			key = TransactionUtils.buildTransactionKey(
-					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO,
+					PropertiesEnum.InterestKey.CONFIG_DATA,
 					namespaceId, request.getGroupId(), request.getDataId());
 		}
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
@@ -204,12 +205,12 @@ public class ConfigOperationService
 		String key;
 		if (request.isBeta()) {
 			key = TransactionUtils.buildTransactionKey(
-					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_BETA,
+					PropertiesEnum.InterestKey.CONFIG_DATA,
 					namespaceId, request.getGroupId(), request.getDataId());
 		}
 		else {
 			key = TransactionUtils.buildTransactionKey(
-					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO,
+					PropertiesEnum.InterestKey.CONFIG_DATA,
 					namespaceId, request.getGroupId(), request.getDataId());
 		}
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
@@ -236,7 +237,7 @@ public class ConfigOperationService
 			DeleteConfigHistory request) {
 		request.setNamespaceId(namespaceId);
 		String key = TransactionUtils.buildTransactionKey(
-				PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_HISTORY,
+				PropertiesEnum.InterestKey.CONFIG_DATA,
 				namespaceId, request.getGroupId(), request.getDataId());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				DeleteConfigHistory.CLASS_NAME);
@@ -245,10 +246,8 @@ public class ConfigOperationService
 	}
 
 	@Override
-	public ResponseData<ConfigListVO> configList(String namespaceId, long page,
-			long pageSize, long lastId) {
-		List<Map<String, String>> list = persistentHandler.configList(namespaceId, page,
-				pageSize, lastId);
+	public ResponseData<ConfigListVO> configList(ConfigQueryPage queryPage) {
+		List<Map<String, String>> list = persistentHandler.configList(queryPage);
 		list = CollectionUtils.isEmpty(list) ? Collections.emptyList() : list;
 		return ResponseData.success(VOUtils.convertToConfigListVO(list));
 	}

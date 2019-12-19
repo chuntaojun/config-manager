@@ -55,7 +55,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @SuppressWarnings("all")
 @Slf4j
-public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements Watcher<ServerNodeChangeEvent> {
+public class ClusterManager extends Publisher<ServerNodeChangeEvent>
+		implements Watcher<ServerNodeChangeEvent> {
 
 	private final EventBus eventBus = new EventBus("ClusterManager-EventBus");
 	private final NodeManager nodeManager = NodeManager.getInstance();
@@ -67,8 +68,8 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 	private ClusterServer clusterServer;
 
 	public ClusterManager(List<BaseTransactionCommitCallback> commitCallbacks,
-						  List<SnapshotOperate> snapshotOperates, TransactionIdManager transactionIdManager,
-			PathConstants pathConstants) {
+			List<SnapshotOperate> snapshotOperates,
+			TransactionIdManager transactionIdManager, PathConstants pathConstants) {
 		this.commitCallbacks = commitCallbacks;
 		this.snapshotOperates = snapshotOperates;
 		this.transactionIdManager = transactionIdManager;
@@ -93,7 +94,8 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 			for (BaseTransactionCommitCallback commitCallback : commitCallbacks) {
 				clusterServer.registerTransactionCommitCallback(commitCallback);
 			}
-			clusterServer.registerSnapshotOperator(snapshotOperates.toArray(new SnapshotOperate[0]));
+			clusterServer.registerSnapshotOperator(
+					snapshotOperates.toArray(new SnapshotOperate[0]));
 			clusterServer.initTransactionIdManger(transactionIdManager);
 			clusterServer.init();
 			registerTransactionId(transactionIdManager);
@@ -106,6 +108,7 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 		manager.register(new TransactionId(BzConstants.CONFIG_INFO));
 		manager.register(new TransactionId(BzConstants.CONFIG_INFO_BETA));
 		manager.register(new TransactionId(BzConstants.CONFIG_INFO_HISTORY));
+		manager.register(new TransactionId(BzConstants.USER_ID));
 		manager.init();
 	}
 
@@ -164,20 +167,21 @@ public class ClusterManager extends Publisher<ServerNodeChangeEvent> implements 
 	}
 
 	@Override
-	public void onNotify(Occurrence<ServerNodeChangeEvent> occurrence, Publisher publisher) {
+	public void onNotify(Occurrence<ServerNodeChangeEvent> occurrence,
+			Publisher publisher) {
 		ServerNodeChangeEvent event = occurrence.getOrigin();
 		ServerNode node = ServerNode.builder().nodeIp(event.getNodeIp())
 				.port(event.getNodePort()).build();
 		switch (event.getType()) {
-			case PUBLISH:
-				nodeManager.nodeJoin(node);
-				break;
-			case DELETE:
-				nodeManager.nodeLeave(node);
-				break;
-			default:
-				throw new IllegalArgumentException(
-						"Illegal cluster nodes transfer event type");
+		case PUBLISH:
+			nodeManager.nodeJoin(node);
+			break;
+		case DELETE:
+			nodeManager.nodeLeave(node);
+			break;
+		default:
+			throw new IllegalArgumentException(
+					"Illegal cluster nodes transfer event type");
 		}
 	}
 }

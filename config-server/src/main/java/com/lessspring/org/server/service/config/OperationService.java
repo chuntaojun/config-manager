@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.server.service.config;
 
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.QueryConfigRequest;
@@ -88,14 +89,10 @@ public interface OperationService {
 	/**
 	 * show config-list to server-page
 	 *
-	 * @param namespaceId namespaceId
-	 * @param page page index
-	 * @param pageSize page size
-	 * @param lastId last query id
+	 * @param queryPage {@link ConfigQueryPage}
 	 * @return {@link ResponseData<ConfigListVO>}
 	 */
-	ResponseData<ConfigListVO> configList(String namespaceId, long page, long pageSize,
-			long lastId);
+	ResponseData<ConfigListVO> configList(ConfigQueryPage queryPage);
 
 	/**
 	 *

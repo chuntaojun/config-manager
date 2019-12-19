@@ -31,15 +31,30 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div id="toolbar_seller" class="btn-group">
-                        <div class="form-group col-md-8">
+                        <div class="form-group col-md-3">
                             <div class="row">
                                 <div class="form-group col-md-12">
-                                    <select id="select-item-namespace" class="form-control">
+                                    <input hidden id="namespace_id_holder" type="text" value="">
+                                    <select id="select-item-namespace" class="form-control" onchange="selectNamespaceId()">
                                     </select>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <input id="groupId_input" class="form-control" type="text" value="" placeholder="GroupId">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <input id="dataId_input" class="form-control" type="text" value="" placeholder="DataId">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
                             <div class="row">
                                 <div class="form-group col-md-12">
                                     <button class="btn btn-default" data-toggle="modal" data-target="#add-item">
@@ -183,6 +198,12 @@
                 }
             }
         })
+    }
+
+    function selectNamespaceId() {
+        const selectItem = document.getElementById("select-item-namespace");
+        const namespaceId = selectItem.options[selectItem.selectedIndex].value;
+        $('#namespace_id_holder').val(namespaceId)
     }
 
     function openBeta() {

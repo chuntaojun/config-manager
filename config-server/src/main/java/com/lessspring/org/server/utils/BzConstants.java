@@ -16,6 +16,9 @@
  */
 package com.lessspring.org.server.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -27,5 +30,20 @@ public final class BzConstants {
 	public static final String CONFIG_INFO_BETA = "@@CONFIG_INFO_BETA@@";
 
 	public static final String CONFIG_INFO_HISTORY = "@@CONFIG_INFO_HISTORY@@";
+
+	public static final String USER_ID = "@@USER_ID@@";
+
+	private static List<String> bzs = new ArrayList<>();
+
+	static {
+		bzs.add(CONFIG_INFO);
+		bzs.add(CONFIG_INFO_BETA);
+		bzs.add(CONFIG_INFO_HISTORY);
+		bzs.add(USER_ID);
+	}
+
+	public static List<String> bzs() {
+		return bzs;
+	}
 
 }

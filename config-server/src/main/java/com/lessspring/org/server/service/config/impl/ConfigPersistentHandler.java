@@ -28,6 +28,7 @@ import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoHistoryDTO;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.BaseConfigRequest;
+import com.lessspring.org.model.vo.ConfigQueryPage;
 import com.lessspring.org.model.vo.DeleteConfigRequest;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.observer.Occurrence;
@@ -82,10 +83,9 @@ public class ConfigPersistentHandler extends AbstractPersistentHandler {
 	}
 
 	@Override
-	public List<Map<String, String>> configList(String namespaceId, long page,
-			long pageSize, long lastId) {
-		List<Map<String, String>> result = configInfoMapper.configList(namespaceId,
-				page - 1, pageSize);
+	public List<Map<String, String>> configList(ConfigQueryPage queryPage) {
+		List<Map<String, String>> result = configInfoMapper.configList(queryPage.getNamespaceId(),
+				queryPage.getLimit(), queryPage.getOffset());
 		return Objects.isNull(result) ? Collections.emptyList() : result;
 	}
 

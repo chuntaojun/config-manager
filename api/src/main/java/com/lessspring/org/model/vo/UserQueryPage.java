@@ -14,27 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.pojo.vo;
+package com.lessspring.org.model.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
- * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserVO {
+@AllArgsConstructor
+public class UserQueryPage {
 
 	private String username;
-	private String role;
-	private List<String> resources;
+	private long limit;
+	private long offset;
 
 }

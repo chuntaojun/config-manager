@@ -116,7 +116,7 @@ public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle 
 		if (raftServer.isLeader()) {
 			// Before submitting application id information, To ensure the business id
 			// since increased and uniqueness
-			final TransactionId transactionId = transactionIdManager.query(datum.getBz());
+			final TransactionId transactionId = transactionIdManager.query(datum.getKey());
 			if (Objects.nonNull(transactionId)) {
 				datum.setId(transactionId.increaseAndObtain());
 			}

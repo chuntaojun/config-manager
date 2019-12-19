@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.server.configuration.filter;
 
+import com.lessspring.org.Constant;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.raft.pojo.ServerNode;
 import com.lessspring.org.server.service.cluster.DistroRouter;
@@ -58,7 +59,7 @@ public class DistroServerConfigFilter implements CustomerConfigFilter {
 		ServerHttpResponse response = exchange.getResponse();
 		final String apiUrl = request.getURI().getRawPath();
 		if (apiUrl.startsWith(StringConst.API_V1)) {
-			String shareId = request.getQueryParams().getFirst("shareId");
+			String shareId = request.getQueryParams().getFirst(Constant.SHARE_ID_NAME);
 			if (StringUtils.isEmpty(shareId)) {
 				return filterResponse(response, HttpStatus.BAD_REQUEST, "Illegal request");
 			}

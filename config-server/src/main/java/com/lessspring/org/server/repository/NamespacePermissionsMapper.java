@@ -18,6 +18,7 @@ package com.lessspring.org.server.repository;
 
 import java.util.List;
 
+import com.lessspring.org.db.dto.AuthorityDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -43,5 +44,24 @@ public interface NamespacePermissionsMapper {
 	 * @return owners
 	 */
 	List<String> findUsersByNamespaceId(@Param(value = "namespaceId") String namespaceId);
+
+	/**
+	 * remove namesapce access permission by user-id and namespace-id
+	 * 
+	 * @param namespaceId namespaceId
+	 * @param userId userId
+	 * @return affect row
+	 */
+	int removePermissionByUserIdAndNamespaceId(
+			@Param(value = "namesapceId") String namespaceId,
+			@Param(value = "userId") Long userId);
+
+	/**
+	 * save access namespace resource by {@link AuthorityDTO}
+	 * 
+	 * @param dto {@link AuthorityDTO}
+	 * @return affect row
+	 */
+	int savePermission(@Param(value = "dto") AuthorityDTO dto);
 
 }

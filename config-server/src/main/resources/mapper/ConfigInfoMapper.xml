@@ -150,7 +150,14 @@
     </select>
 
     <select id="configList" resultType="map">
-        select * from config_info where namespace_id = #{namespaceId} limit #{page} offset #{pageSize}
+        select * from config_info where namespace_id = #{queryPage.namespaceId}
+        <if test="queryPage.groupId != ''">
+            and group_id like #{queryPage.groupId}
+        </if>
+        <if test="queryPage.dataId != ''">
+            and data_id like #{queryPage.dataId}
+        </if>
+        limit #{queryPage.limit} offset #{queryPage.offset}
     </select>
 
     <!--  find min and max id from config-beta-info  -->
