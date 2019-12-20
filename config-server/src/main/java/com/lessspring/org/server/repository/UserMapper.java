@@ -31,6 +31,13 @@ import java.util.List;
 public interface UserMapper {
 
 	/**
+	 * count user nums by name
+	 * 
+	 * @return total
+	 */
+	Integer count(@Param(value = "name") String name);
+
+	/**
 	 * save user info
 	 *
 	 * @param dto {@link UserDTO}

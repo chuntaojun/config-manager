@@ -14,34 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.raft.pojo;
+package com.lessspring.org.server.pojo.vo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
- * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class Transaction {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ListUserVO {
 
-	private final String key;
-	private final String operation;
-	private final byte[] data;
-
-	public Transaction(String key, byte[] data, String operation) {
-		this.key = key;
-		this.operation = operation;
-		this.data = data;
-	}
-
-	public byte[] getData() {
-		return data;
-	}
-
-	public String getOperation() {
-		return operation;
-	}
-
-	public String getKey() {
-		return key;
-	}
+	private Long total;
+	private List<UserVO> userVOS;
 
 }

@@ -60,19 +60,12 @@ create TABLE kms_secret_key
 
 create TABLE user
 (
-    id        int          not null auto_increment,
+    id        bigint          not null auto_increment,
     user_name varchar(50)  not null,
     password  varchar(128) not null,
+    role_type int default 1,
     primary key (id),
     unique (user_name)
-);
-
-create TABLE user_role
-(
-    id        bigint not null auto_increment,
-    user_id   bigint not null,
-    role_type int default 1,
-    primary key (id)
 );
 
 create TABLE config_namespace
@@ -94,14 +87,11 @@ create TABLE namespace_permissions
 
 
 
-insert into user(id, user_name, password)
-VALUES (1, 'lessSpring', '29591314');
+insert into user(id, user_name, password, role_type)
+VALUES (1, 'lessSpring', '29591314', 1);
 
 insert into config_namespace(namespace_name, namespace_id)
 values ('default', 'default');
 
 insert into namespace_permissions(user_id, namespace_id)
 VALUES (1, 'default');
-
-insert into user_role(user_id, role_type)
-VALUES (1, 1)

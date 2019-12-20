@@ -12,8 +12,8 @@
 
     <!--  save user  -->
     <insert id="saveUser">
-        INSERT INTO user(user_name, password, role_type)
-        VALUES (#{dto.username}, #{dto.password}, #{roleType})
+        INSERT INTO user(id, user_name, password, role_type)
+        VALUES (#{dto.id}, #{dto.username}, #{dto.password}, #{dto.roleType})
     </insert>
 
     <!--  modify user info  -->
@@ -33,21 +33,26 @@
 
     <select id="findUserByName" resultMap="UserDTO">
         select *
-        from user u
-                 join user_role ur on u.id = ur.user_id
+        from user
         where user_name = #{username}
     </select>
 
     <select id="queryAll" resultMap="UserDTO">
         select *
-        from user u
-                 join user_role ur on u.id = ur.user_id
-        <if test="page.username != null">
+        from user
+        <if test="page.username != null and page.username != ''">
             where user_name like #{page.username}
         </if>
         limit #{page.limit}
         offset
         #{page.offset}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        select count(1) from user
+        <if test="name != null and name != ''">
+            where user_name like #{name}
+        </if>
     </select>
 
 </mapper>

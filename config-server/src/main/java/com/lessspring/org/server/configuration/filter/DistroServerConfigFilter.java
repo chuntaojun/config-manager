@@ -61,7 +61,7 @@ public class DistroServerConfigFilter implements CustomerConfigFilter {
 		if (apiUrl.startsWith(StringConst.API_V1)) {
 			String shareId = request.getQueryParams().getFirst(Constant.SHARE_ID_NAME);
 			if (StringUtils.isEmpty(shareId)) {
-				return filterResponse(response, HttpStatus.BAD_REQUEST, "Illegal request");
+				return null;
 			}
 			final HttpMethod method = Optional.ofNullable(request.getMethod())
 					.orElse(HttpMethod.GET);

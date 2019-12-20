@@ -22,6 +22,7 @@ import com.alipay.sofa.jraft.entity.Task;
 import com.google.common.eventbus.Subscribe;
 import com.lessspring.org.LifeCycle;
 import com.lessspring.org.SerializerUtils;
+import com.lessspring.org.constant.Code;
 import com.lessspring.org.event.EventType;
 import com.lessspring.org.event.ServerNodeChangeEvent;
 import com.lessspring.org.model.vo.ResponseData;
@@ -52,26 +53,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SuppressWarnings("unchecked")
 public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle {
 
-	private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
-	private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
-	private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
 	private AtomicBoolean initialize = new AtomicBoolean(false);
 	private RaftServer raftServer;
 	private TransactionIdManager transactionIdManager;
-
-	static {
-		NodeManager nodeManager = NodeManager.getInstance();
-		try (InputStream is = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("cluster.properties")) {
-			Properties properties = new Properties();
-			properties.load(is);
-			initClusterNode(nodeManager, properties);
-		}
-		catch (IOException e) {
-			log.error("Server");
-			throw new RuntimeException(e);
-		}
-	}
 
 	public ClusterServer(RaftServerOptions raftServerOptions) {
 		raftServerOptions = Objects.isNull(raftServerOptions) ? new RaftServerOptions()
@@ -114,13 +98,7 @@ public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle 
 		final Throwable[] throwables = new Throwable[] { null };
 		CompletableFuture<ResponseData<Boolean>> future = new CompletableFuture<>();
 		if (raftServer.isLeader()) {
-			// Before submitting application id information, To ensure the business id
-			// since increased and uniqueness
-			final TransactionId transactionId = transactionIdManager.query(datum.getKey());
-			if (Objects.nonNull(transactionId)) {
-				datum.setId(transactionId.increaseAndObtain());
-			}
-			Task task = new Task();
+			final Task task = new Task();
 			task.setDone(new ConfigStoreClosure(datum, status -> {
 				ResponseData<Boolean> data = ResponseData.builder()
 						.withCode(status.getCode()).withData(status.isOk())
@@ -140,6 +118,7 @@ public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle 
 						public void onResponse(Object o) {
 							Response response = (Response) o;
 							ResponseData<Boolean> data = ResponseData.builder()
+									.withCode(Code.SUCCESS.getCode())
 									.withData(response.isSuccess())
 									.withErrMsg(response.getErrMsg()).build();
 							future.complete(data);
@@ -185,22 +164,6 @@ public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle 
 	private void needInitialized() {
 		if (!initialize.get()) {
 			throw new IllegalStateException("Uninitialized cluster");
-		}
-	}
-
-	private static void initClusterNode(NodeManager nodeManager, Properties properties) {
-		int nodes = properties.size() / 2;
-		int selfIndex = Integer
-				.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
-		for (int i = 0; i < nodes; i++) {
-			String ip = properties.getProperty(SERVER_NODE_IP + i);
-			String port = properties.getProperty(SERVER_NODE_PORT + i);
-			ServerNode node = ServerNode.builder().nodeIp(ip).port(Integer.parseInt(port))
-					.build();
-			if (i == selfIndex) {
-				nodeManager.setSelf(node);
-			}
-			nodeManager.nodeJoin(node);
 		}
 	}
 

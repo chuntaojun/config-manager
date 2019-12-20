@@ -96,9 +96,7 @@ $(function(){
             headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
         queryParams: function (params) {
-            const selectItem = document.getElementById("select-item-namespace");
-            const namespaceId = selectItem.options[selectItem.selectedIndex].value;
-            params['namespaceId'] = namespaceId
+            params['namespaceId'] = $("#select-item-namespace").val()
             params['groupId'] = $('#groupId_input').val()
             params['dataId'] = $('#dataId_input').val()
             console.log(JSON.stringify(params))

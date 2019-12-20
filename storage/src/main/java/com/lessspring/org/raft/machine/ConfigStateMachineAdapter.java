@@ -69,9 +69,8 @@ public class ConfigStateMachineAdapter extends RaftStateMachineAdaper {
 						final ByteBuffer data = iter.getData();
 						datum = serializer.deserialize(data.array(), Datum.class);
 					}
-					final long id = datum.getId();
-					final Transaction transaction = new Transaction(id,
-							datum.getKey(), datum.getValue(), datum.getOperation());
+					final Transaction transaction = new Transaction(datum.getKey(),
+							datum.getValue(), datum.getOperation());
 					// For each transaction, according to the different processing of
 					// the key to the callback interface
 					String bzName = callback.interest(transaction.getKey());

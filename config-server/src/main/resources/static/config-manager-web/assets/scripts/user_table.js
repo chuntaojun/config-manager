@@ -6,7 +6,12 @@ function requireBtn(value, row, index) {
 
 window.operateEvents = {
     'click .LookDetail': function (e, value, row, index) {
-        editor.txt.html(row['resources'])
+        const resources = row['resources']
+        let str = '';
+        for (let i = 0; i < resources.length; i ++) {
+            str += resources[i] + '\n'
+        }
+        $('#access_resource').val(resources)
     },
 }
 
@@ -31,22 +36,25 @@ $(function () {
             field: 'role',
             title: '角色',
         }, {
-            field: 'enableResource',
+            field: 'resources',
             title: '可访问资源',
             events: operateEvents,
             formatter: requireBtn,
         }],
         data: [],
         method: 'get',
-        url: HTTP_REQUEST_API_URL + '/api/v1/allUser',
-        cache: true,
+        url: HTTP_REQUEST_API_URL + '/api/v1/user/all',
+        cache: false,
         contentType: 'application/json',
         ajaxOptions:{
             headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
         queryParams: function (params) {
-            params['username'] = $('#user_name').val()
-            return params;
+            const queryParam = new Map()
+            queryParam['username'] = params['search']
+            queryParam['limit'] = params['limit']
+            queryParam['offset'] = params['offset']
+            return queryParam;
         },
         pagination: true,
         sidePagination: 'server', // client or server
@@ -54,6 +62,7 @@ $(function () {
         pageSize: 10,
         selectItemName: 'btSelectItem',
         showHeader: true,
+        search: true,
         showColumns: true,
         showRefresh: true,
         showToggle: true,
@@ -68,5 +77,14 @@ $(function () {
         checkboxHeader: true,
         sortable: true,
         maintainSelected: false,
+        responseHandler: function (res) {
+            if (res.code === 200 || res.code === 0) {
+                const data = res.data
+                return {
+                    totalRows: data.total,
+                    rows: data.userVOS
+                };
+            }
+        }
     })
 })

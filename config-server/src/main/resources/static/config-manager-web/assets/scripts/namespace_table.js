@@ -82,7 +82,7 @@ $(function() {
         data: [],
         method: 'get',
         url: HTTP_REQUEST_API_URL + '/api/v1/namespace/all',
-        cache: true,
+        cache: false,
         contentType: 'application/json',
         ajaxOptions:{
             headers: {"config-manager-token": sessionStorage.getItem("access_token")}

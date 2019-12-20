@@ -65,7 +65,7 @@ public class UserRouter extends BaseRouter {
 						});
 
 		Tuple2<RequestPredicate, HandlerFunction> createUser = Tuples
-				.of(PUT(StringConst.API_V1 + "createUser").and(
+				.of(PUT(StringConst.API_V1 + "user/create").and(
 						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
 							@Override
 							public Mono handle(ServerRequest request) {
@@ -74,7 +74,7 @@ public class UserRouter extends BaseRouter {
 						});
 
 		Tuple2<RequestPredicate, HandlerFunction> deleteUser = Tuples
-				.of(DELETE(StringConst.API_V1 + "removeUser").and(
+				.of(DELETE(StringConst.API_V1 + "user/remove").and(
 						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
 							@Override
 							public Mono handle(ServerRequest request) {
@@ -83,7 +83,7 @@ public class UserRouter extends BaseRouter {
 						});
 
 		Tuple2<RequestPredicate, HandlerFunction> modifyUser = Tuples
-				.of(POST(StringConst.API_V1 + "modifyUser").and(
+				.of(POST(StringConst.API_V1 + "user/modify").and(
 						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
 							@Override
 							public Mono handle(ServerRequest request) {
@@ -92,7 +92,7 @@ public class UserRouter extends BaseRouter {
 						});
 
 		Tuple2<RequestPredicate, HandlerFunction> allUser = Tuples
-				.of(GET(StringConst.API_V1 + "allUser").and(
+				.of(GET(StringConst.API_V1 + "user/all").and(
 						accept(MediaType.APPLICATION_JSON_UTF8)), new HandlerFunction() {
 							@Override
 							public Mono handle(ServerRequest request) {

@@ -84,8 +84,7 @@ public class ConfigPersistentHandler extends AbstractPersistentHandler {
 
 	@Override
 	public List<Map<String, String>> configList(ConfigQueryPage queryPage) {
-		List<Map<String, String>> result = configInfoMapper.configList(queryPage.getNamespaceId(),
-				queryPage.getLimit(), queryPage.getOffset());
+		List<Map<String, String>> result = configInfoMapper.configList(queryPage);
 		return Objects.isNull(result) ? Collections.emptyList() : result;
 	}
 

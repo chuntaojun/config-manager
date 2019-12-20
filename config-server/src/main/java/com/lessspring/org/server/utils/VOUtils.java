@@ -94,7 +94,7 @@ public final class VOUtils {
 	}
 
 	public static UserVO convertUserVo(UserDTO dto) {
-		return UserVO.builder().username(dto.getUsername())
+		return UserVO.builder().id(dto.getId()).username(dto.getUsername())
 				.role(PropertiesEnum.Role.choose(dto.getRoleType()).name()).build();
 	}
 

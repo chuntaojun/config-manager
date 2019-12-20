@@ -71,8 +71,8 @@ public class BaseTransactionCommitCallback implements TransactionCommitCallback 
 
 	@Override
 	public String interest(String trsKey) {
-		for (PropertiesEnum.InterestKey key : PropertiesEnum.InterestKey.values()) {
-			if (trsKey.contains(key.getType())) {
+		for (PropertiesEnum.Bz key : PropertiesEnum.Bz.values()) {
+			if (trsKey.contains(key.name())) {
 				return key.name();
 			}
 		}

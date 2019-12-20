@@ -67,8 +67,4 @@ public class NameAuthorityProcessorImpl implements AuthorityProcessor {
 		return hasRole && hasResource;
 	}
 
-	@Override
-	public ResponseData<?> createAuth(String namespaceId, PropertiesEnum.Role role) {
-		return null;
-	}
 }

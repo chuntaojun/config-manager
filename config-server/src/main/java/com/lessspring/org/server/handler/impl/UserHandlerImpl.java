@@ -80,7 +80,7 @@ public class UserHandlerImpl implements UserHandler {
 		final long limit = Long.parseLong(request.queryParam("limit").orElse("10"));
 		final long offset = Long.parseLong(request.queryParam("offset").orElse("0"));
 		final UserQueryPage queryPage = UserQueryPage.builder()
-				.username(request.queryParam("limit").orElse(null))
+				.username(request.queryParam("username").orElse(null))
 				.limit(limit)
 				.offset(offset)
 				.build();

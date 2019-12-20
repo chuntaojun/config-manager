@@ -73,4 +73,9 @@ public class Constant {
 	 * 
 	 */
 	public static final String SHARE_ID_NAME = "share_id";
+
+		/**
+		 *
+		 */
+	public static final String ID = "id";
 }

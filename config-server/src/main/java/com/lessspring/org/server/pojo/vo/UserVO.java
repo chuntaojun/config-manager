@@ -33,6 +33,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserVO {
 
+	private Long id;
 	private String username;
 	private String role;
 	private List<String> resources;

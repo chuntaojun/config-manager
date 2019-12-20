@@ -19,6 +19,7 @@ package com.lessspring.org.server.service.user;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.UserQueryPage;
 import com.lessspring.org.server.pojo.request.UserRequest;
+import com.lessspring.org.server.pojo.vo.ListUserVO;
 import com.lessspring.org.server.pojo.vo.UserVO;
 
 import java.util.List;
@@ -57,8 +58,8 @@ public interface UserService {
 	 * query all user info by page
 	 *
 	 * @param queryPage {@link UserQueryPage}
-	 * @return {@link List<UserVO>}
+	 * @return {@link ListUserVO}
 	 */
-	ResponseData<List<UserVO>> queryAll(UserQueryPage queryPage);
+	ResponseData<ListUserVO> queryAll(UserQueryPage queryPage);
 
 }

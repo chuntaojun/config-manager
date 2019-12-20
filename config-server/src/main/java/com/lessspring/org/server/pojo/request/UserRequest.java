@@ -34,9 +34,10 @@ public class UserRequest {
 
 	public static final String CLASS_NAME = UserRequest.class.getCanonicalName();
 
+	private Long id;
 	private String username;
 	private String password;
 	private String oldPassword;
-	private Short role = PropertiesEnum.Role.CUSTOMER.getType();
+	private PropertiesEnum.Role role = PropertiesEnum.Role.CUSTOMER;
 
 }

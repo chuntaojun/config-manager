@@ -21,8 +21,4 @@ public class SystemAuthorityProcessorImpl implements AuthorityProcessor {
 		return false;
 	}
 
-	@Override
-	public ResponseData<?> createAuth(String namespaceId, PropertiesEnum.Role role) {
-		return null;
-	}
 }

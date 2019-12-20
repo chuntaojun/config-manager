@@ -34,12 +34,4 @@ public interface AuthorityProcessor {
 	 */
 	boolean hasAuth(Privilege privilege, PropertiesEnum.Role role);
 
-	/**
-	 * create namespace auth token
-	 *
-	 * @param namespaceId namespace-id
-	 * @return create result
-	 */
-	ResponseData<?> createAuth(String namespaceId, PropertiesEnum.Role role);
-
 }

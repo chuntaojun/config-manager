@@ -18,7 +18,10 @@ package com.lessspring.org.raft;
 
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.lessspring.org.raft.pojo.ServerNode;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -27,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -35,7 +39,46 @@ import java.util.stream.Stream;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
+@Slf4j
 public class NodeManager implements LeaderStatusListener {
+
+	private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
+	private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
+	private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
+
+	static {
+		NodeManager nodeManager = NodeManager.getInstance();
+		try (InputStream is = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("cluster.properties")) {
+			Properties properties = new Properties();
+			properties.load(is);
+			initClusterNode(nodeManager, properties);
+		}
+		catch (IOException e) {
+			log.error("Server");
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void load() {}
+
+	private static void initClusterNode(NodeManager nodeManager, Properties properties) {
+		int nodes = properties.size() / 2;
+		String readSelfIndexFromSys = System.getProperty(SERVER_NODE_SELF_INDEX, "0");
+		int selfIndex = Integer.parseInt(
+				properties.getProperty(SERVER_NODE_SELF_INDEX, readSelfIndexFromSys));
+		for (int i = 0; i < nodes; i++) {
+			String ip = properties.getProperty(SERVER_NODE_IP + i);
+			String port = properties.getProperty(SERVER_NODE_PORT + i);
+			ServerNode node = ServerNode.builder().nodeIp(ip).port(Integer.parseInt(port))
+					.build();
+			if (i == selfIndex) {
+				nodeManager.setSelf(node);
+				System.setProperty("server.port", node.getPort() + "");
+			}
+			nodeManager.nodeJoin(node);
+		}
+	}
 
 	private final Comparator<ServerNode> nodeComparator = (o1, o2) -> {
 		String k1 = o1.getKey();

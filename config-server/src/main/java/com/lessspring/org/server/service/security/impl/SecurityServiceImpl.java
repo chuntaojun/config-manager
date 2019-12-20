@@ -23,6 +23,7 @@ import java.util.Optional;
 import javax.annotation.Resource;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.lessspring.org.EncryptionUtils;
 import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
@@ -70,7 +71,7 @@ public class SecurityServiceImpl implements SecurityService {
 			userDTO = Optional.of(dto);
 		}
 		userDTO.ifPresent(dto -> {
-			if (!Objects.equals(loginRequest.getPassword(), dto.getPassword())) {
+			if (!EncryptionUtils.matchesByBcrypt(loginRequest.getPassword(), dto.getPassword())) {
 				throw new VerifyException("Username or password is wrong");
 			}
 			jwt[0] = jwtBuildFactory.createToken(dto);

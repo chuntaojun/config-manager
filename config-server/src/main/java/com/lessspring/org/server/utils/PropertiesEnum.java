@@ -16,6 +16,8 @@
  */
 package com.lessspring.org.server.utils;
 
+import com.lessspring.org.server.exception.NoSuchRoleException;
+
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
@@ -119,7 +121,7 @@ public final class PropertiesEnum {
 					return role;
 				}
 			}
-			return CUSTOMER;
+			throw new NoSuchRoleException();
 		}
 
 		public short getType() {

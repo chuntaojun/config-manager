@@ -17,6 +17,7 @@
 package com.lessspring.org.server;
 
 import com.lessspring.org.admin.AdminServerApplication;
+import com.lessspring.org.raft.NodeManager;
 import com.lessspring.org.server.utils.ByteUtils;
 import de.codecentric.boot.admin.server.config.AdminServerAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerCloudFoundryAutoConfiguration;
@@ -31,6 +32,7 @@ import org.springframework.core.io.ByteArrayResource;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -39,16 +41,17 @@ import java.util.Optional;
 @SpringBootApplication(exclude = { AdminServerAutoConfiguration.class,
 		AdminServerCloudFoundryAutoConfiguration.class,
 		AdminServerNotifierAutoConfiguration.class,
-		AdminServerHazelcastAutoConfiguration.class,
-		ThymeleafAutoConfiguration.class,
-		MappingsEndpointAutoConfiguration.class
-})
+		AdminServerHazelcastAutoConfiguration.class, ThymeleafAutoConfiguration.class,
+		MappingsEndpointAutoConfiguration.class })
 public class ConfigApplication {
 
 	public static void main(String[] args) {
-		String openConfAdmin = Optional.ofNullable(System.getProperty("conf.admin")).orElse("false");
+
+		NodeManager.load();
+		String openConfAdmin = Optional.ofNullable(System.getProperty("conf.admin"))
+				.orElse("false");
 		if (Objects.equals(Boolean.TRUE.toString(), openConfAdmin)) {
-				AdminServerApplication.main(args);
+			AdminServerApplication.main(args);
 		}
 		runApplication(args);
 	}

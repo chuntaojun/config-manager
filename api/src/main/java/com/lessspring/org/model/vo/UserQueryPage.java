@@ -20,12 +20,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,4 +35,29 @@ public class UserQueryPage {
 	private long limit;
 	private long offset;
 
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		if (StringUtils.isNotEmpty(username)) {
+			this.username = "%" + username + "%";
+		}
+	}
+
+	public long getLimit() {
+		return limit;
+	}
+
+	public void setLimit(long limit) {
+		this.limit = limit;
+	}
+
+	public long getOffset() {
+		return offset;
+	}
+
+	public void setOffset(long offset) {
+		this.offset = offset;
+	}
 }

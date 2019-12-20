@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.server.service.config;
 
+import com.lessspring.org.Constant;
 import com.lessspring.org.db.dto.ConfigBetaInfoDTO;
 import com.lessspring.org.db.dto.ConfigInfoDTO;
 import com.lessspring.org.event.EventType;
@@ -29,6 +30,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.observer.Occurrence;
 import com.lessspring.org.observer.Publisher;
 import com.lessspring.org.observer.Watcher;
+import com.lessspring.org.raft.TransactionIdManager;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
@@ -58,6 +60,7 @@ import com.lessspring.org.server.utils.VOUtils;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -97,6 +100,9 @@ public class ConfigOperationService
 	private final ClusterManager clusterManager;
 	private FailCallback failCallback;
 	private ConfigCacheItemManager configCacheItemManager;
+
+	@Autowired
+	private TransactionIdManager idManager;
 
 	public ConfigOperationService(PersistentHandler persistentHandler,
 			NamespaceService namespaceService,
@@ -172,6 +178,7 @@ public class ConfigOperationService
 					PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO,
 					namespaceId, request.getGroupId(), request.getDataId());
 		}
+		request4.setAttribute(Constant.ID, idManager.query(key).increaseAndObtain());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request4),
 				PublishConfigRequest4.CLASS_NAME);
 		datum.setOperation(createConfig);
@@ -226,6 +233,7 @@ public class ConfigOperationService
 		String key = TransactionUtils.buildTransactionKey(
 				PropertiesEnum.InterestKey.CONFIG_DATA, BzConstants.CONFIG_INFO_HISTORY,
 				namespaceId, request.getGroupId(), request.getDataId());
+		request.setAttribute(Constant.ID, idManager.query(key).increaseAndObtain());
 		Datum datum = new Datum(key, GsonUtils.toJsonBytes(request),
 				PublishConfigHistory.CLASS_NAME);
 		datum.setOperation(createConfigHistory);
@@ -309,7 +317,6 @@ public class ConfigOperationService
 					namespaceService.createNamespace(
 							NamespaceRequest.builder().namespace(namespace).build());
 				}
-				request4.setAttribute("id", transaction.getId());
 				if (persistentHandler.saveConfigInfo(request4.getNamespaceId(), request4)
 						&& request4.getStatus() == PropertiesEnum.ConfigStatus.PUBLISH
 								.getStatus()) {
@@ -393,7 +400,6 @@ public class ConfigOperationService
 			public void accept(Transaction transaction) throws Throwable {
 				PublishConfigHistory history = GsonUtils.toObj(transaction.getData(),
 						PublishConfigHistory.class);
-				history.setAttribute("id", transaction.getId());
 				persistentHandler.saveConfigHistory(history.getNamespaceId(), history);
 			}
 
