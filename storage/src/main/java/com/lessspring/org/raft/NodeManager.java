@@ -42,6 +42,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class NodeManager implements LeaderStatusListener {
 
+	private static volatile NodeManager INSTANCE = new NodeManager();
+
+	private static final String SERVER_MODE = "cluster.server.mode.standalone";
 	private static final String SERVER_NODE_SELF_INDEX = "cluster.server.node.self.index";
 	private static final String SERVER_NODE_IP = "cluster.server.node.ip.";
 	private static final String SERVER_NODE_PORT = "cluster.server.node.port.";
@@ -60,9 +63,12 @@ public class NodeManager implements LeaderStatusListener {
 		}
 	}
 
-	public static void load() {}
+	public static void load() {
+	}
 
 	private static void initClusterNode(NodeManager nodeManager, Properties properties) {
+		boolean isStandalone = Boolean
+				.parseBoolean(System.getProperty(SERVER_MODE, "false"));
 		int nodes = properties.size() / 2;
 		String readSelfIndexFromSys = System.getProperty(SERVER_NODE_SELF_INDEX, "0");
 		int selfIndex = Integer.parseInt(
@@ -76,7 +82,15 @@ public class NodeManager implements LeaderStatusListener {
 				nodeManager.setSelf(node);
 				System.setProperty("server.port", node.getPort() + "");
 			}
-			nodeManager.nodeJoin(node);
+			// 单机模式并且为本节点
+			if (isStandalone && i == selfIndex) {
+				nodeManager.nodeJoin(node);
+				break;
+			}
+			// 如果是集群模式，则加入节点管理
+			else if (!isStandalone) {
+				nodeManager.nodeJoin(node);
+			}
 		}
 	}
 
@@ -93,8 +107,6 @@ public class NodeManager implements LeaderStatusListener {
 	private Set<NodeChangeListener> listeners = new LinkedHashSet<>();
 
 	private Map<String, ServerNode> nodeMap = new ConcurrentHashMap<>(3);
-
-	private static volatile NodeManager INSTANCE = new NodeManager();
 
 	public static NodeManager getInstance() {
 		return INSTANCE;

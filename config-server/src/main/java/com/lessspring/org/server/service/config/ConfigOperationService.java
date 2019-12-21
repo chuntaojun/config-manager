@@ -53,7 +53,7 @@ import com.lessspring.org.server.service.distributed.TransactionConsumer;
 import com.lessspring.org.server.service.publish.AbstractNotifyServiceImpl;
 import com.lessspring.org.server.utils.BzConstants;
 import com.lessspring.org.server.utils.DisruptorFactory;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
 import com.lessspring.org.server.utils.VOUtils;

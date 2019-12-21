@@ -16,10 +16,12 @@
  */
 package com.lessspring.org;
 
+import java.util.Scanner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import com.lessspring.org.config.ConfigService;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import org.junit.Test;
 
@@ -46,12 +48,10 @@ public class Test_ClusterInfo {
 
 			@Override
 			public Executor executor() {
-				return Executors.newFixedThreadPool(2);
+				return null;
 			}
 		});
-		while (true) {
-			Thread.sleep(1000);
-		}
+		new Scanner(System.in).next();
 	}
 
 }

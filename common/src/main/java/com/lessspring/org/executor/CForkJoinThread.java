@@ -1,6 +1,7 @@
 package com.lessspring.org.executor;
 
 import com.lessspring.org.context.TraceContext;
+import org.slf4j.MDC;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
@@ -24,11 +25,16 @@ public class CForkJoinThread extends ForkJoinWorkerThread {
     }
 
     public void setTraceContext(TraceContext traceContext) {
+        MDC.put("TraceId", traceContext.getTraceId());
         this.traceContext = traceContext;
     }
 
     public void cleanTraceContext() {
+        MDC.remove("TraceId");
         traceContext = null;
     }
 
+    public TraceContext getTraceContext() {
+        return traceContext;
+    }
 }

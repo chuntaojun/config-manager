@@ -2,12 +2,11 @@ package com.lessspring.org.context;
 
 import com.lessspring.org.executor.CForkJoinThread;
 import com.lessspring.org.executor.CThread;
+import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 
 /**
- * 该
- *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-28 16:48
  */
@@ -33,6 +32,7 @@ public class PassThrough {
     }
 
     protected void transfer() {
+        MDC.put("TraceId", context.getTraceId());
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof CForkJoinThread) {
             CForkJoinThread joinThread = (CForkJoinThread) currentThread;
@@ -48,6 +48,7 @@ public class PassThrough {
     }
 
     protected void clean() {
+        MDC.remove("TraceId");
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof CForkJoinThread) {
             CForkJoinThread joinThread = (CForkJoinThread) currentThread;

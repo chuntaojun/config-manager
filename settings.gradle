@@ -10,4 +10,5 @@ enableFeaturePreview("GRADLE_METADATA")
 rootProject.children.each {project ->
     project.buildFileName = "build.gradle"
 }
+include 'test'
 

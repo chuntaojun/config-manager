@@ -31,12 +31,13 @@ import com.lessspring.org.model.vo.WatchResponse;
 import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.watch.AbstractWatchWorker;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -44,7 +45,8 @@ import java.util.logging.Logger;
  */
 public class SseWatchConfigWorker extends AbstractWatchWorker {
 
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static final Logger logger = LoggerFactory
+			.getLogger(SseWatchConfigWorker.class);
 
 	private EventReceiver<WatchResponse> receiver;
 
@@ -89,7 +91,7 @@ public class SseWatchConfigWorker extends AbstractWatchWorker {
 	}
 
 	private void onError(Throwable throwable) {
-		logger.warning(throwable.getMessage());
+		logger.error(throwable.getMessage());
 	}
 
 	// Create a Watcher to monitor configuration changes information

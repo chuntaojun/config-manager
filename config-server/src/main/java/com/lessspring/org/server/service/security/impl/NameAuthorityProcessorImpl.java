@@ -48,17 +48,20 @@ public class NameAuthorityProcessorImpl implements AuthorityProcessor {
 	private UserMapper userMapper;
 
 	@Override
-	public boolean hasAuth(Privilege privilege, PropertiesEnum.Role role) {
+	public boolean hasAuth(Privilege privilege, PropertiesEnum.Role[] roles) {
 		final String namespaceId = privilege.getAttachment("namespaceId");
 		Set<String> namespaceIds = new HashSet<>(privilege.getOwnerNamespaces());
 		if (namespaceIds.contains(namespaceId)) {
 			return true;
 		}
 		// verify role
-		boolean hasRole = role.equals(privilege.getRole());
+		boolean hasRole = false;
+		for (PropertiesEnum.Role role : roles) {
+			hasRole = role.equals(privilege.getRole());
+		}
 		boolean hasResource = false;
 		// If not an administrator, you need to validate namespace rights
-		if (hasRole && !PropertiesEnum.Role.ADMIN.equals(privilege.getRole())) {
+		if (hasRole) {
 			// verify resource
 			namespaceIds = new HashSet<>(
 					permissionsMapper.findNamespaceIdByUserId(privilege.getUserId()));

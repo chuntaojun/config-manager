@@ -38,7 +38,7 @@ public class Configuration {
 	private String cachePath = Paths
 			.get(System.getProperty("user.home"), "config_manager_client").toString();
 
-	private volatile String clientId;
+	private volatile String clientId = InetUtils.getSelfIp();
 
 	private String username;
 
@@ -52,7 +52,7 @@ public class Configuration {
 
 	private Duration longPollTime = Duration.ofSeconds(60);
 
-	private WatchType watchType = WatchType.SSE;
+	private WatchType watchType = WatchType.LONG_POLL;
 
 	public static Builder builder() {
 		return new Builder();

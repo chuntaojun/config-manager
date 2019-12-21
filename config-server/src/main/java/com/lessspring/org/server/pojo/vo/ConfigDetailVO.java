@@ -1,6 +1,6 @@
 package com.lessspring.org.server.pojo.vo;
 
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

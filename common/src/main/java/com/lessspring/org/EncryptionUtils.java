@@ -31,7 +31,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
-import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -57,6 +57,10 @@ public final class EncryptionUtils {
 		catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static void main(String[] args) {
+		System.out.println(encryptByBcrypt("29591314"));
 	}
 
 	public static void setAesKey(String aesKey) {

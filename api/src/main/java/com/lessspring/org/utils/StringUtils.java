@@ -14,11 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.lessspring.org.utils;
 
-package com.lessspring.org.function;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
- * 该包下的函数式接口是可以支持 {@link com.lessspring.org.context.TraceContext} 透传的
- *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
- * @Created at 2019-11-28 16:43
+ * @since 0.0.1
  */
+public class StringUtils {
+
+	public static String newString4UTF8(byte[] bytes) {
+		return new String(bytes, Charset.forName(StandardCharsets.UTF_8.name()));
+	}
+
+}

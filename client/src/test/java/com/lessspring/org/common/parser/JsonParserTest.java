@@ -2,7 +2,7 @@ package com.lessspring.org.common.parser;
 
 import com.lessspring.org.constant.ConfigType;
 import com.lessspring.org.model.dto.ConfigInfo;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import org.junit.Before;
 import org.junit.Test;
 

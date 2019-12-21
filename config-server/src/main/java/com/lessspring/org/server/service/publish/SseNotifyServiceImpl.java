@@ -19,6 +19,7 @@ package com.lessspring.org.server.service.publish;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.server.pojo.request.WatchClientQueryPage;
 import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.client.SseWatchClient;
 import com.lessspring.org.server.service.publish.client.WatchClient;
@@ -87,9 +88,8 @@ public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 	}
 
 	@Override
-	public List<WatchClientVO> queryWatchClient(String namespaceId, String groupId,
-			String dataId) {
-		List<WatchClientVO> target = super.queryWatchClient(namespaceId, groupId, dataId);
+	public List<WatchClientVO> queryWatchClient(WatchClientQueryPage queryPage) {
+		List<WatchClientVO> target = super.queryWatchClient(queryPage);
 		for (WatchClientVO client : target) {
 			client.setWatchType(WatchType.SSE.name());
 		}

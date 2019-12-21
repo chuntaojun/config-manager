@@ -43,7 +43,7 @@ public @interface NeedAuth {
 	/**
 	 * Return handler to execute privilege check
 	 *
-	 * @return
+	 * @return Class<? extends AuthorityProcessor>
 	 */
 	Class<? extends AuthorityProcessor> handler() default NameAuthorityProcessorImpl.class;
 
@@ -52,6 +52,6 @@ public @interface NeedAuth {
 	 *
 	 * @return default type is {@link PropertiesEnum.Role#CUSTOMER}
 	 */
-	PropertiesEnum.Role role() default PropertiesEnum.Role.CUSTOMER;
+	PropertiesEnum.Role[] role() default PropertiesEnum.Role.CUSTOMER;
 
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils;
+package com.lessspring.org.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

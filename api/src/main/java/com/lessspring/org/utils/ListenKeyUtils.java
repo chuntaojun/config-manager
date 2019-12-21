@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils;
+package com.lessspring.org.utils;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>

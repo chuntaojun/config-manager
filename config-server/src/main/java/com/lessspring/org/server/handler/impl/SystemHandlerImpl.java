@@ -43,7 +43,7 @@ import com.lessspring.org.server.handler.SystemHandler;
 import com.lessspring.org.server.pojo.request.PublishQpsRequest;
 import com.lessspring.org.server.service.dump.DumpService;
 import com.lessspring.org.server.service.publish.TraceAnalyzer;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.RenderUtils;
 import com.lessspring.org.server.utils.SchedulerUtils;

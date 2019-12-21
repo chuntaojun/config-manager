@@ -30,8 +30,9 @@ public interface AuthorityProcessor {
 	 * judge have auth to access this namespace
 	 *
 	 * @param privilege {@link Privilege}
+	 * @param roles need roles
 	 * @return has auth
 	 */
-	boolean hasAuth(Privilege privilege, PropertiesEnum.Role role);
+	boolean hasAuth(Privilege privilege, PropertiesEnum.Role[] roles);
 
 }

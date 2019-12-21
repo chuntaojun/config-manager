@@ -48,7 +48,7 @@ import com.lessspring.org.server.service.config.NamespaceService;
 import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallback;
 import com.lessspring.org.server.service.distributed.TransactionConsumer;
 import com.lessspring.org.server.service.security.AuthorityProcessor;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.TransactionUtils;
 import com.lessspring.org.server.utils.VOUtils;

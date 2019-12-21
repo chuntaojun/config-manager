@@ -17,6 +17,7 @@
 package com.lessspring.org.server.utils;
 
 import com.lessspring.org.model.vo.PublishConfigRequest;
+import com.lessspring.org.utils.ByteUtils;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>

@@ -41,7 +41,7 @@ import static com.lessspring.org.constant.Code.SUCCESS;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClusterNodeWatch extends Publisher implements LifeCycle {
+public class ClusterNodeWatch extends Publisher<Set<String>> implements LifeCycle {
 
 	private ScheduledThreadPoolExecutor executor;
 
@@ -63,8 +63,8 @@ public class ClusterNodeWatch extends Publisher implements LifeCycle {
 
 		notifyAllWatcher(nodeList);
 
-		executor.schedule(this::refreshCluster, TimeUnit.SECONDS.toMillis(15),
-				TimeUnit.MILLISECONDS);
+		executor.schedule(this::refreshCluster, 15,
+				TimeUnit.SECONDS);
 
 	}
 
@@ -118,7 +118,7 @@ public class ClusterNodeWatch extends Publisher implements LifeCycle {
 		executor.schedule(this::refreshCluster, delay, TimeUnit.MILLISECONDS);
 	}
 
-	public void register(Watcher watcher) {
+	public void register(Watcher<Set<String>> watcher) {
 		registerWatcher(watcher);
 	}
 

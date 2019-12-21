@@ -60,8 +60,9 @@ public class DistroServerConfigFilter implements CustomerConfigFilter {
 		final String apiUrl = request.getURI().getRawPath();
 		if (apiUrl.startsWith(StringConst.API_V1)) {
 			String shareId = request.getQueryParams().getFirst(Constant.SHARE_ID_NAME);
-			if (StringUtils.isEmpty(shareId)) {
-				return null;
+			// 本机处理请求
+			if (StringUtils.isEmpty(shareId) || distroRouter.isPrincipal(shareId)) {
+				return chain.filter(exchange);
 			}
 			final HttpMethod method = Optional.ofNullable(request.getMethod())
 					.orElse(HttpMethod.GET);
@@ -69,14 +70,12 @@ public class DistroServerConfigFilter implements CustomerConfigFilter {
 					+ request.getURI().getRawQuery();
 			log.info("http request redirect : source {} => target {}",
 					distroRouter.self() + "?" + request.getURI().getRawQuery(), reqPath);
-			if (distroRouter.isPrincipal(shareId)) {
-				return chain.filter(exchange);
-			}
 			// Forward requests to different nodes
 			Mono<ClientResponse> clientResponseMono = client.method(method).uri(reqPath)
 					.contentType(MediaType.APPLICATION_JSON_UTF8).headers(httpHeaders -> {
 						HttpHeaders rawHeaders = request.getHeaders();
-						for (Map.Entry<String, List<String>> entry : rawHeaders.entrySet()) {
+						for (Map.Entry<String, List<String>> entry : rawHeaders
+								.entrySet()) {
 							httpHeaders.addAll(entry.getKey(), entry.getValue());
 						}
 					}).body(request.getBody(), DataBuffer.class).exchange();

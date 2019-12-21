@@ -1,6 +1,5 @@
 package com.lessspring.org.server.service.security.impl;
 
-import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.pojo.Privilege;
 import com.lessspring.org.server.service.security.AuthorityProcessor;
 import com.lessspring.org.server.utils.PropertiesEnum;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class SystemAuthorityProcessorImpl implements AuthorityProcessor {
 
 	@Override
-	public boolean hasAuth(Privilege privilege, PropertiesEnum.Role role) {
+	public boolean hasAuth(Privilege privilege, PropertiesEnum.Role[] roles) {
 		return false;
 	}
 

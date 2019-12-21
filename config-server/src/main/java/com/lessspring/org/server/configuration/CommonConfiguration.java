@@ -16,10 +16,15 @@
  */
 package com.lessspring.org.server.configuration;
 
+import com.lessspring.org.server.aop.CurrentLimitActuator;
+import com.lessspring.org.server.configuration.tps.TpsCondition;
+import com.lessspring.org.server.configuration.tps.TpsManager;
 import com.lessspring.org.server.service.common.EmailNotifyProperties;
 import com.lessspring.org.server.utils.PathConstants;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -37,6 +42,12 @@ public class CommonConfiguration {
 	@Bean
 	public EmailNotifyProperties emailNotifyProperties() {
 		return new EmailNotifyProperties();
+	}
+
+	@Conditional(value = TpsCondition.class)
+	@Bean
+	public CurrentLimitActuator currentLimitActuator(@Autowired TpsManager tpsManager) {
+		return new CurrentLimitActuator(tpsManager);
 	}
 
 }

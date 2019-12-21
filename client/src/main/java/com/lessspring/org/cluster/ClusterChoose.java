@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class ClusterChoose implements Watcher, LifeCycle {
+public class ClusterChoose implements Watcher<Set<String>>, LifeCycle {
 
 	private ClusterNodeWatch watch;
 
@@ -101,10 +101,9 @@ public class ClusterChoose implements Watcher, LifeCycle {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void onNotify(Occurrence occurrence, Publisher publisher) {
-		Set<String> newClusterInfo = (Set<String>) occurrence.getOrigin();
+	public void onNotify(Occurrence<Set<String>> occurrence, Publisher publisher) {
+		Set<String> newClusterInfo = occurrence.getOrigin();
 		writeLock.lock();
 		try {
 			clusterInfos = newClusterInfo;

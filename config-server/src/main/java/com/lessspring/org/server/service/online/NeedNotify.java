@@ -14,39 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.server.service.online;
 
-import com.lessspring.org.utils.ByteUtils;
-import com.lessspring.org.utils.MD5Utils;
-import com.lessspring.org.utils.StringUtils;
-
-import java.util.Base64;
-import java.util.UUID;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class IDUtils {
-
-	private IDUtils() {
-	}
-
-	public static String generateUuid(String name) {
-		return UUID.fromString(name).toString();
-	}
-
-	public static String generateUuid() {
-		return UUID.randomUUID().toString();
-	}
-
-	public static String generateMd5(String name) {
-		return MD5Utils.md5Hex(name);
-	}
-
-	public static String generateBase64(String name) {
-		Base64.Encoder encoder = Base64.getEncoder();
-		return StringUtils.newString4UTF8(encoder.encode(ByteUtils.toBytes(name)));
-	}
-
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NeedNotify {
 }

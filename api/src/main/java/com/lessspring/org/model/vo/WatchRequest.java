@@ -19,7 +19,7 @@ package com.lessspring.org.model.vo;
 import java.util.Collections;
 import java.util.Map;
 
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>

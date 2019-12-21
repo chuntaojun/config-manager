@@ -35,6 +35,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.watch.AbstractWatchWorker;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +51,11 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-12-01 13:21
  */
+@Slf4j
 public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 
-	private static final Logger logger = LoggerFactory.getLogger(LongPollWatchConfigWorker.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(LongPollWatchConfigWorker.class);
 
 	private List<SubWorker> workers = new ArrayList<>(8);
 
@@ -81,7 +84,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 
 	@Override
 	public void createWatcher() {
-		for (int i = 0; i < workers.size(); i++) {
+		for (int i = 0; i < 8; i++) {
 			SubWorker worker = new SubWorker(i, httpClient);
 			workers.add(worker);
 		}
@@ -138,9 +141,11 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 			if (WorkerState.SUSPEND.equals(workerState)) {
 				synchronized (monitor) {
 					try {
+						log.info("wait to update cacheItem");
 						monitor.wait();
 					}
 					catch (InterruptedException ignore) {
+						Thread.interrupted();
 					}
 				}
 			}
@@ -183,15 +188,16 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 
 		public void init() {
 			boolean needWeakUp = WorkerState.SUSPEND.equals(workerState);
+			if (needWeakUp) {
+				synchronized (monitor) {
+					log.info("notify all waiter");
+					monitor.notify();
+				}
+			}
 			Map<String, CacheItem> cacheItemMap = configManager.copy();
 			for (Map.Entry<String, CacheItem> entry : cacheItemMap.entrySet()) {
 				if (HashUtils.distroHash(entry.getKey(), 8) == index) {
 					observerMap.put(entry.getKey(), entry.getValue());
-				}
-			}
-			if (needWeakUp) {
-				synchronized (monitor) {
-					monitor.notify();
 				}
 			}
 

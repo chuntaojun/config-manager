@@ -24,7 +24,7 @@ import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.metrics.MetricsHelper;
 import com.lessspring.org.server.pojo.Privilege;
 import com.lessspring.org.server.service.security.SecurityService;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import io.micrometer.core.instrument.DistributionSummary;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -82,6 +82,7 @@ public class ConfigWebFilter implements WebFilter {
 		httpTrace.record(1.0D);
 		ServerHttpRequest request = exchange.getRequest();
 		String path = request.getPath().value();
+		openTraceContext(request);
 		// Filter ahead of time by URL whitelist
 		if (uriMatcher(path, anyOneUri)) {
 			return chain.filter(exchange);
@@ -92,8 +93,10 @@ public class ConfigWebFilter implements WebFilter {
 		if (Objects.nonNull(mono)) {
 			return mono;
 		}
+		if (isPageAndAuth(exchange, path)) {
+			return chain.filter(exchange);
+		}
 		// To release the URL white list
-		openTraceContext(request);
 		boolean hasAuth = permissionIntercept(exchange);
 		if (!hasAuth) {
 			return filterResponse(exchange.getResponse(), HttpStatus.UNAUTHORIZED,
@@ -129,11 +132,23 @@ public class ConfigWebFilter implements WebFilter {
 		result.ifPresent(decodedJWT -> exchange.getSession().subscribe(webSession -> {
 			Privilege privilege = GsonUtils.toObj(decodedJWT.getSubject(),
 					Privilege.class);
-			TraceContext context = contextHolder.getInvokeTraceContext();
+			final TraceContext context = contextHolder.getInvokeTraceContext();
 			context.setAttachment("privilege", privilege);
 			webSession.getAttributes().put("privilege", privilege);
 		}));
 		return result.isPresent();
+	}
+
+	private boolean isPageAndAuth(ServerWebExchange exchange, String path) {
+		if (path.startsWith("/page")) {
+			boolean[] result = new boolean[] { false };
+			exchange.getSession().subscribe(webSession -> {
+				Privilege privilege = webSession.getAttribute("privilege");
+				result[0] = Objects.isNull(privilege);
+			});
+			return result[0];
+		}
+		return false;
 	}
 
 	private boolean uriMatcher(String path, String[] matcherUri) {

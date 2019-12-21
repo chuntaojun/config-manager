@@ -17,6 +17,7 @@
 package com.lessspring.org.model.vo;
 
 import com.lessspring.org.constant.Code;
+import com.lessspring.org.utils.GsonUtils;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -107,4 +108,8 @@ public class ResponseData<T> {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return GsonUtils.toJson(this);
+	}
 }

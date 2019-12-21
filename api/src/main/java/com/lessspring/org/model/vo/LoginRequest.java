@@ -16,6 +16,7 @@
  */
 package com.lessspring.org.model.vo;
 
+
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1

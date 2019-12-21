@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import com.lessspring.org.PathUtils;
 import com.lessspring.org.jvm.JvmUtils;
-import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>

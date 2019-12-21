@@ -26,7 +26,7 @@ import com.lessspring.org.server.configuration.tps.OpenTpsLimit;
 import com.lessspring.org.server.configuration.tps.TpsManager;
 import com.lessspring.org.server.pojo.event.email.WarnEmailEvent;
 import com.lessspring.org.server.service.common.EmailService;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import com.lessspring.org.server.utils.RenderUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -47,7 +47,6 @@ import org.springframework.stereotype.Component;
  * @since 0.0.1
  */
 
-@Component
 @Aspect
 public class CurrentLimitActuator implements PriorityOrdered {
 

@@ -49,6 +49,7 @@ public final class RenderUtils {
 		dataMono = dataMono.publishOn(
 				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
 		return ok().header("Access-Control-Allow-Origin", "*")
+				.header("c-trace-info", contextHolder.getInvokeTraceContext().getTraceId())
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.cacheControl(CacheControl.noCache())
 				.body(BodyInserters.fromPublisher(dataMono, (Class) ResponseData.class));
@@ -59,6 +60,7 @@ public final class RenderUtils {
 		return ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=\"" + resource.getFilename() + "\"")
+				.header("c-trace-info", contextHolder.getInvokeTraceContext().getTraceId())
 				.body(BodyInserters.fromResource(resource));
 	}
 

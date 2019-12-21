@@ -14,19 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils;
+package com.lessspring.org.server.pojo.request;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import com.lessspring.org.model.vo.LoginRequest;
+import org.springframework.web.reactive.function.server.ServerRequest;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class StringUtils {
+public class LoginRequest4 extends LoginRequest {
 
-	public static String newString4UTF8(byte[] bytes) {
-		return new String(bytes, Charset.forName(StandardCharsets.UTF_8.name()));
+	private ServerRequest request;
+
+	public ServerRequest getRequest() {
+		return request;
 	}
 
+	public void setRequest(ServerRequest request) {
+		this.request = request;
+	}
 }

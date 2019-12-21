@@ -71,8 +71,8 @@ final class ClientConfigService implements ConfigService {
 
 			// The calling component all initialization of the hook
 			LifeCycleHelper.invokeInit(httpClient);
-			LifeCycleHelper.invokeInit(clusterNodeWatch);
 			LifeCycleHelper.invokeInit(loginHandler);
+			LifeCycleHelper.invokeInit(clusterNodeWatch);
 			LifeCycleHelper.invokeInit(configManager);
 		}
 	}

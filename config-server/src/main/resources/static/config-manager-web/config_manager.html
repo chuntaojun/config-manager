@@ -102,7 +102,14 @@
                                 <option value="yaml">Yaml</option>
                                 <option value="json">Json</option>
                                 <option value="properties">Properties</option>
+                                <option value="xml">Xml</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="item-remark">Encryption</label>
+                            <input type="text" class="form-control" id="encryption" placeholder="加密Token">
                         </div>
                     </div>
                 </div>
@@ -125,8 +132,9 @@
                     <div class="row">
                         <div class="form-group col-md-12">
                             <label for="beta_client_ids">betaIp</label>
-                            <input id="beta_client_ids" type="text" class="form-control" disabled="true" id="item-beta"
-                                   placeholder="灰度配置：client-id-1,client-id-2,">
+                            <input class="form-control" disabled id="beta_client_ids"
+                                   placeholder="灰度配置：client-id-1,client-id-2,"
+                                   type="text">
                         </div>
                     </div>
                 </div>
@@ -134,7 +142,7 @@
                     <div class="row">
                         <div class="form-group col-md-12">
                             <label for="item-content">Context</label>
-                            <div id=configContext id="item-content"></div>
+                            <div id="configContext"></div>
                         </div>
                     </div>
                 </div>
@@ -176,10 +184,16 @@
     $(".w-e-text-container").height(500);
 
     function submitItem() {
+        const status = $('#item-select_beta').val()
+
         const data = {
-            "item_name": $('#item-name').val(),
-            "type": $('#item-class').val(),
-            "item_desc": $('#item-desc').val()
+            "beta": status == 1 || status == '1',
+            "groupId": $('#item-group').val(),
+            "dataId": $('#item-dataId').val(),
+            "contenet": editor.$txt.text(),
+            "clientIps": $('#beta_client_ids').val(),
+            "type": $('#item-config-type').val(),
+            "encryption": $('#encryption').val()
         };
         $.ajax({
             url: HTTP_REQUEST_API_URL + '/api/add/item',
@@ -207,10 +221,10 @@
     }
 
     function openBeta() {
-        const selectItem = document.getElementById("select_beta");
-        const status = selectItem.options[selectItem.selectedIndex].value;
+        const status = $('#item-select_beta').val();
         if (status == 1 || status == '1') {
             document.getElementById('beta_client_ids').disabled = false;
+            $('#beta_client_ids').val("")
         } else {
             document.getElementById('beta_client_ids').disabled = true;
         }

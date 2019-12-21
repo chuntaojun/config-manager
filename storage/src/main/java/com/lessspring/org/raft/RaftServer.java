@@ -37,7 +37,7 @@ import com.lessspring.org.raft.conf.RaftServerOptions;
 import com.lessspring.org.raft.machine.ConfigStateMachineAdapter;
 import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.ServerNode;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 

@@ -14,28 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org.server.utils;
+package com.lessspring.org.common.logger;
 
-import java.util.Objects;
-
-import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class MD5Utils {
-
-	public static String md5Hex(String s) {
-		return DigestUtils.md5Hex(s);
-	}
-
-	public static String md5Hex(byte[] bytes) {
-		return DigestUtils.md5Hex(bytes);
-	}
-
-	public static boolean compareMd5(String var1, String var2) {
-		return Objects.equals(md5Hex(var1), md5Hex(var2));
-	}
+public final class LoggerHelper {
 
 }

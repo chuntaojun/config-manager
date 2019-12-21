@@ -31,18 +31,20 @@ import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.model.vo.PublishConfigRequest;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.pojo.CacheItem;
-import com.lessspring.org.server.utils.GsonUtils;
-import com.lessspring.org.server.utils.MD5Utils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PathConstants;
 import com.lessspring.org.watch.AbstractWatchWorker;
 import com.lessspring.org.watch.ChangeKeyListener;
 import com.lessspring.org.watch.WrapperListener;
 import com.lessspring.org.watch.longpoll.LongPollWatchConfigWorker;
 import com.lessspring.org.watch.sse.SseWatchConfigWorker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,6 +59,9 @@ import java.util.function.Supplier;
  * @since 0.0.1
  */
 public class CacheConfigManager implements LifeCycle {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(CacheConfigManager.class);
 
 	private SerializerUtils serializer = SerializerUtils.getInstance();
 
@@ -75,6 +80,7 @@ public class CacheConfigManager implements LifeCycle {
 
 	CacheConfigManager(HttpClient client, Configuration configuration,
 			ConfigFilterManager configFilterManager) {
+		logger.info("start");
 		this.httpClient = client;
 		this.limitManager = new RequestLimitManager(configuration);
 		this.namespaceId = configuration.getNamespaceId();
@@ -129,7 +135,7 @@ public class CacheConfigManager implements LifeCycle {
 		return Objects.isNull(item) ? Collections.emptyList() : item.listListener();
 	}
 
-	public void registerListener(String groupId, String dataId, String encryption,
+	void registerListener(String groupId, String dataId, String encryption,
 			AbstractListener listener) {
 		Tuple2<Boolean, CacheItem> tuple2 = computeIfAbsentCacheItem(groupId, dataId,
 				encryption);
@@ -147,12 +153,19 @@ public class CacheConfigManager implements LifeCycle {
 	}
 
 	public Map<String, CacheItem> copy() {
-		if (Objects.isNull(itemImmutableMap)) {
-			synchronized (this) {
-				itemImmutableMap = ImmutableMap.copyOf(cacheItemMap);
+		return copy(true);
+	}
+
+	public Map<String, CacheItem> copy(boolean cache) {
+		if (cache) {
+			if (Objects.isNull(itemImmutableMap)) {
+				synchronized (this) {
+					itemImmutableMap = ImmutableMap.copyOf(cacheItemMap);
+				}
 			}
+			return itemImmutableMap;
 		}
-		return itemImmutableMap;
+		return new HashMap<>(cacheItemMap);
 	}
 
 	private void removeCacheItem(String groupId, String dataId) {

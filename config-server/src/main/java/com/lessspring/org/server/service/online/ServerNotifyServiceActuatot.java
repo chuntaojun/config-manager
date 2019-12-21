@@ -14,39 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lessspring.org;
+package com.lessspring.org.server.service.online;
 
-import com.lessspring.org.utils.ByteUtils;
-import com.lessspring.org.utils.MD5Utils;
-import com.lessspring.org.utils.StringUtils;
-
-import java.util.Base64;
-import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public final class IDUtils {
+@Slf4j
+@Component
+@Aspect
+public class ServerNotifyServiceActuatot {
 
-	private IDUtils() {
+	@Pointcut("@annotation(com.lessspring.org.server.service.online.NeedNotify)")
+	public void notifyServer() {
 	}
 
-	public static String generateUuid(String name) {
-		return UUID.fromString(name).toString();
-	}
-
-	public static String generateUuid() {
-		return UUID.randomUUID().toString();
-	}
-
-	public static String generateMd5(String name) {
-		return MD5Utils.md5Hex(name);
-	}
-
-	public static String generateBase64(String name) {
-		Base64.Encoder encoder = Base64.getEncoder();
-		return StringUtils.newString4UTF8(encoder.encode(ByteUtils.toBytes(name)));
+	@Around("notifyServer()")
+	public Object aroundService(ProceedingJoinPoint pjp) throws Throwable {
+		return pjp.proceed();
 	}
 
 }

@@ -18,6 +18,7 @@ package com.lessspring.org.http.impl;
 
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.Configuration;
+import com.lessspring.org.api.ApiConstant;
 import com.lessspring.org.auth.AuthHolder;
 import com.lessspring.org.cluster.ClusterChoose;
 import com.lessspring.org.constant.StringConst;
@@ -183,7 +184,8 @@ class ConfigHttpClient implements HttpClient {
 	}
 
 	@Override
-	public <T> ResponseData<T> post(OkHttpClient client, String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token) {
+	public <T> ResponseData<T> post(OkHttpClient client, String url, Header header,
+			Query query, Body body, TypeToken<ResponseData<T>> token) {
 		Retry<ResponseData<T>> retry = new Retry<ResponseData<T>>() {
 			@Override
 			protected ResponseData<T> run() throws Exception {
@@ -221,7 +223,7 @@ class ConfigHttpClient implements HttpClient {
 						requestHandler.handle(body.getData()));
 				Request.Builder builder = new Request.Builder().url(buildUrl(url))
 						.post(postBody);
-				initHeader(header, builder);
+				initHeader(url, header, builder);
 				EventSource.Factory factory = EventSources.createFactory(client);
 				EventSource source = factory.newEventSource(builder.build(),
 						new ServerSentEventListener<T>(receiver, cls));
@@ -309,14 +311,18 @@ class ConfigHttpClient implements HttpClient {
 		else {
 			throw new IllegalArgumentException("Does not support HTTP request type");
 		}
-		initHeader(header, builder);
+		initHeader(url, header, builder);
 		return builder.build();
 	}
 
-	private void initHeader(final Header header, Request.Builder builder) {
+	private void initHeader(final String url, final Header header,
+			Request.Builder builder) {
 		Iterator<Map.Entry<String, String>> iterator = header.iterator();
 		builder.addHeader(StringConst.CLIENT_ID_NAME, configuration.getClientId());
-		builder.addHeader(StringConst.TOKEN_HEADER_NAME, authHolder.getToken());
+		// 如果是登陆模式，忽略token添加
+		if (!url.contains(ApiConstant.LOGIN)) {
+			builder.addHeader(StringConst.TOKEN_HEADER_NAME, authHolder.getToken());
+		}
 		while (iterator.hasNext()) {
 			Map.Entry<String, String> entry = iterator.next();
 			builder.addHeader(entry.getKey(), entry.getValue());

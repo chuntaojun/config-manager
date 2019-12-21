@@ -19,7 +19,7 @@ package com.lessspring.org.http.impl;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.reflect.TypeToken;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;

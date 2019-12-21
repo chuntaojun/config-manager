@@ -32,13 +32,15 @@ import com.lessspring.org.db.dto.UserDTO;
 import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.server.pojo.Privilege;
 import com.lessspring.org.server.repository.NamespacePermissionsMapper;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import static com.lessspring.org.server.utils.PropertiesEnum.Jwt.TOKEN_EXPIRE_RANGE;
 import static com.lessspring.org.server.utils.PropertiesEnum.Jwt.TOKEN_STATUS_EXPIRE;
@@ -65,7 +67,7 @@ public class JwtBuildFactory {
 		this.algorithm = algorithm;
 	}
 
-	public JwtResponse createToken(UserDTO userDTO) {
+	public Tuple2<Privilege, JwtResponse> createToken(UserDTO userDTO) {
 		final JwtResponse response = new JwtResponse();
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(new Date());
@@ -83,7 +85,7 @@ public class JwtBuildFactory {
 				.withExpiresAt(calendar.getTime()).sign(algorithm);
 		response.setExpireTime(calendar.getTime().getTime());
 		response.setToken(jwt);
-		return response;
+		return Tuples.of(privilege, response);
 	}
 
 	public Optional<DecodedJWT> tokenVerify(String jwt) {

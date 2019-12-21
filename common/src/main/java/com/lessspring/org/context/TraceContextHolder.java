@@ -17,7 +17,13 @@
 
 package com.lessspring.org.context;
 
+import com.lessspring.org.executor.CForkJoinThread;
+import com.lessspring.org.executor.CThread;
+
 /**
+ * A simple link tracing framework, custom implementation of threads and forkjointhreads,
+ * low overhead passthrough of TraceContext
+ *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @Created at 2019-11-28 16:28
  */
@@ -33,14 +39,39 @@ public final class TraceContextHolder {
 	}
 
 	public TraceContext getInvokeTraceContext() {
+		Thread thread = Thread.currentThread();
+		if (thread instanceof CThread) {
+			return ((CThread) thread).getTraceContext();
+		}
+		if (thread instanceof CForkJoinThread) {
+			return ((CForkJoinThread) thread).getTraceContext();
+		}
 		return INSTANCE.contextThreadLocal.get();
 	}
 
 	public void setInvokeTraceContext(TraceContext context) {
+		Thread thread = Thread.currentThread();
+		if (thread instanceof CThread) {
+			((CThread) thread).setTraceContext(context);
+			return;
+		}
+		if (thread instanceof CForkJoinThread) {
+			((CForkJoinThread) thread).setTraceContext(context);
+			return;
+		}
 		INSTANCE.contextThreadLocal.set(context);
 	}
 
 	public void removeInvokeTraceContext() {
+		Thread thread = Thread.currentThread();
+		if (thread instanceof CThread) {
+			((CThread) thread).cleanTraceContext();
+			return;
+		}
+		if (thread instanceof CForkJoinThread) {
+			((CForkJoinThread) thread).cleanTraceContext();
+			return;
+		}
 		INSTANCE.contextThreadLocal.remove();
 	}
 

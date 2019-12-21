@@ -39,7 +39,7 @@ import com.lessspring.org.server.pojo.request.PublishConfigHistory;
 import com.lessspring.org.server.repository.ConfigInfoHistoryMapper;
 import com.lessspring.org.server.repository.ConfigInfoMapper;
 import com.lessspring.org.server.service.config.AbstractPersistentHandler;
-import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.server.utils.ConfigRequestUtils;
 import com.lessspring.org.server.utils.DBUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;

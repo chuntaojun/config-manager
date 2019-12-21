@@ -9,10 +9,11 @@ import com.lessspring.org.server.pojo.ReadWork;
 import com.lessspring.org.server.pojo.event.config.NotifyEvent;
 import com.lessspring.org.server.pojo.event.config.NotifyEventHandler;
 import com.lessspring.org.server.pojo.event.config.PublishLogEvent;
+import com.lessspring.org.server.pojo.request.WatchClientQueryPage;
 import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.config.ConfigCacheItemManager;
 import com.lessspring.org.server.service.publish.client.WatchClient;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.SystemEnv;
 import com.lessspring.org.server.utils.VOUtils;
 import com.lmax.disruptor.WorkHandler;
@@ -213,18 +214,15 @@ public abstract class AbstractNotifyServiceImpl
 	/**
 	 * 根据 namespaceId、groupId、dataId 查询监听客户端
 	 *
-	 * @param namespaceId namespaceId
-	 * @param groupId groupId
-	 * @param dataId dataId
+	 * @param queryPage namespaceId {@link WatchClientQueryPage}
 	 * @return
 	 */
-	public List<WatchClientVO> queryWatchClient(String namespaceId, String groupId,
-			String dataId) {
-		Map<String, Set<WatchClient>> clients = watchClientManager.get(namespaceId);
+	public List<WatchClientVO> queryWatchClient(WatchClientQueryPage queryPage) {
+		Map<String, Set<WatchClient>> clients = watchClientManager.get(queryPage.getNamespaceId());
 		if (Objects.isNull(clients)) {
 			return Collections.emptyList();
 		}
-		final String key = NameUtils.buildName(groupId, dataId);
+		final String key = NameUtils.buildName(queryPage.getGroupId(), queryPage.getDataId());
 		Set<WatchClient> target = clients.getOrDefault(key, Collections.emptySet());
 		List<WatchClientVO> vos = new ArrayList<>();
 		for (WatchClient client : target) {

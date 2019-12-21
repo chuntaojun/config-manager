@@ -16,7 +16,7 @@
  */
 package com.lessspring.org;
 
-import com.lessspring.org.server.utils.MD5Utils;
+import com.lessspring.org.utils.MD5Utils;
 
 /**
  * @author <a href="mailto:liaochunyhm@live.com">liaochuntao</a>

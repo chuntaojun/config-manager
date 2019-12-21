@@ -21,6 +21,7 @@ import java.util.Optional;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.lessspring.org.model.vo.JwtResponse;
 import com.lessspring.org.model.vo.LoginRequest;
+import com.lessspring.org.server.pojo.request.LoginRequest4;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -31,10 +32,10 @@ public interface SecurityService {
 	/**
 	 * Apply for authorization code
 	 *
-	 * @param loginRequest {@link LoginRequest}
+	 * @param loginRequest {@link LoginRequest4}
 	 * @return jwt token
 	 */
-	JwtResponse apply4Authorization(LoginRequest loginRequest);
+	JwtResponse apply4Authorization(LoginRequest4 loginRequest);
 
 	/**
 	 * verify token

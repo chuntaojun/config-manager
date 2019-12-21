@@ -35,7 +35,7 @@ import com.lessspring.org.server.pojo.request.DeleteConfigHistory;
 import com.lessspring.org.server.pojo.request.PublishConfigHistory;
 import com.lessspring.org.server.service.config.AbstractPersistentHandler;
 import com.lessspring.org.server.service.config.ConfigCacheItemManager;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.SystemEnv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

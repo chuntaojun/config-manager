@@ -59,20 +59,23 @@ $(function(){
             'watchType': '-'
         }],
         method: 'get',
-        url: HTTP_REQUEST_API_URL + '/api/get/receive_file',
-        cache: true,
+        url: HTTP_REQUEST_API_URL + '/api/v1/config/watchClient',
+        cache: false,
         contentType: 'application/json',
         ajaxOptions:{
             headers: {"config-manager-token": sessionStorage.getItem("access_token")}
         },
         queryParams: function (params) {
+            params['namespaceId'] = $('#select-item-namespace').val()
+            params['groupId'] = $('#item-groupId').val()
+            params['dataId'] = $('#item-dataId').val()
             return params;
         },
         pagination: true,
         sidePagination: 'client', // client or server
         pageNumber: 1,
         pageSize: 10,
-        pageList: [10, 25, 50],
+        pageList: [10, 25],
         search: false,
         selectItemName: 'btSelectItem',
         showHeader: true,

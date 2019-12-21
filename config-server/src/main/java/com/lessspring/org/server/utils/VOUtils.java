@@ -83,7 +83,6 @@ public final class VOUtils {
 			itemVO.setDataId(item.get("dataId"));
 			listItemVOS.add(itemVO);
 		}
-		vo.setLastId(Long.parseLong(list.get(list.size() - 1).get("id")));
 		vo.setItemVOS(listItemVOS);
 		return vo;
 	}

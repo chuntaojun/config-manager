@@ -32,7 +32,7 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div id="toolbar_seller" class="btn-group">
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <div class="row">
                                 <div class="form-group col-md-12">
                                     <select id="select-item-namespace" class="form-control">
@@ -40,29 +40,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <div class="row">
                                 <div class="form-group col-md-12">
                                     <input type="text" id="item-groupId" class="form-control" placeholder="GroupId">
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <div class="row">
                                 <div class="form-group col-md-12">
                                     <input type="text" id="item-dataId" class="form-control" placeholder="DataId">
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group col-md-3">
-                            <div class="row">
-                                <div class="form-group col-md-12">
-                                    <button class="btn btn-default" onclick="searchWatchClient()">
-                                        <span class="glyphicon glyphicon-add" aria-hidden="true"></span>搜索
-                                    </button>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
                     <table id="config_watch_table"></table>
@@ -90,27 +80,6 @@
 <script src="/config-manager-web/assets/scripts/utils.js"></script>
 <script src="/config-manager-web/assets/scripts/config_watch_table.js"></script>
 <script>
-    function searchWatchClient() {
-        const namespaceId = $('#select-item-namespace').val()
-        const groupId = $('#item-groupId').val()
-        const dataId = $('#item-dataId').val()
-        $.ajax({
-            url: HTTP_REQUEST_API_URL + '/api/v1/config/watchClient?namespaceId=' + namespaceId + '&groupId=' + groupId + '&dataId=' + dataId,
-            type: 'get',
-            dataType: 'json',
-            headers: {
-                "Content-Type": "Application/json",
-                "config-manager-token": sessionStorage.getItem("access_token")
-            },
-            success: function (result) {
-                if (result.state) {
-                    alert("成功")
-                } else {
-                    alert(result.msg)
-                }
-            }
-        })
-    }
 </script>
 </body>
 

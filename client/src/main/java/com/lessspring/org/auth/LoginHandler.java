@@ -40,7 +40,7 @@ import com.lessspring.org.observer.Watcher;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class LoginHandler implements Watcher, LifeCycle {
+public class LoginHandler implements Watcher<CountDownLatch>, LifeCycle {
 
 	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
 			1, new NameThreadFactory("com.lessspring.org.config-manager.client.auth"));
@@ -103,8 +103,8 @@ public class LoginHandler implements Watcher, LifeCycle {
 	}
 
 	@Override
-	public void onNotify(Occurrence occurrence, Publisher publisher) {
-		CountDownLatch latch = (CountDownLatch) occurrence.getOrigin();
+	public void onNotify(Occurrence<CountDownLatch> occurrence, Publisher publisher) {
+		CountDownLatch latch = occurrence.getOrigin();
 		createLoginWork(latch::countDown);
 	}
 }

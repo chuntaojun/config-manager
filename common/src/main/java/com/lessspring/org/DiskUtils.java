@@ -16,7 +16,7 @@
  */
 package com.lessspring.org;
 
-import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;

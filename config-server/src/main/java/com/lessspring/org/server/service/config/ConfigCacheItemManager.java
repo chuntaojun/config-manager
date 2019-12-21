@@ -36,8 +36,8 @@ import com.lessspring.org.model.vo.BaseConfigRequest;
 import com.lessspring.org.server.pojo.CacheItem;
 import com.lessspring.org.server.pojo.WriteWork;
 import com.lessspring.org.server.pojo.event.config.ConfigChangeEvent;
-import com.lessspring.org.server.utils.GsonUtils;
-import com.lessspring.org.server.utils.MD5Utils;
+import com.lessspring.org.utils.GsonUtils;
+import com.lessspring.org.utils.MD5Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -87,7 +87,7 @@ public class ConfigCacheItemManager {
 		}
 		ConfigChangeEvent event = ConfigChangeEvent.builder()
 				.groupId(configInfoDTO.getGroupId()).dataId(configInfoDTO.getDataId())
-				.content(com.lessspring.org.server.utils.StringUtils
+				.content(com.lessspring.org.utils.StringUtils
 						.newString4UTF8(configInfoDTO.getContent()))
 				.fileSource(configInfoDTO.getFileSource())
 				.configType(configInfoDTO.getType()).build();

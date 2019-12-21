@@ -18,7 +18,7 @@ package com.lessspring.org.server;
 
 import com.lessspring.org.admin.AdminServerApplication;
 import com.lessspring.org.raft.NodeManager;
-import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 import de.codecentric.boot.admin.server.config.AdminServerAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerCloudFoundryAutoConfiguration;
 import de.codecentric.boot.admin.server.config.AdminServerHazelcastAutoConfiguration;
@@ -46,7 +46,6 @@ import java.util.concurrent.Executor;
 public class ConfigApplication {
 
 	public static void main(String[] args) {
-
 		NodeManager.load();
 		String openConfAdmin = Optional.ofNullable(System.getProperty("conf.admin"))
 				.orElse("false");

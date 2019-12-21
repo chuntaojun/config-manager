@@ -1,6 +1,6 @@
 package com.lessspring.org.admin;
 
-import com.lessspring.org.server.utils.ByteUtils;
+import com.lessspring.org.utils.ByteUtils;
 import de.codecentric.boot.admin.server.config.EnableAdminServer;
 import org.springframework.boot.ResourceBanner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

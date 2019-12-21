@@ -19,6 +19,7 @@ package com.lessspring.org.server.handler.impl;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.model.vo.WatchRequest;
 import com.lessspring.org.server.handler.NotifyHandler;
+import com.lessspring.org.server.pojo.request.WatchClientQueryPage;
 import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.LongPollNotifyServiceImpl;
 import com.lessspring.org.server.service.publish.SseNotifyServiceImpl;
@@ -96,10 +97,13 @@ public class NotifyHandlerImpl implements NotifyHandler {
 		if (StringUtils.isEmpty(dataId)) {
 			return RenderUtils.render(ResponseData.fail("Illegal query param"));
 		}
-		List<WatchClientVO> lps = longPollNotifyService.queryWatchClient(namespaceId,
-				groupId, dataId);
-		List<WatchClientVO> sses = sseNotifyService.queryWatchClient(namespaceId, groupId,
-				dataId);
+		final WatchClientQueryPage queryPage = WatchClientQueryPage.builder()
+				.namespaceId(namespaceId)
+				.groupId(groupId)
+				.dataId(dataId)
+				.build();
+		List<WatchClientVO> lps = longPollNotifyService.queryWatchClient(queryPage);
+		List<WatchClientVO> sses = sseNotifyService.queryWatchClient(queryPage);
 		List<WatchClientVO> clients = new ArrayList<>();
 		clients.addAll(lps);
 		clients.addAll(sses);

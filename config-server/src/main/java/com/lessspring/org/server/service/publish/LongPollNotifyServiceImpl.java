@@ -21,10 +21,11 @@ import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.constant.StringConst;
 import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.vo.WatchRequest;
+import com.lessspring.org.server.pojo.request.WatchClientQueryPage;
 import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.client.LpWatchClient;
 import com.lessspring.org.server.service.publish.client.WatchClient;
-import com.lessspring.org.server.utils.GsonUtils;
+import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 			monoSink.success("Invalid long polling request: please set hold-time");
 			return;
 		}
-		long holdTimeOut = Long.parseLong(s);
+		long holdTimeOut = Duration.parse(s).getSeconds();
 		WatchClient client = LpWatchClient.builder()
 				.clientId(serverRequest.headers().asHttpHeaders()
 						.getFirst(StringConst.CLIENT_ID_NAME))
@@ -103,9 +104,8 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 	}
 
 	@Override
-	public List<WatchClientVO> queryWatchClient(String namespaceId, String groupId,
-			String dataId) {
-		List<WatchClientVO> target = super.queryWatchClient(namespaceId, groupId, dataId);
+	public List<WatchClientVO> queryWatchClient(WatchClientQueryPage queryPage) {
+		List<WatchClientVO> target = super.queryWatchClient(queryPage);
 		for (WatchClientVO client : target) {
 			client.setWatchType(WatchType.LONG_POLL.name());
 		}

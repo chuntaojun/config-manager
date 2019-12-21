@@ -28,11 +28,7 @@ import com.lessspring.org.observer.Publisher;
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @since 0.0.1
  */
-public class AuthHolder extends Publisher {
-
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
-	private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
+public class AuthHolder extends Publisher<CountDownLatch> {
 
 	private long threshold = TimeUnit.SECONDS.toMillis(3);
 	private volatile long lastRefreshTime;
@@ -43,20 +39,13 @@ public class AuthHolder extends Publisher {
 		registerWatcher(handler);
 	}
 
-	void updateToken(JwtResponse token) {
-		writeLock.lock();
-		try {
-			this.token = Objects.isNull(token.getToken()) ? "" : token.getToken();
-			lastRefreshTime = System.currentTimeMillis();
-			expireTime = token.getExpireTime();
-		}
-		finally {
-			writeLock.unlock();
-		}
+	synchronized void updateToken(JwtResponse token) {
+		this.token = Objects.isNull(token.getToken()) ? "" : token.getToken();
+		lastRefreshTime = System.currentTimeMillis();
+		expireTime = token.getExpireTime();
 	}
 
 	public String getToken() {
-		readLock.lock();
 		try {
 			if (expireTime - lastRefreshTime < threshold) {
 				CountDownLatch latch = new CountDownLatch(1);
@@ -69,13 +58,9 @@ public class AuthHolder extends Publisher {
 		catch (InterruptedException ignore) {
 			return token;
 		}
-		finally {
-			readLock.unlock();
-		}
 	}
 
 	public void refresh() {
-		readLock.lock();
 		try {
 			CountDownLatch latch = new CountDownLatch(1);
 			notifyAllWatcher(latch);
@@ -83,9 +68,6 @@ public class AuthHolder extends Publisher {
 			latch.await(waitTime, TimeUnit.SECONDS);
 		}
 		catch (Exception ignore) {
-		}
-		finally {
-			readLock.unlock();
 		}
 	}
 

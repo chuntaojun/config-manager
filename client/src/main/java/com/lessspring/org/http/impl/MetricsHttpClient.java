@@ -30,6 +30,7 @@ import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.utils.MetricsMonitor;
 import io.prometheus.client.Histogram;
+import okhttp3.OkHttpClient;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -99,6 +100,21 @@ public class MetricsHttpClient implements HttpClient {
 		ResponseData<T> response = null;
 		try {
 			response = client.post(url, header, query, body, token);
+		}
+		finally {
+			timer.observeDuration();
+			timer.close();
+		}
+		return response;
+	}
+
+	@Override
+	public <T> ResponseData<T> post(OkHttpClient client, String url, Header header,
+			Query query, Body body, TypeToken<ResponseData<T>> token) {
+		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("POST", url, "NA");
+		ResponseData<T> response = null;
+		try {
+			response = this.client.post(client, url, header, query, body, token);
 		}
 		finally {
 			timer.observeDuration();

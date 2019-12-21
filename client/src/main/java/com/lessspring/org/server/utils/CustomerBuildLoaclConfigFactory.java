@@ -17,6 +17,7 @@
 package com.lessspring.org.server.utils;
 
 import com.lessspring.org.model.dto.ConfigInfo;
+import com.lessspring.org.utils.GsonUtils;
 
 /**
  * For the use of the user, to a local configuration file readable format

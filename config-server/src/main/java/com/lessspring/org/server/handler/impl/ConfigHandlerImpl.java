@@ -61,8 +61,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	public Mono<ServerResponse> publishConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
-				.publishOn(Schedulers
-						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER))
 				.map(publishRequest -> operationService.publishConfig(namespaceId,
 						publishRequest))
 				.map(Mono::just).flatMap(RenderUtils::render);
@@ -74,8 +72,6 @@ public class ConfigHandlerImpl implements ConfigHandler {
 	public Mono<ServerResponse> modifyConfig(ServerRequest request) {
 		final String namespaceId = request.queryParam("namespaceId").orElse("default");
 		return request.bodyToMono(PublishConfigRequest.class)
-				.publishOn(Schedulers
-						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER))
 				.map(publishRequest -> operationService.modifyConfig(namespaceId,
 						publishRequest))
 				.map(Mono::just).flatMap(RenderUtils::render);
