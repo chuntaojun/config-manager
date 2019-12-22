@@ -18,6 +18,8 @@ package com.lessspring.org;
 
 import com.lessspring.org.utils.ByteUtils;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,7 +38,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -47,7 +48,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class DiskUtils {
 
-	private static Logger logger = Logger.getLogger("com.lessspring.org.DiskUtils");
+	private static Logger logger = LoggerFactory.getLogger(DiskUtils.class);
 
 	private final static String NO_SPACE_CN = "设备上没有空间";
 	private final static String NO_SPACE_EN = "No space left on device";
@@ -134,7 +135,7 @@ public final class DiskUtils {
 				if (NO_SPACE_CN.equals(errMsg) || NO_SPACE_EN.equals(errMsg)
 						|| errMsg.contains(DISK_QUATA_CN)
 						|| errMsg.contains(DISK_QUATA_EN)) {
-					logger.warning("磁盘满，自杀退出");
+					logger.error("磁盘满，自杀退出");
 					System.exit(0);
 				}
 			}
@@ -172,7 +173,7 @@ public final class DiskUtils {
 			mkdirs = directory.mkdirs();
 		}
 		if (!mkdirs) {
-			logger.warning("[DiskUtils] can't create directory");
+			logger.error("[DiskUtils] can't create directory");
 			return null;
 		}
 		File file = new File(path, fileName);

@@ -18,11 +18,10 @@
 package com.lessspring.org.context;
 
 import com.lessspring.org.IDUtils;
+import com.lessspring.org.RequireHelper;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * trace context
@@ -32,48 +31,26 @@ import java.util.Objects;
  */
 public final class TraceContext {
 
-    private static final TraceContextHolder INSTANCE = TraceContextHolder.getInstance();
-
     private final Map<String, Object> attachments = new HashMap<>();
 
-    private TraceContext parentTraceContext;
     private String traceId = "TraceId-" + IDUtils.generateUuid();
-    private LinkedList<TraceContext> subContexts;
 
     public TraceContext() {
-        this.parentTraceContext = null;
-    }
-
-    public TraceContext(TraceContext parentTraceContext) {
-        this.parentTraceContext = parentTraceContext;
     }
 
     public synchronized void setAttachment(String key, Object value) {
-        if (Objects.isNull(value)) {
-            throw new IllegalArgumentException("value cant not be null");
-        }
+        RequireHelper.requireNotNull(value, "value must not null");
         attachments.put(key, value);
     }
 
     @SuppressWarnings("unchecked")
     public synchronized <T> T getAttachment(String key) {
         T t = (T) attachments.get(key);
-        if (t == null && parentTraceContext != null) {
-            return parentTraceContext.getAttachment(key);
-        }
         return t;
     }
 
     public String getTraceId() {
         return traceId;
-    }
-
-    public TraceContext getParentTraceContext() {
-        return parentTraceContext;
-    }
-
-    public LinkedList<TraceContext> getSubContexts() {
-        return subContexts;
     }
 
     @Override
@@ -85,21 +62,8 @@ public final class TraceContext {
     }
 
     public void clean() {
-        parentTraceContext = null;
         traceId = "TraceId-" + IDUtils.generateUuid();
         attachments.clear();
-        if (Objects.nonNull(subContexts)) {
-            subContexts.clear();
-        }
     }
 
-    public synchronized TraceContext createSubContext() {
-        TraceContext sub = new TraceContext(this);
-        INSTANCE.setInvokeTraceContext(sub);
-        if (subContexts == null) {
-            subContexts = new LinkedList<>();
-        }
-        subContexts.addLast(sub);
-        return sub;
-    }
 }

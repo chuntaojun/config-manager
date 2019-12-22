@@ -16,7 +16,6 @@
  */
 package com.lessspring.org.server.service.user.impl;
 
-import com.lessspring.org.Constant;
 import com.lessspring.org.EncryptionUtils;
 import com.lessspring.org.StrackTracekUtils;
 import com.lessspring.org.db.dto.UserDTO;
@@ -28,7 +27,7 @@ import com.lessspring.org.raft.pojo.Datum;
 import com.lessspring.org.raft.pojo.Transaction;
 import com.lessspring.org.server.exception.NoSuchRoleException;
 import com.lessspring.org.server.exception.NotThisResourceException;
-import com.lessspring.org.server.exception.ValidationException;
+import com.lessspring.org.exception.ValidationException;
 import com.lessspring.org.server.pojo.request.UserRequest;
 import com.lessspring.org.server.pojo.vo.ListUserVO;
 import com.lessspring.org.server.pojo.vo.UserVO;

@@ -39,7 +39,7 @@ import com.lessspring.org.server.service.distributed.BaseTransactionCommitCallba
 import com.lessspring.org.server.service.distributed.TransactionConsumer;
 import com.lessspring.org.utils.GsonUtils;
 import com.lessspring.org.server.utils.PropertiesEnum;
-import com.lessspring.org.server.utils.RequireHelper;
+import com.lessspring.org.RequireHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;

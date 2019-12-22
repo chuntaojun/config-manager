@@ -28,7 +28,7 @@ import com.lessspring.org.server.exception.AuthForbidException;
 import com.lessspring.org.server.pojo.Privilege;
 import com.lessspring.org.server.service.security.AuthorityProcessor;
 import com.lessspring.org.server.utils.PropertiesEnum;
-import com.lessspring.org.server.utils.RequireHelper;
+import com.lessspring.org.RequireHelper;
 import com.lessspring.org.server.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

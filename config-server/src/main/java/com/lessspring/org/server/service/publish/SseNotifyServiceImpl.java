@@ -42,6 +42,10 @@ import java.util.Set;
 @Component
 public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 
+	public SseNotifyServiceImpl() {
+		super(WatchType.SSE);
+	}
+
 	// Build with the Client corresponds to a monitored object is
 	// used to monitor configuration changes
 
@@ -59,16 +63,15 @@ public class SseNotifyServiceImpl extends AbstractNotifyServiceImpl {
 		// When event creation is cancelled, automatic cancellation of client
 		// on the server side corresponding to monitor object
 		sink.onDispose(() -> {
-			client.onClose();
-			synchronized (monitor) {
-				clientCnt--;
-			}
-			// For in the form of the key : NameUtils.buildName(groupId, dataId)
-			Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
-					.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
-			for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher
-					.entrySet()) {
-				entry.getValue().remove(client);
+			try {
+				// For in the form of the key : NameUtils.buildName(groupId, dataId)
+				Map<String, Set<WatchClient>> namespaceWatcher = watchClientManager
+						.getOrDefault(client.getNamespaceId(), Collections.emptyMap());
+				for (Map.Entry<String, Set<WatchClient>> entry : namespaceWatcher.entrySet()) {
+					entry.getValue().remove(client);
+				}
+			} finally {
+				client.onClose();
 			}
 		});
 		createWatchClient(client);

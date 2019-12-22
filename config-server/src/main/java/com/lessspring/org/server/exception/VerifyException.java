@@ -17,6 +17,7 @@
 package com.lessspring.org.server.exception;
 
 import com.lessspring.org.constant.Code;
+import com.lessspring.org.exception.BaseException;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>

@@ -22,7 +22,7 @@ import java.util.Map;
 import com.lessspring.org.raft.TransactionCommitCallback;
 import com.lessspring.org.raft.exception.TransactionException;
 import com.lessspring.org.raft.pojo.Transaction;
-import com.lessspring.org.server.exception.BaseException;
+import com.lessspring.org.exception.BaseException;
 import com.lessspring.org.server.utils.PropertiesEnum;
 import lombok.extern.slf4j.Slf4j;
 

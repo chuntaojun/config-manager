@@ -2,6 +2,7 @@ package com.lessspring.org.server.service.publish;
 
 import com.lessspring.org.NameUtils;
 import com.lessspring.org.StrackTracekUtils;
+import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import com.lessspring.org.server.metrics.MetricsHelper;
 import com.lessspring.org.server.pojo.CacheItem;
@@ -51,6 +52,8 @@ public abstract class AbstractNotifyServiceImpl
 	@Lazy
 	protected ConfigCacheItemManager cacheItemManager;
 
+	private final WatchType watchType;
+
 	// 每种监听类别的客户端数量
 
 	long clientCnt = 0;
@@ -58,6 +61,10 @@ public abstract class AbstractNotifyServiceImpl
 			8);
 
 	private static LongAdder totalClient = new LongAdder();
+
+	public AbstractNotifyServiceImpl(WatchType watchType) {
+		this.watchType = watchType;
+	}
 
 	@PostConstruct
 	public void init() {
@@ -208,7 +215,11 @@ public abstract class AbstractNotifyServiceImpl
 	protected abstract boolean compareConfigSign(String oldSign, String newSign);
 
 	public final void onWatchClientDeregister() {
+		synchronized (this) {
+			clientCnt --;
+		}
 		totalClient.decrement();
+		log.info("{} : The client actively exits the listening, now client num : {}, total client num : {}", watchType, clientCnt, totalClient.sum());
 	}
 
 	/**

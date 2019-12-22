@@ -25,9 +25,12 @@ import com.lessspring.org.server.pojo.request.WatchClientQueryPage;
 import com.lessspring.org.server.pojo.vo.WatchClientVO;
 import com.lessspring.org.server.service.publish.client.LpWatchClient;
 import com.lessspring.org.server.service.publish.client.WatchClient;
+import com.lessspring.org.server.utils.SpringUtils;
 import com.lessspring.org.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
@@ -39,6 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -49,6 +53,10 @@ import java.util.concurrent.TimeoutException;
 @Service
 public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 
+	public LongPollNotifyServiceImpl() {
+		super(WatchType.LONG_POLL);
+	}
+
 	@SuppressWarnings("unchecked")
 	public void createWatchClient(WatchRequest request, ServerRequest serverRequest,
 			MonoSink monoSink, Mono mono) {
@@ -57,7 +65,7 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 			monoSink.success("Invalid long polling request: please set hold-time");
 			return;
 		}
-		long holdTimeOut = Duration.parse(s).getSeconds();
+		long holdTimeOut = DurationStyle.detect(s).parse(s, null).getSeconds();
 		WatchClient client = LpWatchClient.builder()
 				.clientId(serverRequest.headers().asHttpHeaders()
 						.getFirst(StringConst.CLIENT_ID_NAME))
@@ -70,14 +78,20 @@ public class LongPollNotifyServiceImpl extends AbstractNotifyServiceImpl {
 				.build();
 		createWatchClient(client);
 		mono.timeout(Duration.ofSeconds(holdTimeOut - 1)).subscribe(o -> {
-		}, throwable -> {
-			client.onClose();
-			if (throwable instanceof TimeoutException) {
-				doQuickCompare(client);
-				return;
+			try {
+				if (o instanceof Throwable) {
+					if (o instanceof TimeoutException) {
+						doQuickCompare(client);
+						return;
+					}
+					log.error("error : {}",
+							StrackTracekUtils.stackTrace((Throwable) o));
+					monoSink.success("");
+				}
 			}
-			log.error("error : {}", StrackTracekUtils.stackTrace((Throwable) throwable));
-			monoSink.success("");
+			finally {
+				client.onClose();
+			}
 		});
 	}
 

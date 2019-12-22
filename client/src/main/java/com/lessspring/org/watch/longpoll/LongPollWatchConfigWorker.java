@@ -141,7 +141,7 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 			if (WorkerState.SUSPEND.equals(workerState)) {
 				synchronized (monitor) {
 					try {
-						log.info("wait to update cacheItem");
+						log.warn("wait to update cacheItem index : {}", index);
 						monitor.wait();
 					}
 					catch (InterruptedException ignore) {
@@ -178,7 +178,6 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 				}
 			}
 			else {
-				// TODO print error log
 				logger.error("[LongPoll] has some error : {}", responseData);
 			}
 
@@ -190,11 +189,11 @@ public class LongPollWatchConfigWorker extends AbstractWatchWorker {
 			boolean needWeakUp = WorkerState.SUSPEND.equals(workerState);
 			if (needWeakUp) {
 				synchronized (monitor) {
-					log.info("notify all waiter");
+					log.warn("notify waiter index {}", index);
 					monitor.notify();
 				}
 			}
-			Map<String, CacheItem> cacheItemMap = configManager.copy();
+			Map<String, CacheItem> cacheItemMap = configManager.copy(false);
 			for (Map.Entry<String, CacheItem> entry : cacheItemMap.entrySet()) {
 				if (HashUtils.distroHash(entry.getKey(), 8) == index) {
 					observerMap.put(entry.getKey(), entry.getValue());

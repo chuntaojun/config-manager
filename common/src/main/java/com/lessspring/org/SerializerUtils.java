@@ -42,7 +42,7 @@ public final class SerializerUtils {
 		kryoPool = new KryoPool.Builder(new KryoFactory()).softReferences().build();
 	}
 
-	private class KryoFactory implements com.esotericsoftware.kryo.pool.KryoFactory {
+	private static class KryoFactory implements com.esotericsoftware.kryo.pool.KryoFactory {
 
 		@Override
 		public Kryo create() {

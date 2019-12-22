@@ -19,7 +19,7 @@ package com.lessspring.org.server.configuration;
 import com.lessspring.org.PathUtils;
 import com.lessspring.org.jvm.JvmUtils;
 import com.lessspring.org.model.vo.ResponseData;
-import com.lessspring.org.server.exception.BaseException;
+import com.lessspring.org.exception.BaseException;
 import com.lessspring.org.server.metrics.MetricsHelper;
 import com.lessspring.org.server.pojo.event.email.ErrorEmailEvent;
 import com.lessspring.org.server.service.common.EmailService;

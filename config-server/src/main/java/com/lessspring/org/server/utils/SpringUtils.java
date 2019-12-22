@@ -1,10 +1,13 @@
 package com.lessspring.org.server.utils;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverterSupport;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -29,6 +32,7 @@ public class SpringUtils implements ApplicationContextInitializer {
 
 	private static ApplicationContext applicationContext;
 	private static ConfigurableEnvironment environment;
+	private static SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
 
 	public static String getId() {
 		return applicationContext.getId();
@@ -211,6 +215,10 @@ public class SpringUtils implements ApplicationContextInitializer {
 
 	public static ConfigurableEnvironment getEnvironment() {
 		return environment;
+	}
+
+	public static <T> T convert(Class<T> cls, Object value) {
+		return simpleTypeConverter.convertIfNecessary(value, cls);
 	}
 
 	@Override

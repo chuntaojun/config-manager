@@ -40,7 +40,7 @@ import com.lessspring.org.server.pojo.event.config.PublishLogEventHandler;
 import com.lessspring.org.server.pojo.vo.PublishLogVO;
 import com.lessspring.org.utils.ByteUtils;
 import com.lessspring.org.server.utils.DisruptorFactory;
-import com.lessspring.org.server.utils.RequireHelper;
+import com.lessspring.org.RequireHelper;
 import com.lmax.disruptor.WorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
 

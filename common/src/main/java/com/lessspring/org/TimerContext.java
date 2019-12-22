@@ -17,10 +17,11 @@
 
 package com.lessspring.org;
 
+import org.slf4j.LoggerFactory;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 /**
  * a simple compute the work execute time spend
@@ -30,10 +31,9 @@ import java.util.logging.Logger;
  */
 public final class TimerContext {
 
-	private static class TimerContextNoArgsNoResult {
+		private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TimerContext.class);
 
-		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.server.utils.TimerContextNoArgsNoResult");
+		private static class TimerContextNoArgsNoResult {
 
 		private final Runnable target;
 
@@ -54,9 +54,6 @@ public final class TimerContext {
 
 	private static class TimerContextWithArgsNoResult<A> {
 
-		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.server.utils.TimerContextWithArgsNoResult");
-
 		private final Consumer<A> consumer;
 
 		private TimerContextWithArgsNoResult(Consumer<A> consumer) {
@@ -74,9 +71,6 @@ public final class TimerContext {
 	}
 
 	private static class TimerContextNoArgsWithResult<R> {
-
-		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.server.utils.TimerContextNoArgsWithResult");
 
 		private final Supplier<R> supplier;
 
@@ -97,9 +91,6 @@ public final class TimerContext {
 	}
 
 	private static class TimerContextWithArgsAndResult<A, R> {
-
-		private static final Logger logger = Logger
-				.getLogger("com.lessspring.org.server.utils.TimerContextWithArgsAndResult");
 
 		private final Function<A, R> function;
 
