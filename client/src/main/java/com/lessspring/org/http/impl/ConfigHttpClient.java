@@ -33,6 +33,7 @@ import com.lessspring.org.http.param.HttpMethod;
 import com.lessspring.org.http.param.Query;
 import com.lessspring.org.model.vo.ResponseData;
 import com.lessspring.org.server.utils.HttpUtils;
+import com.lessspring.org.utils.ByteUtils;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -219,8 +220,8 @@ class ConfigHttpClient implements HttpClient {
 			@Override
 			protected Void run() throws Exception {
 				RequestBody postBody = RequestBody.create(
-						MediaType.parse(APPLICATION_JSON_UTF8_VALUE),
-						requestHandler.handle(body.getData()));
+						ByteUtils.toBytes(requestHandler.handle(body.getData())),
+						MediaType.parse(APPLICATION_JSON_UTF8_VALUE));
 				Request.Builder builder = new Request.Builder().url(buildUrl(url))
 						.post(postBody);
 				initHeader(url, header, builder);

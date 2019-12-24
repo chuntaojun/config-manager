@@ -16,14 +16,11 @@
  */
 package com.lessspring.org;
 
-import java.util.Scanner;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import com.lessspring.org.config.ConfigService;
-import com.lessspring.org.constant.WatchType;
 import com.lessspring.org.model.dto.ConfigInfo;
 import org.junit.Test;
+
+import java.util.concurrent.Executor;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -51,7 +48,7 @@ public class Test_ClusterInfo {
 				return null;
 			}
 		});
-		new Scanner(System.in).next();
+		Thread.sleep(2000);
 	}
 
 }
