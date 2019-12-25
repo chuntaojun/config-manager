@@ -32,7 +32,6 @@ import org.springframework.core.io.ByteArrayResource;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 /**
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
@@ -50,7 +49,7 @@ public class ConfigApplication {
 		String openConfAdmin = Optional.ofNullable(System.getProperty("conf.admin"))
 				.orElse("false");
 		if (Objects.equals(Boolean.TRUE.toString(), openConfAdmin)) {
-			AdminServerApplication.main(args);
+			AdminServerApplication.run(args);
 		}
 		runApplication(args);
 	}

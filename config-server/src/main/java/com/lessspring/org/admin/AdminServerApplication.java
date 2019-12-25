@@ -21,10 +21,8 @@ import java.util.Properties;
 @SpringBootApplication(exclude = SpringApplicationAdminJmxAutoConfiguration.class)
 public class AdminServerApplication {
 
-	private static ConfigurableEnvironment environment;
-
-	public static void main(String[] args) {
-		environment = new StandardEnvironment();
+	public static void run(String[] args) {
+		ConfigurableEnvironment environment = new StandardEnvironment();
 		Properties webServer = new Properties();
 		webServer.put("server.port", 2595);
 		webServer.put("spring.jmx.default-domain", "ConFAdminApplication");
@@ -36,10 +34,6 @@ public class AdminServerApplication {
 				.banner(new ResourceBanner(new ByteArrayResource(bannerText())))
 				.environment(environment);
 		builder.run(args);
-	}
-
-	public static void injectEnvironment(ConfigurableEnvironment environment) {
-		AdminServerApplication.environment = environment;
 	}
 
 	public static byte[] bannerText() {
