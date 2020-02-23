@@ -109,9 +109,14 @@ public class MetricsHttpClient implements HttpClient {
 	}
 
 	@Override
+<<<<<<< Updated upstream
 	public <T> ResponseData<T> post(OkHttpClient client, String url, Header header,
 			Query query, Body body, TypeToken<ResponseData<T>> token) {
 		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("POST", url, "NA");
+=======
+	public <T> ResponseData<T> post(OkHttpClient client, String url, Header header, Query query, Body body, TypeToken<ResponseData<T>> token) {
+		Histogram.Timer timer = MetricsMonitor.getRequestMonitor("PUT", url, "NA");
+>>>>>>> Stashed changes
 		ResponseData<T> response = null;
 		try {
 			response = this.client.post(client, url, header, query, body, token);

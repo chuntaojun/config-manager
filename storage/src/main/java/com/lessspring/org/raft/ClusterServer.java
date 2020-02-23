@@ -53,6 +53,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SuppressWarnings("unchecked")
 public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle {
 
+	private static final String SERVER_NODE_SELF_INDEX = "cluster.node.self.index";
+	private static final String SERVER_NODE_IP = "cluster.node.ip.";
+	private static final String SERVER_NODE_RAFT_PORT = "cluster.node.raft.port.";
 	private AtomicBoolean initialize = new AtomicBoolean(false);
 	private RaftServer raftServer;
 	private TransactionIdManager transactionIdManager;
@@ -164,6 +167,21 @@ public class ClusterServer implements Watcher<ServerNodeChangeEvent>, LifeCycle 
 	private void needInitialized() {
 		if (!initialize.get()) {
 			throw new IllegalStateException("Uninitialized cluster");
+		}
+	}
+
+	private static void initClusterNode(NodeManager nodeManager, Properties properties) {
+		int nodes = properties.size() / 2;
+		int selfIndex = Integer
+				.parseInt(properties.getProperty(SERVER_NODE_SELF_INDEX, "0"));
+		for (int i = 0; i < nodes; i++) {
+			String[] ip = properties.getProperty(SERVER_NODE_IP + i).split(":");
+			ServerNode node = ServerNode.builder().nodeIp(ip[0]).port(Integer.parseInt(ip[1]))
+					.build();
+			if (i == selfIndex) {
+				nodeManager.setSelf(node);
+			}
+			nodeManager.nodeJoin(node);
 		}
 	}
 

@@ -18,6 +18,8 @@ subprojects {
     }
 
     dependencies {
+        compile group: 'com.googlecode.javaewah', name: 'JavaEWAH', version: '1.1.7'
+        compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: '0.8.13'
         implementation("com.squareup.okhttp3:okhttp:4.2.0")
         implementation 'com.esotericsoftware:kryo:4.0.2'
         compile group: 'commons-io', name: 'commons-io', version: '2.6'

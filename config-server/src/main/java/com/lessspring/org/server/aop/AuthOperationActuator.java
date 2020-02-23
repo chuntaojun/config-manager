@@ -36,6 +36,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
@@ -65,21 +66,12 @@ public class AuthOperationActuator implements PriorityOrdered {
 	public Object aroundService(ProceedingJoinPoint pjp) throws Throwable {
 		if (!Objects.equals(developEnv, "develop")) {
 			String methodName = pjp.getSignature().getName();
-			Class<?> classTarget = pjp.getTarget().getClass();
 			cache.computeIfAbsent(methodName, s -> {
-				NeedAuth needAuth = null;
-				try {
-					Method method = classTarget.getMethod(methodName);
-					if (method.isAnnotationPresent(NeedAuth.class)) {
-						needAuth = method.getDeclaredAnnotation(NeedAuth.class);
-					}
-				}
-				catch (NoSuchMethodException ignore) {
-				}
+				NeedAuth needAuth =	((MethodSignature) pjp.getSignature()).getMethod()
+						.getAnnotation(NeedAuth.class);
 				return Optional.ofNullable(needAuth);
 			});
-			Optional<NeedAuth> optionalNeedAuth = cache.getOrDefault(methodName,
-					Optional.empty());
+			Optional<NeedAuth> optionalNeedAuth = cache.get(methodName);
 			optionalNeedAuth.ifPresent(authMethod -> {
 				RequireHelper.requireEquals(pjp.getArgs().length, 1,
 						"The method takes only one argument");
