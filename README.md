@@ -1,7 +1,5 @@
 # Conf（目前为个人毕设项目）
 
-非常幸运的在编写此项目的过程中认识了我的女友——YJW
-
 #### Conf
 
 ![Config-Manager](config-manager.png)
