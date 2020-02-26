@@ -1,4 +1,4 @@
 org.springframework.boot.env.EnvironmentPostProcessor=\
-  com.lessspring.org.server.configuration.ConfigEnvironmentProcessor
+  com.conf.org.server.configuration.ConfigEnvironmentProcessor
 org.springframework.context.ApplicationContextInitializer=\
-  com.lessspring.org.server.utils.SpringUtils
+  com.conf.org.server.utils.SpringUtils

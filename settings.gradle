@@ -1,14 +1,18 @@
+
+
 rootProject.name = 'com.lessspring.org'
 include 'storage'
 include 'config-server'
 include 'api'
 include 'client'
 include 'common'
+include 'test'
+include 'shell'
+include 'data'
 
 enableFeaturePreview("GRADLE_METADATA")
 
 rootProject.children.each {project ->
     project.buildFileName = "build.gradle"
 }
-include 'test'
 

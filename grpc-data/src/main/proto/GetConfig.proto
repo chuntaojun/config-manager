@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.lessspring.org.data";
+option java_outer_classname = "HelloWorldProto";
+
+// The greeting service definition.
+service ConfigService {
+    // Sends a greeting
+    rpc GetConfig (GetConfigRequest) returns (GetConfigResponse) {
+    }
+
+    rpc PublishConfig (PublishConfigRequest) returns (PublishConfigResponse) {
+    }
+
+    rpc WatchConfig (WatchConfigRequest) returns (stream WatchConfigResponse) {
+    }
+}
+
+// The request message containing the user's name.
+message GetConfigRequest {
+    string namespaceId = 1;
+    string groupId = 2;
+    string dataId = 3;
+    string token = 4;
+    string clientId = 5;
+}
+
+// The response message containing the greetings
+message GetConfigResponse {
+    string namespaceId = 1;
+    string groupId = 2;
+    string dataId = 3;
+    string configType = 4;
+    string content = 5;
+}
+
+message PublishConfigRequest {
+    string namespaceId = 1;
+    string groupId = 2;
+    string dataId = 3;
+    string configType = 4;
+    string content = 5;
+}
+
+message PublishConfigResponse {
+    string msg = 1;
+    int32 code = 2;
+}
+
+message WatchConfigRequest {
+    string namespaceId = 1;
+    map<string, string> watchInfo = 2;
+}
+
+message WatchConfigResponse {
+    string namespaceId = 1;
+    map<string, GetConfigResponse> watchInfo = 2;
+}

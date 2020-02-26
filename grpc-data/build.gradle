@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.11'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'com.google.protobuf'
+
+version '0.0.1'
+
+
+repositories {
+    maven { // The google mirror is less flaky than mavenCentral()
+        url "https://maven-central.storage-download.googleapis.com/repos/central/data/" }
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'io.grpc:grpc-netty-shaded:1.27.2'
+    implementation 'io.grpc:grpc-protobuf:1.27.2'
+    implementation 'io.grpc:grpc-stub:1.27.2'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lessspring.org.server.repository.ConfigInfoMapper">
+<mapper namespace="com.conf.org.server.repository.ConfigInfoMapper">
 
-    <resultMap type="com.lessspring.org.db.dto.ConfigInfoDTO" id="ConfigInfoDTO">
+    <resultMap type="com.conf.org.db.dto.ConfigInfoDTO" id="ConfigInfoDTO">
         <id column="id" property="id"/>
         <result column="data_id" property="dataId"/>
         <result column="group_id" property="groupId"/>
@@ -15,7 +15,7 @@
         <result column="file_source" property="fileSource"/>
     </resultMap>
 
-    <resultMap type="com.lessspring.org.db.dto.ConfigBetaInfoDTO" id="ConfigBetaInfoDTO">
+    <resultMap type="com.conf.org.db.dto.ConfigBetaInfoDTO" id="ConfigBetaInfoDTO">
         <id column="id" property="id"/>
         <result column="data_id" property="dataId"/>
         <result column="group_id" property="groupId"/>
@@ -30,7 +30,7 @@
 
     <!--  save config-infog  -->
     <insert id="saveConfigInfo" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
-            parameterType="com.lessspring.org.db.dto.ConfigInfoDTO">
+            parameterType="com.conf.org.db.dto.ConfigInfoDTO">
         INSERT INTO config_info(id, data_id, group_id, namespace_id, content, config_type, encryption, create_time)
         VALUES (#{dto.id},
                 #{dto.dataId},
@@ -112,7 +112,7 @@
 
     <!--  find config-content by QueryConfigInfo  -->
     <select id="findConfigInfoContent"
-            parameterType="com.lessspring.org.server.pojo.query.QueryConfigInfo"
+            parameterType="com.conf.org.server.pojo.query.QueryConfigInfo"
             resultType="java.lang.String">
         SELECT content
         FROM config_info
@@ -124,7 +124,7 @@
 
     <!--  find config by QueryConfigInfo  -->
     <select id="findConfigInfo"
-            parameterType="com.lessspring.org.server.pojo.query.QueryConfigInfo"
+            parameterType="com.conf.org.server.pojo.query.QueryConfigInfo"
             resultMap="ConfigInfoDTO">
         SELECT *
         FROM config_info
@@ -142,7 +142,7 @@
     </select>
 
     <!--  batch find config-info  -->
-    <select id="batchFindConfigInfo" resultType="com.lessspring.org.db.dto.ConfigInfoDTO">
+    <select id="batchFindConfigInfo" resultType="com.conf.org.db.dto.ConfigInfoDTO">
         SELECT * FROM config_info WHERE status = 1 and id in
         <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
             #{id}
@@ -168,7 +168,7 @@
 
     <!--  batch find config-beta-info  -->
     <select id="batchFindConfigInfo4Beta"
-            resultType="com.lessspring.org.db.dto.ConfigBetaInfoDTO">
+            resultType="com.conf.org.db.dto.ConfigBetaInfoDTO">
         SELECT * FROM config_info_beta WHERE status = 1 and id in
         <foreach collection="ids" index="id" item="id" open="(" close=")" separator=",">
             #{id}

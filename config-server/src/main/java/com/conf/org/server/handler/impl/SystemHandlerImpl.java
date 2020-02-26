@@ -1,0 +1,164 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.conf.org.server.handler.impl;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.function.Supplier;
+
+import javax.annotation.PostConstruct;
+
+import com.conf.org.jvm.JvmUtils;
+import com.conf.org.model.vo.ResponseData;
+import com.conf.org.raft.TransactionIdManager;
+import com.conf.org.server.configuration.security.NeedAuth;
+import com.conf.org.server.service.dump.DumpService;
+import com.conf.org.server.service.publish.TraceAnalyzer;
+import com.conf.org.server.handler.SystemHandler;
+import com.conf.org.server.utils.PropertiesEnum;
+import com.conf.org.server.utils.RenderUtils;
+import com.conf.org.server.utils.SchedulerUtils;
+import com.conf.org.server.utils.SystemEnv;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+/**
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ * @since 0.0.1
+ */
+@Slf4j
+@Service
+public class SystemHandlerImpl implements SystemHandler {
+
+	private final LoggingSystem loggingSystem;
+	private final DumpService dumpService;
+	private final TraceAnalyzer traceAnalyzer;
+	private SystemEnv systemEnv;
+	private StandardEnvironment environment = new StandardEnvironment();
+	private ConfigurationBeanFactoryMetadata beanFactoryMetadata;
+
+	@Autowired
+	private TransactionIdManager idManager;
+
+	public SystemHandlerImpl(LoggingSystem loggingSystem, DumpService dumpService,
+			TraceAnalyzer traceAnalyzer,
+			ApplicationContext applicationContext) {
+		this.loggingSystem = loggingSystem;
+		this.dumpService = dumpService;
+		this.traceAnalyzer = traceAnalyzer;
+		this.beanFactoryMetadata = applicationContext.getBean(
+				ConfigurationBeanFactoryMetadata.BEAN_NAME,
+				ConfigurationBeanFactoryMetadata.class);
+	}
+
+	@PostConstruct
+	public void init() {
+		systemEnv = SystemEnv.getSingleton();
+	}
+
+	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
+	public Mono<ServerResponse> changeLogLevel(ServerRequest request) {
+		final String logLevel = request.queryParam("logLevel").orElse("info");
+		LogLevel newLevel;
+		try {
+			newLevel = LogLevel.valueOf(logLevel);
+		}
+		catch (Exception e) {
+			newLevel = LogLevel.INFO;
+		}
+		LogLevel finalNewLevel = newLevel;
+		loggingSystem.getLoggerConfigurations().forEach(
+				conf -> loggingSystem.setLogLevel(conf.getName(), finalNewLevel));
+		return RenderUtils.render(Mono.just(ResponseData.success())).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+	}
+
+	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
+	public Mono<ServerResponse> forceDumpConfig(ServerRequest request) {
+		dumpService.forceDump(false);
+		return RenderUtils.render(ResponseData.success()).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+	}
+
+	@Override
+	public Mono<ServerResponse> publishLog(ServerRequest request) {
+		return RenderUtils.render(ResponseData.success(traceAnalyzer.analyzePublishLog()))
+				.subscribeOn(Schedulers
+						.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+	}
+
+	@Override
+	@NeedAuth(role = PropertiesEnum.Role.ADMIN)
+	public Mono<ServerResponse> jvmHeapDump(ServerRequest request) {
+		final String fileName = systemEnv.jvmHeapDumpFileNameSuppiler.get();
+		log.info("[Jvm heap dump] file name : {}", fileName);
+		final File[] files = new File[] { null };
+		Supplier<Resource> callable = () -> {
+			try {
+				final boolean isLive = Boolean.parseBoolean(
+						(String) request.attribute("isLive").orElse("true"));
+				final File file = JvmUtils.jMap(fileName, isLive);
+				files[0] = file;
+				return new UrlResource(file.toURI());
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		};
+		return RenderUtils.render(callable.get()).doOnTerminate(() -> {
+			if (Objects.nonNull(files[0])) {
+				if (files[0].exists()) {
+					log.warn(
+							"[JvmDump Handler] auto delete file when this request finish");
+					files[0].delete();
+				}
+			}
+		}).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+	}
+
+	@Override
+	public Mono<ServerResponse> getAllTransactionIdInfo(ServerRequest request) {
+		return RenderUtils.render(Mono.just(idManager.all())).subscribeOn(
+				Schedulers.fromExecutor(SchedulerUtils.getSingleton().WEB_HANDLER));
+	}
+
+	private ResolvableType getBeanType(Object bean) {
+		Method factoryMethod = this.beanFactoryMetadata.findFactoryMethod("tpsSetting");
+		if (factoryMethod != null) {
+			return ResolvableType.forMethodReturnType(factoryMethod);
+		}
+		return ResolvableType.forClass(bean.getClass());
+	}
+}

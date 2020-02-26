@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lessspring.org.server.repository.ConfigInfoHistoryMapper">
+<mapper namespace="com.conf.org.server.repository.ConfigInfoHistoryMapper">
 
-    <resultMap id="ConfigInfoHistoryDTO" type="com.lessspring.org.db.dto.ConfigInfoHistoryDTO">
+    <resultMap id="ConfigInfoHistoryDTO" type="com.conf.org.db.dto.ConfigInfoHistoryDTO">
         <id column="id" property="id"/>
         <result column="namespace_id" property="namespaceId"/>
         <result column="group_id" property="groupId"/>
@@ -15,7 +15,7 @@
     </resultMap>
 
     <!--  save config-info-history  -->
-    <insert id="save" parameterType="com.lessspring.org.db.dto.ConfigInfoHistoryDTO">
+    <insert id="save" parameterType="com.conf.org.db.dto.ConfigInfoHistoryDTO">
         insert into config_info_history(id, namespace_id, group_id, data_id, content, config_type, create_time,
                                         last_modify_time)
         values (#{historyDTO.id},

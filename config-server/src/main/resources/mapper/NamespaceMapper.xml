@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lessspring.org.server.repository.NamespaceMapper">
+<mapper namespace="com.conf.org.server.repository.NamespaceMapper">
 
-    <resultMap id="NamespaceDTO" type="com.lessspring.org.db.dto.NamespaceDTO">
+    <resultMap id="NamespaceDTO" type="com.conf.org.db.dto.NamespaceDTO">
         <id column="id" property="id"/>
         <result column="namespace_name" property="namespace"/>
         <result column="namespace_id" property="namespaceId"/>
@@ -16,7 +16,7 @@
 
     <!--  save namespace  -->
     <insert id="saveNamespace" keyColumn="id"
-            parameterType="com.lessspring.org.db.dto.NamespaceDTO">
+            parameterType="com.conf.org.db.dto.NamespaceDTO">
         INSERT INTO config_namespace(namespace_name, namespace_id) VALUES (#{dto.namespace},
         #{dto.namespaceId});
     </insert>
